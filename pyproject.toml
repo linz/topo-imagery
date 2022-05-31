@@ -25,22 +25,32 @@ profile = "black"
 [tool.mypy]
 show_error_codes = true
 strict = true
+disable_error_code = [
+    "import",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "linz_logger",
+]
+ignore_missing_imports = true
 
 [tool.poetry]
-name = "template-python-hello-world"
+name = "imagery-scripts"
 version = "0.1.0"
-description = "A minimal template for Python development"
+description = "A collection of scripts for processing imagery"
 authors = [
-    "Ben Cheng <42329567+Ben-Cheng@users.noreply.github.com>",
     "Blayne Chard <bchard@linz.govt.nz>",
     "Daniel Silk <dsilk@linz.govt.nz>",
-    "Victor Engmark <vengmark@linz.govt.nz>",
+    "Paul Fouquet <pfouquet@linz.govt.nz>",
+    "Alice Fage <afage@linz.govt.nz>",
+    "Megan Davidson <mdavidson@linz.govt.nz>"
 
 ]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 typer = "*"
 
 [tool.poetry.dev-dependencies]
