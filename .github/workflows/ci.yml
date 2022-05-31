@@ -27,17 +27,17 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry
           python -m poetry install
-      # - name: Lint Last Commit
-      #   if: github.event_name == 'push'
-      #   run: |
-      #     poetry run gitlint
-      # - name: Lint All Commits on Pull Request
-      #   if: github.event_name == 'pull_request'
-      #   run: |
-      #     poetry run gitlint --commits "origin/${{ github.base_ref }}...HEAD"
-      # - name: Format
-      #   run: |
-      #     poetry run pre-commit run --all-files
+      - name: Lint Last Commit
+        if: github.event_name == 'push'
+        run: |
+          poetry run gitlint
+      - name: Lint All Commits on Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          poetry run gitlint --commits "origin/${{ github.base_ref }}...HEAD"
+      - name: Format
+        run: |
+          poetry run pre-commit run --all-files
       # - name: Test
       #   run: |
       #     poetry run coverage run --module pytest
