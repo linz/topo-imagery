@@ -1,0 +1,70 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 127
+
+[tool.coverage.report]
+exclude_lines = [
+    'if __name__ == "__main__":',
+]
+fail_under = 100
+
+[tool.coverage.run]
+branch = true
+omit = [
+    ".venv/*",
+]
+
+[tool.isort]
+line_length = 127
+case_sensitive = true
+profile = "black"
+
+[tool.mypy]
+show_error_codes = true
+strict = true
+
+[tool.poetry]
+name = "template-python-hello-world"
+version = "0.1.0"
+description = "A minimal template for Python development"
+authors = [
+    "Ben Cheng <42329567+Ben-Cheng@users.noreply.github.com>",
+    "Blayne Chard <bchard@linz.govt.nz>",
+    "Daniel Silk <dsilk@linz.govt.nz>",
+    "Victor Engmark <vengmark@linz.govt.nz>",
+
+]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+typer = "*"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+coverage = "*"
+gitlint = "*"
+isort = "*"
+language-formatters-pre-commit-hooks = "*"
+mutmut = "*"
+mypy = "*"
+pre-commit = "*"
+pylint = "*"
+pytest = "*"
+pytest-randomly = "*"
+typed-ast = "*"
+
+[tool.pylint.FORMAT]
+max-line-length = 127
+
+[tool.pylint.MASTER]
+disable = [
+    "bad-continuation",
+    "duplicate-code",
+    "invalid-name",
+    "missing-docstring",
+    "too-few-public-methods",
+]
