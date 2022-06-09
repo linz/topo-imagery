@@ -3,7 +3,9 @@ name: Build and Publish Containers
 on:
   push:
     paths:
-      - 'containers/'
+      - 'containers/**'
+
+
 
 jobs:
   build-containers:
