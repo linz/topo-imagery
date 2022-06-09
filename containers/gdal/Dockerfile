@@ -1,12 +1,21 @@
 FROM osgeo/gdal:ubuntu-small-latest
 
 RUN apt-get update
+# Install pip
 RUN apt-get install python3-pip -y
-RUN pip install boto3 -t /app/
-RUN pip install botocore -t /app/
-RUN pip install linz-logger -t /app/
+# Install Poetry
+RUN pip install poetry
 
+# Define the working directory for the following commands
 WORKDIR /app
 
-ADD ./create_polygons.py /app/create_polygons.py
-ADD ./aws_helper.py /app/aws_helper.py
+# Add Poetry config
+COPY poetry.lock pyproject.toml /app/
+
+# Install Python dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev --no-interaction --no-ansi
+
+# Copy Python scripts
+COPY ./scripts/create_polygons.py /app/
+COPY ./scripts/aws_helper.py /app/
