@@ -1,0 +1,26 @@
+name: Build and Publish Containers
+
+on:
+  push:
+    paths:
+      - 'containers/**'
+
+
+
+jobs:
+  build-containers:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build containers
+        run: |
+          docker build container/gdal/ --tag topo-imagery-gdal --label "github_run_id=${GITHUB_RUN_ID}"
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Publish Containers
+        run: |
+          GIT_VERSION=$(git describe --tags --always --match 'v*')
+          docker tag topo-imagery-gdal ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker push ghcr.io/linz/topo-imagery:${GIT_VERSION}
