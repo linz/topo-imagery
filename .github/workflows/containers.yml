@@ -1,6 +1,9 @@
-name: Build
+name: Build and Publish Containers
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'containers/'
 
 jobs:
   build-containers:
