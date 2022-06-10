@@ -14,7 +14,7 @@ Python version is set to `3.8.10` as it is the current version used by `osgeo/gd
 
 1. Build the Docker image:
    `docker build .`
-2. Log into AWS with `AWS-CLI` on your account
+2. Log into AWS with `AWS-CLI`
 3. Run the following command
 
 ```bash
