@@ -1,10 +1,7 @@
 # Topo Imagery
 
-### _A collection of scripts for processing imagery_
 
 [![GitHub Actions Status](https://github.com/linz/topo-imagery/workflows/Build/badge.svg)](https://github.com/linz/topo-imagery/actions)
-[![Alerts](https://badgen.net/lgtm/alerts/g/linz/topo-imagery?labelColor=2e3a44&label=Alerts&color=3dc64b)](https://lgtm.com/projects/g/linz/topo-imagery/context:python)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/linz/topo-imagery.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/linz/topo-imagery/context:python)
 [![Coverage: 100% branches](https://img.shields.io/badge/Coverage-100%25%20branches-brightgreen.svg)](https://pytest.org/)
 [![Kodiak](https://badgen.net/badge/Kodiak/enabled?labelColor=2e3a44&color=F39938)](https://kodiakhq.com/)
 [![Dependabot Status](https://badgen.net/badge/Dependabot/enabled?labelColor=2e3a44&color=blue)](https://github.com/linz/topo-imagery/network/updates)
@@ -14,3 +11,32 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=2e3a44)](https://pycqa.github.io/isort/)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+
+
+_A collection of packages used to process imagery_
+
+# Packages
+## [1. topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
+
+### GDAL Container
+
+The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-latest` Docker image](https://hub.docker.com/r/osgeo/gdal/).
+
+#### Python scripts
+
+Python version is set to `3.8.10` as it is the current version used by `osgeo/gdal`.
+
+`create_polygons.py`
+
+#### Usage
+
+**Local**
+
+1. Build the Docker image:
+   `docker build .`
+2. Log into AWS with `AWS-CLI`
+3. Run the following command
+
+```bash
+docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE='your-aws-profile' 'image-id'  python create_polygons.py --uri 's3://path-to-the-tiff/image.tif' --destination 'destination-bucket'
+```
