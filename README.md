@@ -13,12 +13,12 @@
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
 
-_A collection of packages used to process imagery_
+_A collection of scripts used to process imagery_
 
-# Packages
-## [1. topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
+# Package
+## [topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
 
-### GDAL Container
+### Container Descrption
 
 The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-latest` Docker image](https://hub.docker.com/r/osgeo/gdal/).
 
