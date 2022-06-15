@@ -14,6 +14,9 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Publish Containers
         run: |
+          CURRENT_VERSION=$(cd containers/gdal/ ; poetry version --short ; cd ../../)
+          git tag v${CURRENT_VERSION} -m v${CURRENT_VERSION}
           GIT_VERSION=$(git describe --tags --always --match 'v*')
+
           docker tag topo-imagery-gdal ghcr.io/linz/topo-imagery:${GIT_VERSION}
           docker push ghcr.io/linz/topo-imagery:${GIT_VERSION}
