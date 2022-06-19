@@ -7,7 +7,7 @@ set -e
 git checkout master
 git pull --rebase
 
-# TODO: Validate that there are actually changes to be made, this will fail if nothing needs publishing
+# TODO: Validate that there are actually changes to be made
 cd containers/gdal
 poetry version minor
 
