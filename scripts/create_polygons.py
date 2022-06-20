@@ -18,10 +18,6 @@ arguments = parser.parse_args()
 uri = arguments.uri
 destination = arguments.destination
 
-# Verify destination is a s3 path
-if not "s3://" in destination:
-    raise Exception("The destination provided is not a s3 path.")
-
 # Split the s3 destination path
 destination_bucket_name = aws_helper.bucket_name_from_path(destination)
 destination_path = destination.replace("s3://", "").replace(f"{destination_bucket_name}/", "")
