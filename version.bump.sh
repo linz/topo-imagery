@@ -8,13 +8,10 @@ git checkout master
 git pull --rebase
 
 # TODO: Validate that there are actually changes to be made
-cd containers/gdal
 poetry version minor
 
 # Set the version environment variable
 CURRENT_VERSION=$(poetry version --short)
-
-cd ../../
 
 # Write version to a file for Topo Imagery to use
 echo v${CURRENT_VERSION} | tee VERSION

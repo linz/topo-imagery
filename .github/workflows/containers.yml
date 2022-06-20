@@ -14,7 +14,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
       - name: Publish Containers
         run: |
-          CURRENT_VERSION=$(cd containers/gdal/ ; poetry version --short ; cd ../../)
+          CURRENT_VERSION=$(poetry version --short)
           git tag v${CURRENT_VERSION} -m v${CURRENT_VERSION}
           GIT_VERSION=$(git describe --tags --always --match 'v*')
 
