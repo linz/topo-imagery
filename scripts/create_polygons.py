@@ -2,7 +2,6 @@ import argparse
 import os
 import tempfile
 from collections import Counter
-from ntpath import join
 from urllib.parse import urlparse
 
 from linz_logger import get_log
@@ -59,12 +58,12 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         bucket_name = uri_parse.netloc
         bucket = aws_helper.get_bucket(bucket_name)
         uri = os.path.join(tmp_dir, "temp.tif")
-        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, dest=uri, sourceFileName=source_file_name)
+        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, destination=uri, sourceFileName=source_file_name)
         bucket.download_file(uri_parse.path[1:], uri)
 
 
     # Run create_mask
-    logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, dest=uri)
+    logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=uri)
     mask_file = os.path.join(tmp_dir, "mask.tif")
     create_mask(uri, mask_file)
 
