@@ -4,20 +4,21 @@ import tempfile
 from collections import Counter
 from urllib.parse import urlparse
 
-import aws_helper as aws_helper
+import aws_helper
 from linz_logger import get_log
-from osgeo import gdal
+from osgeo import gdal  # pylint: disable=import-error
 
 logger = get_log()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--uri', dest='uri', required=True)
-parser.add_argument('--destination', dest='destination', required=True)
+parser.add_argument("--uri", dest="uri", required=True)
+parser.add_argument("--destination", dest="destination", required=True)
 arguments = parser.parse_args()
 uri = arguments.uri
 dest_bucket = arguments.destination
 
-def create_mask(file_path, mask_dst):
+
+def create_mask(file_path: str, mask_dst: str) -> None:
     set_srs_command = f'gdal_edit.py -a_srs EPSG:2193 "{file_path}"'
     os.system(set_srs_command)
     calc_command = (
@@ -31,7 +32,8 @@ def create_mask(file_path, mask_dst):
     )
     os.system(calc_command)
 
-def get_pixel_count(file_path):
+
+def get_pixel_count(file_path: str) -> int:
     data_pixels_count = 0
     dataset = gdal.Open(file_path)
     array = dataset.ReadAsArray()
@@ -41,6 +43,7 @@ def get_pixel_count(file_path):
             data_pixels_count += count
     return data_pixels_count
 
+
 with tempfile.TemporaryDirectory() as tmp_dir:
     file_name = os.path.basename(uri)
     # Download the file
@@ -49,9 +52,14 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         bucket_name = uri_parse.netloc
         bucket = aws_helper.get_bucket(bucket_name)
         uri = os.path.join(tmp_dir, "temp.tif")
-        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, dest=uri, fileName=file_name)
+        logger.debug(
+            "download_file",
+            source=uri_parse.path[1:],
+            bucket=bucket_name,
+            dest=uri,
+            fileName=file_name,
+        )
         bucket.download_file(uri_parse.path[1:], uri)
-
 
     # Run create_mask=
     logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, dest=uri)

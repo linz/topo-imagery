@@ -1,6 +1,5 @@
 # Topo Imagery
 
-
 [![GitHub Actions Status](https://github.com/linz/topo-imagery/workflows/Build/badge.svg)](https://github.com/linz/topo-imagery/actions)
 [![Coverage: 100% branches](https://img.shields.io/badge/Coverage-100%25%20branches-brightgreen.svg)](https://pytest.org/)
 [![Kodiak](https://badgen.net/badge/Kodiak/enabled?labelColor=2e3a44&color=F39938)](https://kodiakhq.com/)
@@ -12,10 +11,10 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
-
 _A collection of scripts used to process imagery_
 
 # Package
+
 ## [topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
 
 ### Container Descrption
