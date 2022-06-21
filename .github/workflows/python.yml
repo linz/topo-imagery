@@ -1,0 +1,24 @@
+name: Build Python
+on:
+  push:
+  #   branches:
+  #     - master
+  # pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Python "3.8"
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Install
+        run: |
+          pip install poetry
+          poetry install
+      - name: Format
+        run: |
+          poetry run pre-commit run --all-files
