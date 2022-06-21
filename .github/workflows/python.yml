@@ -1,9 +1,5 @@
 name: Build Python
-on:
-  push:
-  #   branches:
-  #     - master
-  # pull_request:
+on: [push, pull_request]
 
 jobs:
   build:
