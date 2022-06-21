@@ -18,4 +18,5 @@ RUN poetry config virtualenvs.create false \
 
 # Copy Python scripts
 COPY ./scripts/create_polygons.py /app/
+COPY ./scripts/create_dissolved_polygons.py /app/
 COPY ./scripts/aws_helper.py /app/
