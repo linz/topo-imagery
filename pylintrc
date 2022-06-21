@@ -8,4 +8,4 @@ disable =
 [FORMAT]
 max-line-length=127
 [MISCELLANEOUS]
-notes=FIXME,XXX
+notes=XXX
