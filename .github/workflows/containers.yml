@@ -19,7 +19,7 @@ jobs:
       
       - name: Build containers
         run: |
-          docker build --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
+          docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
