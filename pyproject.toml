@@ -12,7 +12,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8.10"
-boto3 = "^1.24.12"
+boto3 = "^1.24.13"
 linz-logger = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
