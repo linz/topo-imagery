@@ -1,13 +1,13 @@
 [[package]]
 name = "boto3"
-version = "1.24.5"
+version = "1.24.12"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.5,<1.28.0"
+botocore = ">=1.27.12,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -16,7 +16,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.5"
+version = "1.27.12"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -110,17 +110,17 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.10"
-content-hash = "9cb10998e8ab77ac6dbea6789b3d64c912937f3767f0f4b1a6d294f5e02b2c43"
+python-versions = "^3.8.10"
+content-hash = "8199466825b761eb49438c47f5ab7696e4d26d51e28d732a16a92e9ad8f5cc3b"
 
 [metadata.files]
 boto3 = [
-    {file = "boto3-1.24.5-py3-none-any.whl", hash = "sha256:c414013899a63a2d1574e6405fbdc2a8379dae71b7d4defdfdc6682ad75df079"},
-    {file = "boto3-1.24.5.tar.gz", hash = "sha256:7d9f636f4a3327968fec2ba1d556c0d4644917a7f041e8ecc1adf299603093f4"},
+    {file = "boto3-1.24.12-py3-none-any.whl", hash = "sha256:0b9757575b8003928defc5fb6e816936fa1bdb1384d0edec6622bb9fb104e96c"},
+    {file = "boto3-1.24.12.tar.gz", hash = "sha256:f39b91a4c3614db8e44912ee82426fb4b16d5df2cd66883f3aff6f76d7f5d310"},
 ]
 botocore = [
-    {file = "botocore-1.27.5-py3-none-any.whl", hash = "sha256:326f3fae882524007edf2c9e352169abe4cb8fb87c148ca559522b99d8dfdc74"},
-    {file = "botocore-1.27.5.tar.gz", hash = "sha256:2cc567c453eca85a7140bd984be4c761fddd938f4fb26e4747655f0849d64f25"},
+    {file = "botocore-1.27.12-py3-none-any.whl", hash = "sha256:b8ac156e55267da6e728ea0b806bfcd97adf882801cffe7849c4b88ce4780326"},
+    {file = "botocore-1.27.12.tar.gz", hash = "sha256:17d3ec9f684d21e06b64d9cb224934557bcd95031e2ecb551bf16271e8722fec"},
 ]
 jmespath = [
     {file = "jmespath-1.0.0-py3-none-any.whl", hash = "sha256:e8dcd576ed616f14ec02eed0005c85973b5890083313860136657e24784e4c04"},
