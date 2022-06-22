@@ -37,16 +37,17 @@ def init_roles():
     for cfg in json_content["buckets"]:
         bucket_roles[cfg["bucket"]] = cfg
 
-def get_credentials(bucket_name: str, set_credentials: bool = False):
+def get_credentials(bucket_name: str, role_arn: str, set_credentials: bool = False):
     get_log().debug("get_credentials_bucket_name", bucket_name=bucket_name)
     if not bucket_roles:
         init_roles()
-    if bucket_name in bucket_roles:
+    if bucket_name in bucket_roles or role_arn:
         # FIXME: check if the token is expired - add a parameter
-        if bucket_name not in bucket_credentials:
-            role_arn = bucket_roles[bucket_name]["roleArn"]
+        if bucket_name not in bucket_credentials or role_arn:
+            if not role_arn:
+                role_arn = bucket_roles[bucket_name]["roleArn"]
             get_log().debug("s3_assume_role", bucket_name=bucket_name, role_arn=role_arn)
-            assumed_role_object = client_sts.assume_role(RoleArn=role_arn, RoleSessionName="gdal")
+            assumed_role_object = client_sts.assume_role(RoleArn=role_arn, RoleSessionName="topo-imagery")
             bucket_credentials[bucket_name] = Credentials(
                 assumed_role_object["Credentials"]["AccessKeyId"],
                 assumed_role_object["Credentials"]["SecretAccessKey"],
