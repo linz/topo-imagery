@@ -1,5 +1,6 @@
 import json
 from os import environ
+from typing import Any
 
 import boto3
 from linz_logger import get_log
@@ -23,7 +24,7 @@ bucket_credentials = {}
 client_sts = session.client("sts")
 
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
-def init_roles():
+def init_roles() -> None:
     s3 = boto3.resource("s3")
 
     content_object = s3.Object("linz-bucket-config", "config.json")
@@ -36,7 +37,7 @@ def init_roles():
         bucket_roles[cfg["bucket"]] = cfg
 
 
-def get_credentials(bucket_name: str):
+def get_credentials(bucket_name: str) -> Credentials:
     get_log().debug("get_credentials_bucket_name", bucket_name=bucket_name)
     if not bucket_roles:
         init_roles()
@@ -61,7 +62,7 @@ def get_credentials(bucket_name: str):
     return default_credentials
 
 
-def get_bucket(bucket_name):
+def get_bucket(bucket_name: str) -> Any:
     credentials = get_credentials(bucket_name=bucket_name)
 
     s3_resource = boto3.resource(

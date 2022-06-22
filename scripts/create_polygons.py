@@ -18,7 +18,7 @@ uri = arguments.uri
 dest_bucket = arguments.destination
 
 
-def create_mask(file_path, mask_dst):
+def create_mask(file_path: str, mask_dst: str) -> None:
     set_srs_command = f'gdal_edit.py -a_srs EPSG:2193 "{file_path}"'
     os.system(set_srs_command)
     calc_command = (
@@ -33,7 +33,7 @@ def create_mask(file_path, mask_dst):
     os.system(calc_command)
 
 
-def get_pixel_count(file_path):
+def get_pixel_count(file_path: str) -> int:
     data_pixels_count = 0
     dataset = gdal.Open(file_path)
     array = dataset.ReadAsArray()
