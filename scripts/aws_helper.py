@@ -6,7 +6,7 @@ import boto3
 from linz_logger import get_log
 
 
-class Credentials:
+class Credentials:  # pylint: disable=too-few-public-methods
     access_key: str
     secret_key: str
     token: str
