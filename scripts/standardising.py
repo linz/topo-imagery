@@ -3,9 +3,8 @@ import os
 import subprocess
 import tempfile
 
-from linz_logger import get_log
-
 import aws_helper
+from linz_logger import get_log
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--source',dest='source', required=True)
