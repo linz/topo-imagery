@@ -15,6 +15,7 @@ class Credentials:
         self.secret_key = secret_key
         self.token = token
 
+
 aws_profile = environ.get("AWS_PROFILE")
 session = boto3.Session(profile_name=aws_profile)
 bucket_roles = {}
@@ -23,16 +24,17 @@ client_sts = session.client("sts")
 
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
 def init_roles():
-    s3 = boto3.resource('s3')
+    s3 = boto3.resource("s3")
 
-    content_object = s3.Object('linz-bucket-config', 'config.json')
-    file_content = content_object.get()['Body'].read().decode('utf-8')
+    content_object = s3.Object("linz-bucket-config", "config.json")
+    file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
 
     get_log().debug("bucket_config", config=json_content)
 
     for cfg in json_content["buckets"]:
         bucket_roles[cfg["bucket"]] = cfg
+
 
 def get_credentials(bucket_name: str):
     get_log().debug("get_credentials_bucket_name", bucket_name=bucket_name)
@@ -58,17 +60,19 @@ def get_credentials(bucket_name: str):
 
     return default_credentials
 
+
 def get_bucket(bucket_name):
     credentials = get_credentials(bucket_name=bucket_name)
 
     s3_resource = boto3.resource(
-        's3',
+        "s3",
         aws_access_key_id=credentials.access_key,
         aws_secret_access_key=credentials.secret_key,
         aws_session_token=credentials.token,
     )
 
     return s3_resource.Bucket(bucket_name)
+
 
 def bucket_name_from_path(path: str) -> str:
     path_parts = path.replace("s3://", "").split("/")

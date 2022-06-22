@@ -16,7 +16,7 @@ jobs:
       - name: Install
         run: |
           pip install poetry
-      
+
       - name: Fetch Tags
         run: git fetch --depth=1 origin +refs/tags/*:refs/tags/* # see https://stackoverflow.com/a/60184319/9285308
 
@@ -35,7 +35,7 @@ jobs:
 
           CURRENT_VERSION=$(poetry version --short)
           git tag v${CURRENT_VERSION} -m v${CURRENT_VERSION}
-    
+
       - name: Publish Containers
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')

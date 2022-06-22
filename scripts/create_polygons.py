@@ -11,11 +11,12 @@ from osgeo import gdal
 logger = get_log()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--uri', dest='uri', required=True)
-parser.add_argument('--destination', dest='destination', required=True)
+parser.add_argument("--uri", dest="uri", required=True)
+parser.add_argument("--destination", dest="destination", required=True)
 arguments = parser.parse_args()
 uri = arguments.uri
 dest_bucket = arguments.destination
+
 
 def create_mask(file_path, mask_dst):
     set_srs_command = f'gdal_edit.py -a_srs EPSG:2193 "{file_path}"'
@@ -31,6 +32,7 @@ def create_mask(file_path, mask_dst):
     )
     os.system(calc_command)
 
+
 def get_pixel_count(file_path):
     data_pixels_count = 0
     dataset = gdal.Open(file_path)
@@ -40,6 +42,7 @@ def get_pixel_count(file_path):
         if pixel_value != 255:
             data_pixels_count += count
     return data_pixels_count
+
 
 with tempfile.TemporaryDirectory() as tmp_dir:
     file_name = os.path.basename(uri)
@@ -51,7 +54,6 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         uri = os.path.join(tmp_dir, "temp.tif")
         logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, dest=uri, fileName=file_name)
         bucket.download_file(uri_parse.path[1:], uri)
-
 
     # Run create_mask=
     logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, dest=uri)
