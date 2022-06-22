@@ -26,7 +26,7 @@ dst_bucket = aws_helper.get_bucket(dst_bucket_name)
 with tempfile.TemporaryDirectory() as tmp_dir:
     standardized_file_name = f"standardized_{os.path.basename(src_file_path)}"
     tmp_file_path = os.path.join(tmp_dir, standardized_file_name)
-    src_gdal_path = f"/vsis3/{source.replace('s3://', '')}"
+    src_gdal_path = source.replace('s3://', '/vsis3/')
 
     # Set the credentials for GDAL to be able to read the source file
     credentials = aws_helper.get_credentials(src_bucket_name)
