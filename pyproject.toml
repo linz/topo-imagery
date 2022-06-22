@@ -16,6 +16,7 @@ boto3 = "^1.24.12"
 linz-logger = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7.1.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
