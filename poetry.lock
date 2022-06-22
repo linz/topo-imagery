@@ -1,13 +1,13 @@
 [[package]]
 name = "boto3"
-version = "1.24.12"
+version = "1.24.14"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.12,<1.28.0"
+botocore = ">=1.27.14,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -16,7 +16,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.12"
+version = "1.27.14"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -111,16 +111,16 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.10"
-content-hash = "8199466825b761eb49438c47f5ab7696e4d26d51e28d732a16a92e9ad8f5cc3b"
+content-hash = "569665eed0a17c80e81719b6ed407bb3d66b70017d0345f38e7807b17d1f0af6"
 
 [metadata.files]
 boto3 = [
-    {file = "boto3-1.24.12-py3-none-any.whl", hash = "sha256:0b9757575b8003928defc5fb6e816936fa1bdb1384d0edec6622bb9fb104e96c"},
-    {file = "boto3-1.24.12.tar.gz", hash = "sha256:f39b91a4c3614db8e44912ee82426fb4b16d5df2cd66883f3aff6f76d7f5d310"},
+    {file = "boto3-1.24.14-py3-none-any.whl", hash = "sha256:490f5e88f5551b33ae3019a37412158b76426d63d1fb910968ade9b6a024e5fe"},
+    {file = "boto3-1.24.14.tar.gz", hash = "sha256:e284705da36faa668c715ae1f74ebbff4320dbfbe3a733df3a8ab076d1ed1226"},
 ]
 botocore = [
-    {file = "botocore-1.27.12-py3-none-any.whl", hash = "sha256:b8ac156e55267da6e728ea0b806bfcd97adf882801cffe7849c4b88ce4780326"},
-    {file = "botocore-1.27.12.tar.gz", hash = "sha256:17d3ec9f684d21e06b64d9cb224934557bcd95031e2ecb551bf16271e8722fec"},
+    {file = "botocore-1.27.14-py3-none-any.whl", hash = "sha256:df1e9b208ff93daac7c645b0b04fb6dccd7f20262eae24d87941727025cbeece"},
+    {file = "botocore-1.27.14.tar.gz", hash = "sha256:bb56fa77b8fa1ec367c2e16dee62d60000451aac5140dcce3ebddc167fd5c593"},
 ]
 jmespath = [
     {file = "jmespath-1.0.0-py3-none-any.whl", hash = "sha256:e8dcd576ed616f14ec02eed0005c85973b5890083313860136657e24784e4c04"},
