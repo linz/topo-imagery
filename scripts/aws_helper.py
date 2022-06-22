@@ -1,5 +1,4 @@
 import json
-import os
 from os import environ
 from typing import Tuple
 from urllib.parse import urlparse
@@ -37,25 +36,22 @@ def init_roles():
     for cfg in json_content["buckets"]:
         bucket_roles[cfg["bucket"]] = cfg
 
-def get_credentials(bucket_name: str, set_credentials: bool = False):
-    get_log().debug("get_credentials_bucket_name", bucket_name=bucket_name)
+def get_credentials(bucket_name: str):
+    get_log().debug("get_credentials", bucket_name=bucket_name)
     if not bucket_roles:
         init_roles()
     if bucket_name in bucket_roles:
         # FIXME: check if the token is expired - add a parameter
         if bucket_name not in bucket_credentials:
             role_arn = bucket_roles[bucket_name]["roleArn"]
-            get_log().debug("s3_assume_role", bucket_name=bucket_name, role_arn=role_arn)
+            get_log().debug("sts_assume_role", bucket_name=bucket_name, role_arn=role_arn)
             assumed_role_object = client_sts.assume_role(RoleArn=role_arn, RoleSessionName="gdal")
             bucket_credentials[bucket_name] = Credentials(
                 assumed_role_object["Credentials"]["AccessKeyId"],
                 assumed_role_object["Credentials"]["SecretAccessKey"],
                 assumed_role_object["Credentials"]["SessionToken"],
             )
-        if set_credentials:
-            os.environ["AWS_ACCESS_KEY_ID"] = bucket_credentials[bucket_name].access_key
-            os.environ["AWS_SECRET_ACCESS_KEY"] = bucket_credentials[bucket_name].secret_key
-            os.environ["AWS_SESSION_TOKEN"] = bucket_credentials[bucket_name].token
+
         return bucket_credentials[bucket_name]
 
     session_credentials = session.get_credentials()
