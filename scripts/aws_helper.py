@@ -69,8 +69,8 @@ def get_bucket(bucket_name: str) -> Bucket:
         aws_secret_access_key=credentials.secret_key,
         aws_session_token=credentials.token,
     )
-
-    return s3_resource.Bucket(bucket_name)
+    s3_bucket: Bucket = s3_resource.Bucket(bucket_name)
+    return s3_bucket
 
 
 def get_bucket_name_from_path(path: str) -> str:
