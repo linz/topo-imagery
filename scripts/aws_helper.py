@@ -1,21 +1,12 @@
 import json
+from collections import namedtuple
 from os import environ
 from typing import Any
 
 import boto3
 from linz_logger import get_log
 
-
-class Credentials:  # pylint: disable=too-few-public-methods
-    access_key: str
-    secret_key: str
-    token: str
-
-    def __init__(self, access_key: str, secret_key: str, token: str):
-        self.access_key = access_key
-        self.secret_key = secret_key
-        self.token = token
-
+Credentials = namedtuple('Credentials', ['access_key', 'secret_key', 'token'])
 
 aws_profile = environ.get("AWS_PROFILE")
 session = boto3.Session(profile_name=aws_profile)
