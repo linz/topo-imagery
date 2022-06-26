@@ -4,11 +4,12 @@ import tempfile
 from collections import Counter
 from urllib.parse import urlparse
 
-import aws_helper
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
+
+from scripts.aws_helper import get_bucket
 
 logger = get_log()
 
@@ -52,13 +53,13 @@ with tempfile.TemporaryDirectory() as tmp_dir:
     if str(uri).startswith("s3://"):
         uri_parse = urlparse(uri, allow_fragments=False)
         bucket_name = uri_parse.netloc
-        bucket = aws_helper.get_bucket(bucket_name)
+        bucket = get_bucket(bucket_name)
         uri = os.path.join(tmp_dir, "temp.tif")
         logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, dest=uri, fileName=file_name)
         bucket.download_file(uri_parse.path[1:], uri)
 
-    # Run create_mask=
-    logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, dest=uri)
+    # Run create_mask
+    logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=uri)
     mask_file = os.path.join(tmp_dir, "mask.tif")
     create_mask(uri, mask_file)
 
@@ -74,7 +75,7 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         os.system(polygonize_command)
 
         # Upload shape file
-        destination = aws_helper.get_bucket(dest_bucket)
+        destination = get_bucket(dest_bucket)
         logger.debug("upload_start", destinationBucket=dest_bucket, destinationFile=file_name_dst)
         try:
             destination.upload_file(poly_dst, file_name_dst)
