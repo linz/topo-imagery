@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 
 import aws_helper
 from linz_logger import get_log
+
+# osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
 
 logger = get_log()
