@@ -60,10 +60,11 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         src_gdal_path,
         tmp_file_path,
     ]
-    proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env)
-    if proc.returncode != 0:
+    try:
+        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env, check=True)
+    except subprocess.CalledProcessError as cpe:
         get_log().error("run_gdal_translate_failed", command=" ".join(command))
-        raise Exception(proc.stderr.decode())
+        raise cpe
     get_log().debug("run_gdal_translate_succeded", command=" ".join(command))
 
     # Upload the standardized file to destination
