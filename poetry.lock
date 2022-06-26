@@ -249,6 +249,17 @@ python2 = ["typed-ast (>=1.4.0,<2)"]
 reports = ["lxml"]
 
 [[package]]
+name = "mypy-boto3-s3"
+version = "1.24.0"
+description = "Type annotations for boto3.S3 1.24.0 service generated with mypy-boto3-builder 7.6.1"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+typing-extensions = ">=4.1.0"
+
+[[package]]
 name = "mypy-extensions"
 version = "0.4.3"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
@@ -459,7 +470,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.10"
-content-hash = "f44be3d9d70e6e491e96bd20bd70472bfe7fce5aba6bc6101b80772d7e7677df"
+content-hash = "cc293bdb48a5f9dad2f8b19aa1603188551e532c80edf9e1ba5ba874f192dfb1"
 
 [metadata.files]
 arrow = [
@@ -618,6 +629,10 @@ mypy = [
     {file = "mypy-0.961-cp39-cp39-win_amd64.whl", hash = "sha256:1ece702f29270ec6af25db8cf6185c04c02311c6bb21a69f423d40e527b75c56"},
     {file = "mypy-0.961-py3-none-any.whl", hash = "sha256:03c6cc893e7563e7b2949b969e63f02c000b32502a1b4d1314cabe391aa87d66"},
     {file = "mypy-0.961.tar.gz", hash = "sha256:f730d56cb924d371c26b8eaddeea3cc07d78ff51c521c6d04899ac6904b75492"},
+]
+mypy-boto3-s3 = [
+    {file = "mypy-boto3-s3-1.24.0.tar.gz", hash = "sha256:213648b5c2d9fc89bfb56a6d90a5c673e1f5953e26d662259634cfff0fbaa4da"},
+    {file = "mypy_boto3_s3-1.24.0-py3-none-any.whl", hash = "sha256:5df806f8d3a8ab536af46e9ae4d9d0f471184eb4e33911d43bc87049c8188005"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},

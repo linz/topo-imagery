@@ -1,12 +1,17 @@
 import json
 from collections import namedtuple
 from os import environ
-from typing import Any
+from typing import TYPE_CHECKING
 
 import boto3
 from linz_logger import get_log
 
-Credentials = namedtuple('Credentials', ['access_key', 'secret_key', 'token'])
+if TYPE_CHECKING:
+    from mypy_boto3_s3.service_resource import Bucket
+else:
+    Bucket = object
+
+Credentials = namedtuple("Credentials", ["access_key", "secret_key", "token"])
 
 aws_profile = environ.get("AWS_PROFILE")
 session = boto3.Session(profile_name=aws_profile)
@@ -53,7 +58,7 @@ def get_credentials(bucket_name: str) -> Credentials:
     return default_credentials
 
 
-def get_bucket(bucket_name: str) -> Any:
+def get_bucket(bucket_name: str) -> Bucket:
     credentials = get_credentials(bucket_name=bucket_name)
 
     s3_resource = boto3.resource(
