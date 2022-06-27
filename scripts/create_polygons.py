@@ -11,6 +11,8 @@ from osgeo import gdal  # pylint: disable=import-error
 
 from scripts.aws_helper import get_bucket
 
+import aws_helper as aws_helper
+
 logger = get_log()
 
 parser = argparse.ArgumentParser()
@@ -18,7 +20,11 @@ parser.add_argument("--uri", dest="uri", required=True)
 parser.add_argument("--destination", dest="destination", required=True)
 arguments = parser.parse_args()
 uri = arguments.uri
-dest_bucket = arguments.destination
+destination = arguments.destination
+
+# Split the s3 destination path
+destination_bucket_name = aws_helper.bucket_name_from_path(destination)
+destination_path = destination.replace("s3://", "").replace(f"{destination_bucket_name}/", "")
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:
@@ -48,14 +54,14 @@ def get_pixel_count(file_path: str) -> int:
 
 
 with tempfile.TemporaryDirectory() as tmp_dir:
-    file_name = os.path.basename(uri)
+    source_file_name = os.path.basename(uri)
     # Download the file
     if str(uri).startswith("s3://"):
         uri_parse = urlparse(uri, allow_fragments=False)
         bucket_name = uri_parse.netloc
         bucket = get_bucket(bucket_name)
         uri = os.path.join(tmp_dir, "temp.tif")
-        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, dest=uri, fileName=file_name)
+        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, destination=uri, sourceFileName=source_file_name)
         bucket.download_file(uri_parse.path[1:], uri)
 
     # Run create_mask
@@ -69,17 +75,18 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         # exclude extents if tif is all white or black
         logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
     else:
-        file_name_dst = os.path.splitext(file_name)[0] + ".geojson"
-        poly_dst = os.path.join(tmp_dir, file_name_dst)
-        polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{poly_dst}" -f GeoJSON'
+        destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
+        temp_file_path = os.path.join(tmp_dir, destination_file_name)
+        polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
         os.system(polygonize_command)
 
         # Upload shape file
         destination = get_bucket(dest_bucket)
-        logger.debug("upload_start", destinationBucket=dest_bucket, destinationFile=file_name_dst)
+        destination_file_path = os.path.join(destination_path, destination_file_name)
+        logger.debug("upload_start", destinationBucket=destination_bucket_name, destinationFile=destination_file_path)
         try:
-            destination.upload_file(poly_dst, file_name_dst)
+            destination_bucket.upload_file(temp_file_path, destination_file_path)
         except Exception as e:
             logger.debug("upload_error", err=e)
             raise e
-        logger.debug("upload_end", destinationBucket=dest_bucket, destinationFile=file_name_dst)
+        logger.debug("upload_end", destinationBucket=destination_bucket_name, destinationFile=destination_file_path)
