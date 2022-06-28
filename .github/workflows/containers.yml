@@ -19,6 +19,9 @@ jobs:
         run: |
           pip install poetry
 
+      - name: Fetch Tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/* # see https://stackoverflow.com/a/60184319/9285308
+
       - name: Build containers
         run: |
           docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"

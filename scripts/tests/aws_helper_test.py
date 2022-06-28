@@ -1,6 +1,4 @@
-import pytest
-
-from scripts.aws_helper import parse_path
+from aws_helper import parse_path
 
 
 def test_parse_path() -> None:

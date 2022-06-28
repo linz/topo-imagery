@@ -4,25 +4,27 @@ import tempfile
 from collections import Counter
 from urllib.parse import urlparse
 
+from aws_helper import get_bucket, get_bucket_name_from_path
 from linz_logger import get_log
-from osgeo import gdal
 
-import aws_helper as aws_helper
+# osgeo is embbed in the Docker image
+from osgeo import gdal  # pylint: disable=import-error
 
 logger = get_log()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--uri', dest='uri', required=True)
-parser.add_argument('--destination', dest='destination', required=True)
+parser.add_argument("--uri", dest="uri", required=True)
+parser.add_argument("--destination", dest="destination", required=True)
 arguments = parser.parse_args()
 uri = arguments.uri
 destination = arguments.destination
 
 # Split the s3 destination path
-destination_bucket_name = aws_helper.bucket_name_from_path(destination)
+destination_bucket_name = get_bucket_name_from_path(destination)
 destination_path = destination.replace("s3://", "").replace(f"{destination_bucket_name}/", "")
 
-def create_mask(file_path, mask_dst):
+
+def create_mask(file_path: str, mask_dst: str) -> None:
     set_srs_command = f'gdal_edit.py -a_srs EPSG:2193 "{file_path}"'
     os.system(set_srs_command)
     calc_command = (
@@ -36,7 +38,8 @@ def create_mask(file_path, mask_dst):
     )
     os.system(calc_command)
 
-def get_pixel_count(file_path):
+
+def get_pixel_count(file_path: str) -> int:
     data_pixels_count = 0
     dataset = gdal.Open(file_path)
     array = dataset.ReadAsArray()
@@ -46,17 +49,19 @@ def get_pixel_count(file_path):
             data_pixels_count += count
     return data_pixels_count
 
+
 with tempfile.TemporaryDirectory() as tmp_dir:
     source_file_name = os.path.basename(uri)
     # Download the file
     if str(uri).startswith("s3://"):
         uri_parse = urlparse(uri, allow_fragments=False)
         bucket_name = uri_parse.netloc
-        bucket = aws_helper.get_bucket(bucket_name)
+        bucket = get_bucket(bucket_name)
         uri = os.path.join(tmp_dir, "temp.tif")
-        logger.debug("download_file", source=uri_parse.path[1:], bucket=bucket_name, destination=uri, sourceFileName=source_file_name)
+        logger.debug(
+            "download_file", source=uri_parse.path[1:], bucket=bucket_name, destination=uri, sourceFileName=source_file_name
+        )
         bucket.download_file(uri_parse.path[1:], uri)
-
 
     # Run create_mask
     logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=uri)
@@ -75,7 +80,7 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         os.system(polygonize_command)
 
         # Upload shape file
-        destination_bucket = aws_helper.get_bucket(destination_bucket_name)
+        destination_bucket = get_bucket(destination_bucket_name)
         destination_file_path = os.path.join(destination_path, destination_file_name)
         logger.debug("upload_start", destinationBucket=destination_bucket_name, destinationFile=destination_file_path)
         try:
