@@ -18,6 +18,7 @@ dst_bucket_name, dst_path = parse_path(destination)
 get_log().debug("destination", bucket=dst_bucket_name, file_path=dst_path)
 dst_bucket = get_bucket(dst_bucket_name)
 
+# TODO Include TDE-411 here
 file_list = [source]
 
 with tempfile.TemporaryDirectory() as tmp_dir:
