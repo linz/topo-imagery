@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import tempfile
+from typing import Dict
 
 from aws_helper import get_bucket, get_credentials, parse_path
 from linz_logger import get_log
@@ -21,24 +22,25 @@ dst_bucket = get_bucket(dst_bucket_name)
 # TODO Include TDE-411 here
 file_list = [source]
 
-with tempfile.TemporaryDirectory() as tmp_dir:
-    for file in file_list:
-        src_bucket_name, src_file_path = parse_path(source)
+gdal_env = os.environ.copy()
+
+for file in file_list:
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        src_bucket_name, src_file_path = parse_path(file)
         get_log().debug("processing_file", bucket=src_bucket_name, file_path=src_file_path)
         standardized_file_name = f"standardized_{os.path.basename(src_file_path)}"
         tmp_file_path = os.path.join(tmp_dir, standardized_file_name)
-        src_gdal_path = source.replace("s3://", "/vsis3/")
+        src_gdal_path = file.replace("s3://", "/vsis3/")
 
         # Set the credentials for GDAL to be able to read the source file
         credentials = get_credentials(src_bucket_name)
-        gdal_env = os.environ.copy()
         gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
         gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
         gdal_env["AWS_SESSION_TOKEN"] = credentials.token
 
         # Run GDAL to standardized the file
         get_log().debug("run_gdal_translate", src=src_gdal_path, output=tmp_file_path)
-        command = [
+        gdal_command = [
             "gdal_translate",
             "-q",
             "-scale",
@@ -62,11 +64,11 @@ with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_file_path,
         ]
         try:
-            proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env, check=True)
+            proc = subprocess.run(gdal_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env, check=True)
         except subprocess.CalledProcessError as cpe:
-            get_log().error("run_gdal_translate_failed", command=" ".join(command))
+            get_log().error("run_gdal_translate_failed", command=" ".join(gdal_command))
             raise cpe
-        get_log().debug("run_gdal_translate_succeded", command=" ".join(command))
+        get_log().debug("run_gdal_translate_succeded", command=" ".join(gdal_command))
 
         # Upload the standardized file to destination
         dst_file_path = os.path.join(dst_path, standardized_file_name).strip("/")
