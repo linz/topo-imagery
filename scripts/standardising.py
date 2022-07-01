@@ -2,7 +2,6 @@ import argparse
 import os
 import subprocess
 import tempfile
-from typing import Dict
 
 from aws_helper import get_bucket, get_credentials, parse_path
 from linz_logger import get_log
