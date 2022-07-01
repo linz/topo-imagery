@@ -20,4 +20,4 @@ jobs:
           poetry run pre-commit run --all-files
       - name: Test
         run: |
-          pytest ./scripts/tests
+          poetry run pytest .
