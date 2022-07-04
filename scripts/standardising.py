@@ -4,8 +4,8 @@ import subprocess
 import tempfile
 
 from aws_helper import get_bucket, get_credentials, parse_path
+from format_source import format_source
 from linz_logger import get_log
-from source_formatter import format_source_from_basemaps_cli
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source", dest="source", nargs="+", required=True)
@@ -15,9 +15,7 @@ source = arguments.source
 destination = arguments.destination
 # TODO if destination needs write permission we have to handle this
 
-# check if source needs formatting
-if len(source) == 1 and source[0].startswith("["):
-    source = format_source_from_basemaps_cli(source[0])
+format_source(source)
 
 get_log().info("standardising", source=source, destination=destination)
 
