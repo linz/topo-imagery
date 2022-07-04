@@ -11,7 +11,7 @@ def test_format_source_from_basemaps_cli_file() -> None:
     file_list = format_source(source)
     assert isinstance(file_list, list)
     assert len(file_list) == 2
-    assert file_list[0] == "s3://test/image_one.tiff"
+    assert file_list == ["s3://test/image_one.tiff", "s3://test/image_two.tiff"]
 
 
 def test_format_source_single_input() -> None:
@@ -20,7 +20,7 @@ def test_format_source_single_input() -> None:
     file_list = format_source(source)
     assert isinstance(file_list, list)
     assert len(file_list) == 1
-    assert file_list[0] == "s3://test/image_one.tiff"
+    assert file_list == ["s3://test/image_one.tiff"]
 
 
 def test_format_source_multiple_inputs() -> None:
@@ -29,4 +29,4 @@ def test_format_source_multiple_inputs() -> None:
     file_list = format_source(source)
     assert isinstance(file_list, list)
     assert len(file_list) == 2
-    assert file_list[0] == "s3://test/image_one.tiff"
+    assert file_list == ["s3://test/image_one.tiff", "s3://test/image_two.tiff"]
