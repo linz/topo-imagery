@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 
 from aws_helper import get_bucket, get_credentials, parse_path
+from file import write
 from linz_logger import get_log
 
 parser = argparse.ArgumentParser()
@@ -20,7 +21,6 @@ src_bucket_name, src_file_path = parse_path(source)
 dst_bucket_name, dst_path = parse_path(destination)
 get_log().debug("source", bucket=src_bucket_name, file_path=src_file_path)
 get_log().debug("destination", bucket=dst_bucket_name, file_path=dst_path)
-dst_bucket = get_bucket(dst_bucket_name)
 
 with tempfile.TemporaryDirectory() as tmp_dir:
     standardized_file_name = f"standardized_{os.path.basename(src_file_path)}"
@@ -67,6 +67,6 @@ with tempfile.TemporaryDirectory() as tmp_dir:
     get_log().debug("run_gdal_translate_succeded", command=" ".join(command))
 
     # Upload the standardized file to destination
-    dst_file_path = os.path.join(dst_path, standardized_file_name).strip("/")
+    dst_file_path = os.path.join(destination, standardized_file_name).strip("/")
     get_log().debug("upload_file", path=dst_file_path)
-    dst_bucket.upload_file(tmp_file_path, dst_file_path)
+    write(dst_file_path, tmp_file_path)
