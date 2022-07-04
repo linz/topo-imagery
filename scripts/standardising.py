@@ -15,7 +15,7 @@ source = arguments.source
 destination = arguments.destination
 # TODO if destination needs write permission we have to handle this
 
-format_source(source)
+source = format_source(source)
 
 get_log().info("standardising", source=source, destination=destination)
 
