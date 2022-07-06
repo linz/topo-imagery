@@ -1,4 +1,3 @@
-import linz_logger
 from format_source import format_source
 
 
@@ -31,6 +30,7 @@ def test_format_source_multiple_inputs() -> None:
     assert isinstance(file_list, list)
     assert len(file_list) == 2
     assert file_list == ["s3://test/image_one.tiff", "s3://test/image_two.tiff"]
+
 
 def test_format_source_json_loading_error() -> None:
     """example: --source [s3://test/image_one.tiff"""
