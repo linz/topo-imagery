@@ -3,6 +3,7 @@ import os
 import tempfile
 
 from aws_helper import get_bucket, parse_path
+from file_helper import get_file_name_from_path
 from gdal_helper import run_gdal
 from linz_logger import get_log
 
@@ -22,7 +23,7 @@ get_log().debug("destination", bucket=dst_bucket_name, file_path=dst_path)
 dst_bucket = get_bucket(dst_bucket_name)
 
 with tempfile.TemporaryDirectory() as tmp_dir:
-    standardized_file_name = f"standardized_{os.path.basename(src_file_path)}"
+    standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
     tmp_file_path = os.path.join(tmp_dir, standardized_file_name)
 
     command = [

@@ -21,3 +21,5 @@ COPY ./scripts/create_polygons.py /app/
 COPY ./scripts/standardising.py /app/
 COPY ./scripts/aws_helper.py /app/
 COPY ./scripts/gdal_helper.py /app/
+COPY ./scripts/file_helper.py /app/
+COPY ./scripts/non_visual_qa.py /app/
