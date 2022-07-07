@@ -45,19 +45,27 @@ def run_gdal(command: List[str], input_file: str = "", output_file: str = "") ->
         subprocess.CompletedProcess: the output process.
     """
     gdal_env = os.environ.copy()
-    if is_s3(input_file):
-        # Set the credentials for GDAL to be able to read the input file
-        credentials = get_credentials(get_bucket_name_from_path(input_file))
-        gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
-        gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
-        gdal_env["AWS_SESSION_TOKEN"] = credentials.token
 
-    command.append(get_vfs_path(input_file))
-    command.append(output_file)
+    if input_file:
+        if is_s3(input_file):
+            # Set the credentials for GDAL to be able to read the input file
+            credentials = get_credentials(get_bucket_name_from_path(input_file))
+            gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
+            gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
+            gdal_env["AWS_SESSION_TOKEN"] = credentials.token
+        command.append(get_vfs_path(input_file))
+
+    if output_file:
+        command.append(output_file)
 
     try:
         get_log().debug("run_gdal", command=command_to_string(command))
-        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env, check=True)
+        proc = subprocess.run(
+            command,
+            env=gdal_env,
+            check=True,
+            capture_output=True,
+        )
     except subprocess.CalledProcessError as cpe:
         get_log().error("run_gdal_failed", command=command_to_string(command))
         raise cpe
