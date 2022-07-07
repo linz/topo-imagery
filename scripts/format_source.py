@@ -1,5 +1,5 @@
 import json
-from typing import List, cast
+from typing import List
 
 from linz_logger import get_log
 
@@ -11,7 +11,8 @@ def format_source(source: List[str]) -> List[str]:
     """
     if len(source) == 1 and source[0].startswith("["):
         try:
-            return cast(List[str], json.loads(source[0]))
-        except ValueError as e:
+            source_json: List[str] = json.loads(source[0])
+            return source_json
+        except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", source=source, msg=e)
     return source
