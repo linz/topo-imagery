@@ -30,7 +30,7 @@ def command_to_string(command: List[str]) -> str:
     return " ".join(command)
 
 
-def run_gdal(command: List[str], input_file: str = "", output_file: str = "") -> subprocess.CompletedProcess:
+def run_gdal(command: List[str], input_file: str = "", output_file: str = "") -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
