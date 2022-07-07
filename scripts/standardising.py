@@ -4,8 +4,9 @@ import subprocess
 import tempfile
 
 from aws_helper import get_bucket, get_credentials, parse_path
-from file import write
 from linz_logger import get_log
+
+from scripts.fs_local import write
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source", dest="source", required=True)
