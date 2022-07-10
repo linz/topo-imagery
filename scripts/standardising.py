@@ -4,15 +4,18 @@ import subprocess
 import tempfile
 
 from aws_helper import get_bucket, get_credentials, parse_path
+from format_source import format_source
 from linz_logger import get_log
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--source", dest="source", required=True)
+parser.add_argument("--source", dest="source", nargs="+", required=True)
 parser.add_argument("--destination", dest="destination", required=True)
 arguments = parser.parse_args()
 source = arguments.source
 destination = arguments.destination
 # TODO if destination needs write permission we have to handle this
+
+source = format_source(source)
 
 get_log().info("standardising", source=source, destination=destination)
 
