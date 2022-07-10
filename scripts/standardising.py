@@ -20,13 +20,9 @@ get_log().info("standardising", source=source, destination=destination)
 dst_bucket_name, dst_path = parse_path(destination)
 get_log().debug("destination", bucket=dst_bucket_name, file_path=dst_path)
 dst_bucket = get_bucket(dst_bucket_name)
-
-# TODO Include TDE-411 here
-file_list = [source]
-
 gdal_env = os.environ.copy()
 
-for file in file_list:
+for file in source:
     with tempfile.TemporaryDirectory() as tmp_dir:
         src_bucket_name, src_file_path = parse_path(file)
         get_log().debug("processing_file", bucket=src_bucket_name, file_path=src_file_path)
