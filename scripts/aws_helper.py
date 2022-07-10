@@ -79,5 +79,13 @@ def get_bucket_name_from_path(path: str) -> str:
 
 
 def parse_path(path: str) -> Tuple[str, str]:
+    """Parse the path and split it into bucket name and key.
+
+    Args:
+        path (str): A S3 path.
+
+    Returns:
+        Tuple[str, str]: bucket name, key
+    """
     parse = urlparse(path, allow_fragments=False)
     return parse.netloc, parse.path
