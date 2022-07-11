@@ -17,7 +17,4 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 
 # Copy Python scripts
-COPY ./scripts/create_polygons.py /app/
-COPY ./scripts/standardising.py /app/
-COPY ./scripts/aws_helper.py /app/
-COPY ./scripts/format_source.py /app/
+COPY ./scripts/* /app/
