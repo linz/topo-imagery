@@ -2,6 +2,7 @@ import argparse
 import json
 from typing import Any, Dict, List
 
+from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
 
@@ -67,9 +68,11 @@ def check_color_interpretation(gdalinfo: Dict[str, Any], errors_list: List[str])
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", required=True)
+    parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
     source = arguments.source
+
+    source = format_source(source)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -80,40 +83,41 @@ def main() -> None:
         )
     srs = gdalsrsinfo_result.stdout
 
-    gdalinfo_command = ["gdalinfo", "-stats", "-json"]
-    gdalinfo_process = run_gdal(gdalinfo_command, source)
-    gdalinfo_result = {}
-    try:
-        gdalinfo_result = json.loads(gdalinfo_process.stdout)
-    except json.JSONDecodeError as e:
-        get_log().error("load_gdalinfo_result_error", error=e)
-        # TODO change this behavior when loop over multiple TIFF files to go to next file instead of raising the exception
-        raise e
-    gdalinfo_errors = gdalinfo_process.stderr
+    for file in source:
+        gdalinfo_command = ["gdalinfo", "-stats", "-json"]
+        gdalinfo_process = run_gdal(gdalinfo_command, file)
+        gdalinfo_result = {}
+        try:
+            gdalinfo_result = json.loads(gdalinfo_process.stdout)
+        except json.JSONDecodeError as e:
+            get_log().error("load_gdalinfo_result_error", file=file, error=e)
+            continue
 
-    # Check result
-    errors: List[str] = []
-    # No data
-    check_no_data(gdalinfo_result, errors)
+        gdalinfo_errors = gdalinfo_process.stderr
 
-    # Band count
-    check_band_count(gdalinfo_result, errors)
+        # Check result
+        errors: List[str] = []
+        # No data
+        check_no_data(gdalinfo_result, errors)
 
-    # srs
-    gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
-    gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, source)
-    check_srs(srs, gdalsrsinfo_tif_result.stdout, errors)
+        # Band count
+        check_band_count(gdalinfo_result, errors)
 
-    # Color interpretation
-    check_color_interpretation(gdalinfo_result, errors)
+        # srs
+        gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
+        gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, file)
+        check_srs(srs, gdalsrsinfo_tif_result.stdout, errors)
 
-    # gdal errors
-    errors.append(f"{gdalinfo_errors!r}")
+        # Color interpretation
+        check_color_interpretation(gdalinfo_result, errors)
 
-    if len(errors) > 0:
-        get_log().info("non_visual_qa_errors_found", result=errors)
-    else:
-        get_log().info("non_visual_qa_no_error")
+        # gdal errors
+        errors.append(f"{gdalinfo_errors!r}")
+
+        if len(errors) > 0:
+            get_log().info("non_visual_qa_errors_found", file=file, result=errors)
+        else:
+            get_log().info("non_visual_qa_no_error", file=file)
 
 
 if __name__ == "__main__":
