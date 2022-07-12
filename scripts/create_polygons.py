@@ -37,7 +37,7 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> None:
+def main() -> str:
     logger = get_log()
 
     parser = argparse.ArgumentParser()
@@ -78,7 +78,7 @@ def main() -> None:
             polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
             os.system(polygonize_command)
 
-            return temp_file_path
+        return temp_file_path
 
 
 if __name__ == "__main__":
