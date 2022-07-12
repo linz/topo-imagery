@@ -81,3 +81,7 @@ def get_bucket_name_from_path(path: str) -> str:
 def parse_path(path: str) -> Tuple[str, str]:
     parse = urlparse(path, allow_fragments=False)
     return parse.netloc, parse.path
+
+
+def is_s3(path: str) -> bool:
+    return path.startswith("s3://")
