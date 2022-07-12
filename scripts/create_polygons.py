@@ -2,9 +2,11 @@ import argparse
 import os
 import tempfile
 from collections import Counter
+from typing import List
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
+from format_source import format_source
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
@@ -37,7 +39,7 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> str:
+def main() -> List[str]:  # pylint: disable=too-many-locals
     logger = get_log()
 
     parser = argparse.ArgumentParser()
@@ -45,40 +47,46 @@ def main() -> str:
     arguments = parser.parse_args()
     source = arguments.source
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        source_file_name = os.path.basename(source)
-        # Download the file
-        if str(source).startswith("s3://"):
-            uri_parse = urlparse(source, allow_fragments=False)
-            bucket_name = uri_parse.netloc
-            bucket = get_bucket(bucket_name)
-            source = os.path.join(tmp_dir, "temp.tif")
-            logger.debug(
-                "download_file",
-                source=uri_parse.path[1:],
-                bucket=bucket_name,
-                destination=source,
-                sourceFileName=source_file_name,
-            )
-            bucket.download_file(uri_parse.path[1:], source)
+    source = format_source(source)
+    output_files = []
 
-        # Run create_mask
-        logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=source)
-        mask_file = os.path.join(tmp_dir, "mask.tif")
-        create_mask(source, mask_file)
+    for file in source:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            source_file_name = os.path.basename(file)
+            # Download the file
+            if str(file).startswith("s3://"):
+                uri_parse = urlparse(file, allow_fragments=False)
+                bucket_name = uri_parse.netloc
+                bucket = get_bucket(bucket_name)
+                file = os.path.join(tmp_dir, "temp.tif")
+                logger.debug(
+                    "download_file",
+                    source=uri_parse.path[1:],
+                    bucket=bucket_name,
+                    destination=file,
+                    sourceFileName=source_file_name,
+                )
+                bucket.download_file(uri_parse.path[1:], file)
 
-        # Run create_polygon
-        data_px_count = get_pixel_count(mask_file)
-        if data_px_count == 0:
-            # exclude extents if tif is all white or black
-            logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
-        else:
-            destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
-            temp_file_path = os.path.join(tmp_dir, destination_file_name)
-            polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
-            os.system(polygonize_command)
+            # Run create_mask
+            logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
+            mask_file = os.path.join(tmp_dir, "mask.tif")
+            create_mask(file, mask_file)
 
-        return temp_file_path
+            # Run create_polygon
+            data_px_count = get_pixel_count(mask_file)
+            if data_px_count == 0:
+                # exclude extents if tif is all white or black
+                logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+            else:
+                destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
+                temp_file_path = os.path.join(tmp_dir, destination_file_name)
+                polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
+                os.system(polygonize_command)
+
+            output_files.append(temp_file_path)
+
+    return output_files
 
 
 if __name__ == "__main__":
