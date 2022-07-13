@@ -1,10 +1,8 @@
 import argparse
 import json
 import os
-import subprocess
 import tempfile
 from collections import Counter
-from typing import List
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
