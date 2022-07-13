@@ -87,7 +87,7 @@ def main() -> None:  # pylint: disable=too-many-locals
 
             output_files.append(temp_file_path)
 
-    with open("/tmp/file_list.json", "w") as jf:
+    with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
 
 
