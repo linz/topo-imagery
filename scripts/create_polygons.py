@@ -43,7 +43,7 @@ def main() -> List[str]:  # pylint: disable=too-many-locals
     logger = get_log()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", required=True)
+    parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
     source = arguments.source
 
@@ -52,7 +52,9 @@ def main() -> List[str]:  # pylint: disable=too-many-locals
 
     for file in source:
         with tempfile.TemporaryDirectory() as tmp_dir:
+            print(file)
             source_file_name = os.path.basename(file)
+            uri_parse = file
             # Download the file
             if str(file).startswith("s3://"):
                 uri_parse = urlparse(file, allow_fragments=False)
