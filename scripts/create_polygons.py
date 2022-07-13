@@ -52,7 +52,6 @@ def main() -> List[str]:  # pylint: disable=too-many-locals
 
     for file in source:
         with tempfile.TemporaryDirectory() as tmp_dir:
-            print(file)
             source_file_name = os.path.basename(file)
             uri_parse = file
             # Download the file
