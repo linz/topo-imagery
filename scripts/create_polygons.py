@@ -1,8 +1,8 @@
 import argparse
+import json
 import os
 import tempfile
 from collections import Counter
-from typing import List
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
@@ -39,7 +39,7 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> List[str]:  # pylint: disable=too-many-locals
+def main() -> None:  # pylint: disable=too-many-locals
     logger = get_log()
 
     parser = argparse.ArgumentParser()
@@ -87,7 +87,8 @@ def main() -> List[str]:  # pylint: disable=too-many-locals
 
             output_files.append(temp_file_path)
 
-    return output_files
+    with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
+        json.dump(output_files, jf)
 
 
 if __name__ == "__main__":
