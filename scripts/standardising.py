@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from aws_helper import get_bucket, parse_path
-from file_helper import get_file_name_from_path
+from file_helper import get_file_name_from_path, is_tiff
 from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
@@ -24,6 +24,9 @@ dst_bucket = get_bucket(dst_bucket_name)
 gdal_env = os.environ.copy()
 
 for file in source:
+    if not is_tiff(file):
+        get_log().error("file_not_tiff_skipped", file=file)
+        continue
     with tempfile.TemporaryDirectory() as tmp_dir:
         src_bucket_name, src_file_path = parse_path(file)
         standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"

@@ -2,6 +2,7 @@ import argparse
 import json
 from typing import Any, Dict, List
 
+from file_helper import is_tiff
 from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
@@ -84,6 +85,10 @@ def main() -> None:
     srs = gdalsrsinfo_result.stdout
 
     for file in source:
+        if not is_tiff(file):
+            get_log().error("file_not_tiff_skipped", file=file)
+            continue
+
         gdalinfo_command = ["gdalinfo", "-stats", "-json"]
         gdalinfo_process = run_gdal(gdalinfo_command, file)
         gdalinfo_result = {}
