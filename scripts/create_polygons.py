@@ -6,12 +6,12 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
-from file_helper import is_tiff  # pylint: disable=import-error
+from file_helper import is_tiff
 from format_source import format_source
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
-from osgeo import gdal
+from osgeo import gdal  # pylint: disable=import-error
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:
