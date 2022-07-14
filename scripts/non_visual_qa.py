@@ -86,7 +86,7 @@ def main() -> None:
 
     for file in source:
         if not is_tiff(file):
-            get_log().error("file_not_tiff_skipped", file=file)
+            get_log().error("non_visual_qa_file_not_tiff_skipped", file=file)
             continue
 
         gdalinfo_command = ["gdalinfo", "-stats", "-json"]

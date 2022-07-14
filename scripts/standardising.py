@@ -25,7 +25,7 @@ gdal_env = os.environ.copy()
 
 for file in source:
     if not is_tiff(file):
-        get_log().error("file_not_tiff_skipped", file=file)
+        get_log().error("standardising_file_not_tiff_skipped", file=file)
         continue
     with tempfile.TemporaryDirectory() as tmp_dir:
         src_bucket_name, src_file_path = parse_path(file)
