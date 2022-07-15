@@ -1,10 +1,23 @@
 import argparse
 import json
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
+
+
+class NonVisualQA:
+    def __init__(self) -> None:
+        self.errors: List[Dict[str, Any]] = []
+        self._valid = True
+
+    def add_error(self, type: str, description: str, custom_fields: Dict[str, str] = {}) -> None:
+        self.errors.append({"type": type, "description": description, custom_fields})
+        self._valid = False
+
+    def is_valid(self) -> bool:
+        return self._valid
 
 
 def check_no_data(gdalinfo: Dict[str, Any], file_errors: Dict[str, str]) -> None:
