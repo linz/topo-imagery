@@ -6,6 +6,10 @@ from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 from linz_logger import get_log
 
 
+class GDALExecutionException(Exception):
+    pass
+
+
 def get_vfs_path(path: str) -> str:
     """Make the path as a GDAL Virtual File Systems path.
 
@@ -67,8 +71,8 @@ def run_gdal(command: List[str], input_file: str = "", output_file: str = "") ->
             capture_output=True,
         )
     except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_failed", command=command_to_string(command))
-        raise cpe
+        get_log().error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
+        raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
     get_log().debug("run_gdal_translate_succeded", command=command_to_string(command))
 
     return proc

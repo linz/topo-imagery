@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict
 
 from non_visual_qa import check_band_count, check_color_interpretation, check_no_data, check_srs
 
@@ -10,10 +10,10 @@ def test_check_band_count_valid() -> None:
     """
     gdalinfo = {}
     gdalinfo["bands"] = [{"band": 1}, {"band": 2}, {"band": 3}]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_band_count(gdalinfo, errors)
-    assert len(errors) == 0
+    assert not errors
 
 
 def test_check_band_count_invalid() -> None:
@@ -23,10 +23,10 @@ def test_check_band_count_invalid() -> None:
     """
     gdalinfo = {}
     gdalinfo["bands"] = [{"band": 1}, {"band": 2}]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_band_count(gdalinfo, errors)
-    assert len(errors) == 1
+    assert errors
 
 
 def test_check_color_interpretation_valid() -> None:
@@ -45,10 +45,10 @@ def test_check_color_interpretation_valid() -> None:
             "colorInterpretation": "Blue",
         },
     ]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_color_interpretation(gdalinfo, errors)
-    assert len(errors) == 0
+    assert not errors
 
 
 def test_check_color_interpretation_invalid() -> None:
@@ -70,10 +70,10 @@ def test_check_color_interpretation_invalid() -> None:
             "colorInterpretation": "Undefined",
         },
     ]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_color_interpretation(gdalinfo, errors)
-    assert len(errors) == 1
+    assert errors
 
 
 def test_check_no_data_valid() -> None:
@@ -86,10 +86,10 @@ def test_check_no_data_valid() -> None:
             "noDataValue": 255,
         }
     ]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_no_data(gdalinfo, errors)
-    assert len(errors) == 0
+    assert not errors
 
 
 def test_check_no_data_no_value() -> None:
@@ -98,10 +98,10 @@ def test_check_no_data_no_value() -> None:
     """
     gdalinfo = {}
     gdalinfo["bands"] = [{"test": 1}]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_no_data(gdalinfo, errors)
-    assert len(errors) == 1
+    assert errors
 
 
 def test_check_no_data_invalid_value() -> None:
@@ -114,10 +114,10 @@ def test_check_no_data_invalid_value() -> None:
             "noDataValue": 0,
         }
     ]
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_no_data(gdalinfo, errors)
-    assert len(errors) == 1
+    assert errors
 
 
 def test_check_srs_valid() -> None:
@@ -126,10 +126,10 @@ def test_check_srs_valid() -> None:
     """
     srs_to_test_against = b"SRS Test"
     srs_tif = b"SRS Test"
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_srs(srs_to_test_against, srs_tif, errors)
-    assert len(errors) == 0
+    assert not errors
 
 
 def test_check_srs_invalid() -> None:
@@ -138,7 +138,7 @@ def test_check_srs_invalid() -> None:
     """
     srs_to_test_against = b"SRS Test"
     srs_tif = b"SRS Different"
-    errors: List[str] = []
+    errors: Dict[str, str] = {}
 
     check_srs(srs_to_test_against, srs_tif, errors)
-    assert len(errors) == 1
+    assert errors
