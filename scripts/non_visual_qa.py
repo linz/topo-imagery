@@ -1,6 +1,6 @@
 import argparse
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
@@ -13,7 +13,7 @@ class NonVisualQA:
         self._valid = True
 
     def add_error(self, type: str, description: str, custom_fields: Dict[str, str] = {}) -> None:
-        self.errors.append({"type": type, "description": description, custom_fields})
+        self.errors.append({"type": type, "description": description, **custom_fields})
         self._valid = False
 
     def is_valid(self) -> bool:
