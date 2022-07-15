@@ -1,13 +1,13 @@
 import argparse
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from format_source import format_source
-from gdal_helper import run_gdal
+from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
 
 
-def check_no_data(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
+def check_no_data(gdalinfo: Dict[str, Any], file_errors: Dict[str, str]) -> None:
     """Add an error in errors_list if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands".
 
     Args:
@@ -18,12 +18,12 @@ def check_no_data(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
     if "noDataValue" in bands[0]:
         current_nodata_val = bands[0]["noDataValue"]
         if current_nodata_val != 255:
-            errors_list.append(f"noDataValue is {int(current_nodata_val)} not 255")
+            file_errors["no_data"] = f"noDataValue is {int(current_nodata_val)} not 255"
     else:
-        errors_list.append("noDataValue not set")
+        file_errors["no_data"] = "noDataValue not set"
 
 
-def check_band_count(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
+def check_band_count(gdalinfo: Dict[str, Any], file_errors: Dict[str, str]) -> None:
     """Add an error in errors_list if there is no exactly 3 bands found.
 
     Args:
@@ -33,10 +33,10 @@ def check_band_count(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
     bands = gdalinfo["bands"]
     bands_num = len(bands)
     if bands_num != 3:
-        errors_list.append(f"not 3 bands, {bands_num} bands found")
+        file_errors["band_count"] = f"not 3 bands, {bands_num} bands found"
 
 
-def check_srs(gdalsrsinfo: bytes, gdalsrsinfo_tif: bytes, errors_list: List[str]) -> None:
+def check_srs(gdalsrsinfo: bytes, gdalsrsinfo_tif: bytes, file_errors: Dict[str, str]) -> None:
     """Add an error in errors_list if gdalsrsinfo and gdalsrsinfo_tif values are different.
 
     Args:
@@ -45,10 +45,10 @@ def check_srs(gdalsrsinfo: bytes, gdalsrsinfo_tif: bytes, errors_list: List[str]
         errors_list (List[str]): List of errors as strings.
     """
     if gdalsrsinfo_tif != gdalsrsinfo:
-        errors_list.append("different srs")
+        file_errors["srs"] = "different srs"
 
 
-def check_color_interpretation(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
+def check_color_interpretation(gdalinfo: Dict[str, Any], file_errors: Dict[str, str]) -> None:
     bands = gdalinfo["bands"]
     missing_bands = []
     band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
@@ -63,10 +63,10 @@ def check_color_interpretation(gdalinfo: Dict[str, Any], errors_list: List[str])
         n += 1
     if missing_bands:
         missing_bands.sort()
-        errors_list.append(f"unexpected color interpretation bands; {', '.join(missing_bands)}")
+        file_errors["color_interpretation"] = f"unexpected color interpretation bands; {', '.join(missing_bands)}"
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
@@ -83,20 +83,25 @@ def main() -> None:
         )
     srs = gdalsrsinfo_result.stdout
 
+    errors_report = {}
     for file in source:
         gdalinfo_command = ["gdalinfo", "-stats", "-json"]
-        gdalinfo_process = run_gdal(gdalinfo_command, file)
-        gdalinfo_result = {}
         try:
-            gdalinfo_result = json.loads(gdalinfo_process.stdout)
-        except json.JSONDecodeError as e:
-            get_log().error("load_gdalinfo_result_error", file=file, error=e)
+            gdalinfo_process = run_gdal(gdalinfo_command, file)
+            gdalinfo_result = {}
+            try:
+                gdalinfo_result = json.loads(gdalinfo_process.stdout)
+            except json.JSONDecodeError as e:
+                get_log().error("load_gdalinfo_result_error", file=file, error=e)
+                gdalinfo_errors = f"GDALINFO RESULT ISSUE: {str(e)}"
+                continue
+            gdalinfo_errors = str(gdalinfo_process.stderr)
+        except GDALExecutionException as gee:
+            gdalinfo_errors = f"GDALINFO FAILED: {str(gee)}"
             continue
 
-        gdalinfo_errors = gdalinfo_process.stderr
-
         # Check result
-        errors: List[str] = []
+        errors: Dict[str, str] = {}
         # No data
         check_no_data(gdalinfo_result, errors)
 
@@ -105,19 +110,26 @@ def main() -> None:
 
         # srs
         gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
-        gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, file)
-        check_srs(srs, gdalsrsinfo_tif_result.stdout, errors)
+        try:
+            gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, file)
+            check_srs(srs, gdalsrsinfo_tif_result.stdout, errors)
+        except GDALExecutionException as gee:
+            errors["srs"] = f"NOT CHECKED: {str(gee)}"
 
         # Color interpretation
         check_color_interpretation(gdalinfo_result, errors)
 
         # gdal errors
-        errors.append(f"{gdalinfo_errors!r}")
+        if gdalinfo_errors:
+            errors["gdal"] = f"{gdalinfo_errors!r}"
 
-        if len(errors) > 0:
-            get_log().info("non_visual_qa_errors_found", file=file, result=errors)
-        else:
-            get_log().info("non_visual_qa_no_error", file=file)
+        if errors:
+            errors_report[file] = errors
+
+    if errors_report:
+        get_log().info("non_visual_qa_errors", errors=errors_report)
+    else:
+        get_log().info("non_visual_qa_no_error")
 
 
 if __name__ == "__main__":
