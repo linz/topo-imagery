@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 from aws_helper import get_bucket
 from format_source import format_source
+from gdal_helper import run_gdal
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
@@ -14,18 +15,22 @@ from osgeo import gdal  # pylint: disable=import-error
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:
-    set_srs_command = f'gdal_edit.py -a_srs EPSG:2193 "{file_path}"'
-    os.system(set_srs_command)
-    calc_command = (
-        f"gdal_calc.py "
-        f"--quiet "
-        f'-A "{file_path}" --A_band=1 '
-        f'--outfile="{mask_dst}" '
-        f'--calc "255*logical_or(((A==254)*(A==254)*(A==254)),((A==0)*(A==0)*(A==0)))" '
-        f"--NoDataValue=255 "
-        f'--co="compress=lzw"'
-    )
-    os.system(calc_command)
+    set_srs_command = ["gdal_edit.py", "-a_srs", "EPSG:2193"] 
+    run_gdal(set_srs_command, input_file=file_path)
+
+    calc_command = [
+        "gdal_calc.py",
+        "--quiet",
+        "-A",
+        file_path,
+        "--A_band=1",
+        f"--outfile={mask_dst}",
+        "--calc",
+        "255*logical_or(((A==254)*(A==254)*(A==254)),((A==0)*(A==0)*(A==0)))",
+        "--NoDataValue=255",
+        "--co=compress=lzw"
+    ] # TODO: input and output files should be separated but they can't just be appended at end of command like others
+    run_gdal(calc_command)
 
 
 def get_pixel_count(file_path: str) -> int:
@@ -82,8 +87,8 @@ def main() -> None:  # pylint: disable=too-many-locals
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)
-                polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
-                os.system(polygonize_command)
+                polygonize_command = ["gdal_polygonize.py", "-q", mask_file, temp_file_path, "-f", "GeoJSON"]
+                run_gdal(polygonize_command)
 
             output_files.append(temp_file_path)
 
