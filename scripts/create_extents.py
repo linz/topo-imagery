@@ -5,7 +5,7 @@ import tempfile
 from collections import Counter
 from urllib.parse import urlparse
 
-from aws_helper import get_bucket
+from aws_helper import download_s3_file, get_bucket, is_s3
 from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
@@ -58,24 +58,13 @@ def main() -> None:  # pylint: disable=too-many-locals
     for file in source:
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
-            uri_parse = file
+
             # Download the file
-            if str(file).startswith("s3://"):
-                uri_parse = urlparse(file, allow_fragments=False)
-                bucket_name = uri_parse.netloc
-                bucket = get_bucket(bucket_name)
-                file = os.path.join(tmp_dir, "temp.tif")
-                logger.debug(
-                    "download_file",
-                    source=uri_parse.path[1:],
-                    bucket=bucket_name,
-                    destination=file,
-                    sourceFileName=source_file_name,
-                )
-                bucket.download_file(uri_parse.path[1:], file)
+            if is_s3(file):
+                file, bucket_name = download_s3_file(file, tmp_dir, source_file_name)
 
             # Run create_mask
-            logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
+            get_log().debug("create_mask", source=source_file_name, bucket=bucket_name, destination=file)
             mask_file = os.path.join(tmp_dir, "mask.tif")
             create_mask(file, mask_file)
 
@@ -83,7 +72,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             data_px_count = get_pixel_count(mask_file)
             if data_px_count == 0:
                 # exclude extents if tif is all white or black
-                logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)

@@ -1,4 +1,5 @@
 import json
+import os
 from collections import namedtuple
 from os import environ
 from typing import TYPE_CHECKING, Tuple
@@ -85,3 +86,18 @@ def parse_path(path: str) -> Tuple[str, str]:
 
 def is_s3(path: str) -> bool:
     return path.startswith("s3://")
+
+def download_s3_file(file: str, tmp_dir:str, source_file_name:str) -> Tuple[str, str]:
+    uri_parse = urlparse(file, allow_fragments=False)
+    bucket_name = uri_parse.netloc
+    bucket = get_bucket(bucket_name)
+    file = os.path.join(tmp_dir, "temp.tif")
+    get_log().debug(
+        "download_file",
+        source=uri_parse.path[1:],
+        bucket=bucket_name,
+        destination=file,
+        sourceFileName=source_file_name,
+    )
+    bucket.download_file(uri_parse.path[1:], file)
+    return file, bucket_name
