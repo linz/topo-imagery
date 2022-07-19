@@ -66,7 +66,7 @@ for file in source:
             "-co",
             "overview_quality=90",
             "-co",
-            "sparse_ok=true"
+            "sparse_ok=true",
         ]
         run_gdal(command, input_file=file, output_file=tmp_file_path, input_file_index=17)
 
