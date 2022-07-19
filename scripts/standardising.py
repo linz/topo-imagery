@@ -10,12 +10,9 @@ from linz_logger import get_log
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source", dest="source", nargs="+", required=True)
-
 arguments = parser.parse_args()
-source = arguments.source
 
-
-source = format_source(source)
+source = format_source(arguments.source)
 
 get_log().info("standardising", source=source)
 gdal_env = os.environ.copy()
