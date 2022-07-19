@@ -64,7 +64,7 @@ def main() -> None:  # pylint: disable=too-many-locals
                 file, bucket_name = download_s3_file(file, tmp_dir, source_file_name)
 
             # Run create_mask
-            get_log().debug("create_mask", source=source_file_name, bucket=bucket_name, destination=file)
+            logger.debug("create_mask", source=source_file_name, bucket=bucket_name, destination=file)
             mask_file = os.path.join(tmp_dir, "mask.tif")
             create_mask(file, mask_file)
 
@@ -72,7 +72,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             data_px_count = get_pixel_count(mask_file)
             if data_px_count == 0:
                 # exclude extents if tif is all white or black
-                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)
