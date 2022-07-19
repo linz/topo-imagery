@@ -30,13 +30,15 @@ def command_to_string(command: List[str]) -> str:
     return " ".join(command)
 
 
-def run_gdal(command: List[str], input_file: str = "", output_file: str = "") -> "subprocess.CompletedProcess[bytes]":
+def run_gdal(
+    command: List[str], input_file: Optional[str] = None, output_file: Optional[str] = None, input_file_index: Optional[int] = None
+) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
         command (List[str]): each arguments of the GDAL command.
-        input_file (str, optional): the input file path. Defaults to "".
-        output_file (str, optional): the output file path. Defaults to "".
+        input_file (str, optional): the input file path.
+        output_file (str, optional): the output file path.
 
     Raises:
         cpe: CalledProcessError is raised if something goes wrong during the execution of the command.
