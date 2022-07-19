@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import List
+from typing import List, Optional
 
 from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 from linz_logger import get_log
@@ -30,7 +30,7 @@ def command_to_string(command: List[str]) -> str:
     return " ".join(command)
 
 
-def run_gdal(command: List[str], input_file: str = "", output_file: str = "") -> "subprocess.CompletedProcess[bytes]":
+def run_gdal(command: List[str] = [], input_file: str = "", output_file: str = "", input_file_index: Optional[int] = None) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
@@ -53,7 +53,11 @@ def run_gdal(command: List[str], input_file: str = "", output_file: str = "") ->
             gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
             gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
             gdal_env["AWS_SESSION_TOKEN"] = credentials.token
-        command.append(get_vfs_path(input_file))
+            input_file = get_vfs_path(input_file)
+    if input_file_index:
+        command.insert(input_file_index, input_file)
+    else:
+        command.append(input_file)
 
     if output_file:
         command.append(output_file)
