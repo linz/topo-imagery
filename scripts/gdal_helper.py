@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import List
+from typing import List, Optional
 
 from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 from linz_logger import get_log
@@ -34,7 +34,6 @@ def run_gdal(
     command: List[str],
     input_file: Optional[str] = None,
     output_file: Optional[str] = None,
-    input_file_index: Optional[int] = None,
 ) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
