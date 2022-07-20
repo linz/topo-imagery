@@ -39,3 +39,5 @@ Python version is set to `3.8.10` as it is the current version used by `osgeo/gd
 ```bash
 docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE='your-aws-profile' 'image-id'  python create_polygons.py --uri 's3://path-to-the-tiff/image.tif' --destination 'destination-bucket'
 ```
+
+docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE=li-topo-imagery-prod topo-imagery:latest python standardising.py --source s3://linz-imagery-staging/test/sample/BX24_5000_0405.tif --destination s3://linz-imagery-staging/test/cog-test-out/

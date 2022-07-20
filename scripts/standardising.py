@@ -68,7 +68,7 @@ for file in source:
             "-co",
             "sparse_ok=true",
         ]
-        run_gdal(command, input_file=file, output_file=tmp_file_path, input_file_index=17)
+        run_gdal(command, input_file=file, output_file=tmp_file_path)
 
         # Upload the standardized file to destination
         dst_file_path = os.path.join(dst_path, standardized_file_name).strip("/")
