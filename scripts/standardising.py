@@ -58,7 +58,7 @@ for file in source:
             "-co",
             "overview_compress=webp",
             "-co",
-            "biggtiff=yes",
+            "bigtiff=yes",
             "-co",
             "overview_resampling=lanczos",
             "-co",
