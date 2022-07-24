@@ -47,10 +47,28 @@ for file in source:
             "2",
             "-b",
             "3",
+            "-of",
+            "COG",
             "-co",
             "compress=lzw",
+            "-co",
+            "num_threads=all_cpus",
+            "-co",
+            "predictor=2",
+            "-co",
+            "overview_compress=webp",
+            "-co",
+            "bigtiff=yes",
+            "-co",
+            "overview_resampling=lanczos",
+            "-co",
+            "blocksize=512",
+            "-co",
+            "overview_quality=90",
+            "-co",
+            "sparse_ok=true",
         ]
-        run_gdal(command, file, tmp_file_path)
+        run_gdal(command, input_file=file, output_file=tmp_file_path)
 
         # Upload the standardized file to destination
         dst_file_path = os.path.join(dst_path, standardized_file_name).strip("/")
