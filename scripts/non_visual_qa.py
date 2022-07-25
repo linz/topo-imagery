@@ -1,6 +1,6 @@
 import argparse
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
@@ -8,13 +8,15 @@ from linz_logger import get_log
 
 
 class FileCheck:
-    def __init__(self, path: str, srs: str) -> None:
+    def __init__(self, path: str, srs: bytes) -> None:
         self.path = path
         self.global_srs = srs
         self.errors: List[Dict[str, Any]] = []
         self._valid = True
 
-    def add_error(self, error_type: str, error_message: str, custom_fields: Dict[str, str] = {}) -> None:
+    def add_error(self, error_type: str, error_message: str, custom_fields: Optional[Dict[str, str]] = None) -> None:
+        if not custom_fields:
+            custom_fields = {}
         self.errors.append({"type": error_type, "message": error_message, **custom_fields})
         self._valid = False
 
@@ -52,14 +54,14 @@ class FileCheck:
                 error_type="bands", error_message="bands count is not 3", custom_fields={"count": f"{int(bands_num)}"}
             )
 
-    def check_srs(self, gdalsrsinfo: bytes, gdalsrsinfo_tif: bytes) -> None:
+    def check_srs(self, gdalsrsinfo_tif: bytes) -> None:
         """Add an error if gdalsrsinfo and gdalsrsinfo_tif values are different.
 
         Args:
             gdalsrsinfo (str): Value returned by gdalsrsinfo as a string.
             gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
         """
-        if gdalsrsinfo_tif != gdalsrsinfo:
+        if gdalsrsinfo_tif != self.global_srs:
             self.add_error(error_type="srs", error_message="different srs")
 
     def check_color_interpretation(self, gdalinfo: Dict[str, Any]) -> None:
@@ -113,7 +115,7 @@ class FileCheck:
             gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
             try:
                 gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, self.path)
-                self.check_srs(self.global_srs, gdalsrsinfo_tif_result.stdout)
+                self.check_srs(gdalsrsinfo_tif_result.stdout)
             except GDALExecutionException as gee:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
 
@@ -140,8 +142,9 @@ def main() -> None:  # pylint: disable=too-many-locals
         file_check.run()
 
         if not file_check.is_valid():
-            for error in file_check.errors:
-                get_log().info("non_visual_qa", file=file_check.path, **error)
+            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+        else:
+            get_log().info("non_visual_qa_passed", file=file_check.path)
 
 
 if __name__ == "__main__":
