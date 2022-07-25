@@ -2,6 +2,7 @@ import argparse
 import json
 from typing import Any, Dict, List, Optional
 
+from file_helper import is_tiff
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
@@ -138,6 +139,9 @@ def main() -> None:  # pylint: disable=too-many-locals
     srs = gdalsrsinfo_result.stdout
 
     for file in source:
+        if not is_tiff(file):
+            get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
+            continue
         file_check = FileCheck(file, srs)
         file_check.run()
 
