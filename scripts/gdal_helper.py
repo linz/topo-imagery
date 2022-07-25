@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import List
+from typing import List, Optional
 
 from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 from linz_logger import get_log
@@ -30,13 +30,17 @@ def command_to_string(command: List[str]) -> str:
     return " ".join(command)
 
 
-def run_gdal(command: List[str], input_file: str = "", output_file: str = "") -> "subprocess.CompletedProcess[bytes]":
+def run_gdal(
+    command: List[str],
+    input_file: Optional[str] = None,
+    output_file: Optional[str] = None,
+) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
         command (List[str]): each arguments of the GDAL command.
-        input_file (str, optional): the input file path. Defaults to "".
-        output_file (str, optional): the output file path. Defaults to "".
+        input_file (str, optional): the input file path.
+        output_file (str, optional): the output file path.
 
     Raises:
         cpe: CalledProcessError is raised if something goes wrong during the execution of the command.
@@ -53,22 +57,21 @@ def run_gdal(command: List[str], input_file: str = "", output_file: str = "") ->
             gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
             gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
             gdal_env["AWS_SESSION_TOKEN"] = credentials.token
-        command.append(get_vfs_path(input_file))
+            input_file = get_vfs_path(input_file)
+        command.append(input_file)
 
     if output_file:
         command.append(output_file)
 
     try:
         get_log().debug("run_gdal", command=command_to_string(command))
-        proc = subprocess.run(
-            command,
-            env=gdal_env,
-            check=True,
-            capture_output=True,
-        )
+        proc = subprocess.run(command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_failed", command=command_to_string(command))
+        get_log().error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
         raise cpe
-    get_log().debug("run_gdal_translate_succeded", command=command_to_string(command))
+    if proc.stderr:
+        get_log().error("run_gdal_error", command=command_to_string(command), error=proc.stderr.decode())
+        raise Exception(proc.stderr.decode())
+    get_log().debug("run_gdal_succeded", command=command_to_string(command))
 
     return proc
