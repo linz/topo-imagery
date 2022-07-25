@@ -2,7 +2,7 @@ import argparse
 import os
 
 from aws_helper import parse_path
-from file_helper import get_file_name_from_path
+from file_helper import get_file_name_from_path, is_tiff
 from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
@@ -17,10 +17,13 @@ get_log().info("standardising", source=source)
 gdal_env = os.environ.copy()
 
 for file in source:
+    if not is_tiff(file):
+        get_log().trace("standardising_file_not_tiff_skipped", file=file)
+        continue
+
     src_bucket_name, src_file_path = parse_path(file)
     standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
     tmp_file_path = os.path.join("/tmp/", standardized_file_name)
-
     command = [
         "gdal_translate",
         "-q",

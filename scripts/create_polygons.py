@@ -6,6 +6,7 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
+from file_helper import is_tiff
 from format_source import format_source
 from linz_logger import get_log
 
@@ -51,6 +52,9 @@ def main() -> None:  # pylint: disable=too-many-locals
     output_files = []
 
     for file in source:
+        if not is_tiff(file):
+            get_log().trace("create_polygon_file_not_tiff_skipped", file=file)
+            continue
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
             uri_parse = file
