@@ -1,41 +1,29 @@
 import argparse
 import os
-import subprocess
-import tempfile
 
-from aws_helper import get_credentials, parse_path
-from fs_local import write
+from aws_helper import parse_path
+from file_helper import get_file_name_from_path, is_tiff
+from format_source import format_source
+from gdal_helper import run_gdal
 from linz_logger import get_log
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--source", dest="source", required=True)
-parser.add_argument("--destination", dest="destination", required=True)
+parser.add_argument("--source", dest="source", nargs="+", required=True)
 arguments = parser.parse_args()
-source = arguments.source
-destination = arguments.destination
-# TODO if destination needs write permission we have to handle this
 
-get_log().info("standardising", source=source, destination=destination)
+source = format_source(arguments.source)
 
-src_bucket_name, src_file_path = parse_path(source)
-dst_bucket_name, dst_path = parse_path(destination)
-get_log().debug("source", bucket=src_bucket_name, file_path=src_file_path)
-get_log().debug("destination", bucket=dst_bucket_name, file_path=dst_path)
+get_log().info("standardising", source=source)
+gdal_env = os.environ.copy()
 
-with tempfile.TemporaryDirectory() as tmp_dir:
-    standardized_file_name = f"standardized_{os.path.basename(src_file_path)}"
-    tmp_file_path = os.path.join(tmp_dir, standardized_file_name)
-    src_gdal_path = source.replace("s3://", "/vsis3/")
+for file in source:
+    if not is_tiff(file):
+        get_log().trace("standardising_file_not_tiff_skipped", file=file)
+        continue
 
-    # Set the credentials for GDAL to be able to read the source file
-    credentials = get_credentials(src_bucket_name)
-    gdal_env = os.environ.copy()
-    gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
-    gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
-    gdal_env["AWS_SESSION_TOKEN"] = credentials.token
-
-    # Run GDAL to standardized the file
-    get_log().debug("run_gdal_translate", src=src_gdal_path, output=tmp_file_path)
+    src_bucket_name, src_file_path = parse_path(file)
+    standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
+    tmp_file_path = os.path.join("/tmp/", standardized_file_name)
     command = [
         "gdal_translate",
         "-q",
@@ -54,19 +42,25 @@ with tempfile.TemporaryDirectory() as tmp_dir:
         "2",
         "-b",
         "3",
+        "-of",
+        "COG",
         "-co",
         "compress=lzw",
-        src_gdal_path,
-        tmp_file_path,
+        "-co",
+        "num_threads=all_cpus",
+        "-co",
+        "predictor=2",
+        "-co",
+        "overview_compress=webp",
+        "-co",
+        "bigtiff=yes",
+        "-co",
+        "overview_resampling=lanczos",
+        "-co",
+        "blocksize=512",
+        "-co",
+        "overview_quality=90",
+        "-co",
+        "sparse_ok=true",
     ]
-    try:
-        proc = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=gdal_env, check=True)
-    except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_translate_failed", command=" ".join(command))
-        raise cpe
-    get_log().debug("run_gdal_translate_succeded", command=" ".join(command))
-
-    # Upload the standardized file to destination
-    dst_file_path = os.path.join(destination, standardized_file_name).strip("/")
-    get_log().debug("upload_file", path=dst_file_path)
-    write(dst_file_path, tmp_file_path)
+    run_gdal(command, input_file=file, output_file=tmp_file_path)
