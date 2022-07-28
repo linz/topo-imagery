@@ -5,13 +5,14 @@ import tempfile
 from collections import Counter
 from urllib.parse import urlparse
 
-from aws_helper import get_bucket
-from file_helper import is_tiff
-from format_source import format_source
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
+
+from scripts.aws.aws_helper import get_bucket
+from scripts.converters.format_source import format_source
+from scripts.files.files_helper import is_tiff
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:

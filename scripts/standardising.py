@@ -1,11 +1,12 @@
 import argparse
 import os
 
-from aws_helper import parse_path
-from file_helper import get_file_name_from_path, is_tiff
-from format_source import format_source
-from gdal_helper import run_gdal
 from linz_logger import get_log
+
+from scripts.aws.aws_helper import parse_path
+from scripts.converters.format_source import format_source
+from scripts.files.files_helper import get_file_name_from_path, is_tiff
+from scripts.gdal.gdal_helper import run_gdal
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source", dest="source", nargs="+", required=True)

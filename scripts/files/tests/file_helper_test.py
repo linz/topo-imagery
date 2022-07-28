@@ -1,4 +1,4 @@
-from file_helper import is_tiff
+from scripts.files.files_helper import is_tiff
 
 
 def test_is_tiff() -> None:

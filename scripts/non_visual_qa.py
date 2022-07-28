@@ -2,10 +2,11 @@ import argparse
 import json
 from typing import Any, Dict, List
 
-from file_helper import is_tiff
-from format_source import format_source
-from gdal_helper import run_gdal
 from linz_logger import get_log
+
+from scripts.converters.format_source import format_source
+from scripts.files.files_helper import is_tiff
+from scripts.gdal.gdal_helper import run_gdal
 
 
 def check_no_data(gdalinfo: Dict[str, Any], errors_list: List[str]) -> None:
@@ -68,6 +69,7 @@ def check_color_interpretation(gdalinfo: Dict[str, Any], errors_list: List[str])
 
 
 def main() -> None:
+    # pylint: disable=duplicate-code
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()

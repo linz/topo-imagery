@@ -17,4 +17,9 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 
 # Copy Python scripts
-COPY ./scripts/* /app/
+COPY ./scripts/ /app/scripts/
+COPY ./fs /app/
+
+ENV PYTHONPATH="/app"
+
+WORKDIR /app/scripts

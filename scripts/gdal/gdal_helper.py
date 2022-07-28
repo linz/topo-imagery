@@ -2,8 +2,9 @@ import os
 import subprocess
 from typing import List, Optional
 
-from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 from linz_logger import get_log
+
+from scripts.aws.aws_helper import get_bucket_name_from_path, get_credentials, is_s3
 
 
 def get_vfs_path(path: str) -> str:

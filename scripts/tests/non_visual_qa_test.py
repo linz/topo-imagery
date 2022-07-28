@@ -1,6 +1,6 @@
 from typing import List
 
-from non_visual_qa import check_band_count, check_color_interpretation, check_no_data, check_srs
+from scripts.non_visual_qa import check_band_count, check_color_interpretation, check_no_data, check_srs
 
 
 def test_check_band_count_valid() -> None:

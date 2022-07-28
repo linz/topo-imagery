@@ -1,4 +1,4 @@
-from aws_helper import parse_path
+from scripts.aws.aws_helper import parse_path
 
 
 def test_parse_path() -> None:
