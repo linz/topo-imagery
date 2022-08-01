@@ -71,7 +71,7 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
         needs_credentials (bool, optional):  Tells if credentials are needed. Defaults to False.
 
     Returns:
-        Union[bytes, None]: The file in bytes. None if the file from the path can't be read.
+        bytes: The file in bytes.
     """
     bucket_name, key = parse_path(path)
     key = key[1:]
