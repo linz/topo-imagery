@@ -79,8 +79,6 @@ def main() -> None:  # pylint: disable=too-many-locals
                 os.system(polygonize_command)
 
             output_files.append(temp_file_path)
-            print("Done")
-            print(output_files)
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
