@@ -1,4 +1,6 @@
 import boto3
+import botocore
+import pytest
 from moto import mock_s3
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture
@@ -32,19 +34,18 @@ def test_read() -> None:
 
 @mock_s3  # type: ignore
 def test_read_bucket_not_found(capsys: CaptureFixture[str]) -> None:
-    content = read("s3://testbucket/test.file")
-    sysout = capsys.readouterr()
-
-    assert "read_s3_bucket_not_found" in sysout.out
-    assert content is None
+    with pytest.raises(botocore.exceptions.ClientError):
+        read("s3://testbucket/test.file")
+        sysout = capsys.readouterr()
+        assert "read_s3_bucket_not_found" in sysout.out
 
 
 @mock_s3  # type: ignore
 def test_read_file_not_found(capsys: CaptureFixture[str]) -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
-    content = read("s3://testbucket/test.file")
-    sysout = capsys.readouterr()
 
-    assert "read_s3_file_not_found" in sysout.out
-    assert content is None
+    with pytest.raises(botocore.exceptions.ClientError):
+        read("s3://testbucket/test.file")
+        sysout = capsys.readouterr()
+        assert "read_s3_file_not_found" in sysout.out
