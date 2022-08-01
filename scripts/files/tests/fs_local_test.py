@@ -8,8 +8,8 @@ import pytest
 from scripts.files.fs_local import read, write
 
 
-@pytest.fixture(autouse=True)
-def setup() -> Generator[str, None, None]:
+@pytest.fixture(name="setup", autouse=True)
+def fixture_setup() -> Generator[str, None, None]:
     """
     This function creates a temporary directory and deletes it after each test.
     See following link for details:
@@ -29,7 +29,7 @@ def test_write(setup: str) -> None:
 
 
 @pytest.mark.dependency(name="read", depends=["write"])
-def test_read(setup) -> None:
+def test_read(setup: str) -> None:
     content = b"test content"
     target = setup
     path = os.path.join(target, "test.file")

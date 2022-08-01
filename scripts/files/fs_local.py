@@ -1,6 +1,3 @@
-from scripts.files.files_helper import get_file_name_from_path
-
-
 def write(destination: str, source: bytes) -> None:
     """Write the source to the local destination file.
 
