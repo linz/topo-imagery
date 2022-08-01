@@ -1,5 +1,3 @@
-from typing import Optional
-
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 
@@ -11,7 +9,7 @@ def write(destination: str, source: bytes) -> None:
         fs_local.write(destination, source)
 
 
-def read(path: str) -> Optional[bytes]:
+def read(path: str) -> bytes:
     if is_s3(path):
         return fs_s3.read(path)
 

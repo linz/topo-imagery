@@ -3,15 +3,14 @@ import json
 import os
 import tempfile
 from collections import Counter
-from urllib.parse import urlparse
 
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
 
-from scripts.aws.aws_helper import get_bucket
 from scripts.converters.format_source import format_source
+from scripts.files import fs
 from scripts.files.files_helper import is_tiff
 
 
@@ -58,24 +57,13 @@ def main() -> None:  # pylint: disable=too-many-locals
             continue
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
-            uri_parse = file
-            # Download the file
-            if str(file).startswith("s3://"):
-                uri_parse = urlparse(file, allow_fragments=False)
-                bucket_name = uri_parse.netloc
-                bucket = get_bucket(bucket_name)
-                file = os.path.join(tmp_dir, "temp.tif")
-                logger.debug(
-                    "download_file",
-                    source=uri_parse.path[1:],
-                    bucket=bucket_name,
-                    destination=file,
-                    sourceFileName=source_file_name,
-                )
-                bucket.download_file(uri_parse.path[1:], file)
+            tmp_file = os.path.join(tmp_dir, "temp.tif")
+
+            # Get the file
+            fs.write(tmp_file, fs.read(file))
+            file = tmp_file
 
             # Run create_mask
-            logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
             mask_file = os.path.join(tmp_dir, "mask.tif")
             create_mask(file, mask_file)
 
@@ -91,6 +79,8 @@ def main() -> None:  # pylint: disable=too-many-locals
                 os.system(polygonize_command)
 
             output_files.append(temp_file_path)
+            print("Done")
+            print(output_files)
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
