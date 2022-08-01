@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import boto3
 import botocore
@@ -45,7 +45,7 @@ def write(destination: str, source: bytes, needs_credentials: bool = False) -> N
             get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
 
 
-def read(path: str, needs_credentials: bool = False) -> bytes | None:
+def read(path: str, needs_credentials: bool = False) -> Union[bytes, None]:
     bucket_name, key = parse_path(path)
     key = key[1:]
     s3 = boto3.resource("s3")
