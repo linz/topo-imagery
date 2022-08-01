@@ -18,7 +18,6 @@ RUN poetry config virtualenvs.create false \
 
 # Copy Python scripts
 COPY ./scripts/ /app/scripts/
-COPY ./fs /app/
 
 ENV PYTHONPATH="/app"
 
