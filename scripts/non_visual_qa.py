@@ -123,6 +123,7 @@ class FileCheck:
 
 
 def main() -> None:  # pylint: disable=too-many-locals
+    # pylint: disable=duplicate-code
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
