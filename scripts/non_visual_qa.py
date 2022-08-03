@@ -1,11 +1,13 @@
 import argparse
 import json
+import os
 from typing import Any, Dict, List, Optional
 
 from file_helper import is_tiff
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
+from time_helper import time_in_ms
 
 
 class FileCheck:
@@ -122,12 +124,17 @@ class FileCheck:
 
 
 def main() -> None:  # pylint: disable=too-many-locals
+    start_time = time_in_ms()
+    node_id = os.getenv("ARGO_NODE_ID")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
     source = arguments.source
 
     source = format_source(source)
+
+    get_log().info("non_visual_qa_start", nodeId=node_id, source=source)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -149,6 +156,8 @@ def main() -> None:  # pylint: disable=too-many-locals
             get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
+
+    get_log().info("non_visual_qa_end", nodeId=node_id, source=source, duration=time_in_ms() - start_time)
 
 
 if __name__ == "__main__":

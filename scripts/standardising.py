@@ -6,6 +6,10 @@ from file_helper import get_file_name_from_path, is_tiff
 from format_source import format_source
 from gdal_helper import run_gdal
 from linz_logger import get_log
+from time_helper import time_in_ms
+
+start_time = time_in_ms()
+node_id = os.getenv("ARGO_NODE_ID")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source", dest="source", nargs="+", required=True)
@@ -13,7 +17,8 @@ arguments = parser.parse_args()
 
 source = format_source(arguments.source)
 
-get_log().info("standardising", source=source)
+get_log().info("standardising_start", nodeId=node_id, source=source)
+
 gdal_env = os.environ.copy()
 
 for file in source:
@@ -64,3 +69,5 @@ for file in source:
         "sparse_ok=true",
     ]
     run_gdal(command, input_file=file, output_file=tmp_file_path)
+
+    get_log().info("standardising_end", nodeId=node_id, source=source, duration=time_in_ms() - start_time)
