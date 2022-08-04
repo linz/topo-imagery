@@ -18,5 +18,5 @@ def read(path: str) -> bytes:
     Returns:
         bytes: The file in bytes.
     """
-    with open(path, "rb") as buffer:
-        return buffer.read()
+    with open(path, "rb") as file:
+        return file.read()
