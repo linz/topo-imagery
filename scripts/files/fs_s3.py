@@ -42,14 +42,14 @@ def write(destination: str, source: bytes, needs_credentials: bool = False) -> N
     if source is None:
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
-    bucket_name, key = parse_path(destination)
-    key = key[1:]
+    s3_path = parse_path(destination)
+    key = s3_path.key[1:]
     s3 = boto3.resource("s3")
     try:
         if needs_credentials:
-            s3 = get_auth_s3_session(bucket_name)
+            s3 = get_auth_s3_session(s3_path.bucket)
 
-        s3_object = s3.Object(bucket_name, key)
+        s3_object = s3.Object(s3_path.bucket, key)
         response = s3_object.put(Body=source)
         if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
             get_log().debug("write_s3_success", path=destination, response=response)
@@ -73,15 +73,15 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     Returns:
         bytes: The file in bytes.
     """
-    bucket_name, key = parse_path(path)
-    key = key[1:]
+    s3_path = parse_path(path)
+    key = s3_path.key[1:]
     s3 = boto3.resource("s3")
 
     try:
         if needs_credentials:
-            s3 = get_auth_s3_session(bucket_name)
+            s3 = get_auth_s3_session(s3_path.bucket)
 
-        s3_object = s3.Object(bucket_name, key)
+        s3_object = s3.Object(s3_path.bucket, key)
         file: bytes = s3_object.get()["Body"].read()
     except botocore.exceptions.ClientError as ce:
         if ce.response["Error"]["Code"] == "NoSuchBucket":

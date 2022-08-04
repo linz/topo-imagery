@@ -1,7 +1,7 @@
 import json
 from collections import namedtuple
 from os import environ
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 import boto3
@@ -13,6 +13,7 @@ else:
     Bucket = object
 
 Credentials = namedtuple("Credentials", ["access_key", "secret_key", "token"])
+S3_path = namedtuple("S3_path", ["bucket", "key"])
 
 aws_profile = environ.get("AWS_PROFILE")
 session = boto3.Session(profile_name=aws_profile)
@@ -78,17 +79,17 @@ def get_bucket_name_from_path(path: str) -> str:
     return path_parts.pop(0)
 
 
-def parse_path(path: str) -> Tuple[str, str]:
+def parse_path(path: str) -> S3_path:
     """Parse the path and split it into bucket name and key.
 
     Args:
         path (str): A S3 path.
 
     Returns:
-        Tuple[str, str]: bucket name, key
+        s3_path (namedtuple): s3_path.bucket, s3_path.key
     """
     parse = urlparse(path, allow_fragments=False)
-    return parse.netloc, parse.path
+    return S3_path(parse.netloc, parse.path)
 
 
 def is_s3(path: str) -> bool:
