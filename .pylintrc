@@ -9,3 +9,8 @@ disable =
 max-line-length=127
 [MISCELLANEOUS]
 notes=XXX
+[SIMILARITIES]
+min-similarity-lines=10
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=yes
