@@ -122,7 +122,8 @@ class FileCheck:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
 
 
-def main() -> None:  # pylint: disable=too-many-locals
+def main() -> None:
+    # pylint: disable=too-many-locals
     start_time = time_in_ms()
 
     parser = argparse.ArgumentParser()
