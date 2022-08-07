@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from linz_logger import get_log
+from logger import LOGGER
 
 
 def format_source(source: List[str]) -> List[str]:
@@ -14,5 +14,5 @@ def format_source(source: List[str]) -> List[str]:
             source_json: List[str] = json.loads(source[0])
             return source_json
         except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", source=source, msg=e)
+            LOGGER.debug("Decoding Json Failed", source=source, msg=e)
     return source

@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from aws_helper import get_bucket
 from file_helper import is_tiff
 from format_source import format_source
-from linz_logger import get_log
+from logger import LOGGER
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
@@ -43,7 +43,6 @@ def get_pixel_count(file_path: str) -> int:
 
 def main() -> None:  # pylint: disable=too-many-locals
     start_time = time_in_ms()
-    node_id = os.getenv("ARGO_NODE_ID")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
@@ -51,13 +50,13 @@ def main() -> None:  # pylint: disable=too-many-locals
     source = arguments.source
 
     source = format_source(source)
-    get_log().info("create_polygons_start", nodeId=node_id, source=source)
+    LOGGER.info("create_polygons_start", source=source)
 
     output_files = []
 
     for file in source:
         if not is_tiff(file):
-            get_log().trace("create_polygon_file_not_tiff_skipped", file=file)
+            LOGGER.trace("create_polygon_file_not_tiff_skipped", file=file)  # type: ignore
             continue
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
@@ -68,7 +67,7 @@ def main() -> None:  # pylint: disable=too-many-locals
                 bucket_name = uri_parse.netloc
                 bucket = get_bucket(bucket_name)
                 file = os.path.join(tmp_dir, "temp.tif")
-                get_log().debug(
+                LOGGER.debug(
                     "download_file",
                     source=uri_parse.path[1:],
                     bucket=bucket_name,
@@ -78,7 +77,7 @@ def main() -> None:  # pylint: disable=too-many-locals
                 bucket.download_file(uri_parse.path[1:], file)
 
             # Run create_mask
-            get_log().debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
+            LOGGER.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
             mask_file = os.path.join(tmp_dir, "mask.tif")
             create_mask(file, mask_file)
 
@@ -86,7 +85,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             data_px_count = get_pixel_count(mask_file)
             if data_px_count == 0:
                 # exclude extents if tif is all white or black
-                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                LOGGER.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)
@@ -98,7 +97,7 @@ def main() -> None:  # pylint: disable=too-many-locals
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
 
-    get_log().info("create_polygons_end", nodeId=node_id, source=source, duration=time_in_ms() - start_time)
+    LOGGER.info("create_polygons_end", source=source, duration=time_in_ms() - start_time)
 
 
 if __name__ == "__main__":
