@@ -3,7 +3,7 @@ import subprocess
 from typing import List, Optional
 
 from aws_helper import get_bucket_name_from_path, get_credentials, is_s3
-from logger import LOGGER
+from linz_logger import get_log
 from time_helper import time_in_ms
 
 
@@ -70,18 +70,18 @@ def run_gdal(
 
     start_time = time_in_ms()
     try:
-        LOGGER.debug("run_gdal_start", command=command_to_string(command))
+        get_log().debug("run_gdal_start", command=command_to_string(command))
         proc = subprocess.run(command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
-        LOGGER.error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
+        get_log().error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
         raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
     finally:
-        LOGGER.info("run_gdal_end", command=command_to_string(command), duration=time_in_ms() - start_time)
+        get_log().info("run_gdal_end", command=command_to_string(command), duration=time_in_ms() - start_time)
 
     if proc.stderr:
-        LOGGER.error("run_gdal_error", command=command_to_string(command), error=proc.stderr.decode())
+        get_log().error("run_gdal_error", command=command_to_string(command), error=proc.stderr.decode())
         raise GDALExecutionException(proc.stderr.decode())
 
-    LOGGER.debug("run_gdal_succeded", command=command_to_string(command), stdout=proc.stdout.decode())
+    get_log().debug("run_gdal_succeded", command=command_to_string(command), stdout=proc.stdout.decode())
 
     return proc

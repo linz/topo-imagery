@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from file_helper import is_tiff
 from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
-from logger import LOGGER
+from linz_logger import get_log
 from time_helper import time_in_ms
 
 
@@ -101,7 +101,7 @@ class FileCheck:
             try:
                 gdalinfo_result = json.loads(gdalinfo_process.stdout)
             except json.JSONDecodeError as e:
-                LOGGER.error("load_gdalinfo_result_error", file=self.path, error=e)
+                get_log().error("load_gdalinfo_result_error", file=self.path, error=e)
                 self.add_error(error_type="gdalinfo", error_message=f"parsing result issue: {str(e)}")
                 gdalinfo_success = False
             if gdalinfo_process.stderr:
@@ -132,7 +132,7 @@ def main() -> None:  # pylint: disable=too-many-locals
 
     source = format_source(source)
 
-    LOGGER.info("non_visual_qa_start", source=source)
+    get_log().info("non_visual_qa_start", source=source)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -145,17 +145,17 @@ def main() -> None:  # pylint: disable=too-many-locals
 
     for file in source:
         if not is_tiff(file):
-            LOGGER.trace("non_visual_qa_file_not_tiff_skipped", file=file)  # type: ignore
+            get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
             continue
         file_check = FileCheck(file, srs)
         file_check.run()
 
         if not file_check.is_valid():
-            LOGGER.info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
         else:
-            LOGGER.info("non_visual_qa_passed", file=file_check.path)
+            get_log().info("non_visual_qa_passed", file=file_check.path)
 
-    LOGGER.info("non_visual_qa_end", source=source, duration=time_in_ms() - start_time)
+    get_log().info("non_visual_qa_end", source=source, duration=time_in_ms() - start_time)
 
 
 if __name__ == "__main__":

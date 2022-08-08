@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Tuple
 from urllib.parse import urlparse
 
 import boto3
-from logger import LOGGER
+from linz_logger import get_log
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.service_resource import Bucket
@@ -28,21 +28,21 @@ def init_roles() -> None:
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
 
-    LOGGER.debug("bucket_config", config=json_content)
+    get_log().debug("bucket_config", config=json_content)
 
     for cfg in json_content["buckets"]:
         bucket_roles[cfg["bucket"]] = cfg
 
 
 def get_credentials(bucket_name: str) -> Credentials:
-    LOGGER.debug("get_credentials_bucket_name", bucket_name=bucket_name)
+    get_log().debug("get_credentials_bucket_name", bucket_name=bucket_name)
     if not bucket_roles:
         init_roles()
     if bucket_name in bucket_roles:
         # FIXME: check if the token is expired - add a parameter
         if bucket_name not in bucket_credentials:
             role_arn = bucket_roles[bucket_name]["roleArn"]
-            LOGGER.debug("sts_assume_role", bucket_name=bucket_name, role_arn=role_arn)
+            get_log().debug("sts_assume_role", bucket_name=bucket_name, role_arn=role_arn)
             assumed_role_object = client_sts.assume_role(RoleArn=role_arn, RoleSessionName="gdal")
             bucket_credentials[bucket_name] = Credentials(
                 assumed_role_object["Credentials"]["AccessKeyId"],

@@ -243,13 +243,14 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "linz-logger"
-version = "0.8.0"
+version = "0.9.0"
 description = "LINZ standard Logging format"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
+python-ulid = ">=1.1.0,<2.0.0"
 structlog = ">=22.1.0,<23.0.0"
 
 [[package]]
@@ -439,6 +440,14 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 six = ">=1.5"
 
 [[package]]
+name = "python-ulid"
+version = "1.1.0"
+description = "Universally Unique Lexicographically Sortable Identifier"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "pyyaml"
 version = "6.0"
 description = "YAML parser and emitter for Python"
@@ -563,7 +572,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.10"
-content-hash = "767698dcdaf28d1435ea45124a17c6478165a764fd06f9fac79a44296a62158f"
+content-hash = "461330a23ae3ec9b244ff200608528e15e4bd2ffb70bf7159df15b526a9a56ec"
 
 [metadata.files]
 arrow = []
@@ -602,6 +611,7 @@ pylint = []
 pyparsing = []
 pytest = []
 python-dateutil = []
+python-ulid = []
 pyyaml = []
 s3transfer = []
 sh = []
