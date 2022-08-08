@@ -1,3 +1,4 @@
+import argparse
 import json
 from typing import List
 
@@ -16,3 +17,16 @@ def format_source(source: List[str]) -> List[str]:
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", source=source, msg=e)
     return source
+
+
+def parse_source() -> List[str]:
+    """Parse the CLI argument '--source' and format it to a list of paths.
+
+    Returns:
+        List[str]: A list of paths.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source", dest="source", nargs="+", required=True)
+    arguments = parser.parse_args()
+
+    return format_source(arguments.source)

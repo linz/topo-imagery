@@ -1,9 +1,8 @@
-import argparse
 import json
 from typing import Any, Dict, List, Optional
 
+from cli_helper import parse_source
 from file_helper import is_tiff
-from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
 
@@ -121,13 +120,8 @@ class FileCheck:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
 
 
-def main() -> None:  # pylint: disable=too-many-locals
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
-    source = arguments.source
-
-    source = format_source(source)
+def main() -> None:
+    source = parse_source()
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]

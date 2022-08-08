@@ -1,4 +1,4 @@
-from format_source import format_source
+from cli_helper import format_source
 
 
 def test_format_source_from_basemaps_cli_file() -> None:
