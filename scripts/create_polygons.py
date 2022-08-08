@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import tempfile
@@ -6,8 +5,8 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
+from cli_helper import parse_source
 from file_helper import is_tiff
-from format_source import format_source
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
@@ -40,15 +39,8 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> None:  # pylint: disable=too-many-locals
-    logger = get_log()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
-    source = arguments.source
-
-    source = format_source(source)
+def main() -> None:
+    source = parse_source()
     output_files = []
 
     for file in source:
@@ -57,14 +49,13 @@ def main() -> None:  # pylint: disable=too-many-locals
             continue
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
-            uri_parse = file
+            uri_parse = urlparse(file, allow_fragments=False)
             # Download the file
             if str(file).startswith("s3://"):
-                uri_parse = urlparse(file, allow_fragments=False)
                 bucket_name = uri_parse.netloc
                 bucket = get_bucket(bucket_name)
                 file = os.path.join(tmp_dir, "temp.tif")
-                logger.debug(
+                get_log().debug(
                     "download_file",
                     source=uri_parse.path[1:],
                     bucket=bucket_name,
@@ -74,7 +65,7 @@ def main() -> None:  # pylint: disable=too-many-locals
                 bucket.download_file(uri_parse.path[1:], file)
 
             # Run create_mask
-            logger.debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
+            get_log().debug("create_mask", source=uri_parse.path[1:], bucket=bucket_name, destination=file)
             mask_file = os.path.join(tmp_dir, "mask.tif")
             create_mask(file, mask_file)
 
@@ -82,7 +73,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             data_px_count = get_pixel_count(mask_file)
             if data_px_count == 0:
                 # exclude extents if tif is all white or black
-                logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)
