@@ -89,7 +89,7 @@ def parse_path(path: str) -> S3_path:
         s3_path (namedtuple): s3_path.bucket, s3_path.key
     """
     parse = urlparse(path, allow_fragments=False)
-    return S3_path(parse.netloc, parse.path)
+    return S3_path(parse.netloc, parse.path[1:])
 
 
 def is_s3(path: str) -> bool:

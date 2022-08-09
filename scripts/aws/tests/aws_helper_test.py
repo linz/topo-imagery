@@ -6,4 +6,4 @@ def test_parse_path() -> None:
     path = parse_path(s3_path)
 
     assert path.bucket == "bucket-name"
-    assert path.key == "/path/to/the/file.test"
+    assert path.key == "path/to/the/file.test"

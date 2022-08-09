@@ -17,8 +17,8 @@ for file in source:
         get_log().trace("standardising_file_not_tiff_skipped", file=file)
         continue
 
-    src_bucket_name, src_file_path = parse_path(file)
-    standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
+    s3_path = parse_path(file)
+    standardized_file_name = f"standardized_{get_file_name_from_path(s3_path.key)}"
     tmp_file_path = os.path.join("/tmp/", standardized_file_name)
     command = [
         "gdal_translate",

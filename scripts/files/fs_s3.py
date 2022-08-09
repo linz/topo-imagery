@@ -43,7 +43,7 @@ def write(destination: str, source: bytes, needs_credentials: bool = False) -> N
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
     s3_path = parse_path(destination)
-    key = s3_path.key[1:]
+    key = s3_path.key
     s3 = boto3.resource("s3")
     try:
         if needs_credentials:
@@ -74,7 +74,7 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
         bytes: The file in bytes.
     """
     s3_path = parse_path(path)
-    key = s3_path.key[1:]
+    key = s3_path.key
     s3 = boto3.resource("s3")
 
     try:
