@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import tempfile
@@ -9,9 +8,9 @@ from linz_logger import get_log
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
 
-from scripts.converters.format_source import format_source
-from scripts.files import fs
+from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
+from scripts.files.fs import read, write
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:
@@ -40,15 +39,8 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> None:  # pylint: disable=too-many-locals
-    logger = get_log()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
-    source = arguments.source
-
-    source = format_source(source)
+def main() -> None:
+    source = parse_source()
     output_files = []
 
     for file in source:
@@ -60,7 +52,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             tmp_file = os.path.join(tmp_dir, "temp.tif")
 
             # Get the file
-            fs.write(tmp_file, fs.read(file))
+            write(tmp_file, read(file))
             file = tmp_file
 
             # Run create_mask
@@ -71,7 +63,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             data_px_count = get_pixel_count(mask_file)
             if data_px_count == 0:
                 # exclude extents if tif is all white or black
-                logger.debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
             else:
                 destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                 temp_file_path = os.path.join(tmp_dir, destination_file_name)
