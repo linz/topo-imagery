@@ -1,9 +1,8 @@
-import argparse
 import json
 from typing import Any, Dict, List, Optional
 
+from cli_helper import parse_source
 from file_helper import is_tiff
-from format_source import format_source
 from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
 from time_helper import time_in_ms
@@ -122,15 +121,9 @@ class FileCheck:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
 
 
-def main() -> None:  # pylint: disable=too-many-locals
+def main() -> None:
     start_time = time_in_ms()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
-    source = arguments.source
-
-    source = format_source(source)
+    source = parse_source()
 
     get_log().info("non_visual_qa_start", source=source)
 

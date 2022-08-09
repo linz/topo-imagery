@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import tempfile
@@ -6,8 +5,8 @@ from collections import Counter
 from urllib.parse import urlparse
 
 from aws_helper import get_bucket
+from cli_helper import parse_source
 from file_helper import is_tiff
-from format_source import format_source
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
@@ -41,17 +40,9 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> None:  # pylint: disable=too-many-locals
+def main() -> None:
     start_time = time_in_ms()
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
-    source = arguments.source
-
-    source = format_source(source)
-    get_log().info("create_polygons_start", source=source)
-
+    source = parse_source()
     output_files = []
 
     for file in source:
@@ -60,10 +51,9 @@ def main() -> None:  # pylint: disable=too-many-locals
             continue
         with tempfile.TemporaryDirectory() as tmp_dir:
             source_file_name = os.path.basename(file)
-            uri_parse = file
+            uri_parse = urlparse(file, allow_fragments=False)
             # Download the file
             if str(file).startswith("s3://"):
-                uri_parse = urlparse(file, allow_fragments=False)
                 bucket_name = uri_parse.netloc
                 bucket = get_bucket(bucket_name)
                 file = os.path.join(tmp_dir, "temp.tif")
