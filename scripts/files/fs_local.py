@@ -5,8 +5,8 @@ def write(destination: str, source: bytes) -> None:
         destination (str): The local path to the file to write.
         source (bytes): The source file in bytes.
     """
-    with open(destination, "wb") as buffer:
-        buffer.write(source)
+    with open(destination, "wb") as file:
+        file.write(source)
 
 
 def read(path: str) -> bytes:
