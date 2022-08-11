@@ -5,10 +5,14 @@ from cli_helper import parse_source
 from file_helper import get_file_name_from_path, is_tiff
 from gdal_helper import run_gdal
 from linz_logger import get_log
+from time_helper import time_in_ms
+
+start_time = time_in_ms()
 
 source = parse_source()
 
-get_log().info("standardising", source=source)
+get_log().info("standardising_start", source=source)
+
 gdal_env = os.environ.copy()
 
 for file in source:
@@ -59,3 +63,5 @@ for file in source:
         "sparse_ok=true",
     ]
     run_gdal(command, input_file=file, output_file=tmp_file_path)
+
+    get_log().info("standardising_end", source=source, duration=time_in_ms() - start_time)

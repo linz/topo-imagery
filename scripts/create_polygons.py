@@ -11,6 +11,7 @@ from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
+from time_helper import time_in_ms
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:
@@ -40,6 +41,7 @@ def get_pixel_count(file_path: str) -> int:
 
 
 def main() -> None:
+    start_time = time_in_ms()
     source = parse_source()
     output_files = []
 
@@ -84,6 +86,8 @@ def main() -> None:
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
+
+    get_log().info("create_polygons_end", source=source, duration=time_in_ms() - start_time)
 
 
 if __name__ == "__main__":
