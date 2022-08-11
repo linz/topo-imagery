@@ -5,6 +5,7 @@ import botocore
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_credentials, parse_path
+from scripts.logging.time_helper import time_in_ms
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.service_resource import S3ServiceResource
@@ -46,6 +47,7 @@ def write(destination: str, source: bytes) -> None:
         destination (str): The AWS S3 path to the file to write.
         source (bytes): The source file in bytes.
     """
+    start_time = time_in_ms()
     if source is None:
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
@@ -56,8 +58,7 @@ def write(destination: str, source: bytes) -> None:
     try:
         s3_object = s3.Object(s3_path.bucket, key)
         s3_object.put(Body=source)
-        # TODO add the duration
-        get_log().debug("write_s3_success", path=destination)
+        get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except botocore.exceptions.ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
         raise ce
@@ -73,6 +74,7 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     Returns:
         bytes: The file in bytes.
     """
+    start_time = time_in_ms()
     s3_path = parse_path(path)
     key = s3_path.key
     s3 = boto3.resource("s3")
@@ -94,6 +96,5 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
 
         get_log().error("read_s3_error", path=path, error=f"Unable to read the file: {ce}")
         raise ce
-    # TODO add the duration
-    get_log().debug("read_s3_success", path=path)
+    get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
     return file
