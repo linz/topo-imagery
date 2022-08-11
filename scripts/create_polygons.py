@@ -47,37 +47,33 @@ def main() -> None:
     output_files = []
 
     for file in source:
-        try:
-            if not is_tiff(file):
-                get_log().trace("create_polygon_file_not_tiff_skipped", file=file)
-                continue
-            with tempfile.TemporaryDirectory() as tmp_dir:
-                source_file_name = os.path.basename(file)
-                tmp_file = os.path.join(tmp_dir, "temp.tif")
-
-                # Get the file
-                write(tmp_file, read(file))
-                file = tmp_file
-
-                # Run create_mask
-                mask_file = os.path.join(tmp_dir, "mask.tif")
-                create_mask(file, mask_file)
-
-                # Run create_polygon
-                data_px_count = get_pixel_count(mask_file)
-                if data_px_count == 0:
-                    # exclude extents if tif is all white or black
-                    get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
-                else:
-                    destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
-                    temp_file_path = os.path.join(tmp_dir, destination_file_name)
-                    polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
-                    os.system(polygonize_command)
-
-                output_files.append(temp_file_path)
-        except ClientError as ce:
-            get_log().error("create_polygon_skip_file", error=str(ce))
+        if not is_tiff(file):
+            get_log().trace("create_polygon_file_not_tiff_skipped", file=file)
             continue
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            source_file_name = os.path.basename(file)
+            tmp_file = os.path.join(tmp_dir, "temp.tif")
+
+            # Get the file
+            write(tmp_file, read(file))
+            file = tmp_file
+
+            # Run create_mask
+            mask_file = os.path.join(tmp_dir, "mask.tif")
+            create_mask(file, mask_file)
+
+            # Run create_polygon
+            data_px_count = get_pixel_count(mask_file)
+            if data_px_count == 0:
+                # exclude extents if tif is all white or black
+                get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+            else:
+                destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
+                temp_file_path = os.path.join(tmp_dir, destination_file_name)
+                polygonize_command = f'gdal_polygonize.py -q "{mask_file}" "{temp_file_path}" -f GeoJSON'
+                os.system(polygonize_command)
+
+            output_files.append(temp_file_path)
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
