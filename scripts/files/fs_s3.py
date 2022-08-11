@@ -85,16 +85,17 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
 
         s3_object = s3.Object(s3_path.bucket, key)
         file: bytes = s3_object.get()["Body"].read()
-    except botocore.exceptions.ClientError as ce:
+    except s3.meta.client.exceptions.ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("read_s3_needs_credentials", path=path)
             return read(path, True)
-        if ce.response["Error"]["Code"] == "NoSuchBucket":
-            get_log().error("read_s3_bucket_not_found", path=path, error=f"The specified bucket does not seem to exist: {ce}")
-        if ce.response["Error"]["Code"] == "NoSuchKey":
-            get_log().error("read_s3_file_not_found", path=path, error=f"The specified file does not seem to exist: {ce}")
-
-        get_log().error("read_s3_error", path=path, error=f"Unable to read the file: {ce}")
         raise ce
+    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+        get_log().error("read_s3_bucket_not_found", path=path, error=f"The specified bucket does not seem to exist: {nsb}")
+        raise nsb
+    except s3.meta.client.exceptions.NoSuchKey as nsk:
+        get_log().error("read_s3_file_not_found", path=path, error=f"The specified file does not seem to exist: {nsk}")
+        raise nsk
+
     get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
     return file
