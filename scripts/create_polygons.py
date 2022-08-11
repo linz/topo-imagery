@@ -85,6 +85,7 @@ def main() -> None:
 
     get_log().info("create_polygons_end", source=source, duration=time_in_ms() - start_time)
     if is_error:
+        get_log().info("create_polygons_warn", warning="At least one file has been skipped")
         sys.exit(1)
 
 
