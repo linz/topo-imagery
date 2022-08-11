@@ -3,7 +3,6 @@ import os
 import tempfile
 from collections import Counter
 
-from botocore.exceptions import ClientError
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
