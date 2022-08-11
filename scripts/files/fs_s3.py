@@ -39,24 +39,19 @@ def _get_s3_resource(bucket_name: str) -> S3ServiceResource:
     return s3
 
 
-def write(destination: str, source: bytes, needs_credentials: bool = False) -> None:
+def write(destination: str, source: bytes) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
     Args:
         destination (str): The AWS S3 path to the file to write.
         source (bytes): The source file in bytes.
-        needs_credentials (bool, optional): Tells if credentials are needed. Defaults to False.
     """
     if source is None:
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
     s3_path = parse_path(destination)
     key = s3_path.key
-
-    if needs_credentials:
-        s3 = _get_s3_resource(s3_path.bucket)
-    else:
-        s3 = boto3.resource("s3")
+    s3 = boto3.resource("s3")
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
@@ -64,10 +59,6 @@ def write(destination: str, source: bytes, needs_credentials: bool = False) -> N
         # TODO add the duration
         get_log().debug("write_s3_success", path=destination)
     except botocore.exceptions.ClientError as ce:
-        # Boto3 Resources exceptions are not exposed like for Clients
-        if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
-            write(destination, source, True)
-
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
         raise ce
 

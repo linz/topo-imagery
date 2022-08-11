@@ -3,6 +3,7 @@ import os
 import tempfile
 from collections import Counter
 
+from botocore.exceptions import ClientError
 from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
@@ -72,8 +73,8 @@ def main() -> None:
                     os.system(polygonize_command)
 
                 output_files.append(temp_file_path)
-        except Exception as e:
-            get_log().error("create_polygon_skip_file", error=str(e))
+        except ClientError as ce:
+            get_log().error("create_polygon_skip_file", error=str(ce))
             continue
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
