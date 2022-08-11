@@ -8,11 +8,11 @@ from linz_logger import get_log
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
-from time_helper import time_in_ms
 
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import read, write
+from scripts.logging.time_helper import time_in_ms
 
 
 def create_mask(file_path: str, mask_dst: str) -> None:

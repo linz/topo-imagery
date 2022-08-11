@@ -1,14 +1,15 @@
 import os
 
 from linz_logger import get_log
-from time_helper import time_in_ms
-
-start_time = time_in_ms()
 
 from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import run_gdal
+from scripts.logging.time_helper import time_in_ms
+
+start_time = time_in_ms()
+
 
 source = parse_source()
 
