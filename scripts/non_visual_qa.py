@@ -1,11 +1,12 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from cli_helper import parse_source
-from file_helper import is_tiff
-from gdal_helper import GDALExecutionException, run_gdal
 from linz_logger import get_log
-from time_helper import time_in_ms
+
+from scripts.cli.cli_helper import parse_source
+from scripts.files.files_helper import is_tiff
+from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.logging.time_helper import time_in_ms
 
 
 class FileCheck:
