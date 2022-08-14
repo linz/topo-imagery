@@ -39,6 +39,7 @@ authors = [
 python = "^3.8.10"
 boto3 = "^1.24.12"
 linz-logger = "^0.9.0"
+certifi = "^2022.6.15"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
