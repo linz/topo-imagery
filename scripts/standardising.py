@@ -10,7 +10,7 @@ from scripts.gdal.gdal_helper import run_gdal
 from scripts.logging.time_helper import time_in_ms
 
 
-def standardising(files: List[str]) -> str:
+def standardising(files: List[str]) -> List[str]:
     start_time = time_in_ms()
     output_folder = "/tmp/"
     output_files = []
