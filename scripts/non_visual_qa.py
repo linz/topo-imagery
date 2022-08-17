@@ -122,11 +122,10 @@ class FileCheck:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
 
 
-def main() -> None:
+def non_visual_qa(files: List[str]) -> None:
     start_time = time_in_ms()
-    source = parse_source()
 
-    get_log().info("non_visual_qa_start", source=source)
+    get_log().info("non_visual_qa_start", source=files)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -137,7 +136,7 @@ def main() -> None:
         )
     srs = gdalsrsinfo_result.stdout
 
-    for file in source:
+    for file in files:
         if not is_tiff(file):
             get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
             continue
@@ -149,7 +148,12 @@ def main() -> None:
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
 
-    get_log().info("non_visual_qa_end", source=source, duration=time_in_ms() - start_time)
+    get_log().info("non_visual_qa_end", source=files, duration=time_in_ms() - start_time)
+
+
+def main() -> None:
+    source = parse_source()
+    non_visual_qa(source)
 
 
 if __name__ == "__main__":
