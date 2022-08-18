@@ -9,20 +9,27 @@ from scripts.cli.cli_helper import format_date, format_source, valid_date
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, strip_extension
 from scripts.files.fs import write
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.item import ImageryItem
+from scripts.stac import imagery_stac
+from scripts.stac.util.checksum import multihash_as_hex
+from scripts.stac.util.geotiff import get_extents
 
 
-def create_items_imagery(files: List[str], date: str) -> None:
-    for file in files:
-        if not is_tiff(file):
-            get_log().trace("create_stac_skipped_file_not_tiff", file=file)
+def create_imagery_items(files: List[str], date: str) -> None:
+    for path in files:
+        if not is_tiff(path):
+            get_log().trace("create_stac_skipped_file_not_tiff", file=path)
             continue
-        filename = strip_extension(get_file_name_from_path(file))
-        item = ImageryItem(filename)
-        item.create_stac_item(file, date)
-        # validate item
-        tmp_file_path = os.path.join("/tmp/", f"{filename}.json")
-        write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
+
+        id_ = strip_extension(get_file_name_from_path(path))
+        geometry, bbox = get_extents(path)
+        checksum = multihash_as_hex(path)
+
+        stac = imagery_stac.create_item(id_, path, date, geometry, bbox, checksum)
+
+        tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
+        write(tmp_file_path, json.dumps(stac).encode("utf-8"))
+
+        get_log().info("Imagery Stac Item Created", tiff_path=path, stac=stac)
 
 
 def main() -> None:
@@ -34,10 +41,11 @@ def main() -> None:
     arguments = parser.parse_args()
 
     files = format_source(arguments.source)
+    date = format_date(arguments.date)
 
     get_log().info("create_stac_items_start", source=files)
-    date = format_date(arguments.date)
-    create_items_imagery(files, date)
+
+    create_imagery_items(files, date)
 
     get_log().info("create_stac_items_complete", source=files, duration=time_in_ms() - start_time)
 
