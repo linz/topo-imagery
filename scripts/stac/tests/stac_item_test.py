@@ -1,5 +1,5 @@
 from scripts.files.files_helper import get_file_name_from_path, strip_extension
-from scripts.stac import imagery_stac
+from scripts.stac.imagery_stac import ImageryItem, create_item
 
 
 def test_imagery_stac_item() -> None:
@@ -11,7 +11,8 @@ def test_imagery_stac_item() -> None:
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     date = "2021-01-27 00:00:00Z"
     # create item
-    stac = imagery_stac.create_item(id_, path, date, geometry, bbox, checksum)
+    item = ImageryItem(id_, path, date, geometry, bbox, checksum)
+    stac = create_item(item)
     # checks
     assert stac["id"] == "RGB_BD33_0709"
     assert stac["properties"]["datetime"] == date

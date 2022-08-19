@@ -9,7 +9,7 @@ from scripts.cli.cli_helper import format_date, format_source, valid_date
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, strip_extension
 from scripts.files.fs import write
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac import imagery_stac
+from scripts.stac.imagery_stac import ImageryItem, create_item
 from scripts.stac.util.checksum import multihash_as_hex
 from scripts.stac.util.geotiff import get_extents
 
@@ -24,7 +24,8 @@ def create_imagery_items(files: List[str], date: str) -> None:
         geometry, bbox = get_extents(path)
         checksum = multihash_as_hex(path)
 
-        stac = imagery_stac.create_item(id_, path, date, geometry, bbox, checksum)
+        item = ImageryItem(id_, path, date, geometry, bbox, checksum)
+        stac = create_item(item)
 
         tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
         write(tmp_file_path, json.dumps(stac).encode("utf-8"))
