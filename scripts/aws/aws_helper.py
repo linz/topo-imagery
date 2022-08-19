@@ -85,7 +85,7 @@ def parse_path(path: str) -> S3Path:
         path (str): A S3 path.
 
     Returns:
-        S3Path (NamedTupe): s3_path.bucket (str), s3_path.key (str)
+        S3Path (NamedTuple): s3_path.bucket (str), s3_path.key (str)
     """
     parse = urlparse(path, allow_fragments=False)
     return S3Path(parse.netloc, parse.path[1:])

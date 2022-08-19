@@ -1,4 +1,5 @@
 import os
+from multiprocessing import Pool
 from typing import List
 
 from linz_logger import get_log
@@ -10,71 +11,87 @@ from scripts.gdal.gdal_helper import run_gdal
 from scripts.logging.time_helper import time_in_ms
 
 
-def standardising(files: List[str]) -> List[str]:
+def parallelise(files: str) -> None:
     start_time = time_in_ms()
-    output_folder = "/tmp/"
-    output_files = []
+    tiff_files = []
 
     get_log().info("standardising_start", source=files)
 
     for file in files:
-        if not is_tiff(file):
+        if is_tiff(file):
+            tiff_files.append(file)
+        else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
-            continue
 
-        _, src_file_path = parse_path(file)
-        standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
-        tmp_file_path = os.path.join(output_folder, standardized_file_name)
-        command = [
-            "gdal_translate",
-            "-q",
-            "-scale",
-            "0",
-            "255",
-            "0",
-            "254",
-            "-a_srs",
-            "EPSG:2193",
-            "-a_nodata",
-            "255",
-            "-b",
-            "1",
-            "-b",
-            "2",
-            "-b",
-            "3",
-            "-of",
-            "COG",
-            "-co",
-            "compress=lzw",
-            "-co",
-            "num_threads=all_cpus",
-            "-co",
-            "predictor=2",
-            "-co",
-            "overview_compress=webp",
-            "-co",
-            "bigtiff=yes",
-            "-co",
-            "overview_resampling=lanczos",
-            "-co",
-            "blocksize=512",
-            "-co",
-            "overview_quality=90",
-            "-co",
-            "sparse_ok=true",
-        ]
-        run_gdal(command, input_file=file, output_file=tmp_file_path)
-        output_files.append(tmp_file_path)
+    print(tiff_files)
+
+    with Pool(4) as p:
+        output_files = p.map(standardising, tiff_files)
+
+    p.close()
+    p.join()
 
     get_log().info("standardising_end", source=files, duration=time_in_ms() - start_time)
 
+    print(output_files)
+
     return output_files
+
+def standardising(file: str) -> List[str]:
+
+    output_folder = "/tmp/"
+
+    _, src_file_path = parse_path(file)
+    standardized_file_name = f"standardized_{get_file_name_from_path(src_file_path)}"
+    tmp_file_path = os.path.join(output_folder, standardized_file_name)
+
+    command = [
+        "gdal_translate",
+        "-q",
+        "-scale",
+        "0",
+        "255",
+        "0",
+        "254",
+        "-a_srs",
+        "EPSG:2193",
+        "-a_nodata",
+        "255",
+        "-b",
+        "1",
+        "-b",
+        "2",
+        "-b",
+        "3",
+        "-of",
+        "COG",
+        "-co",
+        "compress=lzw",
+        "-co",
+        "num_threads=all_cpus",
+        "-co",
+        "predictor=2",
+        "-co",
+        "overview_compress=webp",
+        "-co",
+        "bigtiff=yes",
+        "-co",
+        "overview_resampling=lanczos",
+        "-co",
+        "blocksize=512",
+        "-co",
+        "overview_quality=90",
+        "-co",
+        "sparse_ok=true",
+    ]
+    run_gdal(command, input_file=file, output_file=tmp_file_path)
+
+    return tmp_file_path
 
 
 def main() -> None:
     source = parse_source()
-    standardising(source)
+    parallelise(source)
 
 
 if __name__ == "__main__":
