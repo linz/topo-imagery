@@ -14,6 +14,7 @@ from scripts.logging.time_helper import time_in_ms
 def start_standardising_with_concurrency(files: List[str], argo_env: bool) -> List[str]:
     start_time = time_in_ms()
     tiff_files = []
+    output_files = []
 
     get_log().info("standardising_start", source=files)
 
