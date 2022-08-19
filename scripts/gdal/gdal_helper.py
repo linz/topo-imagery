@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 from typing import List, Optional
@@ -71,18 +72,40 @@ def run_gdal(
 
     start_time = time_in_ms()
     try:
-        get_log().debug("run_gdal_start", command=command_to_string(command))
+        get_log().debug(
+            "GDAL execution started", action="run_gdal", reason="start", gdal={"command": command_to_string(command)}
+        )
         proc = subprocess.run(command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
+        get_log().error(
+            "GDAL execution has failed",
+            action="run_gdal",
+            reason="fail",
+            stderr=str(cpe.stderr, "utf-8"),
+            command=command_to_string(command),
+            duration=time_in_ms() - start_time,
+        )
         raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
-    finally:
-        get_log().info("run_gdal_end", command=command_to_string(command), duration=time_in_ms() - start_time)
 
     if proc.stderr:
-        get_log().error("run_gdal_error", command=command_to_string(command), error=proc.stderr.decode())
+        get_log().error(
+            "GDAL execution has not been successful",
+            action="run_gdal",
+            reason="fail",
+            gdal={"command": command_to_string(command), "stderr": proc.stderr.decode()},
+            duration=time_in_ms() - start_time,
+        )
         raise GDALExecutionException(proc.stderr.decode())
 
-    get_log().debug("run_gdal_succeded", command=command_to_string(command), stdout=proc.stdout.decode())
+    stdout = proc.stdout.decode()
+    if "-json" in command:
+        stdout = json.loads(stdout)
+    get_log().debug(
+        "GDAL execution ended",
+        action="run_gdal",
+        reason="success",
+        gdal={"command": command_to_string(command), "stdout": stdout},
+        duration=time_in_ms() - start_time,
+    )
 
     return proc

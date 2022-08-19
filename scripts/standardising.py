@@ -6,7 +6,7 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
-from scripts.gdal.gdal_helper import run_gdal
+from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -15,11 +15,11 @@ def standardising(files: List[str]) -> List[str]:
     output_folder = "/tmp/"
     output_files = []
 
-    get_log().info("standardising_start", source=files)
+    get_log().info("Standardising process started", action="standardising", reason="start", source=files)
 
     for file in files:
         if not is_tiff(file):
-            get_log().info("standardising_file_not_tiff_skipped", file=file)
+            get_log().info(f"{file} has been skipped because is not a TIFF", action="standardising", reason="skip", path=file)
             continue
 
         _, src_file_path = parse_path(file)
@@ -64,10 +64,25 @@ def standardising(files: List[str]) -> List[str]:
             "-co",
             "sparse_ok=true",
         ]
-        run_gdal(command, input_file=file, output_file=tmp_file_path)
+        try:
+            run_gdal(command, input_file=file, output_file=tmp_file_path)
+        except GDALExecutionException as gee:
+            get_log().error(
+                f"Standardising file: {file} has failed. This file will be skipped",
+                action="standardising",
+                reason="skip",
+                error=str(gee),
+            )
+            continue
         output_files.append(tmp_file_path)
 
-    get_log().info("standardising_end", source=files, duration=time_in_ms() - start_time)
+    get_log().info(
+        "Standardising process ended",
+        action="standardising",
+        reason="success",
+        source=files,
+        duration=time_in_ms() - start_time,
+    )
 
     return output_files
 

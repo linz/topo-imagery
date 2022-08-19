@@ -19,7 +19,7 @@ class FileCheck:
     def add_error(self, error_type: str, error_message: str, custom_fields: Optional[Dict[str, str]] = None) -> None:
         if not custom_fields:
             custom_fields = {}
-        self.errors.append({"type": error_type, "message": error_message, **custom_fields})
+        self.errors.append({"type": error_type, "msg": error_message, **custom_fields})
         self._valid = False
 
     def is_valid(self) -> bool:
@@ -125,7 +125,7 @@ class FileCheck:
 def non_visual_qa(files: List[str]) -> None:
     start_time = time_in_ms()
 
-    get_log().info("non_visual_qa_start", source=files)
+    get_log().info("Non Visual QA checks started", action="non_visual_qa", reason="start", source=files)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -138,17 +138,40 @@ def non_visual_qa(files: List[str]) -> None:
 
     for file in files:
         if not is_tiff(file):
-            get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
+            get_log().debug(
+                f"File: '{file}' is not a tiff. It won't be checked in the Non Visual QA",
+                action="non_visual_qa",
+                reason="skip",
+                path=file,
+            )
             continue
         file_check = FileCheck(file, srs)
         file_check.run()
 
         if not file_check.is_valid():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            get_log().info(
+                f"Non Visual QA for file: {file_check.path} contains error(s)",
+                action="non_visual_qa",
+                reason="check",
+                path=file_check.path,
+                non_visual_qa=file_check.errors,
+            )
         else:
-            get_log().info("non_visual_qa_passed", file=file_check.path)
+            get_log().info(
+                f"Non Visual QA for file: {file_check.path} passed",
+                action="non_visual_qa",
+                reason="check",
+                file=file_check.path,
+                non_visual_qa="passed",
+            )
 
-    get_log().info("non_visual_qa_end", source=files, duration=time_in_ms() - start_time)
+    get_log().info(
+        "Non Visual QA checks ended",
+        action="non_visual_qa",
+        reason="success",
+        source=files,
+        duration=time_in_ms() - start_time,
+    )
 
 
 def main() -> None:
