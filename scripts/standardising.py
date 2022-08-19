@@ -35,8 +35,6 @@ def start_standardising(files: List[str], argo_env: bool) -> List[str]:
 
     get_log().info("standardising_end", source=files, duration=time_in_ms() - start_time)
 
-    print(output_files)
-
     return output_files
 
 
