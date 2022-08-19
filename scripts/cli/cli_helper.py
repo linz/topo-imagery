@@ -30,3 +30,19 @@ def parse_source() -> List[str]:
     arguments = parser.parse_args()
 
     return format_source(arguments.source)
+
+# def parse_parallel() -> int:
+#     """Parse the CLI argument '--parallel' and return number of concurrent processes requested. If not specified will be single process.
+
+#     Returns:
+#         int: number of concurrent processes requested.
+#     """
+#     parallel_processes = 1
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--parallel", dest="parallel", nargs=1, type=int, choices=range(1, 11), required=False)
+#     arguments = parser.parse_args()
+
+#     if arguments.parallel:
+#         parallel_processes = arguments.parallel
+
+#     return parallel_processes

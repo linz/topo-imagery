@@ -93,3 +93,9 @@ def parse_path(path: str) -> S3Path:
 
 def is_s3(path: str) -> bool:
     return path.startswith("s3://")
+
+
+def is_argo() -> bool:
+    argo_env = True if environ.get("ARGO_TEMPLATE") else False
+    print(argo_env)
+    return argo_env
