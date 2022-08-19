@@ -25,10 +25,10 @@ def start_standardising(files: List[str], argo_env: bool) -> List[str]:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
     if argo_env:
-        pool = Pool(4)
-        output_files = pool.map(standardising, tiff_files)
-        pool.close()
-        pool.join()
+        with Pool(4) as p:
+            output_files = p.map(standardising, tiff_files)
+            p.close()
+            p.join()
     else:
         for tiff_file in tiff_files:
             output_files.append(standardising(tiff_file))
