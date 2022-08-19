@@ -96,4 +96,4 @@ def is_s3(path: str) -> bool:
 
 
 def is_argo() -> bool:
-    return True if environ.get("ARGO_TEMPLATE") else False
+    return bool(environ.get("ARGO_TEMPLATE"))
