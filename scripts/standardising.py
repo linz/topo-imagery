@@ -11,7 +11,7 @@ from scripts.gdal.gdal_helper import run_gdal
 from scripts.logging.time_helper import time_in_ms
 
 
-def start_standardising_with_concurrency(files: List[str], argo_env: bool) -> List[str]:
+def starter_concurrency(files: List[str], argo_env: bool) -> List[str]:
     start_time = time_in_ms()
     tiff_files = []
     output_files = []
@@ -95,7 +95,7 @@ def standardising(file: str) -> str:
 def main() -> None:
     source = parse_source()
     argo_env = is_argo()
-    start_standardising_with_concurrency(source, argo_env)
+    starter_concurrency(source, argo_env)
 
 if __name__ == "__main__":
     main()
