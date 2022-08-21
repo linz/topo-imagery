@@ -7,6 +7,7 @@ from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.logging.logging_keys import LOG_REASON_SKIP, LOG_REASON_START, LOG_REASON_SUCCESS
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -15,11 +16,16 @@ def standardising(files: List[str]) -> List[str]:
     output_folder = "/tmp/"
     output_files = []
 
-    get_log().info("Standardising process started", action="standardising", reason="start", source=files)
+    get_log().info("Standardising process started", action=standardising.__name__, reason=LOG_REASON_START, source=files)
 
     for file in files:
         if not is_tiff(file):
-            get_log().info(f"{file} has been skipped because is not a TIFF", action="standardising", reason="skip", path=file)
+            get_log().info(
+                f"{file} has been skipped because is not a TIFF",
+                action=standardising.__name__,
+                reason=LOG_REASON_SKIP,
+                path=file,
+            )
             continue
 
         _, src_file_path = parse_path(file)
@@ -69,8 +75,8 @@ def standardising(files: List[str]) -> List[str]:
         except GDALExecutionException as gee:
             get_log().error(
                 f"Standardising file: {file} has failed. This file will be skipped",
-                action="standardising",
-                reason="skip",
+                action=standardising.__name__,
+                reason=LOG_REASON_SKIP,
                 error=str(gee),
             )
             continue
@@ -78,8 +84,8 @@ def standardising(files: List[str]) -> List[str]:
 
     get_log().info(
         "Standardising process ended",
-        action="standardising",
-        reason="success",
+        action=standardising.__name__,
+        reason=LOG_REASON_SUCCESS,
         source=files,
         duration=time_in_ms() - start_time,
     )

@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import boto3
 from linz_logger import get_log
 
+from scripts.logging.logging_keys import LOG_REASON_START, LOG_REASON_SUCCESS
 from scripts.logging.time_helper import time_in_ms
 
 if TYPE_CHECKING:
@@ -31,8 +32,8 @@ def init_roles() -> None:
 
     get_log().debug(
         "Retrieving AWS roles started",
-        action="init_roles",
-        reason="start",
+        action=init_roles.__name__,
+        reason=LOG_REASON_START,
         path=config_path,
         aws={"action": "get", "bucket": bucket_config_name, "object": config_name, "service": "s3"},
     )
@@ -48,8 +49,8 @@ def init_roles() -> None:
 
     get_log().debug(
         "Retrieving AWS roles ended",
-        action="init_roles",
-        reason="success",
+        action=init_roles.__name__,
+        reason=LOG_REASON_SUCCESS,
         path=config_path,
         content=json_content,
         duration=time_in_ms() - start_time,
@@ -60,8 +61,8 @@ def get_credentials(bucket_name: str) -> Credentials:
     start_time = time_in_ms()
     get_log().debug(
         f"Getting AWS credentials for bucket: '{bucket_name}' started",
-        action="get_credentials",
-        reason="start",
+        action=get_credentials.__name__,
+        reason=LOG_REASON_START,
         parameters={"bucket_name": bucket_name},
     )
 
@@ -73,6 +74,7 @@ def get_credentials(bucket_name: str) -> Credentials:
             role_arn = bucket_roles[bucket_name]["roleArn"]
             get_log().debug(
                 f"Assuming AWS ARN Role for bucket: {bucket_name}",
+                action=get_credentials.__name__,
                 aws={"action": "assume_role", "bucket": bucket_name, "roleArn": role_arn, "service": "sts"},
             )
             assumed_role_object = client_sts.assume_role(RoleArn=role_arn, RoleSessionName="gdal")
@@ -83,8 +85,8 @@ def get_credentials(bucket_name: str) -> Credentials:
             )
         get_log().debug(
             f"Getting AWS credentials for bucket: '{bucket_name}' ended",
-            action="get_credentials",
-            reason="success",
+            action=get_credentials.__name__,
+            reason=LOG_REASON_SUCCESS,
             parameters={"bucket_name": bucket_name},
             duration=time_in_ms() - start_time,
         )
@@ -97,8 +99,8 @@ def get_credentials(bucket_name: str) -> Credentials:
 
     get_log().debug(
         f"Using default credentials for bucket: '{bucket_name}'",
-        action="get_credentials",
-        reason="success",
+        action=get_credentials.__name__,
+        reason=LOG_REASON_SUCCESS,
         parameters={"bucket_name": bucket_name},
         duration=time_in_ms() - start_time,
     )
@@ -109,8 +111,8 @@ def get_bucket(bucket_name: str) -> Bucket:
     start_time = time_in_ms()
     get_log().debug(
         f"Getting AWS Bucket S3 resource for bucket: '{bucket_name}' started",
-        action="get_bucket",
-        reason="start",
+        action=get_bucket.__name__,
+        reason=LOG_REASON_START,
         parameters={"bucket_name": bucket_name},
     )
     credentials = get_credentials(bucket_name=bucket_name)
@@ -125,8 +127,8 @@ def get_bucket(bucket_name: str) -> Bucket:
 
     get_log().debug(
         f"Getting AWS Bucket S3 resource for bucket: '{bucket_name}' ended",
-        action="get_credentials",
-        reason="success",
+        action=get_bucket.__name__,
+        reason=LOG_REASON_SUCCESS,
         parameters={"bucket_name": bucket_name},
         duration=time_in_ms() - start_time,
     )

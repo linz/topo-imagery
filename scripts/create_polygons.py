@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 from collections import Counter
+from typing import List
 
 from linz_logger import get_log
 
@@ -12,6 +13,7 @@ from osgeo import gdal  # pylint: disable=import-error
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import read, write
+from scripts.logging.logging_keys import LOG_REASON_SKIP, LOG_REASON_START, LOG_REASON_SUCCESS, LOG_REASON_WARN
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -41,16 +43,27 @@ def get_pixel_count(file_path: str) -> int:
     return data_pixels_count
 
 
-def main() -> None:
+def create_polygons(files: List[str]) -> None:
     start_time = time_in_ms()
-    source = parse_source()
     output_files = []
     is_error = False
 
-    for file in source:
+    get_log().info(
+        "Create polygons started",
+        action=create_polygons.__name__,
+        source=files,
+        reason=LOG_REASON_START,
+    )
+
+    for file in files:
         try:
             if not is_tiff(file):
-                get_log().trace("create_polygon_file_not_tiff_skipped", file=file)
+                get_log().debug(
+                    f"File: '{file}' is not a tiff. Polygon won't be created for this file",
+                    action=create_polygons.__name__,
+                    reason=LOG_REASON_SKIP,
+                    path=file,
+                )
                 continue
             with tempfile.TemporaryDirectory() as tmp_dir:
                 source_file_name = os.path.basename(file)
@@ -58,17 +71,21 @@ def main() -> None:
 
                 # Get the file
                 write(tmp_file, read(file))
-                file = tmp_file
 
                 # Run create_mask
                 mask_file = os.path.join(tmp_dir, "mask.tif")
-                create_mask(file, mask_file)
+                create_mask(tmp_file, mask_file)
 
                 # Run create_polygon
                 data_px_count = get_pixel_count(mask_file)
                 if data_px_count == 0:
                     # exclude extents if tif is all white or black
-                    get_log().debug(f"- data_px_count was zero in create_mask function for the tif {mask_file}")
+                    get_log().warn(
+                        f"data_px_count was zero in create_mask function for the tif {mask_file}",
+                        action=create_polygons.__name__,
+                        reason=LOG_REASON_WARN,
+                        path=mask_file,
+                    )
                 else:
                     destination_file_name = os.path.splitext(source_file_name)[0] + ".geojson"
                     temp_file_path = os.path.join(tmp_dir, destination_file_name)
@@ -77,16 +94,38 @@ def main() -> None:
 
                 output_files.append(temp_file_path)
         except Exception as e:  # pylint:disable=broad-except
-            get_log().error("create_polygon_file_skipped", path=file, error=str(e))
+            get_log().error(
+                f"An error occurs during polygon creation for the file: {file}",
+                action=create_polygons.__name__,
+                path=file,
+                reason=LOG_REASON_SKIP,
+                error=str(e),
+            )
             is_error = True
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
 
-    get_log().info("create_polygons_end", source=source, duration=time_in_ms() - start_time)
     if is_error:
-        get_log().info("create_polygons_warn", warning="At least one file has been skipped")
+        get_log().warn(
+            "Create polygons ended with at least one file skipped",
+            action=create_polygons.__name__,
+            reason=LOG_REASON_WARN,
+            duration=time_in_ms() - start_time,
+        )
         sys.exit(1)
+    else:
+        get_log().info(
+            "Create polygons ended",
+            action=create_polygons.__name__,
+            source=files,
+            reason=LOG_REASON_SUCCESS,
+            duration=time_in_ms() - start_time,
+        )
+
+
+def main() -> None:
+    create_polygons(parse_source)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.logging.logging_keys import LOG_REASON_CHECK, LOG_REASON_SKIP, LOG_REASON_START, LOG_REASON_SUCCESS
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -101,7 +102,6 @@ class FileCheck:
             try:
                 gdalinfo_result = json.loads(gdalinfo_process.stdout)
             except json.JSONDecodeError as e:
-                get_log().error("load_gdalinfo_result_error", file=self.path, error=e)
                 self.add_error(error_type="gdalinfo", error_message=f"parsing result issue: {str(e)}")
                 gdalinfo_success = False
             if gdalinfo_process.stderr:
@@ -125,7 +125,7 @@ class FileCheck:
 def non_visual_qa(files: List[str]) -> None:
     start_time = time_in_ms()
 
-    get_log().info("Non Visual QA checks started", action="non_visual_qa", reason="start", source=files)
+    get_log().info("Non Visual QA checks started", action=non_visual_qa.__name__, reason=LOG_REASON_START, source=files)
 
     # Get srs
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
@@ -140,8 +140,8 @@ def non_visual_qa(files: List[str]) -> None:
         if not is_tiff(file):
             get_log().debug(
                 f"File: '{file}' is not a tiff. It won't be checked in the Non Visual QA",
-                action="non_visual_qa",
-                reason="skip",
+                action=non_visual_qa.__name__,
+                reason=LOG_REASON_SKIP,
                 path=file,
             )
             continue
@@ -151,32 +151,31 @@ def non_visual_qa(files: List[str]) -> None:
         if not file_check.is_valid():
             get_log().info(
                 f"Non Visual QA for file: {file_check.path} contains error(s)",
-                action="non_visual_qa",
-                reason="check",
+                action=non_visual_qa.__name__,
+                reason=LOG_REASON_CHECK,
                 path=file_check.path,
                 non_visual_qa=file_check.errors,
             )
         else:
             get_log().info(
                 f"Non Visual QA for file: {file_check.path} passed",
-                action="non_visual_qa",
-                reason="check",
+                action=non_visual_qa.__name__,
+                reason=LOG_REASON_CHECK,
                 file=file_check.path,
                 non_visual_qa="passed",
             )
 
     get_log().info(
         "Non Visual QA checks ended",
-        action="non_visual_qa",
-        reason="success",
+        action=non_visual_qa.__name__,
+        reason=LOG_REASON_SUCCESS,
         source=files,
         duration=time_in_ms() - start_time,
     )
 
 
 def main() -> None:
-    source = parse_source()
-    non_visual_qa(source)
+    non_visual_qa(parse_source())
 
 
 if __name__ == "__main__":

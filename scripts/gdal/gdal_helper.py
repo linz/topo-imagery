@@ -6,6 +6,7 @@ from typing import List, Optional
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_bucket_name_from_path, get_credentials, is_s3
+from scripts.logging.logging_keys import LOG_REASON_FAIL, LOG_REASON_START, LOG_REASON_SUCCESS
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -73,14 +74,17 @@ def run_gdal(
     start_time = time_in_ms()
     try:
         get_log().debug(
-            "GDAL execution started", action="run_gdal", reason="start", gdal={"command": command_to_string(command)}
+            "GDAL execution started",
+            action=run_gdal.__name__,
+            reason=LOG_REASON_START,
+            gdal={"command": command_to_string(command)},
         )
         proc = subprocess.run(command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
         get_log().error(
             "GDAL execution has failed",
-            action="run_gdal",
-            reason="fail",
+            action=run_gdal.__name__,
+            reason=LOG_REASON_FAIL,
             stderr=str(cpe.stderr, "utf-8"),
             command=command_to_string(command),
             duration=time_in_ms() - start_time,
@@ -90,8 +94,8 @@ def run_gdal(
     if proc.stderr:
         get_log().error(
             "GDAL execution has not been successful",
-            action="run_gdal",
-            reason="fail",
+            action=run_gdal.__name__,
+            reason=LOG_REASON_FAIL,
             gdal={"command": command_to_string(command), "stderr": proc.stderr.decode()},
             duration=time_in_ms() - start_time,
         )
@@ -102,8 +106,8 @@ def run_gdal(
         stdout = json.loads(stdout)
     get_log().debug(
         "GDAL execution ended",
-        action="run_gdal",
-        reason="success",
+        action=run_gdal.__name__,
+        reason=LOG_REASON_SUCCESS,
         gdal={"command": command_to_string(command), "stdout": stdout},
         duration=time_in_ms() - start_time,
     )

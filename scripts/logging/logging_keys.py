@@ -1,0 +1,6 @@
+LOG_REASON_SUCCESS = "success"
+LOG_REASON_SKIP = "skip"
+LOG_REASON_START = "start"
+LOG_REASON_FAIL = "fail"
+LOG_REASON_WARN = "warn"
+LOG_REASON_CHECK = "check"
