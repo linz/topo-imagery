@@ -85,11 +85,10 @@ def run_gdal(
             "GDAL execution has failed",
             action=run_gdal.__name__,
             reason=LOG_REASON_FAIL,
-            stderr=str(cpe.stderr, "utf-8"),
-            command=command_to_string(command),
+            gdal={"stderr": str(cpe.stderr, "utf-8"), "command": command_to_string(command)},
             duration=time_in_ms() - start_time,
         )
-        raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
+        raise GDALExecutionException(f"GDAL ERROR: {str(cpe.stderr, 'utf-8')}") from cpe
 
     if proc.stderr:
         get_log().error(
