@@ -1,12 +1,12 @@
-from dataclasses import dataclass
 from typing import Any, Dict, List
 
 from pystac import get_stac_version
 
+from scripts.files.files_helper import get_file_name_from_path, strip_extension
+from scripts.stac.util import checksum  # dont touch this
 from scripts.stac.util.stac_extensions import StacExtensions
 
 
-@dataclass
 class ImageryItem:
     id: str
     path: str
@@ -14,36 +14,47 @@ class ImageryItem:
     geometry: List[List[float]]
     bbox: List[float]
     checksum: str
+    stac: Dict[str, Any]
 
+    def __init__(self, path: str, datetime: str, geometry: List[List[float]], bbox: List[float]) -> None:
+        self.path = path
+        self.datetime = datetime
+        self.geometry = geometry
+        self.bbox = bbox
+        self.id = strip_extension(get_file_name_from_path(path))
+        self.checksum = checksum.multihash_as_hex(path)
 
-def create_item(item: ImageryItem) -> Dict[str, Any]:
-    return {
-        "type": "Feature",
-        "stac_version": get_stac_version(),
-        "id": item.id,
-        "properties": {
-            "datetime": item.datetime,
-        },
-        "geometry": {"type": "Polygon", "coordinates": [item.geometry]},
-        "bbox": item.bbox,
-        "links": [
-            {"rel": "item", "href": f"./{item.id}.json", "type": "application/json"},
-        ],
-        "assets": {"image": {"href": item.path, "type": "image/vnd.stac.geotiff", "file:checksum": item.checksum}},
-        "stac_extensions": [StacExtensions.file.value],
-    }
+    def create_core_item(self) -> None:
+        self.stac = {
+            "type": "Feature",
+            "stac_version": get_stac_version(),
+            "id": self.id,
+            "properties": {
+                "datetime": self.datetime,
+            },
+            "geometry": {"type": "Polygon", "coordinates": [self.geometry]},
+            "bbox": self.bbox,
+            "links": [
+                {"rel": "self", "href": f"./{self.id}.json", "type": "application/json"},
+            ],
+            "assets": {
+                "image": {
+                    "href": self.path,
+                    "type": "image/tiff; application:geotiff; profile:cloud-optimized",
+                    "file:checksum": self.checksum,
+                }
+            },
+            "stac_extensions": [StacExtensions.file.value],
+        }
 
+    def validate_stac(self) -> bool:
+        # TODO: will implement in future PR
+        return True
 
-def validate_stac() -> bool:
-    # TODO: will implement in future PR
-    return True
+    def create_collection(self) -> Dict[str, Any]:
+        # TODO: will implement in future PR
+        return {"": ""}
 
-
-def create_collection() -> Dict[str, Any]:
-    # TODO: will implement in future PR
-    return {"": ""}
-
-
-def validate_collection() -> bool:
-    # TODO: will implement in future PR
-    return True
+    def validate_collection(self) -> bool:
+        # TODO: will implement in future PR
+        return True

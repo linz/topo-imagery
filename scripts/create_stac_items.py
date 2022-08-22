@@ -6,11 +6,10 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, valid_date
-from scripts.files.files_helper import get_file_name_from_path, is_tiff, strip_extension
+from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery_stac import ImageryItem, create_item
-from scripts.stac.util.checksum import multihash_as_hex
+from scripts.stac.imagery_stac import ImageryItem
 from scripts.stac.util.geotiff import get_extents
 
 
@@ -20,17 +19,15 @@ def create_imagery_items(files: List[str], date: str) -> None:
             get_log().trace("create_stac_skipped_file_not_tiff", file=path)
             continue
 
-        id_ = strip_extension(get_file_name_from_path(path))
         geometry, bbox = get_extents(path)
-        checksum = multihash_as_hex(path)
 
-        item = ImageryItem(id_, path, date, geometry, bbox, checksum)
-        stac = create_item(item)
+        item = ImageryItem(path, date, geometry, bbox)
+        item.create_core_item()
 
-        tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
-        write(tmp_file_path, json.dumps(stac).encode("utf-8"))
+        tmp_file_path = os.path.join("/tmp/", f"{item.id}.json")
+        write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
 
-        get_log().info("Imagery Stac Item Created", tiff_path=path, stac=stac)
+        get_log().info("Imagery Stac Item Created", tiff_path=path, stac=item.stac)
 
 
 def main() -> None:
