@@ -1,4 +1,5 @@
-from scripts.aws.aws_helper import is_argo, parse_path
+from scripts.aws.aws_helper import parse_path
+from scripts.cli.cli_helper import is_argo
 
 
 def test_parse_path() -> None:

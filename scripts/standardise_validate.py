@@ -1,5 +1,4 @@
-from scripts.aws.aws_helper import is_argo
-from scripts.cli.cli_helper import parse_source
+from scripts.cli.cli_helper import is_argo, parse_source
 from scripts.non_visual_qa import non_visual_qa
 from scripts.standardising import start_standardising
 
