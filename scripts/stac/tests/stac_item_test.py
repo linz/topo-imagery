@@ -13,7 +13,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
         return_value="1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4",
     )
     item = ImageryItem(path, date, geometry, bbox)
-    item.create_core_item()
+    item.create_core_stac()
     # checks
     assert item.stac["id"] == "BR34_5000_0302"
     assert item.stac["properties"]["datetime"] == date

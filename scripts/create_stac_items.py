@@ -22,7 +22,7 @@ def create_imagery_items(files: List[str], date: str) -> None:
         geometry, bbox = get_extents(path)
 
         item = ImageryItem(path, date, geometry, bbox)
-        item.create_core_item()
+        item.create_core_stac()
 
         tmp_file_path = os.path.join("/tmp/", f"{item.id}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))

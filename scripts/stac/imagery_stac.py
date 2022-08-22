@@ -24,7 +24,7 @@ class ImageryItem:
         self.id = strip_extension(get_file_name_from_path(path))
         self.checksum = checksum.multihash_as_hex(path)
 
-    def create_core_item(self) -> None:
+    def create_core_stac(self) -> None:
         self.stac = {
             "type": "Feature",
             "stac_version": get_stac_version(),
@@ -51,10 +51,17 @@ class ImageryItem:
         # TODO: will implement in future PR
         return True
 
-    def create_collection(self) -> Dict[str, Any]:
-        # TODO: will implement in future PR
-        return {"": ""}
+# class ImageryCollection:
+#     items = List[ImageryItem]
 
-    def validate_collection(self) -> bool:
-        # TODO: will implement in future PR
-        return True
+#     def __init__(self) -> None:
+#         # TODO: will implement in future PR
+#         pass
+
+#     def create_stac(self) -> None:
+#         # TODO: will implement in future PR
+#         pass
+
+#     def validate_collection(self) -> bool:
+#         # TODO: will implement in future PR
+#         return True
