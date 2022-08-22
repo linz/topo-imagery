@@ -51,6 +51,7 @@ class ImageryItem:
         # TODO: will implement in future PR
         return True
 
+
 # class ImageryCollection:
 #     items = List[ImageryItem]
 
