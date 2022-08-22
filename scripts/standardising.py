@@ -11,7 +11,7 @@ from scripts.gdal.gdal_helper import run_gdal
 from scripts.logging.time_helper import time_in_ms
 
 
-def start_standardising(files: List[str], argo_env: bool) -> List[str]:
+def start_standardising(files: List[str], concurrency: int) -> List[str]:
     start_time = time_in_ms()
     tiff_files = []
     output_files = []
@@ -24,8 +24,8 @@ def start_standardising(files: List[str], argo_env: bool) -> List[str]:
         else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
-    if argo_env:
-        with Pool(4) as p:
+    if concurrency:
+        with Pool(concurrency) as p:
             output_files = p.map(standardising, tiff_files)
             p.close()
             p.join()
@@ -92,9 +92,11 @@ def standardising(file: str) -> str:
 
 
 def main() -> None:
+    concurrency: int = 0
     source = parse_source()
-    argo_env = is_argo()
-    start_standardising(source, argo_env)
+    if is_argo():
+        concurrency = 4
+    start_standardising(source, concurrency)
 
 
 if __name__ == "__main__":
