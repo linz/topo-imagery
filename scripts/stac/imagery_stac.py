@@ -1,12 +1,10 @@
 from typing import Any, Dict, List
 
-from pystac import get_stac_version
-
 from scripts.files.files_helper import get_file_name_from_path, strip_extension
 from scripts.stac.util import checksum  # dont touch this
 from scripts.stac.util.stac_extensions import StacExtensions
 
-
+PYSTAC_VERSION = "1.0.0"
 class ImageryItem:
     id: str
     path: str
@@ -27,7 +25,7 @@ class ImageryItem:
     def create_core_stac(self) -> None:
         self.stac = {
             "type": "Feature",
-            "stac_version": get_stac_version(),
+            "stac_version": PYSTAC_VERSION,
             "id": self.id,
             "properties": {
                 "datetime": self.datetime,

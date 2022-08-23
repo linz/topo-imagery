@@ -573,21 +573,6 @@ python-versions = ">=3.6.8"
 diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
-name = "pystac"
-version = "1.6.1"
-description = "Python library for working with Spatiotemporal Asset Catalog (STAC)."
-category = "main"
-optional = false
-python-versions = ">=3.8"
-
-[package.dependencies]
-python-dateutil = ">=2.7.0"
-
-[package.extras]
-orjson = ["orjson (>=3.5)"]
-validation = ["jsonschema (>=4.0.1)"]
-
-[[package]]
 name = "pytest"
 version = "7.1.2"
 description = "pytest: simple powerful testing with Python"
@@ -844,7 +829,7 @@ python-versions = ">=3.4"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.10"
-content-hash = "c41f1f54e9a0dc29ab2f02aea608147d79fdef7626e3e193890da550917a8be9"
+content-hash = "92790112add43f439f5c50a33df90ae966f3bf27a2a8077cc6f9208a9b62af2e"
 
 [metadata.files]
 arrow = [
@@ -1067,7 +1052,6 @@ pyparsing = [
     {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
     {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
-pystac = []
 pytest = [
     {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
     {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
