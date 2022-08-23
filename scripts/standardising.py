@@ -24,14 +24,10 @@ def start_standardising(files: List[str], concurrency: int) -> List[str]:
         else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
-    if concurrency:
-        with Pool(concurrency) as p:
-            output_files = p.map(standardising, tiff_files)
-            p.close()
-            p.join()
-    else:
-        for tiff_file in tiff_files:
-            output_files.append(standardising(tiff_file))
+    with Pool(concurrency) as p:
+        output_files = p.map(standardising, tiff_files)
+        p.close()
+        p.join()
 
     get_log().info("standardising_end", source=files, duration=time_in_ms() - start_time)
 
@@ -92,7 +88,7 @@ def standardising(file: str) -> str:
 
 
 def main() -> None:
-    concurrency: int = 0
+    concurrency: int = 1
     source = parse_source()
     if is_argo():
         concurrency = 4
