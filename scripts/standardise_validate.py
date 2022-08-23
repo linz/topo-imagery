@@ -4,9 +4,11 @@ from scripts.standardising import start_standardising
 
 
 def main() -> None:
+    concurrency: int = 1
     source = parse_source()
-    argo_env = is_argo()
-    standardised_files = start_standardising(source, argo_env)
+    if is_argo():
+        concurrency = 4
+    standardised_files = start_standardising(source, concurrency)
     non_visual_qa(standardised_files)
 
 
