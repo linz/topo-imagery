@@ -10,7 +10,7 @@ def main() -> None:
     source = parse_source()
     if is_argo():
         concurrency = 4
-    standardised_files = start_standardising(source, concurrency)
+    standardised_files = start_standardising(source, "lzw", concurrency)
     if standardised_files:
         non_visual_qa(standardised_files)
     else:
