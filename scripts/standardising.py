@@ -40,7 +40,7 @@ def standardising(file: str) -> str:
     get_log().info("standardising_start", source=file)
 
     _, src_file_path = parse_path(file)
-    standardized_file_name = f"{get_file_name_from_path(s3_path.key)}.tiff"
+    standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
     tmp_file_path = os.path.join(output_folder, standardized_file_name)
 
     command = [
