@@ -49,7 +49,6 @@ def main() -> None:
 
     create_imagery_items(files, start_datetime, end_datetime)
 
-    
 
 if __name__ == "__main__":
     main()
