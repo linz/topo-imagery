@@ -13,6 +13,9 @@ from scripts.stac.imagery_stac import create_imagery_stac_item
 
 
 def create_imagery_items(files: List[str], start_datetime: str, end_datetime: str) -> None:
+    start_time = time_in_ms()
+    get_log().info("create_stac_items_start", source=files)
+
     for path in files:
         if not is_tiff(path):
             get_log().trace("create_stac_skipped_file_not_tiff", file=path)
@@ -26,10 +29,10 @@ def create_imagery_items(files: List[str], start_datetime: str, end_datetime: st
 
         get_log().trace("Imagery Stac Item Created", tiff_path=path, stac=stac)
 
+    get_log().info("create_stac_items_complete", source=files, duration=time_in_ms() - start_time)
+
 
 def main() -> None:
-    start_time = time_in_ms()
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument(
@@ -44,12 +47,9 @@ def main() -> None:
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
 
-    get_log().info("create_stac_items_start", source=files)
-
     create_imagery_items(files, start_datetime, end_datetime)
 
-    get_log().info("create_stac_items_complete", source=files, duration=time_in_ms() - start_time)
-
+    
 
 if __name__ == "__main__":
     main()
