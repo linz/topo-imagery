@@ -27,7 +27,7 @@ def create_imagery_items(files: List[str], start_datetime: str, end_datetime: st
         tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
         write(tmp_file_path, json.dumps(stac).encode("utf-8"))
 
-        get_log().trace("Imagery Stac Item Created", tiff_path=path, stac=stac)
+        get_log().info("imagery_stac_item_created", source=path)
 
     get_log().info("create_stac_items_complete", source=files, duration=time_in_ms() - start_time)
 
