@@ -1,4 +1,5 @@
 from scripts.aws.aws_helper import parse_path
+from scripts.cli.cli_helper import is_argo
 
 
 def test_parse_path() -> None:
@@ -7,3 +8,7 @@ def test_parse_path() -> None:
 
     assert path.bucket == "bucket-name"
     assert path.key == "path/to/the/file.test"
+
+
+def test_is_argo() -> None:
+    assert not is_argo()
