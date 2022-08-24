@@ -1,5 +1,7 @@
 from typing import List
 
+from linz_logger import get_log
+
 GDAL_PRESET_LZW = [
     "gdal_translate",
     "-q",
@@ -68,7 +70,7 @@ GDAL_PRESET_WEBP = [
 
 
 def get_gdal_command(preset: str) -> List[str]:
-    print(preset)
+    get_log().info("gdal_preset", preset=preset)
     if preset == "lzw":
         return GDAL_PRESET_LZW
     if preset == "webp":
