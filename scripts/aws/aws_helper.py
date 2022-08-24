@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import Dict, List, NamedTuple, Optional
+from typing import Any, Dict, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
 import boto3
@@ -19,10 +19,9 @@ sessions: Dict[str, boto3.Session] = {}
 
 bucket_roles: List[CredentialSource] = []
 
-bucket_credentials = {}
 client_sts = session.client("sts")
 
-bucket_config_path ="s3://linz-bucket-config/config-v2.json"
+bucket_config_path = "s3://linz-bucket-config/config-v2.json"
 
 
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
@@ -41,11 +40,12 @@ def _init_roles() -> None:
     get_log().debug("bucket_config_loaded", config=bucket_config_path, prefix_count=len(bucket_roles))
 
 
-def _get_client_creator(session):
-    def client_creator(service_name, **kwargs):
-        return session.client(service_name, **kwargs)
+def _get_client_creator(local_session: boto3.Session) -> Any:
+    def client_creator(service_name: str, **kwargs: Any) -> Any:
+        return local_session.client(service_name, **kwargs)
 
     return client_creator
+
 
 def get_session(prefix: str) -> boto3.Session:
     cfg = _get_credential_config(prefix)
@@ -56,18 +56,20 @@ def get_session(prefix: str) -> boto3.Session:
     if current_session is not None:
         return current_session
 
-    extra_args = {"DurationSeconds": cfg.roleSessionDuration}
+    extra_args: Dict[str, Any] = {"DurationSeconds": cfg.roleSessionDuration}
 
     if cfg.externalId:
         extra_args["ExternalId"] = cfg.externalId
-        
+
     fetcher = AssumeRoleCredentialFetcher(
         client_creator=_get_client_creator(session),
         source_credentials=session.get_credentials(),
         role_arn=cfg.roleArn,
-        extra_args=extra_args
+        extra_args=extra_args,
     )
     botocore_session = botocore.session.Session()
+
+    # pylint:disable=protected-access
     botocore_session._credentials = DeferredRefreshableCredentials(
         method="assume-role", refresh_using=fetcher.fetch_credentials
     )

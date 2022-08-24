@@ -1,4 +1,3 @@
-
 import boto3
 import botocore
 from linz_logger import get_log

@@ -1,8 +1,8 @@
-
 from dataclasses import dataclass
 from typing import Optional
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class CredentialSource:
     bucket: str
