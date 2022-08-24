@@ -10,7 +10,6 @@ from linz_logger import get_log
 
 from scripts.aws.aws_credential_source import CredentialSource
 
-Credentials = NamedTuple("Credentials", [("access_key", str), ("secret_key", str), ("token", str)])
 S3Path = NamedTuple("S3Path", [("bucket", str), ("key", str)])
 
 aws_profile = environ.get("AWS_PROFILE")
