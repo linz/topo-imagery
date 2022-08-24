@@ -1,7 +1,7 @@
 import argparse
 import json
-from os import environ
 from datetime import datetime
+from os import environ
 from typing import List
 
 from dateutil import parser, tz
