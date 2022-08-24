@@ -1,5 +1,6 @@
 import argparse
 import json
+from os import environ
 from typing import List
 
 from linz_logger import get_log
@@ -31,3 +32,7 @@ def parse_source() -> List[str]:
     arguments = parser.parse_args()
 
     return format_source(arguments.source)
+
+
+def is_argo() -> bool:
+    return bool(environ.get("ARGO_TEMPLATE"))
