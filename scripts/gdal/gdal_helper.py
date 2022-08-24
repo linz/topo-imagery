@@ -4,7 +4,8 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import get_bucket_name_from_path, get_credentials, is_s3
+from scripts.aws.aws_helper import is_s3
+from scripts.files.fs_s3 import get_session
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -59,7 +60,8 @@ def run_gdal(
     if input_file:
         if is_s3(input_file):
             # Set the credentials for GDAL to be able to read the input file
-            credentials = get_credentials(get_bucket_name_from_path(input_file))
+            session = get_session(input_file)
+            credentials= session.get_credentials()
             gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
             gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
             gdal_env["AWS_SESSION_TOKEN"] = credentials.token
