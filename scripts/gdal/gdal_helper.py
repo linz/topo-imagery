@@ -55,6 +55,7 @@ def run_gdal(
         subprocess.CompletedProcess: the output process.
     """
     gdal_env = os.environ.copy()
+    temp_command = command.copy()
 
     if input_file:
         if is_s3(input_file):
@@ -65,25 +66,25 @@ def run_gdal(
             gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
             gdal_env["AWS_SESSION_TOKEN"] = credentials.token
             input_file = get_vfs_path(input_file)
-        command.append(input_file)
+        temp_command.append(input_file)
 
     if output_file:
-        command.append(output_file)
+        temp_command.append(output_file)
 
     start_time = time_in_ms()
     try:
-        get_log().debug("run_gdal_start", command=command_to_string(command))
-        proc = subprocess.run(command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        get_log().debug("run_gdal_start", command=command_to_string(temp_command))
+        proc = subprocess.run(temp_command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_failed", command=command_to_string(command), error=str(cpe.stderr, "utf-8"))
+        get_log().error("run_gdal_failed", command=command_to_string(temp_command), error=str(cpe.stderr, "utf-8"))
         raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
     finally:
-        get_log().info("run_gdal_end", command=command_to_string(command), duration=time_in_ms() - start_time)
+        get_log().info("run_gdal_end", command=command_to_string(temp_command), duration=time_in_ms() - start_time)
 
     if proc.stderr:
-        get_log().error("run_gdal_error", command=command_to_string(command), error=proc.stderr.decode())
+        get_log().error("run_gdal_error", command=command_to_string(temp_command), error=proc.stderr.decode())
         raise GDALExecutionException(proc.stderr.decode())
 
-    get_log().debug("run_gdal_succeeded", command=command_to_string(command), stdout=proc.stdout.decode())
+    get_log().debug("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
     return proc
