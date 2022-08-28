@@ -1,4 +1,4 @@
-from scripts.files.files_helper import get_file_name_from_path, strip_extension
+from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery_stac import create_imagery_stac_item
 
 
@@ -11,7 +11,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
     mocker.patch("scripts.stac.util.geotiff.get_extents", return_value=(geometry, bbox))
 
     path = "./test/BR34_5000_0302.tiff"
-    id_ = strip_extension(get_file_name_from_path(path))
+    id_ = get_file_name_from_path(path)
     start_datetime = "2021-01-27 00:00:00Z"
     end_datetime = "2021-01-27 00:00:00Z"
 

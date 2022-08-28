@@ -6,7 +6,7 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, valid_date
-from scripts.files.files_helper import get_file_name_from_path, is_tiff, strip_extension
+from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.files.fs import write
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery_stac import create_imagery_stac_item
@@ -21,7 +21,7 @@ def create_imagery_items(files: List[str], start_datetime: str, end_datetime: st
             get_log().trace("create_stac_skipped_file_not_tiff", file=path)
             continue
 
-        id_ = strip_extension(get_file_name_from_path(path))
+        id_ = get_file_name_from_path(path)
         stac = create_imagery_stac_item(id_, path, start_datetime, end_datetime)
 
         tmp_file_path = os.path.join("/tmp/", f"{id_}.json")

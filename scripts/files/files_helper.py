@@ -6,11 +6,5 @@ def get_file_name_from_path(path: str) -> str:
     return filename
 
 
-def strip_extension(file: str) -> str:
-    if file.endswith("tiff"):
-        return file.rstrip(".tiff")
-    return file.rstrip(".tif")
-
-
 def is_tiff(path: str) -> bool:
     return path.lower().endswith((".tiff", ".tif"))
