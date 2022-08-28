@@ -15,11 +15,11 @@ def gdal_info(path: str) -> Dict[Any, Any]:
             gdalinfo_result = json.loads(gdalinfo_process.stdout)
         except json.JSONDecodeError as e:
             get_log().error("load_gdalinfo_result_error", file=path, error=e)
-            raise Exception(e)
+            raise e
         if gdalinfo_process.stderr:
             get_log().error("Gdalinfo_error", file=path, error=str(gdalinfo_process.stderr))
             raise Exception(f"Gdalinfo Error {str(gdalinfo_process.stderr)}")
         return gdalinfo_result
     except GDALExecutionException as gee:
         get_log().error("gdalinfo_failed", file=path, error=str(gee))
-        raise Exception(gee)
+        raise gee

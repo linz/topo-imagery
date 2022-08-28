@@ -68,6 +68,6 @@ def nzt_datetime_to_utc_datetime(date: str) -> datetime:
 def valid_date(s: str) -> datetime:
     try:
         return datetime.strptime(s, "%Y-%m-%d")
-    except ValueError:
+    except ValueError as e:
         msg = f"not a valid date: {s}"
-        raise argparse.ArgumentTypeError(msg)
+        raise argparse.ArgumentTypeError(msg) from e

@@ -4,7 +4,6 @@ disable =
         missing-class-docstring,
         missing-module-docstring,
         missing-function-docstring,
-        raise-missing-from,
 
 [FORMAT]
 max-line-length=127
