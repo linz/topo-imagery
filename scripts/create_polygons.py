@@ -43,7 +43,12 @@ def get_pixel_count(file_path: str) -> int:
 
 def main() -> None:
     start_time = time_in_ms()
-    source = parse_source()
+    source = []
+    try:
+        source = parse_source()
+    except Exception as e:
+        get_log().error("An error occured while parsing the source {e}", error=str(e))
+        raise e
     output_files = []
     is_error = False
 

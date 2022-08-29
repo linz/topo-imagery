@@ -152,7 +152,12 @@ def non_visual_qa(files: List[str]) -> None:
 
 
 def main() -> None:
-    source = parse_source()
+    source = []
+    try:
+        source = parse_source()
+    except Exception as e:
+        get_log().error("An error occured while parsing the source {e}", error=str(e))
+        raise e
     non_visual_qa(source)
 
 

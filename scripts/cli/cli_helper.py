@@ -17,6 +17,7 @@ def format_source(source: List[str]) -> List[str]:
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", source=source, msg=e)
+            raise e
     return source
 
 

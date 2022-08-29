@@ -7,7 +7,12 @@ from scripts.standardising import start_standardising
 
 def main() -> None:
     concurrency: int = 1
-    source = parse_source()
+    source = []
+    try:
+        source = parse_source()
+    except Exception as e:
+        get_log().error("An error occured while parsing the source {e}", error=str(e))
+        raise e
     if is_argo():
         concurrency = 4
     standardised_files = start_standardising(source, "lzw", concurrency)

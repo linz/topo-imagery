@@ -59,7 +59,11 @@ def main() -> None:
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
 
-    source = format_source(arguments.source)
+    try:
+        source = format_source(arguments.source)
+    except Exception as e:
+        get_log().error("An error occured while parsing the source {e}", error=str(e))
+        raise e
 
     if is_argo():
         concurrency = 4
