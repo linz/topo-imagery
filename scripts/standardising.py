@@ -19,7 +19,7 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
     tiff_files = []
     output_files = []
 
-    get_log().info("standardising_start", source=files)
+    get_log().info("standardising_start")
 
     for file in files:
         if is_tiff(file):
@@ -32,7 +32,7 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
         p.close()
         p.join()
 
-    get_log().info("standardising_end", source=files, duration=time_in_ms() - start_time)
+    get_log().info("standardising_end", duration=time_in_ms() - start_time)
 
     return output_files
 
@@ -40,7 +40,7 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
 def standardising(file: str, preset: str) -> str:
     output_folder = "/tmp/"
 
-    get_log().info("standardising_start", source=file)
+    get_log().info(f"standardising {file}", source=file)
 
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"

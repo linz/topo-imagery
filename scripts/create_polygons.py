@@ -77,13 +77,13 @@ def main() -> None:
 
                 output_files.append(temp_file_path)
         except Exception as e:  # pylint:disable=broad-except
-            get_log().error("create_polygon_file_skipped", path=file, error=str(e))
+            get_log().error("create_polygon_file_skipped", file=file, error=str(e))
             is_error = True
 
     with open("/tmp/file_list.json", "w", encoding="utf-8") as jf:
         json.dump(output_files, jf)
 
-    get_log().info("create_polygons_end", source=source, duration=time_in_ms() - start_time)
+    get_log().info("create_polygons_end", duration=time_in_ms() - start_time)
     if is_error:
         get_log().info("create_polygons_warn", warning="At least one file has been skipped")
         sys.exit(1)
