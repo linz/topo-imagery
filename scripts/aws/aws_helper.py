@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass
 from os import environ
 from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
@@ -22,7 +23,6 @@ bucket_roles: List[CredentialSource] = []
 client_sts = session.client("sts")
 
 bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-config/config.json")
-role_retry_count = int(environ.get("AWS_ROLE_RETRY_COUNT", "3"))
 
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
 def _init_roles() -> None:
@@ -80,16 +80,34 @@ def get_session(prefix: str) -> boto3.Session:
     get_log().info("role_assume", prefix=prefix, bucket=cfg.bucket, role_arn=cfg.roleArn)
     return current_session
 
-def get_session_credentials(prefix: str, retry_count=3) -> boto3.Credentials:
+
+@dataclass
+class AwsFrozenCredentials:
     """
-    Attempt to get cretentials for a prefix, retrying upto retry_count amount of times
+    work around as I couldn't find the type for get_frozen_credentials()
     """
-    for retry in range(retry_count):
+
+    access_key: str
+    secret_key: str
+    token: str
+
+
+def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCredentials:
+    """
+    Attempt to get credentials for a prefix, retrying upto retry_count amount of times
+    """
+    last_error: Exception = Exception(f"Invalid retry count: {retry_count}")
+    for retry in range(1, retry_count + 1):
         try:
-            get_session(prefix).get_credentials()
-        except botocore.errorfactory.InvalidIdentityTokenException: 
+            # Get credentials may give differing access_key and secret_key
+            credentials: AwsFrozenCredentials = get_session(prefix).get_frozen_credentials()
+            return credentials
+        except client_sts.meta.client.exceptions.InvalidIdentityTokenException as e:
             get_log().warn("bucket_load_retry", retry_count=retry)
-            sleep(0.5 * (retry + 1))
+            sleep(0.5 * retry)
+            last_error = e
+
+    raise last_error
 
 
 def _get_credential_config(prefix: str) -> Optional[CredentialSource]:

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import is_s3
+from scripts.aws.aws_helper import get_session_credentials, is_s3
 from scripts.logging.time_helper import time_in_ms
 
 
