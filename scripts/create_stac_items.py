@@ -14,22 +14,22 @@ from scripts.stac.imagery_stac import create_imagery_stac_item
 
 def create_imagery_items(files: List[str], start_datetime: str, end_datetime: str) -> None:
     start_time = time_in_ms()
-    get_log().info("create_stac_items_start", source=files)
+    get_log().info("create_stac_items_imagery_start", source=files)
 
-    for path in files:
-        if not is_tiff(path):
-            get_log().trace("create_stac_skipped_file_not_tiff", file=path)
+    for file in files:
+        if not is_tiff(file):
+            get_log().trace("create_stac_file_not_tiff_skipped", file=file)
             continue
 
-        id_ = get_file_name_from_path(path)
-        stac = create_imagery_stac_item(id_, path, start_datetime, end_datetime)
+        id_ = get_file_name_from_path(file)
+        stac = create_imagery_stac_item(id_, file, start_datetime, end_datetime)
 
         tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
         write(tmp_file_path, json.dumps(stac).encode("utf-8"))
 
-        get_log().info("imagery_stac_item_created", source=path)
+        get_log().info("imagery_stac_item_created", file=file)
 
-    get_log().info("create_stac_items_complete", source=files, duration=time_in_ms() - start_time)
+    get_log().info("create_stac_items_imagery_complete", source=files, duration=time_in_ms() - start_time)
 
 
 def main() -> None:
