@@ -49,7 +49,7 @@ def test_format_source_json_loading_error() -> None:
 def test_format_date() -> None:
     """example: --start_datetime 2022-01-22"""
     s = "2022-01-22"
-    assert format_date(datetime.strptime(s, "%Y-%m-%d")) == "2022-01-21T11:00:1642719600Z"
+    assert format_date(datetime.strptime(s, "%Y-%m-%d")) == "2022-01-21T11:00:00Z"
 
 
 def test_valid_date() -> None:
