@@ -1,6 +1,8 @@
+import sys
+
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import is_argo, parse_source
+from scripts.cli.cli_helper import InputParameterError, is_argo, parse_source
 from scripts.non_visual_qa import non_visual_qa
 from scripts.standardising import start_standardising
 
@@ -10,9 +12,9 @@ def main() -> None:
     source = []
     try:
         source = parse_source()
-    except Exception as e:
-        get_log().error("An error occured while parsing the source {e}", error=str(e))
-        raise e
+    except InputParameterError:
+        sys.exit(1)
+
     if is_argo():
         concurrency = 4
     standardised_files = start_standardising(source, "lzw", concurrency)

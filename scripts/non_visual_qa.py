@@ -1,9 +1,10 @@
 import json
+import sys
 from typing import Any, Dict, List, Optional
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import parse_source
+from scripts.cli.cli_helper import InputParameterError, parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.logging.time_helper import time_in_ms
@@ -155,9 +156,9 @@ def main() -> None:
     source = []
     try:
         source = parse_source()
-    except Exception as e:
-        get_log().error("An error occured while parsing the source {e}", error=str(e))
-        raise e
+    except InputParameterError:
+        sys.exit(1)
+
     non_visual_qa(source)
 
 

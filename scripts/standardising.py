@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 from functools import partial
 from multiprocessing import Pool
 from typing import List
@@ -7,7 +8,7 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import parse_path
-from scripts.cli.cli_helper import format_source, is_argo
+from scripts.cli.cli_helper import InputParameterError, format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_gdal_command
@@ -61,9 +62,8 @@ def main() -> None:
 
     try:
         source = format_source(arguments.source)
-    except Exception as e:
-        get_log().error("An error occured while parsing the source {e}", error=str(e))
-        raise e
+    except InputParameterError:
+        sys.exit(1)
 
     if is_argo():
         concurrency = 4

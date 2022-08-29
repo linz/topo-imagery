@@ -6,6 +6,10 @@ from typing import List
 from linz_logger import get_log
 
 
+class InputParameterError(Exception):
+    pass
+
+
 def format_source(source: List[str]) -> List[str]:
     """Due to Argo constraints if using the basemaps cli list command
     the source has a string that contains a list that needs to be split.
@@ -16,8 +20,8 @@ def format_source(source: List[str]) -> List[str]:
             source_json: List[str] = json.loads(source[0])
             return source_json
         except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", source=source, msg=e)
-            raise e
+            get_log().debug("Decoding Json Failed", source=source, error=str(e))
+            raise InputParameterError("An error occured while formatting the --source input") from e
     return source
 
 
