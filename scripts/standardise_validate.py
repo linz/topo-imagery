@@ -7,7 +7,7 @@ from scripts.non_visual_qa import non_visual_qa
 from scripts.standardising import start_standardising
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=duplicate-code
     concurrency: int = 1
     source = []
     try:

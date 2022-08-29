@@ -152,7 +152,7 @@ def non_visual_qa(files: List[str]) -> None:
     get_log().info("non_visual_qa_end", source=files, duration=time_in_ms() - start_time)
 
 
-def main() -> None:
+def main() -> None:  # pylint: disable=duplicate-code
     source = []
     try:
         source = parse_source()
