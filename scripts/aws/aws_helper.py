@@ -1,5 +1,6 @@
 import json
 from os import environ
+from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
@@ -21,6 +22,7 @@ bucket_roles: List[CredentialSource] = []
 client_sts = session.client("sts")
 
 bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-config/config.json")
+role_retry_count = int(environ.get("AWS_ROLE_RETRY_COUNT", "3"))
 
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
 def _init_roles() -> None:
@@ -77,6 +79,17 @@ def get_session(prefix: str) -> boto3.Session:
 
     get_log().info("role_assume", prefix=prefix, bucket=cfg.bucket, role_arn=cfg.roleArn)
     return current_session
+
+def get_session_credentials(prefix: str, retry_count=3) -> boto3.Credentials:
+    """
+    Attempt to get cretentials for a prefix, retrying upto retry_count amount of times
+    """
+    for retry in range(retry_count):
+        try:
+            get_session(prefix).get_credentials()
+        except botocore.errorfactory.InvalidIdentityTokenException: 
+            get_log().warn("bucket_load_retry", retry_count=retry)
+            sleep(0.5 * (retry + 1))
 
 
 def _get_credential_config(prefix: str) -> Optional[CredentialSource]:
