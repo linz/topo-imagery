@@ -1,4 +1,6 @@
-from scripts.cli.cli_helper import format_source
+import pytest
+
+from scripts.cli.cli_helper import InputParameterError, format_source
 
 
 def test_format_source_from_basemaps_cli_file() -> None:
@@ -35,7 +37,5 @@ def test_format_source_multiple_inputs() -> None:
 def test_format_source_json_loading_error() -> None:
     """example: --source [s3://test/image_one.tiff"""
     source = ["[s3://test/image_one.tiff"]
-    file_list = format_source(source)
-    assert isinstance(file_list, list)
-    assert len(file_list) == 1
-    assert file_list == ["[s3://test/image_one.tiff"]
+    with pytest.raises(InputParameterError):
+        format_source(source)
