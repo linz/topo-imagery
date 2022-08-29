@@ -56,5 +56,6 @@ def main() -> None:
     source = parse_source()
     start_standardising(source, "lzw", 1)
 
+
 if __name__ == "__main__":
     main()
