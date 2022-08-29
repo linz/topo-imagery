@@ -5,8 +5,6 @@ from typing import List
 
 from linz_logger import get_log
 
-from scripts.logging.formatter import list_to_str
-
 
 def format_source(source: List[str]) -> List[str]:
     """Due to Argo constraints if using the basemaps cli list command

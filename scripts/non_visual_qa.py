@@ -6,7 +6,6 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.logging.formatter import list_to_str
 from scripts.logging.time_helper import time_in_ms
 
 

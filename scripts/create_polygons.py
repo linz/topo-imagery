@@ -12,7 +12,6 @@ from osgeo import gdal  # pylint: disable=import-error
 from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import read, write
-from scripts.logging.formatter import list_to_str
 from scripts.logging.time_helper import time_in_ms
 
 
