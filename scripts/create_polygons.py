@@ -9,7 +9,7 @@ from linz_logger import get_log
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
 
-from scripts.cli.cli_helper import InputParameterError, parse_source
+from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import read, write
 from scripts.logging.time_helper import time_in_ms
@@ -43,13 +43,7 @@ def get_pixel_count(file_path: str) -> int:
 
 def main() -> None:
     start_time = time_in_ms()
-    source = []
-
-    try:
-        source = parse_source()
-    except InputParameterError:
-        sys.exit(1)
-
+    source = parse_source()
     output_files = []
     is_error = False
 
@@ -95,5 +89,9 @@ def main() -> None:
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pylint: disable=duplicate-code
+    try:
+        main()
+    except Exception as ex:  # pylint:disable=broad-except
+        get_log().error("An error occured while executing create_polygon.py", error=str(ex))
+        sys.exit(1)

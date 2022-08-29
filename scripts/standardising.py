@@ -8,7 +8,7 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import parse_path
-from scripts.cli.cli_helper import InputParameterError, format_source, is_argo
+from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_gdal_command
@@ -59,11 +59,7 @@ def main() -> None:
     parser.add_argument("--preset", dest="preset", required=False, default="lzw")
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
-
-    try:
-        source = format_source(arguments.source)
-    except InputParameterError:
-        sys.exit(1)
+    source = format_source(arguments.source)
 
     if is_argo():
         concurrency = 4
@@ -71,5 +67,9 @@ def main() -> None:
     start_standardising(source, arguments.preset, concurrency)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pylint: disable=duplicate-code
+    try:
+        main()
+    except Exception as ex:  # pylint:disable=broad-except
+        get_log().error("An error occured while executing standardising.py", error=str(ex))
+        sys.exit(1)

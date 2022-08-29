@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, parse_source
+from scripts.cli.cli_helper import parse_source
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.logging.time_helper import time_in_ms
@@ -153,14 +153,13 @@ def non_visual_qa(files: List[str]) -> None:
 
 
 def main() -> None:  # pylint: disable=duplicate-code
-    source = []
-    try:
-        source = parse_source()
-    except InputParameterError:
-        sys.exit(1)
-
+    source = parse_source()
     non_visual_qa(source)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pylint: disable=duplicate-code
+    try:
+        main()
+    except Exception as ex:  # pylint:disable=broad-except
+        get_log().error("An error occured while executing non_visual_qa.py", error=str(ex))
+        sys.exit(1)

@@ -2,18 +2,14 @@ import sys
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, parse_source
+from scripts.cli.cli_helper import is_argo, parse_source
 from scripts.non_visual_qa import non_visual_qa
 from scripts.standardising import start_standardising
 
 
-def main() -> None:  # pylint: disable=duplicate-code
+def main() -> None:
     concurrency: int = 1
-    source = []
-    try:
-        source = parse_source()
-    except InputParameterError:
-        sys.exit(1)
+    source = parse_source()
 
     if is_argo():
         concurrency = 4
@@ -26,5 +22,9 @@ def main() -> None:  # pylint: disable=duplicate-code
         )
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pylint: disable=duplicate-code
+    try:
+        main()
+    except Exception as ex:  # pylint:disable=broad-except
+        get_log().error("An error occured while executing standardise_validate.py", error=str(ex))
+        sys.exit(1)
