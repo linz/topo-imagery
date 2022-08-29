@@ -5,6 +5,8 @@ from typing import List
 
 from linz_logger import get_log
 
+from scripts.logging.formatter import list_to_str
+
 
 def format_source(source: List[str]) -> List[str]:
     """Due to Argo constraints if using the basemaps cli list command
@@ -16,7 +18,7 @@ def format_source(source: List[str]) -> List[str]:
             source_json: List[str] = json.loads(source[0])
             return source_json
         except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", source=source, msg=e)
+            get_log().debug("Decoding Json Failed", msg=e)
     return source
 
 
