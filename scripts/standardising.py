@@ -1,3 +1,4 @@
+import argparse
 import os
 from functools import partial
 from multiprocessing import Pool
@@ -6,7 +7,7 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import parse_path
-from scripts.cli.cli_helper import parse_source
+from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_gdal_command
@@ -53,8 +54,18 @@ def standardising(file: str, preset: str) -> str:
 
 def main() -> None:
 
-    source = parse_source()
-    start_standardising(source, "lzw", 1)
+    concurrency: int = 1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--preset", dest="preset", required=False, default="lzw")
+    parser.add_argument("--source", dest="source", nargs="+", required=True)
+    arguments = parser.parse_args()
+
+    source = format_source(arguments.source)
+
+    if is_argo():
+        concurrency = 4
+
+    start_standardising(source, arguments.preset, concurrency)
 
 
 if __name__ == "__main__":
