@@ -94,7 +94,7 @@ class FileCheck:
 
     def run(self) -> None:
         gdalinfo_success = True
-        gdalinfo_command = ["gdalinfo", "-stats", "-json"]
+        gdalinfo_command = ["gdalinfo", "-stats", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
         try:
             gdalinfo_process = run_gdal(gdalinfo_command, self.path)
             gdalinfo_result = {}
