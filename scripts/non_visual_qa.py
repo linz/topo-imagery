@@ -94,7 +94,8 @@ class FileCheck:
 
     def run(self) -> None:
         gdalinfo_success = True
-        gdalinfo_command = ["gdalinfo", "-stats", "-json"]
+        # Set GDAL_PAM_ENABLED to NO to temporarily disable PAM support and prevent creation of auxiliary XML file
+        gdalinfo_command = ["gdalinfo", "-stats", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
         try:
             gdalinfo_process = run_gdal(gdalinfo_command, self.path)
             gdalinfo_result = {}
