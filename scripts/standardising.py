@@ -56,7 +56,7 @@ def main() -> None:
 
     concurrency: int = 1
     parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=False, default="lzw")
+    parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     arguments = parser.parse_args()
 
