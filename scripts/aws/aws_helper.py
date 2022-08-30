@@ -100,9 +100,9 @@ def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCrede
     for retry in range(1, retry_count + 1):
         try:
             # Get credentials may give differing access_key and secret_key
-            credentials: AwsFrozenCredentials = get_session(prefix).get_frozen_credentials()
+            credentials: AwsFrozenCredentials = get_session(prefix).get_credentials().get_frozen_credentials()
             return credentials
-        except client_sts.meta.client.exceptions.InvalidIdentityTokenException as e:
+        except client_sts.exceptions.InvalidIdentityTokenException as e:
             get_log().warn("bucket_load_retry", retry_count=retry)
             sleep(0.5 * retry)
             last_error = e
