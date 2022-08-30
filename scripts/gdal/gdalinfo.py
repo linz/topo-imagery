@@ -7,7 +7,7 @@ from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 
 
 def gdal_info(path: str) -> Dict[Any, Any]:
-    gdalinfo_command = ["gdalinfo", "-stats", "-json"]
+    gdalinfo_command = ["gdalinfo", "-stats", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
     try:
         gdalinfo_process = run_gdal(gdalinfo_command, path)
         gdalinfo_result = {}
