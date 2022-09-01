@@ -23,7 +23,7 @@ def create_imagery_stac_item(id_: str, path: str, start_datetime: str, end_datet
             {"rel": "self", "href": f"./{id_}.json", "type": "application/json"},
         ],
         "assets": {
-            "image": {
+            "visual": {
                 "href": path,
                 "type": "image/tiff; application:geotiff; profile:cloud-optimized",
                 "file:checksum": checksum.multihash_as_hex(path),
