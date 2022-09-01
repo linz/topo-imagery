@@ -23,4 +23,4 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
     assert stac["properties"]["datetime"] is None
     assert stac["geometry"]["coordinates"] == [geometry]
     assert stac["bbox"] == bbox
-    assert stac["assets"]["image"]["file:checksum"] == checksum
+    assert stac["assets"]["visual"]["file:checksum"] == checksum
