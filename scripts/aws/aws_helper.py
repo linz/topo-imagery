@@ -1,5 +1,7 @@
 import json
+from dataclasses import dataclass
 from os import environ
+from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
@@ -77,6 +79,35 @@ def get_session(prefix: str) -> boto3.Session:
 
     get_log().info("role_assume", prefix=prefix, bucket=cfg.bucket, role_arn=cfg.roleArn)
     return current_session
+
+
+@dataclass
+class AwsFrozenCredentials:
+    """
+    work around as I couldn't find the type for get_frozen_credentials()
+    """
+
+    access_key: str
+    secret_key: str
+    token: str
+
+
+def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCredentials:
+    """
+    Attempt to get credentials for a prefix, retrying upto retry_count amount of times
+    """
+    last_error: Exception = Exception(f"Invalid retry count: {retry_count}")
+    for retry in range(1, retry_count + 1):
+        try:
+            # Get credentials may give differing access_key and secret_key
+            credentials: AwsFrozenCredentials = get_session(prefix).get_credentials().get_frozen_credentials()
+            return credentials
+        except client_sts.exceptions.InvalidIdentityTokenException as e:
+            get_log().warn("bucket_load_retry", retry_count=retry)
+            sleep(0.5 * retry)
+            last_error = e
+
+    raise last_error
 
 
 def _get_credential_config(prefix: str) -> Optional[CredentialSource]:
