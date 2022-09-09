@@ -10,16 +10,23 @@ PYSTAC_VERSION = "1.0.0"
 class ImageryCollection:
     stac: Dict[str, Any]
 
-    def __init__(self, title: Optional[str] = None, description: Optional[str] = None) -> None:
-        self.stac = {
-            "type": "Collection",
+    def __init__(
+        self, title: Optional[str] = None, description: Optional[str] = None, stac: Optional[Dict[str, Any]] = None
+    ) -> None:
+        if stac:
+            self.stac = stac
+        elif title and description:
+            self.stac = {
+                "type": "Collection",
             "stac_version": STAC_VERSION,
-            "id": str(ulid.ULID()),
-            "title": title,
-            "description": description,
-            "license": "CC-BY-4.0",
-            "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
-        }
+                "id": str(ulid.ULID()),
+                "title": title,
+                "description": description,
+                "license": "CC-BY-4.0",
+                "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
+            }
+        else:
+            raise Exception("incorrect initialising parameters must have 'stac' or 'title and description'")
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
         # Will be implemented in Future PR
