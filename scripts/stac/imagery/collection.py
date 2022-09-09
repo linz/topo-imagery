@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import ulid
 
@@ -18,3 +18,19 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
         }
+
+    def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
+        # Will be implemented in Future PR
+        pass
+
+    def update_spatial_extent(self, item_bbox: List[float]) -> None:
+        # Will be implemented in Future PR
+        pass
+
+    def update_temporal_extent(self, item_start_datetime: str, item_end_datetime: str) -> None:
+        # Will be implemented in Future PR
+        pass
+
+    def update_extent(self, bbox: Optional[List[float]] = None, interval: Optional[List[str]] = None) -> None:
+        # Will be implemented in Future PR
+        pass
