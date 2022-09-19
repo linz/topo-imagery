@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional
 
 import ulid
 
+from scripts.stac.util.STAC_VERSION import STAC_VERSION
+
 PYSTAC_VERSION = "1.0.0"
 
 
@@ -11,7 +13,7 @@ class ImageryCollection:
     def __init__(self, title: Optional[str] = None, description: Optional[str] = None) -> None:
         self.stac = {
             "type": "Collection",
-            "stac_version": PYSTAC_VERSION,
+            "stac_version": STAC_VERSION,
             "id": str(ulid.ULID()),
             "title": title,
             "description": description,
