@@ -4,8 +4,6 @@ import ulid
 
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
-PYSTAC_VERSION = "1.0.0"
-
 
 class ImageryCollection:
     stac: Dict[str, Any]
@@ -18,7 +16,7 @@ class ImageryCollection:
         elif title and description:
             self.stac = {
                 "type": "Collection",
-            "stac_version": STAC_VERSION,
+                "stac_version": STAC_VERSION,
                 "id": str(ulid.ULID()),
                 "title": title,
                 "description": description,

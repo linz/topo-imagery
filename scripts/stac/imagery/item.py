@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.util import checksum
+from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
-
-PYSTAC_VERSION = "1.0.0"
 
 
 class ImageryItem:
@@ -15,7 +15,7 @@ class ImageryItem:
         elif id_ and path:
             self.stac = {
                 "type": "Feature",
-                "stac_version": PYSTAC_VERSION,
+                "stac_version": STAC_VERSION,
                 "id": id_,
                 "links": [
                     {"rel": "self", "href": f"./{id_}.json", "type": "application/json"},
@@ -39,12 +39,12 @@ class ImageryItem:
             "datetime": None,
         }
 
-    def update_spatail(self, geometry: List[List[float]], bbox: List[float]) -> None:
+    def update_spatial(self, geometry: List[List[float]], bbox: List[float]) -> None:
         self.stac["geometry"] = {"type": "Polygon", "coordinates": [geometry]}
         self.stac["bbox"] = bbox
 
-    def add_collection(self, title: str, path: str) -> None:
-        self.stac["collection"] = title
+    def add_collection(self, collection: ImageryCollection, path: str) -> None:
+        self.stac["collection"] = collection.stac["title"]
         self.add_link(rel="collection", href=path)
         self.add_link(rel="parent", href=path)
 

@@ -32,8 +32,8 @@ def create_imagery_items(files: List[str], start_datetime: str, end_datetime: st
 
         item = ImageryItem(id_, file)
         item.update_datetime(start_datetime, end_datetime)
-        item.update_spatail(geometry, bbox)
-        item.add_collection(collection.stac["title"], collection_path)
+        item.update_spatial(geometry, bbox)
+        item.add_collection(collection, collection_path)
 
         tmp_file_path = os.path.join("/tmp/", f"{id_}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
