@@ -23,7 +23,6 @@ def main() -> None:
     parser.add_argument("--collection", dest="collection", help="path to collection.json", required=True)
     arguments = parser.parse_args()
 
-    source = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     collection_path = arguments.collection
