@@ -21,11 +21,8 @@ def main() -> None:
         "--end_datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
     parser.add_argument("--collection", dest="collection", help="path to collection.json", required=True)
-    arguments = parser.parse_args()
 
-    start_datetime = format_date(arguments.start_datetime)
-    end_datetime = format_date(arguments.end_datetime)
-    collection_path = arguments.collection
+    arguments = parser.parse_args()
 
     source = format_source(arguments.source)
 
@@ -35,7 +32,12 @@ def main() -> None:
     standardised_files = start_standardising(source, arguments.preset, concurrency)
     if standardised_files:
         non_visual_qa(standardised_files)
-        create_imagery_items(standardised_files, start_datetime, end_datetime, collection_path)
+        create_imagery_items(
+            standardised_files,
+            format_date(arguments.start_datetime),
+            format_date(arguments.end_datetime),
+            arguments.collection,
+        )
     else:
         get_log().info(
             "Non Visual QA skipped because no file has been standardised", action="standardise_validate", reason="skip"
