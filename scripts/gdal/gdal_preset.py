@@ -104,6 +104,7 @@ GDAL_PRESET_GRAY_WEBP = [
     "sparse_ok=true",
 ]
 
+
 def get_gdal_command(preset: str) -> List[str]:
     get_log().info("gdal_preset", preset=preset)
     if preset == "lzw":
