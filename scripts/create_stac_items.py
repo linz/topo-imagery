@@ -1,11 +1,10 @@
-import argparse
 import json
 import os
 from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import format_date, format_source, valid_date
+from scripts.cli.cli_helper import format_date, format_source, parse_multiple_arguments
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.files.fs import read, write
 from scripts.logging.time_helper import time_in_ms
@@ -43,23 +42,13 @@ def create_imagery_items(files: List[str], start_datetime: str, end_datetime: st
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument(
-        "--start_datetime", dest="start_datetime", help="start datetime in format YYYY-MM-DD", type=valid_date, required=True
-    )
-    parser.add_argument(
-        "--end_datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
-    )
-    parser.add_argument("--collection", dest="collection", help="path to collection.json", required=True)
-    arguments = parser.parse_args()
+    arguments = parse_multiple_arguments()
 
     source = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    collection_path = arguments.collection
 
-    create_imagery_items(source, start_datetime, end_datetime, collection_path)
+    create_imagery_items(source, start_datetime, end_datetime, arguments.collection)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,26 @@ def parse_source() -> List[str]:
     return format_source(arguments.source)
 
 
+def parse_multiple_arguments() -> argparse.Namespace:
+    """Parse the CLI arguments '--preset', '--source', '--start_datetime', '--end_datetime' and '--collection'
+
+    Returns:
+        argparse.Namespace: the parsed arguments
+    """
+    parser_args = argparse.ArgumentParser()
+    parser_args.add_argument("--preset", dest="preset", required=True)
+    parser_args.add_argument("--source", dest="source", nargs="+", required=True)
+    parser_args.add_argument(
+        "--start_datetime", dest="start_datetime", help="start datetime in format YYYY-MM-DD", type=valid_date, required=True
+    )
+    parser_args.add_argument(
+        "--end_datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
+    )
+    parser_args.add_argument("--collection", dest="collection", help="path to collection.json", required=True)
+
+    return parser_args.parse_args()
+
+
 def is_argo() -> bool:
     return bool(environ.get("ARGO_TEMPLATE"))
 
