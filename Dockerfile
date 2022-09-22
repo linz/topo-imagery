@@ -20,5 +20,6 @@ RUN poetry config virtualenvs.create false \
 COPY ./scripts/ /app/scripts/
 
 ENV PYTHONPATH="/app"
+ENV GTIFF_SRS_SOURCE="EPSG"
 
 WORKDIR /app/scripts

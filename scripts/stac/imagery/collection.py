@@ -4,7 +4,6 @@ import ulid
 
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
-
 class ImageryCollection:
     stac: Dict[str, Any]
 
