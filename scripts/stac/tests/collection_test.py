@@ -22,7 +22,7 @@ def test_imagery_stac_collection_update() -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [start_datetime, end_datetime]
 
 
-def test_imagery_stac_collction_update_twice() -> None:
+def test_imagery_stac_collection_update_twice() -> None:
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
     collection = ImageryCollection(title, description)
