@@ -10,10 +10,10 @@ from scripts.standardising import start_standardising
 def main() -> None:
 
     concurrency: int = 1
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=True)
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser.parse_args()
+    parse_args = argparse.ArgumentParser()
+    parse_args.add_argument("--preset", dest="preset", required=True)
+    parse_args.add_argument("--source", dest="source", nargs="+", required=True)
+    arguments = parse_args.parse_args()
 
     source = format_source(arguments.source)
 
