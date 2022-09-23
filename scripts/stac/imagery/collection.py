@@ -105,4 +105,3 @@ class ImageryCollection:
             self.stac["extent"]["spatial"]["bbox"] = bbox
         if interval:
             self.stac["extent"]["temporal"]["interval"] = interval
-            
