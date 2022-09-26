@@ -1,10 +1,8 @@
-from typing import List, Tuple
-
-from scripts.gdal.gdalinfo import gdal_info
+from typing import Any, Dict, List, Tuple
 
 
-def get_extents(path: str) -> Tuple[List[List[float]], List[float]]:
-    corner_coordinates = gdal_info(path)["cornerCoordinates"]
+def get_extents(gdalinfo_result: Dict[Any, Any]) -> Tuple[List[List[float]], List[float]]:
+    corner_coordinates = gdalinfo_result["cornerCoordinates"]
 
     upper_left = [corner_coordinates["upperLeft"][0], corner_coordinates["upperLeft"][1]]
     upper_right = [corner_coordinates["upperRight"][0], corner_coordinates["upperRight"][1]]

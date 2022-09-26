@@ -1,19 +1,21 @@
+import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import ulid
 
+from scripts.files.fs import read
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 
 class ImageryCollection:
     stac: Dict[str, Any]
+    path: str
 
-    def __init__(
-        self, title: Optional[str] = None, description: Optional[str] = None, stac: Optional[Dict[str, Any]] = None
-    ) -> None:
-        if stac:
-            self.stac = stac
+    def __init__(self, title: Optional[str] = None, description: Optional[str] = None, path: Optional[str] = None) -> None:
+        if path:
+            self.stac = json.loads(read(path))
+            self.path = path
         elif title and description:
             self.stac = {
                 "type": "Collection",

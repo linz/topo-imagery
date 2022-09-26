@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, Dict, List, Optional
 
 from linz_logger import get_log
 
@@ -15,30 +15,43 @@ def non_visual_qa(files: List[str]) -> None:
 
     get_log().info("non_visual_qa_start")
 
-    # Get srs
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
-    gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
-    if gdalsrsinfo_result.stderr:
-        raise Exception(
-            f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"
-        )
-    srs = gdalsrsinfo_result.stdout
+    srs = get_srs()
 
     for file in files:
         if not is_tiff(file):
             get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
             continue
         get_log().info(f"Non Visual QA {file}", file=file)
-        file_check = FileCheck(file, srs)
-        gdalinfo_result = gdal_info(path=file, file_check=file_check)
-        file_check.validate(gdalinfo_result)
 
-        if not file_check.is_valid():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
-        else:
-            get_log().info("non_visual_qa_passed", file=file_check.path)
+        qa_file(file, srs)
 
     get_log().info("non_visual_qa_end", duration=time_in_ms() - start_time)
+
+
+def get_srs() -> bytes:
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
+    gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
+    if gdalsrsinfo_result.stderr:
+        raise Exception(
+            f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"
+        )
+    return gdalsrsinfo_result.stdout
+
+
+def qa_file(file: str, srs: bytes, gdalinfo_result: Optional[Dict[Any, Any]] = None) -> bool:
+    file_check = FileCheck(file, srs)
+
+    if not gdalinfo_result:
+        gdalinfo_result = gdal_info(path=file, file_check=file_check)
+
+    file_check.validate(gdalinfo_result)
+
+    if not file_check.is_valid():
+        get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+    else:
+        get_log().info("non_visual_qa_passed", file=file_check.path)
+
+    return file_check.is_valid()
 
 
 def main() -> None:

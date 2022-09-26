@@ -31,6 +31,7 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     title = "Collection"
     description = "Collection Description"
     collection = ImageryCollection(title=title, description=description)
+    collection.path = "fake/path.json"
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)
@@ -38,7 +39,7 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
     item = ImageryItem(id_, path)
 
-    item.add_collection(collection, "fake/path.json")
+    item.add_collection(collection)
 
     assert item.stac["collection"] == "Collection"
     assert {"rel": "collection", "href": "fake/path.json", "type": "application/json"} in item.stac["links"]

@@ -1,5 +1,7 @@
+import json
 from typing import Any, Dict, List, Optional
 
+from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -8,10 +10,12 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 class ImageryItem:
     stac: Dict[str, Any]
+    path: str
 
-    def __init__(self, id_: Optional[str] = None, path: Optional[str] = None, stac: Optional[Dict[str, Any]] = None) -> None:
-        if stac:
-            self.stac = stac
+    def __init__(self, id_: Optional[str] = None, path: Optional[str] = None) -> None:
+        if path and not id_:
+            self.stac = json.loads(read(path))
+            self.path = path
         elif id_ and path:
             self.stac = {
                 "type": "Feature",
@@ -30,7 +34,7 @@ class ImageryItem:
                 "stac_extensions": [StacExtensions.file.value],
             }
         else:
-            raise Exception("incorrect initialising parameters must have 'stac' or 'id_ and path'")
+            raise Exception("incorrect initialising parameters must have 'path' or 'id_ and path'")
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
         self.stac["properties"] = {
@@ -43,10 +47,11 @@ class ImageryItem:
         self.stac["geometry"] = {"type": "Polygon", "coordinates": [geometry]}
         self.stac["bbox"] = bbox
 
-    def add_collection(self, collection: ImageryCollection, path: str) -> None:
+    def add_collection(self, collection: ImageryCollection) -> None:
         self.stac["collection"] = collection.stac["title"]
-        self.add_link(rel="collection", href=path)
-        self.add_link(rel="parent", href=path)
+        if collection.path:
+            self.add_link(rel="collection", href=collection.path)
+            self.add_link(rel="parent", href=collection.path)
 
     def add_link(self, rel: str, href: str, file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
