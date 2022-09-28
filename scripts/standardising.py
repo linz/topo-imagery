@@ -40,7 +40,7 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
 def standardising(file: str, preset: str) -> str:
     output_folder = "/tmp/"
 
-    get_log().info(f"standardising {file}", source=file)
+    get_log().info(f"standardising {file}", path=file)
 
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
