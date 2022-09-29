@@ -2,7 +2,7 @@ import argparse
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import format_source, is_argo, valid_date
+from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac_items import create_item
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdalinfo import gdal_info
@@ -55,7 +55,7 @@ def main() -> None:
             get_log().trace("file_not_valid_create_stac_skipped", file=file)
             continue
         if collection:
-            create_item(file, arguments.start_datetime, arguments.end_datetime, collection, gdalinfo_result)
+            create_item(file, format_date(arguments.start_datetime), format_date(arguments.end_datetime), collection, gdalinfo_result)
 
 
 if __name__ == "__main__":
