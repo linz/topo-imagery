@@ -11,14 +11,14 @@ from scripts.stac.imagery.collection import ImageryCollection
 
 def initialise_imagery_collection(title: str, description: str) -> None:
     start_time = time_in_ms()
-    get_log().info("finalise_stac_collection_imagery_start", title=title, description=description)
+    get_log().info("initialise_stac_collection_imagery_start", title=title, description=description)
 
     collection = ImageryCollection(title=title, description=description)
 
     tmp_file_path = os.path.join("/tmp/", "collection.json")
     write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
 
-    get_log().info("create_stac_collection_imagery_complete", title=title, duration=time_in_ms() - start_time)
+    get_log().info("initialise_stac_collection_imagery_complete", title=title, duration=time_in_ms() - start_time)
 
 
 def main() -> None:
