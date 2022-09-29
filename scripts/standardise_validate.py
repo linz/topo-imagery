@@ -55,7 +55,9 @@ def main() -> None:
             get_log().trace("file_not_valid_create_stac_skipped", file=file)
             continue
         if collection:
-            create_item(file, format_date(arguments.start_datetime), format_date(arguments.end_datetime), collection, gdalinfo_result)
+            create_item(
+                file, format_date(arguments.start_datetime), format_date(arguments.end_datetime), collection, gdalinfo_result
+            )
 
 
 if __name__ == "__main__":
