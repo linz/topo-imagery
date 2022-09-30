@@ -10,7 +10,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 class ImageryItem:
     stac: Dict[str, Any]
-    path: str
+    path: Optional[str] = None
 
     def __init__(self, id_: Optional[str] = None, path: Optional[str] = None) -> None:
         if path and not id_:

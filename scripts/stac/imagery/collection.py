@@ -10,7 +10,7 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 class ImageryCollection:
     stac: Dict[str, Any]
-    path: str
+    path: Optional[str] = None
 
     def __init__(self, title: Optional[str] = None, description: Optional[str] = None, path: Optional[str] = None) -> None:
         if path:
