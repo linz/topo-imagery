@@ -43,7 +43,11 @@ def main() -> None:
             continue
         gdalinfo_result = gdal_info(file)
         item = create_item(
-            file, format_date(arguments.start_datetime), format_date(arguments.end_datetime), arguments.collection_id, gdalinfo_result
+            file,
+            format_date(arguments.start_datetime),
+            format_date(arguments.end_datetime),
+            arguments.collection_id,
+            gdalinfo_result,
         )
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
