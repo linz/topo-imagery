@@ -1,31 +1,37 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import ulid
 
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
+if TYPE_CHECKING:
+    from scripts.stac.imagery.item import ImageryItem
+
 
 class ImageryCollection:
     stac: Dict[str, Any]
 
-    def __init__(
-        self, title: Optional[str] = None, description: Optional[str] = None, stac: Optional[Dict[str, Any]] = None
-    ) -> None:
-        if stac:
-            self.stac = stac
-        elif title and description:
-            self.stac = {
-                "type": "Collection",
-                "stac_version": STAC_VERSION,
-                "id": str(ulid.ULID()),
-                "title": title,
-                "description": description,
-                "license": "CC-BY-4.0",
-                "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
-            }
-        else:
-            raise Exception("incorrect initialising parameters must have 'stac' or 'title and description'")
+    def __init__(self, title: str, description: str, collection_id: Optional[str] = None) -> None:
+        if not collection_id:
+            collection_id = str(ulid.ULID())
+
+        self.stac = {
+            "type": "Collection",
+            "stac_version": STAC_VERSION,
+            "id": collection_id,
+            "title": title,
+            "description": description,
+            "license": "CC-BY-4.0",
+            "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
+        }
+
+    def add_item(self, item: "ImageryItem") -> None:
+        item_self_link = next((feat for feat in item.stac["links"] if feat["rel"] == "self"), None)
+        if item_self_link:
+            self.add_link(href=item_self_link["href"])
+            self.update_temporal_extent(item.stac["properties"]["start_datetime"], item.stac["properties"]["end_datetime"])
+            self.update_spatial_extent(item.stac["bbox"])
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
@@ -34,11 +40,12 @@ class ImageryCollection:
         if "extent" not in self.stac:
             self.update_extent(bbox=item_bbox)
             return
-        if not self.stac["extent"]["spatial"]["bbox"]:
+        if self.stac["extent"]["spatial"]["bbox"] == [None]:
             self.update_extent(bbox=item_bbox)
             return
 
-        bbox = self.stac["extent"]["spatial"]["bbox"]
+        bbox = self.stac["extent"]["spatial"]["bbox"][0]
+
         min_x = min(bbox[0], bbox[2])
         max_x = max(bbox[0], bbox[2])
         min_y = min(bbox[1], bbox[3])
@@ -64,11 +71,11 @@ class ImageryCollection:
         if "extent" not in self.stac:
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
-        if not self.stac["extent"]["temporal"]["interval"]:
+        if self.stac["extent"]["temporal"]["interval"] == [None]:
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
 
-        interval = self.stac["extent"]["temporal"]["interval"]
+        interval = self.stac["extent"]["temporal"]["interval"][0]
 
         item_start = datetime.strptime(item_start_datetime, "%Y-%m-%dT%H:%M:%SZ")
         item_end = datetime.strptime(item_end_datetime, "%Y-%m-%dT%H:%M:%SZ")
@@ -96,12 +103,12 @@ class ImageryCollection:
         if "extent" not in self.stac:
             self.stac["extent"] = {
                 "spatial": {
-                    "bbox": bbox,
+                    "bbox": [bbox],
                 },
-                "temporal": {"interval": interval},
+                "temporal": {"interval": [interval]},
             }
             return
         if bbox:
-            self.stac["extent"]["spatial"]["bbox"] = bbox
+            self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
-            self.stac["extent"]["temporal"]["interval"] = interval
+            self.stac["extent"]["temporal"]["interval"] = [interval]
