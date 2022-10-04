@@ -1,5 +1,6 @@
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.stac.imagery.item import ImageryCollection, ImageryItem
+from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.item import ImageryItem
 
 
 def test_imagery_stac_item(mocker) -> None:  # type: ignore
@@ -25,13 +26,14 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
     assert item.stac["geometry"]["coordinates"] == [geometry]
     assert item.stac["bbox"] == bbox
     assert item.stac["assets"]["visual"]["file:checksum"] == checksum
+    assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
 
 
 def test_imagery_add_collection(mocker) -> None:  # type: ignore
     title = "Collection"
     description = "Collection Description"
-    collection = ImageryCollection(title=title, description=description)
-    collection.path = "fake/path.json"
+    ulid = 'fake_ulid'
+    collection = ImageryCollection(title=title, description=description, ulid_id=ulid)
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)
@@ -41,5 +43,6 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
 
     item.add_collection(collection)
 
-    assert item.stac["collection"] == "Collection"
-    assert {"rel": "collection", "href": "fake/path.json", "type": "application/json"} in item.stac["links"]
+    assert item.stac["collection"] == ulid
+    assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+    assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]

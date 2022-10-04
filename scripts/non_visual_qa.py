@@ -38,7 +38,7 @@ def get_srs() -> bytes:
     return gdalsrsinfo_result.stdout
 
 
-def qa_file(file: str, srs: bytes, gdalinfo_result: Optional[Dict[Any, Any]] = None) -> bool:
+def qa_file(file: str, srs: bytes, gdalinfo_result: Optional[Dict[Any, Any]] = None) -> None:
     file_check = FileCheck(file, srs)
 
     if not gdalinfo_result:
@@ -50,8 +50,6 @@ def qa_file(file: str, srs: bytes, gdalinfo_result: Optional[Dict[Any, Any]] = N
         get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
     else:
         get_log().info("non_visual_qa_passed", file=file_check.path)
-
-    return file_check.is_valid()
 
 
 def main() -> None:
