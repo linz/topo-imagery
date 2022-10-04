@@ -11,15 +11,15 @@ from scripts.standardising import start_standardising
 
 def main() -> None:
 
-    concurrency: int = 1
-
     parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
+    parser.add_argument("--preset", dest="preset", required=True)
 
     arguments = parser.parse_args()
 
     source = format_source(arguments.source)
+
+    concurrency: int = 1
 
     if is_argo():
         concurrency = 4
