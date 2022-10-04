@@ -47,13 +47,14 @@ def test_imagery_stac_collection_update_twice() -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime_one, end_datetime_two]]
     assert collection.stac["extent"]["spatial"]["bbox"] == [[174.889641, -41.217532, 174.922965, -41.203521]]
 
+
 def test_add_item(mocker) -> None:  # type: ignore
-    title = "Collection"
-    description = "Collection Description"
-    ulid = 'fake_ulid'
+    title = "Collection Test"
+    description = "Collection Test Description"
+    ulid = "ulid"
     collection = ImageryCollection(title=title, description=description, ulid_id=ulid)
 
-    path = "./test/BR34_5000_0302.tiff"
+    path = "./test/BR34_5000_0304.tiff"
     id_ = get_file_name_from_path(path)
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)

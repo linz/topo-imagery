@@ -7,6 +7,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 if TYPE_CHECKING:
     from scripts.stac.imagery.collection import ImageryCollection
 
+
 class ImageryItem:
     stac: Dict[str, Any]
 

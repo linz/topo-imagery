@@ -7,13 +7,15 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 if TYPE_CHECKING:
     from scripts.stac.imagery.item import ImageryItem
+
+
 class ImageryCollection:
     stac: Dict[str, Any]
 
-    def __init__(self, title: str, description: str, ulid_id: Optional[str]= None) -> None:
+    def __init__(self, title: str, description: str, ulid_id: Optional[str] = None) -> None:
         if not ulid_id:
             ulid_id = str(ulid.ULID())
-        
+
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
@@ -72,7 +74,7 @@ class ImageryCollection:
         if self.stac["extent"]["temporal"]["interval"] == [None]:
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
-        
+
         interval = self.stac["extent"]["temporal"]["interval"][0]
 
         item_start = datetime.strptime(item_start_datetime, "%Y-%m-%dT%H:%M:%SZ")

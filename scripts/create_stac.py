@@ -46,10 +46,9 @@ def main() -> None:
             file, format_date(arguments.start_datetime), format_date(arguments.end_datetime), collection, gdalinfo_result
         )
         collection.add_item(item)
-            
+
         tmp_file_path = os.path.join("/tmp/", "collection.json")
         write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
-
 
 
 def create_item(
@@ -75,6 +74,7 @@ def create_item(
     write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
     get_log().info("imagery_stac_item_created", file=file)
     return item
+
 
 if __name__ == "__main__":
     main()

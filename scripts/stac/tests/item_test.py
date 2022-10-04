@@ -32,7 +32,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
 def test_imagery_add_collection(mocker) -> None:  # type: ignore
     title = "Collection"
     description = "Collection Description"
-    ulid = 'fake_ulid'
+    ulid = "fake_ulid"
     collection = ImageryCollection(title=title, description=description, ulid_id=ulid)
 
     path = "./test/BR34_5000_0302.tiff"
