@@ -89,8 +89,8 @@ class FileCheck:
     def validate(self, gdalinfo_result: Dict[Any, Any]) -> None:
         if self.is_valid():
             self.check_no_data(gdalinfo_result)
-            self.check_band_count(gdalinfo_result)
-            self.check_color_interpretation(gdalinfo_result)
+            # self.check_band_count(gdalinfo_result)
+            # self.check_color_interpretation(gdalinfo_result)
             gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
             try:
                 gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, self.path)
