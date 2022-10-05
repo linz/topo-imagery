@@ -1,4 +1,4 @@
-from scripts.non_visual_qa import FileCheck
+from scripts.files.file_check import FileCheck
 
 
 def test_check_band_count_valid() -> None:
