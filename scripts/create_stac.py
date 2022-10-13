@@ -19,14 +19,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--collection_id", dest="collection_id", help="Unique id for collection", required=False)
-    parser.add_argument("--title", dest="title", help="collection title", required=True)
-    parser.add_argument("--description", dest="description", help="collection description", required=True)
     parser.add_argument(
         "--start_datetime", dest="start_datetime", help="start datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
     parser.add_argument(
         "--end_datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
+    parser.add_argument("--title", dest="title", help="collection title", required=True)
+    parser.add_argument("--description", dest="description", help="collection description", required=True)
 
     arguments = parser.parse_args()
 
@@ -51,7 +51,7 @@ def main() -> None:
         )
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
-        get_log().info("imagery_stac_item_created", file=file)
+        get_log().info("stac_item_created", file=file)
 
         collection.add_item(item.stac)
 
