@@ -53,7 +53,7 @@ def main() -> None:
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("imagery_stac_item_created", file=file)
 
-        collection.add_item(item)
+        collection.add_item(item.stac)
 
         tmp_file_path = os.path.join("/tmp/", "collection.json")
         write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
