@@ -28,7 +28,7 @@ def main() -> None:
         if not is_json(file):
             get_log().trace("skipping file as not json", file=file, action="collection_from_items", reason="skip")
             continue
-        
+
         item_stac = json.loads(read(file).decode("utf-8"))
 
         if not collection.stac["id"]:
@@ -36,11 +36,15 @@ def main() -> None:
             get_log().info(f"collection id {collection.stac['id']}")
 
         elif not collection.stac["id"] == item_stac["collection"]:
-            get_log().trace("skipping file as item.collection does not match collection.id", file=file, action="collection_from_items", reason="skip")
+            get_log().trace(
+                "skipping file as item.collection does not match collection.id",
+                file=file,
+                action="collection_from_items",
+                reason="skip",
+            )
             continue
 
         collection.add_item(item_stac)
-
 
     tmp_file_path = os.path.join(arguments.destination, "collection.json")
     write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
