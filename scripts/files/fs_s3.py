@@ -65,3 +65,13 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
 
     get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
     return file
+
+
+def bucket_name_from_path(path: str) -> str:
+    path_parts = path.replace("s3://", "").split("/")
+    return path_parts.pop(0)
+
+
+def prefix_from_path(path: str) -> str:
+    bucket_name = bucket_name_from_path(path)
+    return path.replace(f"s3://{bucket_name}/", "")
