@@ -20,7 +20,7 @@ class ImageryItem:
             "assets": {
                 "visual": {
                     "href": os.path.join(".", os.path.basename(file)),
-                    "type": "image/tiff; application:geotiff; profile:cloud-optimized",
+                    "type": "image/tiff; application=geotiff; profile=cloud-optimized",
                     "file:checksum": checksum.multihash_as_hex(file),
                 }
             },
