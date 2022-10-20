@@ -39,7 +39,7 @@ authors = [
 python = "^3.8.10"
 boto3 = "^1.24.12"
 linz-logger = "^0.9.0"
-certifi = "^2022.6.15"
+certifi = "^2022.9.24"
 py-multihash = "^2.0.1"
 shapely = "^1.8.5"
 
