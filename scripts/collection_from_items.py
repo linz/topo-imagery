@@ -36,14 +36,14 @@ def main() -> None:
     for response in response_iterator:
         for contents_data in response["Contents"]:
             key = contents_data["Key"]
- 
+
             file = os.path.join(f"s3://{bucket_name_from_path(uri)}", key)
 
             if not is_json(file):
                 get_log().info("skipping file as not json", file=file, action="collection_from_items", reason="skip")
                 continue
 
-            item_stac = json .loads(read(file).decode("utf-8"))
+            item_stac = json.loads(read(file).decode("utf-8"))
 
             if not arguments.collection_id == item_stac["collection"]:
                 get_log().info(
