@@ -1,12 +1,9 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import ulid
 
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
-
-if TYPE_CHECKING:
-    from scripts.stac.imagery.item import ImageryItem
 
 
 class ImageryCollection:
@@ -26,12 +23,13 @@ class ImageryCollection:
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
         }
 
-    def add_item(self, item: "ImageryItem") -> None:
-        item_self_link = next((feat for feat in item.stac["links"] if feat["rel"] == "self"), None)
+    def add_item(self, item: Dict[Any, Any]) -> None:
+
+        item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
             self.add_link(href=item_self_link["href"])
-            self.update_temporal_extent(item.stac["properties"]["start_datetime"], item.stac["properties"]["end_datetime"])
-            self.update_spatial_extent(item.stac["bbox"])
+            self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
+            self.update_spatial_extent(item["bbox"])
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})

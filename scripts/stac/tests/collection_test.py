@@ -65,7 +65,7 @@ def test_add_item(mocker) -> None:  # type: ignore
     end_datetime = "2021-01-27 00:00:00Z"
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
-    collection.add_item(item)
+    collection.add_item(item.stac)
 
     assert {"rel": "item", "href": f"./{id_}.json", "type": "application/json"} in collection.stac["links"]
     assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]

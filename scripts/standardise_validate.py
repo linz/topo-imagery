@@ -31,6 +31,9 @@ def main() -> None:
     arguments = parser.parse_args()
 
     source = format_source(arguments.source)
+    start_datetime = format_date(arguments.start_datetime)
+    end_datetime = format_date(arguments.end_datetime)
+    collection_id = arguments.collection_id
 
     if is_argo():
         concurrency = 4
@@ -47,16 +50,11 @@ def main() -> None:
             continue
         gdalinfo_result = gdal_info(file)
         qa_file(file, srs, gdalinfo_result)
-        item = create_item(
-            file,
-            format_date(arguments.start_datetime),
-            format_date(arguments.end_datetime),
-            arguments.collection_id,
-            gdalinfo_result,
-        )
+        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo_result)
+
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
-        get_log().info("imagery_stac_item_created", file=file)
+        get_log().info("stac item written to tmp", location=tmp_file_path)
 
 
 if __name__ == "__main__":
