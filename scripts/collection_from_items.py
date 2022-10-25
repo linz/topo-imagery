@@ -29,27 +29,33 @@ def main() -> None:
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
-    connection = client("s3")
-    for key in connection.list_objects(Bucket=bucket_name_from_path(uri), Prefix=prefix_from_path(uri))["Contents"]:
-        file = os.path.join(f"s3://{bucket_name_from_path(uri)}", key["Key"])
+    s3_client = client("s3")
 
-        if not is_json(file):
-            get_log().info("skipping file as not json", file=file, action="collection_from_items", reason="skip")
-            continue
+    paginator = s3_client.get_paginator("list_objects_v2")
+    response_iterator = paginator.paginate(Bucket=bucket_name_from_path(uri), Prefix=prefix_from_path(uri))
+    for response in response_iterator:
+        for contents_data in response["Contents"]:
+            key = contents_data["Key"]
+ 
+            file = os.path.join(f"s3://{bucket_name_from_path(uri)}", key)
 
-        item_stac = json.loads(read(file).decode("utf-8"))
+            if not is_json(file):
+                get_log().info("skipping file as not json", file=file, action="collection_from_items", reason="skip")
+                continue
 
-        if not arguments.collection_id == item_stac["collection"]:
-            get_log().info(
-                "skipping file as item.collection does not match collection_id",
-                file=file,
-                action="collection_from_items",
-                reason="skip",
-            )
-            continue
+            item_stac = json .loads(read(file).decode("utf-8"))
 
-        collection.add_item(item_stac)
-        get_log().info("item added to collection", item=item_stac["id"], file=file)
+            if not arguments.collection_id == item_stac["collection"]:
+                get_log().info(
+                    "skipping file as item.collection does not match collection_id",
+                    file=file,
+                    action="collection_from_items",
+                    reason="skip",
+                )
+                continue
+
+            collection.add_item(item_stac)
+            get_log().info("item added to collection", item=item_stac["id"], file=file)
 
     valid_item_count = [dictionary["rel"] for dictionary in collection.stac["links"]].count("item")
     get_log().info("All valid items added to collection", valid_item_count=valid_item_count)
