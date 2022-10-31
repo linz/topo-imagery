@@ -113,7 +113,6 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
         # delete the source
         src_s3_object = s3.Object(src_s3_path.bucket, src_key)
         src_s3_object.delete()
-        get_log().debug("rename_s3_success", path=path, destination=new_path, duration=time_in_ms() - start_time)
     except s3.meta.client.exceptions.ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("rename_s3_needs_credentials", path=path, destination=new_path)
@@ -135,6 +134,8 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             error=f"The specified file does not seem to exist: {nsk}",
         )
         raise nsk
+    get_log().debug("rename_s3_success", path=path, destination=new_path, duration=time_in_ms() - start_time)
+    return None
 
 
 def bucket_name_from_path(path: str) -> str:
