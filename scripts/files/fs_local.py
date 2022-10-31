@@ -1,3 +1,6 @@
+import os
+
+
 def write(destination: str, source: bytes) -> None:
     """Write the source to the local destination file.
 
@@ -20,3 +23,13 @@ def read(path: str) -> bytes:
     """
     with open(path, "rb") as file:
         return file.read()
+
+
+def rename(path: str, new_path: str) -> None:
+    """Rename a file.
+
+    Args:
+        path (str): original path
+        new_path (str): path to be renamed with
+    """
+    os.rename(src=path, dst=new_path)

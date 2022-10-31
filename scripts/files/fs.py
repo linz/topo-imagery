@@ -1,5 +1,11 @@
+from linz_logger import get_log
+
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
+
+
+class FsException(Exception):
+    pass
 
 
 def write(destination: str, source: bytes) -> None:
@@ -28,3 +34,24 @@ def read(path: str) -> bytes:
         return fs_s3.read(path)
 
     return fs_local.read(path)
+
+
+def rename(path: str, new_path: str) -> None:
+    """Rename a file (path to new_path).
+
+    Args:
+        path (str): the path of the original file.
+        new_path (str): the path of which the file should be renamed to.
+
+    Raises:
+        FsException: an exception if the path are not on the same file system.
+    """
+    if path == new_path:
+        get_log().info("rename_skipped_same_name", path=path, destination=new_path)
+    else:
+        if is_s3(path) and is_s3(new_path):
+            fs_s3.rename(path, new_path)
+        elif not is_s3(path) and not is_s3(new_path):
+            fs_local.rename(path, new_path)
+        else:
+            raise FsException("The files to rename have to be on the same file system.")

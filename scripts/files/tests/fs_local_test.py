@@ -5,7 +5,7 @@ from typing import Generator
 
 import pytest
 
-from scripts.files.fs_local import read, write
+from scripts.files.fs_local import read, rename, write
 
 
 @pytest.fixture(name="setup", autouse=True)
@@ -36,3 +36,15 @@ def test_read(setup: str) -> None:
     write(path, content)
     file_content = read(path)
     assert file_content == content
+
+
+@pytest.mark.dependency(name="rename", depends=["write"])
+def test_rename(setup: str) -> None:
+    content = b"content"
+    target = setup
+    path = os.path.join(target, "testA.file")
+    write(path, content)
+    new_path = os.path.join(target, "testB.file")
+    rename(path, new_path)
+    assert os.path.exists(new_path)
+    assert not os.path.exists(path)
