@@ -4,10 +4,6 @@ from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 
 
-class FsException(Exception):
-    pass
-
-
 def write(destination: str, source: bytes) -> None:
     """Write a file from its source to a destination path.
 
