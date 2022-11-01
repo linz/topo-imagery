@@ -95,16 +95,13 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
         )
         raise Exception(f"Files {path} and {new_path} are not on the same S3 bucket.")
 
-    src_key = src_s3_path.key
-    dst_key = dst_s3_path.key
-    copy_source = {"Bucket": src_s3_path.bucket, "Key": src_key}
     s3 = boto3.resource("s3")
     try:
         if needs_credentials:
             s3 = get_session(path).client("s3")
 
-        dst_s3_object = s3.Object(dst_s3_path.bucket, dst_key)
-        src_s3_object = s3.Object(src_s3_path.bucket, src_key)
+        dst_s3_object = s3.Object(dst_s3_path.bucket, dst_s3_path.key)
+        src_s3_object = s3.Object(src_s3_path.bucket, src_s3_path.key)
         try:
             # check if the original file exists
             src_s3_object.load()
@@ -131,9 +128,9 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "404":
                 # OK: the destination file does not already exists
-                dst_s3_object.copy(copy_source)
+                dst_s3_object.copy({"Bucket": src_s3_path.bucket, "Key": src_s3_path.key})
                 # delete the source
-                src_s3_object = s3.Object(src_s3_path.bucket, src_key)
+                src_s3_object = s3.Object(src_s3_path.bucket, src_s3_path.key)
                 src_s3_object.delete()
                 get_log().debug("rename_s3_success", path=path, destination=new_path, duration=time_in_ms() - start_time)
     except s3.meta.client.exceptions.ClientError as ce:
