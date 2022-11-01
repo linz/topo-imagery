@@ -6,15 +6,12 @@ from scripts.cli.cli_helper import parse_source
 from scripts.files.file_check import FileCheck
 from scripts.files.files_helper import is_tiff
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 
 
 def non_visual_qa(files: List[str]) -> None:
     start_time = time_in_ms()
-
     get_log().info("non_visual_qa_start")
-
     srs = get_srs()
 
     for file in files:
@@ -22,8 +19,7 @@ def non_visual_qa(files: List[str]) -> None:
             get_log().trace("non_visual_qa_file_not_tiff_skipped", file=file)
             continue
         get_log().info(f"Non Visual QA {file}", file=file)
-
-        qa_file(file, srs)
+        qa_file(FileCheck(file, srs))
 
     get_log().info("non_visual_qa_end", duration=time_in_ms() - start_time)
 
@@ -38,18 +34,11 @@ def get_srs() -> bytes:
     return gdalsrsinfo_result.stdout
 
 
-def qa_file(file: str, srs: bytes, gdalinfo_result: Optional[Dict[Any, Any]] = None) -> None:
-    file_check = FileCheck(file, srs)
-
-    if not gdalinfo_result:
-        gdalinfo_result = gdal_info(path=file, file_check=file_check)
-
-    file_check.validate(gdalinfo_result)
-
-    if not file_check.is_valid():
-        get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+def qa_file(file: FileCheck) -> None:
+    if not file.validate():
+        get_log().info("non_visual_qa_errors", file=file.path, errors=file.errors)
     else:
-        get_log().info("non_visual_qa_passed", file=file_check.path)
+        get_log().info("non_visual_qa_passed", file=file.path)
 
 
 def main() -> None:

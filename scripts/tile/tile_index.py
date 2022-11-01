@@ -291,6 +291,7 @@ class TileIndex:
             tile_y = int((sheet.ul.y - point.y) // self.tile_height + 1)
             return self.get_tile(sheet.name, tile_x, tile_y)
         else:
+
             return None
 
     def iter_tiles_in_sheet(self, sheet_code: str) -> Iterator[Tile]:

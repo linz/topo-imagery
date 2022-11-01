@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.gdal.gdalinfo import gdal_info
 
 
 class FileCheck:
@@ -9,6 +10,7 @@ class FileCheck:
         self.global_srs = srs
         self.errors: List[Dict[str, Any]] = []
         self._valid = True
+        self.gdalinfo = gdal_info(self.path, self)
 
     def add_error(self, error_type: str, error_message: str, custom_fields: Optional[Dict[str, str]] = None) -> None:
         if not custom_fields:
@@ -86,14 +88,15 @@ class FileCheck:
                 custom_fields={"missing": f"{', '.join(missing_bands)}"},
             )
 
-    def validate(self, gdalinfo_result: Dict[Any, Any]) -> None:
+    def validate(self) -> bool:
         if self.is_valid():
-            self.check_no_data(gdalinfo_result)
-            self.check_band_count(gdalinfo_result)
-            self.check_color_interpretation(gdalinfo_result)
+            self.check_no_data(self.gdalinfo)
+            self.check_band_count(self.gdalinfo)
+            self.check_color_interpretation(self.gdalinfo)
             gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
             try:
                 gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, self.path)
                 self.check_srs(gdalsrsinfo_tif_result.stdout)
             except GDALExecutionException as gee:
                 self.add_error(error_type="srs", error_message=f"not checked: {str(gee)}")
+        return self.is_valid()

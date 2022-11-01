@@ -6,9 +6,9 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac import create_item
+from scripts.files.file_check import FileCheck
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
-from scripts.gdal.gdalinfo import gdal_info
 from scripts.non_visual_qa import get_srs, qa_file
 from scripts.standardising import start_standardising
 
@@ -48,9 +48,10 @@ def main() -> None:
         if not is_tiff(file):
             get_log().trace("file_not_tiff_skipped", file=file)
             continue
-        gdalinfo_result = gdal_info(file)
-        qa_file(file, srs, gdalinfo_result)
-        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo_result)
+        file_check = FileCheck(file, srs)
+        qa_file(file_check)
+
+        item = create_item(file, start_datetime, end_datetime, collection_id, file_check.gdalinfo)
 
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
