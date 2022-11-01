@@ -43,8 +43,10 @@ def main() -> None:
             continue
 
         if not collection:
-            # note: this will need to change when we add more fields, for example we may need `collection_from_json()` (01/11/2022)
-            collection = ImageryCollection(title=partial_stac["title"], description=partial_stac["description"], collection_id=arguments.collection_id)
+            # nb: this will need to change when we add more fields, e.g.- `collection_from_json()` (01/11/2022)
+            collection = ImageryCollection(
+                title=partial_stac["title"], description=partial_stac["description"], collection_id=arguments.collection_id
+            )
             continue
 
         # merge links
@@ -57,9 +59,10 @@ def main() -> None:
         start_datetime = min(partial_stac["extent"]["spatial"]["bbox"][0], partial_stac["extent"]["spatial"]["bbox"][1])
         end_datetime = max(partial_stac["extent"]["spatial"]["bbox"][0], partial_stac["extent"]["spatial"]["bbox"][1])
         collection.update_temporal_extent(start_datetime, end_datetime)
-    
+
     if collection:
         write(arguments.destination, json.dumps(collection.stac).encode("utf-8"))
+
 
 if __name__ == "__main__":
     main()
