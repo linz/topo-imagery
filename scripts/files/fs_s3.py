@@ -104,11 +104,9 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             s3 = get_session(path).client("s3")
 
         dst_s3_object = s3.Object(dst_s3_path.bucket, dst_key)
-        # check if the original file exists
-
-        # check if the destination file already exists
         src_s3_object = s3.Object(src_s3_path.bucket, src_key)
         try:
+            # check if the original file exists
             src_s3_object.load()
         except botocore.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "404":
@@ -121,6 +119,7 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             raise Exception(f"{path} does not exists.") from e
 
         try:
+            # check if the destination file already exists
             dst_s3_object.load()
             get_log().error(
                 "rename_s3_already_exists",
