@@ -52,7 +52,7 @@ def test_read_file_not_found(capsys: CaptureFixture[str]) -> None:
 
 
 @mock_s3  # type: ignore
-def test_rename(capsys: CaptureFixture[str]) -> None:
+def test_rename() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
