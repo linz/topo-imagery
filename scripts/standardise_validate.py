@@ -10,6 +10,7 @@ from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.non_visual_qa import get_srs, qa_file
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.standardising import start_standardising
 
 
@@ -21,6 +22,8 @@ def main() -> None:
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--collection_id", dest="collection_id", help="Unique id for collection", required=True)
+    parser.add_argument("--title", dest="title", help="collection title", required=True)
+    parser.add_argument("--description", dest="description", help="collection description", required=True)
     parser.add_argument(
         "--start_datetime", dest="start_datetime", help="start datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
@@ -44,6 +47,8 @@ def main() -> None:
         return
     srs = get_srs()
 
+    collection = ImageryCollection(title=arguments.title, description=arguments.description, collection_id=collection_id)
+
     for file in standardised_files:
         if not is_tiff(file):
             get_log().trace("file_not_tiff_skipped", file=file)
@@ -55,6 +60,11 @@ def main() -> None:
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("stac item written to tmp", location=tmp_file_path)
+
+        collection.add_item(item.stac)
+
+    write("/tmp/collection.json", json.dumps(collection.stac).encode("utf-8"))
+    get_log().info("stac item written to tmp", location="/tmp/collection.json")
 
 
 if __name__ == "__main__":

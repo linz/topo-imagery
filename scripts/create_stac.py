@@ -54,8 +54,8 @@ def main() -> None:
 
         collection.add_item(item.stac)
 
-        tmp_file_path = os.path.join("/tmp/", "collection.json")
-        write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
+    tmp_file_path = os.path.join("/tmp/", "collection.json")
+    write(tmp_file_path, json.dumps(collection.stac).encode("utf-8"))
 
 
 def create_item(
