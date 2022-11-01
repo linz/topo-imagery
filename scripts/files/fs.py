@@ -44,7 +44,7 @@ def rename(path: str, new_path: str) -> None:
         new_path (str): the path of which the file should be renamed to.
 
     Raises:
-        FsException: an exception if the path are not on the same file system.
+        Exception: an exception if the path are not on the same file system.
     """
     if path == new_path:
         get_log().info("rename_skipped_same_name", path=path, destination=new_path)
@@ -54,4 +54,4 @@ def rename(path: str, new_path: str) -> None:
         elif not is_s3(path) and not is_s3(new_path):
             fs_local.rename(path, new_path)
         else:
-            raise FsException("The files to rename have to be on the same file system.")
+            raise Exception("The files to rename have to be on the same file system.")

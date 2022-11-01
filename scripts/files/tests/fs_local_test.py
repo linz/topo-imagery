@@ -4,6 +4,7 @@ from tempfile import mkdtemp
 from typing import Generator
 
 import pytest
+from pytest import CaptureFixture
 
 from scripts.files.fs_local import read, rename, write
 
@@ -48,3 +49,29 @@ def test_rename(setup: str) -> None:
     rename(path, new_path)
     assert os.path.exists(new_path)
     assert not os.path.exists(path)
+
+
+@pytest.mark.dependency(name="rename", depends=["write"])
+def test_rename_already_exists(setup: str, capsys: CaptureFixture[str]) -> None:
+    content = b"content"
+    target = setup
+    path = os.path.join(target, "testA.file")
+    write(path, content)
+    existing_path = os.path.join(target, "testB.file")
+    write(existing_path, content)
+    new_path = os.path.join(target, "testB.file")
+    with pytest.raises(Exception):
+        rename(path, new_path)
+        sysout = capsys.readouterr()
+        assert "rename_local_already_exists" in sysout.out
+
+
+@pytest.mark.dependency(name="rename", depends=["write"])
+def test_rename_not_exists(setup: str, capsys: CaptureFixture[str]) -> None:
+    target = setup
+    path = os.path.join(target, "testA.file")
+    new_path = os.path.join(target, "testB.file")
+    with pytest.raises(Exception):
+        rename(path, new_path)
+        sysout = capsys.readouterr()
+        assert "rename_local_not_exists" in sysout.out

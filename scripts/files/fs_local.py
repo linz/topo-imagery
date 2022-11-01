@@ -1,5 +1,7 @@
 import os
 
+from linz_logger import get_log
+
 
 def write(destination: str, source: bytes) -> None:
     """Write the source to the local destination file.
@@ -32,4 +34,21 @@ def rename(path: str, new_path: str) -> None:
         path (str): original path
         new_path (str): path to be renamed with
     """
+    if not os.path.exists(path):
+        get_log().error(
+            "rename_local_not_exists",
+            path=path,
+            destination=new_path,
+            error="The file to rename does not exist.",
+        )
+        raise Exception(f"{path} does not exist.")
+    if os.path.exists(new_path):
+        get_log().error(
+            "rename_local_already_exists",
+            path=path,
+            destination=new_path,
+            error="The destination file already exists.",
+        )
+        raise Exception(f"{new_path} already exists.")
+
     os.rename(src=path, dst=new_path)

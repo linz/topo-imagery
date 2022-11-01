@@ -6,10 +6,6 @@ from scripts.aws.aws_helper import get_session, parse_path
 from scripts.logging.time_helper import time_in_ms
 
 
-class FsS3Exception(Exception):
-    pass
-
-
 def write(destination: str, source: bytes) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
@@ -81,7 +77,7 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
         needs_credentials (bool, optional): Tells if credentials are needed. Defaults to False.
 
     Raises:
-        FsS3Exception: an exception if the path are not in the same bucket
+        Exception: an exception if the path are not in the same bucket
         ce: a client exception
         nsb: a no such bucket exception
         nsk: a no such key exception
@@ -97,7 +93,7 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             destination=new_path,
             error="The source and destination path are not in the same bucket",
         )
-        raise FsS3Exception(f"Files {path} and {new_path} are not on the same S3 bucket.")
+        raise Exception(f"Files {path} and {new_path} are not on the same S3 bucket.")
 
     src_key = src_s3_path.key
     dst_key = dst_s3_path.key
@@ -108,11 +104,39 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             s3 = get_session(path).client("s3")
 
         dst_s3_object = s3.Object(dst_s3_path.bucket, dst_key)
-        dst_s3_object.copy(copy_source)
+        # check if the original file exists
 
-        # delete the source
+        # check if the destination file already exists
         src_s3_object = s3.Object(src_s3_path.bucket, src_key)
-        src_s3_object.delete()
+        try:
+            src_s3_object.load()
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                get_log().error(
+                    "rename_s3_not_exists",
+                    path=path,
+                    destination=new_path,
+                    error="The file to rename does not exist.",
+                )
+            raise Exception(f"{path} does not exists.") from e
+
+        try:
+            dst_s3_object.load()
+            get_log().error(
+                "rename_s3_already_exists",
+                path=path,
+                destination=new_path,
+                error="A file for the destination path already exists.",
+            )
+            raise Exception(f"{new_path} already exists. The file can't be renamed with this path.")
+        except botocore.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                # OK: the destination file does not already exists
+                dst_s3_object.copy(copy_source)
+                # delete the source
+                src_s3_object = s3.Object(src_s3_path.bucket, src_key)
+                src_s3_object.delete()
+                get_log().debug("rename_s3_success", path=path, destination=new_path, duration=time_in_ms() - start_time)
     except s3.meta.client.exceptions.ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("rename_s3_needs_credentials", path=path, destination=new_path)
@@ -134,7 +158,6 @@ def rename(path: str, new_path: str, needs_credentials: bool = False) -> None:
             error=f"The specified file does not seem to exist: {nsk}",
         )
         raise nsk
-    get_log().debug("rename_s3_success", path=path, destination=new_path, duration=time_in_ms() - start_time)
     return None
 
 
