@@ -29,7 +29,7 @@ def test_write(setup: str) -> None:
     assert os.path.isfile(path)
 
 
-@pytest.mark.dependency(name="read", depends=["write"])
+@pytest.mark.dependency(depends=["write"])
 def test_read(setup: str) -> None:
     content = b"test content"
     target = setup
@@ -39,7 +39,7 @@ def test_read(setup: str) -> None:
     assert file_content == content
 
 
-@pytest.mark.dependency(name="rename", depends=["write"])
+@pytest.mark.dependency(depends=["write"])
 def test_rename(setup: str) -> None:
     content = b"content"
     target = setup
@@ -51,27 +51,23 @@ def test_rename(setup: str) -> None:
     assert not os.path.exists(path)
 
 
-@pytest.mark.dependency(name="rename", depends=["write"])
-def test_rename_already_exists(setup: str, capsys: CaptureFixture[str]) -> None:
-    content = b"content"
-    target = setup
-    path = os.path.join(target, "testA.file")
-    write(path, content)
-    existing_path = os.path.join(target, "testB.file")
-    write(existing_path, content)
-    new_path = os.path.join(target, "testB.file")
-    with pytest.raises(Exception):
-        rename(path, new_path)
-        sysout = capsys.readouterr()
-        assert "rename_local_already_exists" in sysout.out
-
-
-@pytest.mark.dependency(name="rename", depends=["write"])
 def test_rename_not_exists(setup: str, capsys: CaptureFixture[str]) -> None:
     target = setup
     path = os.path.join(target, "testA.file")
     new_path = os.path.join(target, "testB.file")
-    with pytest.raises(Exception):
+    with pytest.raises(FileNotFoundError):
         rename(path, new_path)
         sysout = capsys.readouterr()
-        assert "rename_local_not_exists" in sysout.out
+        assert "rename_s3_file_not_found" in sysout.out
+
+
+@pytest.mark.dependency(depends=["write"])
+def test_rename_overwite(setup: str) -> None:
+    target = setup
+    content = b"content"
+    path = os.path.join(target, "testA.file")
+    new_path = os.path.join(target, "testB.file")
+    write(new_path, content)
+    write(path, content)
+
+    rename(path, new_path)

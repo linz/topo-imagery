@@ -34,21 +34,13 @@ def rename(path: str, new_path: str) -> None:
         path (str): original path
         new_path (str): path to be renamed with
     """
-    if not os.path.exists(path):
+    try:
+        os.rename(src=path, dst=new_path)
+    except FileNotFoundError as fnfe:
         get_log().error(
-            "rename_local_not_exists",
+            "rename_local_file_not_found",
             path=path,
             destination=new_path,
-            error="The file to rename does not exist.",
+            error=f"The specified file to rename does not seem to exist: {fnfe}",
         )
-        raise Exception(f"{path} does not exist.")
-    if os.path.exists(new_path):
-        get_log().error(
-            "rename_local_already_exists",
-            path=path,
-            destination=new_path,
-            error="The destination file already exists.",
-        )
-        raise Exception(f"{new_path} already exists.")
-
-    os.rename(src=path, dst=new_path)
+        raise fnfe
