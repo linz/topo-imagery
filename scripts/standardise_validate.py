@@ -54,14 +54,12 @@ def main() -> None:
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
 
-        if not file_check.is_error_type(FileCheckErrorType.GDAL_INFO):
-            gdalinfo = file_check.get_gdalinfo()
-            item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
-            tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
-            write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
-            get_log().info("stac item written to tmp", location=tmp_file_path)
-        else:
-            get_log().info("create_stac_item_skipped", file=file_check.path)
+        # create STAC
+        gdalinfo = file_check.get_gdalinfo()
+        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
+        tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
+        write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
+        get_log().info("stac item written to tmp", location=tmp_file_path)
 
 
 if __name__ == "__main__":
