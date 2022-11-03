@@ -17,7 +17,7 @@ _A collection of scripts used to process imagery_
 
 ## [topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
 
-### Container Descrption
+### Container Description
 
 The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-latest` Docker image](https://hub.docker.com/r/osgeo/gdal/).
 
