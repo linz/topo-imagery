@@ -1,16 +1,17 @@
 import argparse
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_source
 from scripts.files.files_helper import is_tiff
-from scripts.gdal.gdalinfo import gdal_info
+
+# from scripts.gdal.gdalinfo import gdal_info
 from scripts.tile.tile_index import XY, TileIndex, TileIndexScale
 
 
-def check_alignement(gdalinfo: Dict[Any, Any], scale: TileIndexScale) -> str | None:
+def check_alignement(gdalinfo: Dict[Any, Any], scale: int) -> str | None:
     """Validate the tiff file against tile indexes
 
     Args:
@@ -21,11 +22,14 @@ def check_alignement(gdalinfo: Dict[Any, Any], scale: TileIndexScale) -> str | N
         str: the filename is tiff is valid against the tile index. None if not valid.
     """
     # Get the scale from the original file name
-    index = TileIndex(scale)
+    tile_index_scale = TileIndexScale(scale)
+    index = TileIndex(tile_index_scale)
     tile = index.get_tile_from_point(
         XY(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
     )
-    return tile.name
+    if not tile.name:
+        return None
+    return str(tile.name)
 
 
 def main() -> None:
@@ -43,8 +47,10 @@ def main() -> None:
 
     for file in source:
         if is_tiff(file):
-            gdalinfo_result = gdal_info(file)
-            valid_name = validate(gdalinfo_result, TileIndexScale(int(scale)))
+            # gdalinfo_result = gdal_info(file)
+
+            # valid_name = check_alignement(gdalinfo_result, TileIndexScale(int(scale)))
+            valid_name = "dgfdfg"
             if valid_name is not None:
                 if valid_name == file:
                     get_log().info("success")

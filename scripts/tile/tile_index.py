@@ -1,9 +1,5 @@
-import argparse
-import sys
 from enum import Enum
 from typing import Any, Dict, Iterator, NamedTuple, Optional, Union
-
-import debugpy
 
 SHEET_WIDTH = 24_000  # The width of a 1:50k sheet in metres
 SHEET_HEIGHT = 36_000  # The height of a 1:50k sheet in metres
@@ -123,8 +119,7 @@ class TileBase:
         """Returns True if the supplied point is located within this tile, else false"""
         if self.min_x <= point.x < self.max_x and self.min_y < point.y <= self.max_y:
             return True
-        else:
-            return False
+        return False
 
     def feature(self) -> Dict[str, Dict[str, Any]]:
         """The instance formatted as a fiona-format feature record"""
@@ -229,8 +224,8 @@ class TileIndex:
         """
         try:
             return self.sheets[sheet_code]
-        except KeyError:
-            raise ValueError(f"{sheet_code} is not a valid sheet_code, must be a value contained in TileIndex.sheets")
+        except KeyError as ke:
+            raise ValueError(f"{sheet_code} is not a valid sheet_code, must be a value contained in TileIndex.sheets") from ke
 
     def get_sheet_from_point(self, point: XY) -> Optional[Sheet]:
         """
@@ -248,8 +243,7 @@ class TileIndex:
 
         if sheet.contains(point):
             return sheet
-        else:
-            return None
+        return None
 
     def get_tile(self, sheet_code: str, x_index: int, y_index: int) -> Tile:
         """
@@ -268,18 +262,18 @@ class TileIndex:
         tile_name = f"{sheet.name}_{self.scale}_{tile_id}"
         if tile_name in self.tiles:
             return self.tiles[tile_name]
-        else:
-            tile = Tile(
-                min_x=int(sheet.ul.x + (x_index - 1) * self.tile_width),
-                min_y=int(sheet.ul.y - y_index * self.tile_height),
-                max_x=int(sheet.ul.x + x_index * self.tile_width),
-                max_y=int(sheet.ul.y - (y_index - 1) * self.tile_height),
-                sheet_code=sheet.name,
-                scale=self.scale,
-                id_=tile_id,
-            )
-            self.tiles[tile.name] = tile
-            return tile
+
+        tile = Tile(
+            min_x=int(sheet.ul.x + (x_index - 1) * self.tile_width),
+            min_y=int(sheet.ul.y - y_index * self.tile_height),
+            max_x=int(sheet.ul.x + x_index * self.tile_width),
+            max_y=int(sheet.ul.y - (y_index - 1) * self.tile_height),
+            sheet_code=sheet.name,
+            scale=self.scale,
+            id_=tile_id,
+        )
+        self.tiles[tile.name] = tile
+        return tile
 
     def get_tile_from_point(self, point: XY) -> Optional[Tile]:
         """
@@ -290,9 +284,8 @@ class TileIndex:
             tile_x = int((point.x - sheet.ul.x) // self.tile_width + 1)
             tile_y = int((sheet.ul.y - point.y) // self.tile_height + 1)
             return self.get_tile(sheet.name, tile_x, tile_y)
-        else:
 
-            return None
+        return None
 
     def iter_tiles_in_sheet(self, sheet_code: str) -> Iterator[Tile]:
         """
