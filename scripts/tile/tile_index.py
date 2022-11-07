@@ -77,7 +77,7 @@ class TileBase:
     """
 
     schema: Dict[str, Union[str, Dict[str, str]]]
-
+    # pylint: disable=too-many-arguments
     def __init__(self, min_x: int, min_y: int, max_x: int, max_y: int, sheet_code: str):
         self.min_x: int = min_x
         self.min_y: int = min_y
@@ -144,7 +144,7 @@ class Tile(TileBase):
     """
 
     schema = {"geometry": "Polygon", "properties": {"TILENAME": "str", "MAPSHEET": "str", "SCALE": "int", "TILE": "str"}}
-
+    # pylint: disable=too-many-arguments
     def __init__(self, min_x: int, min_y: int, max_x: int, max_y: int, sheet_code: str, scale: TileIndexScale, id_: str):
         self.scale: TileIndexScale = scale
         self.id: str = id_
@@ -300,7 +300,8 @@ class TileIndex:
 
     def iter_all_tiles(self) -> Iterator[Tile]:
         """Provides an iterator through all tiles in all sheets."""
-        for sheet_code in self.sheets.keys():
+
+        for sheet_code in self.sheets:
             for tile in self.iter_tiles_in_sheet(sheet_code):
                 yield tile
 
@@ -320,3 +321,26 @@ def id_to_xy(id_: str) -> XY:
     x = int(id_[length // 2 :])
     y = int(id_[0 : length // 2])
     return XY(x=x, y=y)
+
+
+def get_origin_from_gdalinfo(gdalinfo: Dict[Any, Any]) -> XY:
+    return XY(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+
+
+def check_alignement(origin: XY, scale: int) -> str | None:
+    """Validate the tiff file against tile indexes
+
+    Args:
+        path (str): the tiff path
+        scale (Optional[TileIndexScale]): the scale for the tile index. Try to get it from the tiff file name if not provided.
+
+    Returns:
+        str: the filename is tiff is valid against the tile index. None if not valid.
+    """
+    # Get the scale from the original file name
+    tile_index_scale = TileIndexScale(scale)
+    index = TileIndex(tile_index_scale)
+    tile = index.get_tile_from_point(origin)
+    if not tile.name:
+        return None
+    return str(tile.name)

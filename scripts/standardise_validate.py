@@ -6,7 +6,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac import create_item
-from scripts.files.file_check import FileCheck, FileCheckErrorType
+from scripts.files.file_check import FileCheck
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
 from scripts.standardising import start_standardising

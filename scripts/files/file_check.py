@@ -3,10 +3,10 @@ import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from scripts.check_tile_alignment import check_alignement
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, get_srs, run_gdal
 from scripts.gdal.gdalinfo import gdal_info
+from scripts.tile.tile_index import check_alignement, get_origin_from_gdalinfo
 
 
 class FileCheckErrorType(str, Enum):
@@ -42,7 +42,7 @@ class FileCheck:
                 self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
             except GDALExecutionException as gee:
                 self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"failed: {str(gee)}")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
@@ -126,7 +126,8 @@ class FileCheck:
             )
 
     def check_tile_and_rename(self, gdalinfo: Dict[Any, Any]) -> None:
-        generated_name = check_alignement(gdalinfo, self.scale)
+        origin = get_origin_from_gdalinfo(gdalinfo)
+        generated_name = check_alignement(origin, self.scale)
         if generated_name:
             if not generated_name == get_file_name_from_path(self.path):
                 new_path = os.path.join(os.path.dirname(self.path), generated_name)
