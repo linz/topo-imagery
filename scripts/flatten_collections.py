@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 
 from linz_logger import get_log
 
@@ -43,10 +44,10 @@ def main() -> None:
             continue
 
         if not collection:
-            # nb: this will need to change when we add more fields, e.g.- `collection_from_json()` (01/11/2022)
             collection = ImageryCollection(
                 title=partial_stac["title"], description=partial_stac["description"], collection_id=arguments.collection_id
             )
+            collection.stac = partial_stac
             continue
 
         # merge links
@@ -54,14 +55,13 @@ def main() -> None:
             if link["rel"] != "self":
                 collection.add_link(href=link["href"], rel=link["rel"], file_type=link["type"])
 
-        collection.update_spatial_extent(partial_stac["extent"]["spatial"]["bbox"])
-
-        start_datetime = min(partial_stac["extent"]["spatial"]["bbox"][0], partial_stac["extent"]["spatial"]["bbox"][1])
-        end_datetime = max(partial_stac["extent"]["spatial"]["bbox"][0], partial_stac["extent"]["spatial"]["bbox"][1])
+        collection.update_spatial_extent(partial_stac["extent"]["spatial"]["bbox"][0])
+        start_datetime = min(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
+        end_datetime = max(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
         collection.update_temporal_extent(start_datetime, end_datetime)
 
     if collection:
-        write(arguments.destination, json.dumps(collection.stac).encode("utf-8"))
+        write(os.path.join(arguments.destination, "collection.json"), json.dumps(collection.stac).encode("utf-8"))
 
 
 if __name__ == "__main__":
