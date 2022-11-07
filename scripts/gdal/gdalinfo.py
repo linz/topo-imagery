@@ -22,11 +22,9 @@ def gdal_info(path: str, file_check: Optional[FileCheck] = None) -> Dict[Any, An
             else:
                 raise e
         if gdalinfo_process.stderr:
-            get_log().error("Gdalinfo_error", file=path, error=str(gdalinfo_process.stderr))
             if file_check:
+                # FIXME: do we want this recorded as an error in the non_visual_qa report?
                 file_check.add_error(error_type="gdalinfo", error_message=f"error(s): {str(gdalinfo_process.stderr)}")
-            else:
-                raise Exception(f"Gdalinfo Error {str(gdalinfo_process.stderr)}")
         return gdalinfo_result
     except GDALExecutionException as gee:
         get_log().error("gdalinfo_failed", file=path, error=str(gee))
