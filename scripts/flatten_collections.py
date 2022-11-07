@@ -14,7 +14,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--collection_id", dest="collection_id", required=True)
-    parser.add_argument("--destination", dest="destination", required=True)
+    parser.add_argument("--destination", dest="destination directory", required=True)
 
     arguments = parser.parse_args()
 
