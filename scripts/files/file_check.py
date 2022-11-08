@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, get_srs, run_gdal
 from scripts.gdal.gdalinfo import gdal_info
-from scripts.tile.tile_index import check_alignement, get_origin_from_gdalinfo
+from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
 
 
 class FileCheckErrorType(str, Enum):
@@ -126,15 +126,15 @@ class FileCheck:
             )
 
     def check_tile_and_rename(self, gdalinfo: Dict[Any, Any]) -> None:
-        origin = get_origin_from_gdalinfo(gdalinfo)
-        generated_name = check_alignement(origin, self.scale)
-        if generated_name:
-            if not generated_name == get_file_name_from_path(self.path):
-                new_path = os.path.join(os.path.dirname(self.path), generated_name + ".tiff")
+        origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+        try:
+            tile_name = get_tile_name(origin, self.scale)
+            if not tile_name == get_file_name_from_path(self.path):
+                new_path = os.path.join(os.path.dirname(self.path), tile_name + ".tiff")
                 os.rename(self.path, new_path)
                 self.path = new_path
-        else:
-            self.add_error(FileCheckErrorType.TILE_ALIGNMENT, error_message="The tiff is not find in the tile index")
+        except TileIndexException as tie:
+            self.add_error(FileCheckErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
 
     def validate(self) -> bool:
         gdalinfo = self.get_gdalinfo()

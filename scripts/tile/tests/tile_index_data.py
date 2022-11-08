@@ -1,4 +1,6 @@
-MAP_SHEET_DATA = [
+from typing import Any, Dict, List
+
+MAP_SHEET_DATA: List[Dict[Any, Any]] = [
     {"origin": {"x": 1492000, "y": 6234000}, "code": "AS21"},
     {"origin": {"x": 1516000, "y": 6234000}, "code": "AS22"},
     {"origin": {"x": 1564000, "y": 6198000}, "code": "AT24"},
