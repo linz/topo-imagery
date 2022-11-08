@@ -97,6 +97,5 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     letters = list(SHEET_RANGES)[offset_y]
     sheet_code = f"{letters}{offset_x:02d}"
     tile_id = f"{tile_y:0{nb_digits}d}{tile_x:0{nb_digits}d}"
-    tile_name = f"{sheet_code}_{grid_size}_{tile_id}"
 
-    return tile_name
+    return f"{sheet_code}_{grid_size}_{tile_id}"
