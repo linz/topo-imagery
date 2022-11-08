@@ -56,8 +56,12 @@ def main() -> None:
                 collection.add_link(href=link["href"], rel=link["rel"], file_type=link["type"])
 
         collection.update_spatial_extent(partial_stac["extent"]["spatial"]["bbox"][0])
-        start_datetime = min(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
-        end_datetime = max(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
+        start_datetime = min(
+            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
+        )
+        end_datetime = max(
+            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
+        )
         collection.update_temporal_extent(start_datetime, end_datetime)
 
     if collection:
