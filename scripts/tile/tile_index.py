@@ -1,4 +1,5 @@
-from typing import NamedTuple, Union
+import unicodedata
+from typing import Generator, NamedTuple, Union
 
 SHEET_WIDTH = 24_000  # The width of a 1:50k sheet in metres
 SHEET_HEIGHT = 36_000  # The height of a 1:50k sheet in metres
@@ -91,8 +92,8 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     offset_y = int((SHEET_ORIGIN_TOP - origin_y) // SHEET_HEIGHT)
     max_y = SHEET_ORIGIN_TOP - (offset_y * SHEET_HEIGHT)
     min_x = SHEET_ORIGIN_LEFT + (offset_x * SHEET_WIDTH)
-    tile_x = (origin_x - min_x) // tile_width + 1
-    tile_y = (max_y - origin_y) // tile_height + 1
+    tile_x = int((origin_x - min_x) // tile_width + 1)
+    tile_y = int((max_y - origin_y) // tile_height + 1)
 
     letters = list(SHEET_RANGES)[offset_y]
     sheet_code = f"{letters}{offset_x:02d}"

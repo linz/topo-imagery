@@ -59,7 +59,7 @@ class FileCheck:
 
     def is_error_type(self, error_type: str) -> bool:
         for error in self.errors:
-            if error["error_type"] == error_type:
+            if error["type"] == error_type:
                 return True
         return False
 
@@ -131,6 +131,7 @@ class FileCheck:
             tile_name = get_tile_name(origin, self.scale)
             if not tile_name == get_file_name_from_path(self.path):
                 new_path = os.path.join(os.path.dirname(self.path), tile_name + ".tiff")
+                print(f"renamming file: old name = {get_file_name_from_path(self.path)} - new name = {new_path}")
                 os.rename(self.path, new_path)
                 self.path = new_path
         except TileIndexException as tie:

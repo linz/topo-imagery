@@ -48,11 +48,16 @@ def main() -> None:
         if not is_tiff(file):
             get_log().trace("file_not_tiff_skipped", file=file)
             continue
+
+        # Validate the file
         file_check = FileCheck(file, scale)
         if not file_check.validate():
             get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
+
+        # Get the new path if the file has been renamed
+        file = file_check.path
 
         # create STAC
         gdalinfo = file_check.get_gdalinfo()

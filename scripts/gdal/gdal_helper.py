@@ -82,7 +82,7 @@ def run_gdal(
 
     if proc.stderr:
         get_log().error("run_gdal_error", command=command_to_string(temp_command), error=proc.stderr.decode())
-        raise GDALExecutionException(proc.stderr.decode())
+        # raise GDALExecutionException(proc.stderr.decode())
 
     get_log().debug("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
