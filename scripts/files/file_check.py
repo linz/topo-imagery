@@ -130,7 +130,7 @@ class FileCheck:
         generated_name = check_alignement(origin, self.scale)
         if generated_name:
             if not generated_name == get_file_name_from_path(self.path):
-                new_path = os.path.join(os.path.dirname(self.path), generated_name)
+                new_path = os.path.join(os.path.dirname(self.path), generated_name + ".tiff")
                 os.rename(self.path, new_path)
                 self.path = new_path
         else:
