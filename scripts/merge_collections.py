@@ -55,20 +55,23 @@ def main() -> None:
     if collection:
         write(os.path.join(arguments.destination, "collection.json"), json.dumps(collection.stac).encode("utf-8"))
 
+
 def merge_links(collection: ImageryCollection, partial_stac: Dict[Any, Any]) -> ImageryCollection:
     for link in partial_stac["links"]:
         if link["rel"] != "self":
             collection.add_link(href=link["href"], rel=link["rel"], file_type=link["type"])
     return collection
 
+
 def get_partial_stac_datetimes(partial_stac: Dict[Any, Any]) -> Tuple[str, str]:
-    start_datetime = str(min(
-            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
-        ))
-    end_datetime = str(max(
-            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
-        ))
+    start_datetime = str(
+        min(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
+    )
+    end_datetime = str(
+        max(partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1])
+    )
     return start_datetime, end_datetime
+
 
 if __name__ == "__main__":
     main()
