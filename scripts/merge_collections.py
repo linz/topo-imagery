@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from typing import Any, Dict, Tuple
 
 from linz_logger import get_log
 
@@ -17,17 +18,13 @@ def main() -> None:
     parser.add_argument("--destination", dest="destination directory", required=True)
 
     arguments = parser.parse_args()
-
     source = format_source(arguments.source)
-
     collection = None
 
     for file in source:
-
         if not is_json(file):
             get_log().info("skipping file as not json", file=file, action="merge_collection", reason="skip")
             continue
-
         if not file.endswith("/collection.json"):
             get_log().info("skipping file as not collection.json", file=file, action="merge_collection", reason="skip")
             continue
@@ -50,23 +47,28 @@ def main() -> None:
             collection.stac = partial_stac
             continue
 
-        # merge links
-        for link in partial_stac["links"]:
-            if link["rel"] != "self":
-                collection.add_link(href=link["href"], rel=link["rel"], file_type=link["type"])
-
+        collection = merge_links(collection, partial_stac)
         collection.update_spatial_extent(partial_stac["extent"]["spatial"]["bbox"][0])
-        start_datetime = min(
-            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
-        )
-        end_datetime = max(
-            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
-        )
-        collection.update_temporal_extent(start_datetime, end_datetime)
+        partial_start_datetime, partial_end_datetime = get_partial_stac_datetimes(partial_stac)
+        collection.update_temporal_extent(partial_start_datetime, partial_end_datetime)
 
     if collection:
         write(os.path.join(arguments.destination, "collection.json"), json.dumps(collection.stac).encode("utf-8"))
 
+def merge_links(collection: ImageryCollection, partial_stac: Dict[Any, Any]) -> ImageryCollection:
+    for link in partial_stac["links"]:
+        if link["rel"] != "self":
+            collection.add_link(href=link["href"], rel=link["rel"], file_type=link["type"])
+    return collection
+
+def get_partial_stac_datetimes(partial_stac: Dict[Any, Any]) -> Tuple[str, str]:
+    start_datetime = str(min(
+            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
+        ))
+    end_datetime = str(max(
+            partial_stac["extent"]["temporal"]["interval"][0][0], partial_stac["extent"]["temporal"]["interval"][0][1]
+        ))
+    return start_datetime, end_datetime
 
 if __name__ == "__main__":
     main()
