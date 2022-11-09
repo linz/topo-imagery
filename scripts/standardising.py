@@ -9,7 +9,7 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
-from scripts.gdal.gdal_helper import run_gdal
+from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_gdal_command
 from scripts.logging.time_helper import time_in_ms
 
@@ -19,7 +19,8 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
     tiff_files = []
     output_files = []
 
-    get_log().info("standardising_start")
+    gdal_version = get_gdal_version()
+    get_log().info("standardising_start", gdalVersion=gdal_version)
 
     for file in files:
         if is_tiff(file):

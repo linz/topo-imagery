@@ -14,7 +14,7 @@ from scripts.stac.imagery.collection import ImageryCollection
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
-    parser.add_argument("--collection_id", dest="collection_id", required=True)
+    parser.add_argument("--collection-id", dest="collection_id", required=True)
     parser.add_argument("--title", dest="title", help="collection title", required=True)
     parser.add_argument("--description", dest="description", help="collection description", required=True)
 
