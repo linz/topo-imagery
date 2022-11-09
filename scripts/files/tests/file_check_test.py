@@ -9,7 +9,7 @@ def test_check_band_count_valid() -> None:
     gdalinfo = {}
     gdalinfo["bands"] = [{"band": 1}, {"band": 2}, {"band": 3}]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_band_count(gdalinfo)
 
     assert not file_check.errors
@@ -23,7 +23,7 @@ def test_check_band_count_invalid() -> None:
     gdalinfo = {}
     gdalinfo["bands"] = [{"band": 1}, {"band": 2}]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_band_count(gdalinfo)
 
     assert file_check.errors
@@ -46,7 +46,7 @@ def test_check_color_interpretation_valid() -> None:
         },
     ]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_color_interpretation(gdalinfo)
 
     assert not file_check.errors
@@ -72,7 +72,7 @@ def test_check_color_interpretation_invalid() -> None:
         },
     ]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_color_interpretation(gdalinfo)
 
     assert file_check.errors
@@ -89,7 +89,7 @@ def test_check_no_data_valid() -> None:
         }
     ]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_no_data(gdalinfo)
 
     assert not file_check.errors
@@ -102,7 +102,7 @@ def test_check_no_data_no_value() -> None:
     gdalinfo = {}
     gdalinfo["bands"] = [{"test": 1}]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_no_data(gdalinfo)
 
     assert file_check.errors
@@ -119,7 +119,7 @@ def test_check_no_data_invalid_value() -> None:
         }
     ]
 
-    file_check = FileCheck("test", 500)
+    file_check = FileCheck("test", 500, b"test")
     file_check.check_no_data(gdalinfo)
 
     assert file_check.errors

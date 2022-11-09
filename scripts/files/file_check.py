@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.gdal.gdal_helper import GDALExecutionException, get_srs, run_gdal
+from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
 
@@ -25,7 +25,7 @@ class FileCheck:
         self,
         path: str,
         scale: int,
-        srs: Optional[bytes] = None,
+        srs: bytes,
     ) -> None:
         self.path = path
         self.scale = scale
@@ -96,8 +96,6 @@ class FileCheck:
         Args:
             gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
         """
-        if not self._srs:
-            self._srs = get_srs()
         if gdalsrsinfo_tif != self._srs:
             self.add_error(error_type=FileCheckErrorType.SRS, error_message="different srs")
 

@@ -9,6 +9,7 @@ from scripts.create_stac import create_item
 from scripts.files.file_check import FileCheck
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
+from scripts.gdal.gdal_helper import get_srs
 from scripts.standardising import start_standardising
 
 
@@ -39,14 +40,15 @@ def main() -> None:
     if not standardised_files:
         get_log().info("Process skipped because no file has been standardised", action="standardise_validate", reason="skip")
         return
-
+    # SRS needed for FileCheck (non visual QA)
+    srs = get_srs()
     for file in standardised_files:
         if not is_tiff(file):
             get_log().trace("file_not_tiff_skipped", file=file)
             continue
 
         # Validate the file
-        file_check = FileCheck(file, scale)
+        file_check = FileCheck(file, scale, srs)
         if not file_check.validate():
             get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
         else:
