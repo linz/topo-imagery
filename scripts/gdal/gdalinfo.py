@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Dict, Optional
 
 from linz_logger import get_log
@@ -32,3 +33,15 @@ def gdal_info(path: str, file_check: Optional[FileCheck] = None) -> Dict[Any, An
             file_check.add_error(error_type="gdalinfo", error_message=f"failed: {str(gee)}")
             return gdalinfo_result
         raise gee
+
+
+def format_wkt(wkt: str) -> str:
+    """Remove special characters and replace double quotes by quotes in wkt output (gdalinfo).
+
+    Args:
+        wkt (str): The wkt output from gdalinfo.
+
+    Returns:
+        str: The wkt output formatted.
+    """
+    return re.sub(r"\s+", " ", (wkt.replace('"', "'").replace("\n", "")))
