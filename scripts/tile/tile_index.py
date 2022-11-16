@@ -57,6 +57,7 @@ SHEET_RANGES = {
 }
 GRID_SIZES = [10_000, 5_000, 2_000, 1_000, 500]
 GRID_SIZE_MAX = 50_000
+ROUND_CORRECTION = 0.01
 
 
 class TileIndexException(Exception):
@@ -68,6 +69,24 @@ class Point(NamedTuple):
 
     x: Union[int, float]
     y: Union[int, float]
+
+
+def round_to_correction(value: Union[int, float]) -> int | float:
+    if isinstance(value, int):
+        return value
+
+    correction = rounded_value = round(value, 2)
+
+    if not rounded_value.is_integer():
+        if (rounded_value + ROUND_CORRECTION).is_integer():
+            correction = rounded_value + ROUND_CORRECTION
+        elif (rounded_value - ROUND_CORRECTION).is_integer():
+            correction = rounded_value - ROUND_CORRECTION
+
+    if correction.is_integer():
+        correction = int(correction)
+
+    return correction
 
 
 def get_tile_name(origin: Point, grid_size: int) -> str:
@@ -87,8 +106,8 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     if not grid_size in GRID_SIZES:
         raise TileIndexException(f"The scale has to be one of the following values: {GRID_SIZES}")
 
-    origin_x = origin[0]
-    origin_y = origin[1]
+    origin_x = round_to_correction(origin[0])
+    origin_y = round_to_correction(origin[1])
     scale = GRID_SIZE_MAX // grid_size
     tile_width = SHEET_WIDTH // scale
     tile_height = SHEET_HEIGHT // scale

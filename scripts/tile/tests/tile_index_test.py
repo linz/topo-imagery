@@ -1,5 +1,5 @@
 from scripts.tile.tests.tile_index_data import MAP_SHEET_DATA
-from scripts.tile.tile_index import Point, get_tile_name
+from scripts.tile.tile_index import Point, get_tile_name, round_to_correction
 
 
 def test_check_alignment_build_correct_sheet_code() -> None:
@@ -15,3 +15,19 @@ def test_check_alignment_generate_correct_name() -> None:
     origin = Point(1236640, 4837560)
     tile_name = get_tile_name(origin, 500)
     assert tile_name + ".tiff" == file_name
+
+
+def test_check_alignment_generate_correct_name_when_origin_drift() -> None:
+    file_name = "BP27_1000_4817.tiff"
+    origin = Point(1643679.999967818148434, 5444159.999954843893647)
+    tile_name = get_tile_name(origin, 1000)
+    assert tile_name + ".tiff" == file_name
+
+
+def test_round_origin() -> None:
+    assert round_to_correction(1643679.999967818148434) == 1643680
+    assert round_to_correction(1643679.99) == 1643680
+    assert round_to_correction(1643680.01) == 1643680
+    assert round_to_correction(1643680.05) == 1643680.05
+    assert round_to_correction(1643679.969) == 1643679.97
+    assert round_to_correction(5444160.051) == 5444160.05
