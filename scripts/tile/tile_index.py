@@ -57,6 +57,7 @@ SHEET_RANGES = {
 }
 GRID_SIZES = [10_000, 5_000, 2_000, 1_000, 500]
 GRID_SIZE_MAX = 50_000
+# Correction is set to 1 centimeter
 ROUND_CORRECTION = 0.01
 
 
@@ -71,10 +72,22 @@ class Point(NamedTuple):
     y: Union[int, float]
 
 
-def round_to_correction(value: Union[int, float]) -> int | float:
+def round_with_correction(value: Union[int, float]) -> int | float:
+    """Round a value to the next or previous centimeter.
+    Python round() can be 'inaccurate', note that:
+        round(0.015) == 0.01
+        round(0.985) == 0.99
+
+    Args:
+        value (Union[int, float]): the value to round with correction.
+
+    Returns:
+        int | float: the rounded and (maybe) corrected value.
+    """
     if isinstance(value, int):
         return value
 
+    # Round to centimeter precision
     correction = rounded_value = round(value, 2)
 
     if not rounded_value.is_integer():
@@ -84,7 +97,7 @@ def round_to_correction(value: Union[int, float]) -> int | float:
             correction = rounded_value - ROUND_CORRECTION
 
     if correction.is_integer():
-        correction = int(correction)
+        return int(correction)
 
     return correction
 
@@ -106,8 +119,13 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     if not grid_size in GRID_SIZES:
         raise TileIndexException(f"The scale has to be one of the following values: {GRID_SIZES}")
 
-    origin_x = round_to_correction(origin[0])
-    origin_y = round_to_correction(origin[1])
+    origin_x = round_with_correction(origin[0])
+    origin_y = round_with_correction(origin[1])
+
+    # If x or y is not a round number, the origin is not valid
+    if not isinstance(origin_x, int) or not isinstance(origin_y, int):
+        raise TileIndexException(f"The origin is invalid x = {origin_x}, y = {origin_y}")
+
     scale = GRID_SIZE_MAX // grid_size
     tile_width = SHEET_WIDTH // scale
     tile_height = SHEET_HEIGHT // scale
