@@ -17,6 +17,9 @@ def main() -> None:
     parser.add_argument("--collection-id", dest="collection_id", required=True)
     parser.add_argument("--title", dest="title", help="collection title", required=True)
     parser.add_argument("--description", dest="description", help="collection description", required=True)
+    parser.add_argument(
+        "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
+    )
 
     arguments = parser.parse_args()
     uri = arguments.uri
@@ -34,7 +37,9 @@ def main() -> None:
     files_to_read = list_json_in_uri(uri, s3_client)
 
     start_time = time_in_ms()
-    for key, result in get_object_parallel_multithreading(bucket_name_from_path(uri), files_to_read, s3_client):
+    for key, result in get_object_parallel_multithreading(
+        bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
+    ):
         item_stac = json.loads(result["Body"].read().decode("utf-8"))
 
         if not arguments.collection_id == item_stac["collection"]:

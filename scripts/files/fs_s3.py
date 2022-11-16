@@ -106,11 +106,11 @@ def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
 
 
 def get_object_parallel_multithreading(
-    bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client]
+    bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
     if not s3_client:
         s3_client = boto3.client("s3")
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
         future_to_key = {executor.submit(_get_object, bucket, key, s3_client): key for key in files_to_read}
 
         for future in futures.as_completed(future_to_key):
