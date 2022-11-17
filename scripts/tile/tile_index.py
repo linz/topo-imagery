@@ -73,7 +73,7 @@ class Point(NamedTuple):
 
 
 def round_with_correction(value: Union[int, float]) -> int | float:
-    """Round a value to the next or previous centimeter.
+    """Round a value to the next or previous unit ROUND_CORRECTION.
     Python round() can be 'inaccurate', note that:
         round(0.015) == 0.01
         round(0.985) == 0.99
