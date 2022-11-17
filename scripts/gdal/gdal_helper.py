@@ -105,3 +105,13 @@ def run_gdal(
     get_log().debug("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
     return proc
+
+
+def get_srs() -> bytes:
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
+    gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
+    if gdalsrsinfo_result.stderr:
+        raise Exception(
+            f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"
+        )
+    return gdalsrsinfo_result.stdout
