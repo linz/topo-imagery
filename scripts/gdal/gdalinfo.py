@@ -36,7 +36,7 @@ def gdal_info(path: str, file_check: Optional[FileCheck] = None) -> Dict[Any, An
 
 
 def format_wkt(wkt: str) -> str:
-    """Remove special characters and replace double quotes by quotes in wkt output (gdalinfo).
+    """Remove newline, spaces, and replace double quotes by quotes in wkt output (gdalinfo).
 
     Args:
         wkt (str): The wkt output from gdalinfo.
