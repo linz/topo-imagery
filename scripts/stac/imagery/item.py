@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -34,8 +34,8 @@ class ImageryItem:
             "datetime": None,
         }
 
-    def update_spatial(self, geometry: List[List[float]], bbox: List[float]) -> None:
-        self.stac["geometry"] = {"type": "Polygon", "coordinates": [geometry]}
+    def update_spatial(self, geometry: Dict[str, List[float]], bbox: Tuple[float]) -> None:
+        self.stac["geometry"] = geometry
         self.stac["bbox"] = bbox
 
     def add_collection(self, collection_id: str) -> None:

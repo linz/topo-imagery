@@ -1,8 +1,13 @@
+from concurrent import futures
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Generator, List, Optional, Union
+
 import boto3
 import botocore
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
+from scripts.files.files_helper import is_json
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -75,3 +80,44 @@ def bucket_name_from_path(path: str) -> str:
 def prefix_from_path(path: str) -> str:
     bucket_name = bucket_name_from_path(path)
     return path.replace(f"s3://{bucket_name}/", "")
+
+
+def list_json_in_uri(uri: str, s3_client: Optional[boto3.client]) -> List[str]:
+    if not s3_client:
+        s3_client = boto3.client("s3")
+    files = []
+    paginator = s3_client.get_paginator("list_objects_v2")
+    response_iterator = paginator.paginate(Bucket=bucket_name_from_path(uri), Prefix=prefix_from_path(uri))
+
+    for response in response_iterator:
+        for contents_data in response["Contents"]:
+            key = contents_data["Key"]
+            if not is_json(key):
+                get_log().trace("skipping file not json", file=key, action="collection_from_items", reason="skip")
+                continue
+            files.append(key)
+    get_log().info("Files Listed", number_of_files=len(files))
+    return files
+
+
+def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
+    get_log().info("Retrieving File", path=f"s3://{bucket}/{file_name}")
+    return s3_client.get_object(Bucket=bucket, Key=file_name)
+
+
+def get_object_parallel_multithreading(
+    bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client], concurrency: int
+) -> Generator[Any, Union[Any, BaseException], None]:
+    if not s3_client:
+        s3_client = boto3.client("s3")
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        future_to_key = {executor.submit(_get_object, bucket, key, s3_client): key for key in files_to_read}
+
+        for future in futures.as_completed(future_to_key):
+            key = future_to_key[future]
+            exception = future.exception()
+
+            if not exception:
+                yield key, future.result()
+            else:
+                yield key, exception

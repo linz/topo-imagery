@@ -1,4 +1,4 @@
-FROM osgeo/gdal@sha256:452da485c574fe040a5748b73932d3ec7334913197744b550d13ce80493ef3c4
+FROM osgeo/gdal:ubuntu-small-3.6.0
 
 RUN apt-get update
 # Install pip
@@ -14,7 +14,7 @@ COPY poetry.lock pyproject.toml /app/
 
 # Install Python dependencies
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry install --only main --no-interaction --no-ansi
 
 # Copy Python scripts
 COPY ./scripts/ /app/scripts/
