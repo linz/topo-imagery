@@ -21,15 +21,11 @@ class FileCheckErrorType(str, Enum):
 
 
 class FileCheck:
-    def __init__(
-        self,
-        path: str,
-        scale: int,
-        srs: bytes,
-    ) -> None:
+    def __init__(self, path: str, scale: int, srs: bytes, origin_correction: Optional[float] = None) -> None:
         self.path = path
         self.scale = scale
         self.errors: List[Dict[str, Any]] = []
+        self.origin_correction = origin_correction
         self._valid = True
         self._gdalinfo: Dict[Any, Any] = {}
         self._srs = srs
@@ -128,7 +124,7 @@ class FileCheck:
     def check_tile_and_rename(self, gdalinfo: Dict[Any, Any]) -> None:
         origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
         try:
-            tile_name = get_tile_name(origin, self.scale)
+            tile_name = get_tile_name(origin, self.scale, self.origin_correction)
             if not tile_name == get_file_name_from_path(self.path):
                 new_path = os.path.join(os.path.dirname(self.path), tile_name + ".tiff")
                 os.rename(self.path, new_path)

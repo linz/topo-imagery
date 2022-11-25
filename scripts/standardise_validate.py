@@ -25,16 +25,21 @@ def main() -> None:
     parser.add_argument(
         "--end-datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
+    parser.add_argument("--origin-correction", dest="origin_correction", required=False)
     arguments = parser.parse_args()
 
     source = format_source(arguments.source)
     scale = int(arguments.scale)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    collection_id = arguments.collection_id
     concurrency: int = 1
     if is_argo():
         concurrency = 4
+    origin_correction = None
+    try:
+        origin_correction = float(arguments.origin_correction)
+    except TypeError:
+        get_log().info("no_origin_correction_specified")
 
     standardised_files = start_standardising(source, arguments.preset, concurrency)
     if not standardised_files:
@@ -48,7 +53,7 @@ def main() -> None:
             continue
 
         # Validate the file
-        file_check = FileCheck(file, scale, srs)
+        file_check = FileCheck(file, scale, srs, origin_correction)
         if not file_check.validate():
             get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
         else:
@@ -57,7 +62,7 @@ def main() -> None:
         file = file_check.path
         # Create STAC
         gdalinfo = file_check.get_gdalinfo()
-        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
+        item = create_item(file, start_datetime, end_datetime, arguments.collection_id, gdalinfo)
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("stac item written to tmp", location=tmp_file_path)

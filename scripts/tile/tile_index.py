@@ -1,4 +1,6 @@
-from typing import NamedTuple, Union
+from typing import NamedTuple, Optional, Union
+
+from linz_logger import get_log
 
 SHEET_WIDTH = 24_000  # The width of a 1:50k sheet in metres
 SHEET_HEIGHT = 36_000  # The height of a 1:50k sheet in metres
@@ -57,7 +59,7 @@ SHEET_RANGES = {
 }
 GRID_SIZES = [10_000, 5_000, 2_000, 1_000, 500]
 GRID_SIZE_MAX = 50_000
-# Correction is set to 1 centimeter
+# Correction is set to 1 centimeter by default but it's actually 1.5cm, see round_with_correction()
 ROUND_CORRECTION = 0.01
 
 
@@ -72,7 +74,7 @@ class Point(NamedTuple):
     y: Union[int, float]
 
 
-def round_with_correction(value: Union[int, float]) -> int | float:
+def round_with_correction(value: Union[int, float], origin_correction: Optional[float] = None) -> int | float:
     """Round a value to the next or previous unit ROUND_CORRECTION.
     Python round() can be 'inaccurate', note that:
         round(0.015) == 0.01
@@ -87,22 +89,26 @@ def round_with_correction(value: Union[int, float]) -> int | float:
     if isinstance(value, int):
         return value
 
+    if not origin_correction:
+        origin_correction = ROUND_CORRECTION
+
     # Round to centimeter precision
-    correction = rounded_value = round(value, 2)
+    corrected_origin = rounded_value = round(value, 2)
 
     if not rounded_value.is_integer():
-        if (rounded_value + ROUND_CORRECTION).is_integer():
-            correction = rounded_value + ROUND_CORRECTION
-        elif (rounded_value - ROUND_CORRECTION).is_integer():
-            correction = rounded_value - ROUND_CORRECTION
+        if (rounded_value + origin_correction).is_integer():
+            corrected_origin = rounded_value + origin_correction
+        elif (rounded_value - origin_correction).is_integer():
+            corrected_origin = rounded_value - origin_correction
+        get_log().info("origin_corrected", old=str(value), new=str(corrected_origin))
 
-    if correction.is_integer():
-        return int(correction)
+    if corrected_origin.is_integer():
+        return int(corrected_origin)
 
-    return correction
+    return corrected_origin
 
 
-def get_tile_name(origin: Point, grid_size: int) -> str:
+def get_tile_name(origin: Point, grid_size: int, origin_correction: Optional[float] = None) -> str:
     """Get the tile name from an origin point and the grid size (or scale).
 
     Args:
@@ -119,8 +125,8 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     if not grid_size in GRID_SIZES:
         raise TileIndexException(f"The scale has to be one of the following values: {GRID_SIZES}")
 
-    origin_x = round_with_correction(origin[0])
-    origin_y = round_with_correction(origin[1])
+    origin_x = round_with_correction(origin[0], origin_correction)
+    origin_y = round_with_correction(origin[1], origin_correction)
 
     # If x or y is not a round number, the origin is not valid
     if not isinstance(origin_x, int) or not isinstance(origin_y, int):
