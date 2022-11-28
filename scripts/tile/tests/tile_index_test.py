@@ -1,7 +1,7 @@
 from pytest import CaptureFixture, raises
 
 from scripts.tile.tests.tile_index_data import MAP_SHEET_DATA
-from scripts.tile.tile_index import Point, TileIndexException, get_tile_name, round_with_correction
+from scripts.tile.tile_index import Point, TileIndexException, get_number_digits, get_tile_name, round_with_correction
 
 
 def test_check_alignment_build_correct_sheet_code() -> None:
@@ -40,6 +40,11 @@ def test_check_alignment_generate_correct_name_when_origin_driftti(capsys: Captu
         assert "origin is invalid" in sysout.out
 
 
+def test_get_number_digits() -> None:
+    assert get_number_digits(0.01) == 2
+    assert get_number_digits(1) == 0
+
+
 def test_round_origin() -> None:
     assert round_with_correction(1643679.999967818148434) == 1643680
     assert round_with_correction(1643679.99) == 1643680
@@ -49,3 +54,10 @@ def test_round_origin() -> None:
     assert round_with_correction(5444160.051) == 5444160.05
     assert round_with_correction(5444160.015) == 5444160
     assert round_with_correction(5444160.985) == 5444161
+
+
+def test_custom_correction() -> None:
+    assert round_with_correction(5444160.051, 0.001) == 5444160.051
+    assert round_with_correction(1643679.999, 0.001) == 1643680
+    assert round_with_correction(1643680.001, 0.001) == 1643680
+    assert round_with_correction(1643680.001, 1) == 1643680

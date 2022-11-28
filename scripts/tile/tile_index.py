@@ -1,5 +1,5 @@
 from typing import NamedTuple, Optional, Union
-
+from decimal import Decimal
 from linz_logger import get_log
 
 SHEET_WIDTH = 24_000  # The width of a 1:50k sheet in metres
@@ -74,6 +74,18 @@ class Point(NamedTuple):
     y: Union[int, float]
 
 
+def get_number_digits(value: float) -> int:
+    """Get number of digits after decimal point
+
+    Args:
+        value (float): a float
+
+    Returns:
+        int: the number of digits after the decimal point
+    """
+    return abs(Decimal(str(value)).as_tuple().exponent)
+
+
 def round_with_correction(value: Union[int, float], origin_correction: Optional[float] = None) -> int | float:
     """Round a value to the next or previous unit ROUND_CORRECTION.
     Python round() can be 'inaccurate', note that:
@@ -92,8 +104,7 @@ def round_with_correction(value: Union[int, float], origin_correction: Optional[
     if not origin_correction:
         origin_correction = ROUND_CORRECTION
 
-    # Round to centimeter precision
-    corrected_origin = rounded_value = round(value, 2)
+    corrected_origin = rounded_value = round(value, get_number_digits(origin_correction))
 
     if not rounded_value.is_integer():
         if (rounded_value + origin_correction).is_integer():
