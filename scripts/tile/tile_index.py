@@ -143,6 +143,11 @@ def get_tile_name(origin: Point, grid_size: int, origin_correction: Optional[flo
     if not isinstance(origin_x, int) or not isinstance(origin_y, int):
         raise TileIndexException(f"The origin is invalid x = {origin_x}, y = {origin_y}")
 
+    if not SHEET_MIN_X <= origin_x <= SHEET_MAX_X:
+        raise TileIndexException(f"x must be between {SHEET_MIN_X} and {SHEET_MAX_X}, was {origin_x}")
+    if not SHEET_MIN_Y <= origin_y <= SHEET_MAX_Y:
+        raise TileIndexException(f"y must be between {SHEET_MIN_Y} and {SHEET_MAX_Y}, was {origin_y}")
+
     scale = GRID_SIZE_MAX // grid_size
     tile_width = SHEET_WIDTH // scale
     tile_height = SHEET_HEIGHT // scale
@@ -150,10 +155,6 @@ def get_tile_name(origin: Point, grid_size: int, origin_correction: Optional[flo
     if grid_size == 500:
         nb_digits = 3
 
-    if not SHEET_MIN_X <= origin_x <= SHEET_MAX_X:
-        raise TileIndexException(f"x must be between {SHEET_MIN_X} and {SHEET_MAX_X}, was {origin_x}")
-    if not SHEET_MIN_Y <= origin_y <= SHEET_MAX_Y:
-        raise TileIndexException(f"y must be between {SHEET_MIN_Y} and {SHEET_MAX_Y}, was {origin_y}")
     # Do some maths
     offset_x = int((origin_x - SHEET_ORIGIN_LEFT) // SHEET_WIDTH)
     offset_y = int((SHEET_ORIGIN_TOP - origin_y) // SHEET_HEIGHT)
