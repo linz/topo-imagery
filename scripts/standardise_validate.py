@@ -10,6 +10,7 @@ from scripts.files.file_check import FileCheck
 from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
 from scripts.gdal.gdal_helper import get_srs
+from scripts.gdal.gdalinfo import format_wkt
 from scripts.standardising import start_standardising
 
 
@@ -31,7 +32,6 @@ def main() -> None:
     scale = int(arguments.scale)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    collection_id = arguments.collection_id
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -50,14 +50,19 @@ def main() -> None:
         # Validate the file
         file_check = FileCheck(file, scale, srs)
         if not file_check.validate():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            # Format gdalinfo for logging
+            formatted_gdalinfo = file_check.get_gdalinfo()
+            if formatted_gdalinfo:
+                formatted_gdalinfo["coordinateSystem"]["wkt"] = format_wkt(formatted_gdalinfo["coordinateSystem"]["wkt"])
+                formatted_gdalinfo["stac"]["proj:wkt2"] = format_wkt(formatted_gdalinfo["stac"]["proj:wkt2"])
+            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors, gdalinfo=formatted_gdalinfo)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
         # Get the new path if the file has been renamed
         file = file_check.path
         # Create STAC
         gdalinfo = file_check.get_gdalinfo()
-        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
+        item = create_item(file, start_datetime, end_datetime, arguments.collection_id, gdalinfo)
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("stac item written to tmp", location=tmp_file_path)
