@@ -11,6 +11,7 @@ from scripts.files.files_helper import is_tiff
 from scripts.files.fs import write
 from scripts.gdal.gdal_helper import get_srs
 from scripts.standardising import start_standardising
+from scripts.gdal.gdalinfo import format_wkt
 
 
 def main() -> None:
@@ -55,7 +56,12 @@ def main() -> None:
         # Validate the file
         file_check = FileCheck(file, scale, srs, origin_correction)
         if not file_check.validate():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            # Format gdalinfo for logging
+            formatted_gdalinfo = file_check.get_gdalinfo()
+            if formatted_gdalinfo:
+                formatted_gdalinfo["coordinateSystem"]["wkt"] = format_wkt(formatted_gdalinfo["coordinateSystem"]["wkt"])
+                formatted_gdalinfo["stac"]["proj:wkt2"] = format_wkt(formatted_gdalinfo["stac"]["proj:wkt2"])
+            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors, gdalinfo=formatted_gdalinfo)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
         # Get the new path if the file has been renamed
