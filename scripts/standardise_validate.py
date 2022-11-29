@@ -58,8 +58,9 @@ def main() -> None:
         if not file_check.validate():
             # Format gdalinfo for logging
             formatted_gdalinfo = file_check.get_gdalinfo()
-            formatted_gdalinfo["coordinateSystem"]["wkt"] = format_wkt(formatted_gdalinfo["coordinateSystem"]["wkt"])
-            formatted_gdalinfo["stac"]["proj:wkt2"] = format_wkt(formatted_gdalinfo["stac"]["proj:wkt2"])
+            if formatted_gdalinfo:
+                formatted_gdalinfo["coordinateSystem"]["wkt"] = format_wkt(formatted_gdalinfo["coordinateSystem"]["wkt"])
+                formatted_gdalinfo["stac"]["proj:wkt2"] = format_wkt(formatted_gdalinfo["stac"]["proj:wkt2"])
             get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors, gdalinfo=formatted_gdalinfo)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
