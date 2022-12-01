@@ -31,7 +31,6 @@ def main() -> None:
     scale = int(arguments.scale)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    collection_id = arguments.collection_id
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -63,7 +62,7 @@ def main() -> None:
         file = file_check.path
         # Create STAC
         gdalinfo = file_check.get_gdalinfo()
-        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
+        item = create_item(file, start_datetime, end_datetime, arguments.collection_id, gdalinfo)
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("stac item written to tmp", location=tmp_file_path)
