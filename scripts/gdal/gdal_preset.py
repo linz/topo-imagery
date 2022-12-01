@@ -106,11 +106,16 @@ def get_gdal_band_offset(file: str) -> List[str]:
 
     bands = info['bands'];
 
+    alpha_band = find_band(bands, 'Alpha')
+    alpha_band_info: List[str] = []
+    if alpha_band:
+        alpha_band_info.extend(['-b',  str(alpha_band['band'])])
+
     # Grey scale imagery, set R,G and B to just the grey_band
     grey_band = find_band(bands, 'Gray')
     if grey_band:
         grand_band_index = str(grey_band['band'])
-        return ["-b", grand_band_index, "-b", grand_band_index, "-b", grand_band_index]
+        return ["-b", grand_band_index, "-b", grand_band_index, "-b", grand_band_index] + alpha_band_info
 
     band_red = find_band(bands, 'Red')
     band_green = find_band(bands, 'Green')
@@ -118,6 +123,19 @@ def get_gdal_band_offset(file: str) -> List[str]:
 
     if band_red is None or band_green is None or band_blue is None:
         get_log().warn("gdal_info_bands_failed", band_red=band_red is None, band_green=band_green is None, band_blue=band_blue is None)
-        return ["-b", "1", "-b", "2", "-b", "3"] 
+        return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
 
-    return ["-b", str(band_red['band']), "-b", str(band_green['band']), "-b", str(band_blue['band'])]
+    return ["-b", str(band_red['band']), "-b", str(band_green['band']), "-b", str(band_blue['band'])] + alpha_band_info
+
+
+# Get a command to create a virtual file which has a cutline and alpha applied 
+def get_cutline_command(cutline: str)-> List[str] :
+    return [
+        'gdalwarp', 
+        # Outputting a VRT makes things faster as its not recomputing everything
+        '-of', 'VRT', 
+        # Apply the cutline
+        '-cutline', cutline, 
+        # Ensure the target has a alpha channel
+        '-dstalpha'
+    ]
