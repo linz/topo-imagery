@@ -50,7 +50,13 @@ def main() -> None:
         # Validate the file
         file_check = FileCheck(file, scale, srs)
         if not file_check.validate():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            vfs_path = ""
+            env_argo_template = os.environ.get("ARGO_TEMPLATE")
+            if env_argo_template:
+                argo_template = json.loads(env_argo_template)
+                s3_information = argo_template["archiveLocation"]["s3"]
+                vfs_path = f"/vsis3/{s3_information['bucket']}/{s3_information['key']}{file_check.path}"
+            get_log().info("non_visual_qa_errors", file=file_check.path, vfspath=vfs_path, errors=file_check.errors)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
         # Get the new path if the file has been renamed
