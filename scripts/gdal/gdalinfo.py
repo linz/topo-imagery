@@ -24,9 +24,14 @@ class GdalInfo(TypedDict):
     extent: Dict[any, any]
     bands: List[GdalInfoBands]
 
-def gdal_info(path: str) -> GdalInfo:
+def gdal_info(path: str, stats: bool = True) -> GdalInfo:
     # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
-    gdalinfo_command = ["gdalinfo", "-stats", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
+    gdalinfo_command = ["gdalinfo",  "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
+
+    # Stats takes a while to generate only generate if needed
+    if stats:
+        gdalinfo_command.append("-stats")
+
     try:
         gdalinfo_process = run_gdal(gdalinfo_command, path)
         return json.loads(gdalinfo_process.stdout)

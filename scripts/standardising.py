@@ -10,7 +10,7 @@ from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_gdal_command
+from scripts.gdal.gdal_preset import get_gdal_command, get_gdal_band_offset
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -41,13 +41,15 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
 def standardising(file: str, preset: str) -> str:
     output_folder = "/tmp/"
 
-    get_log().info(f"standardising {file}", path=file)
+    get_log().info(f"standardising", path=file)
 
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
     tmp_file_path = os.path.join(output_folder, standardized_file_name)
 
     command = get_gdal_command(preset)
+    command.extend(get_gdal_band_offset(file))
+
     run_gdal(command, input_file=file, output_file=tmp_file_path)
 
     return tmp_file_path

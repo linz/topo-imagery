@@ -57,14 +57,14 @@ def get_gdal_version() -> str:
 
 def run_gdal(
     command: List[str],
-    input_file: Optional[str] = None,
+    input_file: str,
     output_file: Optional[str] = None,
 ) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
         command (List[str]): each arguments of the GDAL command.
-        input_file (str, optional): the input file path.
+        input_file str: the input file path.
         output_file (str, optional): the output file path.
 
     Raises:
@@ -102,7 +102,7 @@ def run_gdal(
     if proc.stderr:
         get_log().warning("run_gdal_stderr", command=command_to_string(temp_command), stderr=proc.stderr.decode())
 
-    get_log().debug("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
+    get_log().trace("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
     return proc
 
