@@ -50,7 +50,7 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
 
     input_file = file
     if cutline:
-        target_cutline_file = os.path.join(output_folder, str(ulid.ULID())  + ".vrt")
+        target_cutline_file = os.path.join(output_folder, str(ulid.ULID()) + ".vrt")
         # TODO check if the cutline actually intersects with the input_file as apply a cutline is much slower than conversion
         run_gdal(get_cutline_command(cutline), input_file=input_file, output_file=target_cutline_file)
         input_file = target_cutline_file
