@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Dict, List, Optional, TypedDict, Any, cast
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from linz_logger import get_log
 

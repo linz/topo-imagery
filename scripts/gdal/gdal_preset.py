@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from linz_logger import get_log
-from scripts.gdal.gdalinfo import gdal_info, GdalInfoBand
 
+from scripts.gdal.gdalinfo import GdalInfoBand, gdal_info
 
 # Force the source projection as NZTM EPSG:2193
 NZTM_SOURCE = ["-a_srs", "EPSG:2193"]

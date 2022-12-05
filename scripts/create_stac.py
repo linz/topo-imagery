@@ -1,10 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.geotiff import get_extents
-from scripts.gdal.gdalinfo import gdal_info, GdalInfo
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 from scripts.stac.imagery.item import ImageryItem
 
 
