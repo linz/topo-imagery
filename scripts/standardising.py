@@ -1,13 +1,15 @@
 import argparse
 import os
+import tempfile
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
+from scripts.files.fs import read, write
 
 import ulid
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import parse_path
+from scripts.aws.aws_helper import is_s3, parse_path
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
@@ -38,7 +40,6 @@ def start_standardising(files: List[str], preset: str, cutline: Optional[str], c
 
     return output_files
 
-
 def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
     output_folder = "/tmp/"
 
@@ -46,25 +47,35 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
 
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
-    tmp_file_path = os.path.join(output_folder, standardized_file_name)
+    output_file_path = os.path.join(output_folder, standardized_file_name)
 
-    input_file = file
-    if cutline:
-        target_cutline_file = os.path.join(output_folder, str(ulid.ULID()) + ".vrt")
-        # TODO check if the cutline actually intersects with the input_file as apply a cutline is much slower than conversion
-        run_gdal(get_cutline_command(cutline), input_file=input_file, output_file=target_cutline_file)
-        input_file = target_cutline_file
+    with tempfile.TemporaryDirectory() as tmp_path:
+        input_file = file
 
-    command = get_gdal_command(preset)
-    command.extend(get_gdal_band_offset(input_file))
+        # Ensure the remote file can be read locally, having multiple s3 paths with different credentials 
+        # makes it hard for GDAL to do its thing
+        if is_s3(input_file):
+            input_file_path = os.path.join(tmp_path, str(ulid.ULID()) + ".tiff")
+            write(input_file_path, read(input_file))
+            input_file = input_file_path;
 
-    run_gdal(command, input_file=input_file, output_file=tmp_file_path)
+        if cutline:
+            input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+            # Ensure the input cutline is a easy spot for GDAL to read
+            write(input_cutline_path, read(cutline))
 
-    # Cleanup temporary file
-    if input_file != file:
-        os.remove(input_file)
+            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+            # TODO check if the cutline actually intersects with the input_file as apply a cutline is much slower than conversion
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
 
-    return tmp_file_path
+        command = get_gdal_command(preset)
+        command.extend(get_gdal_band_offset(input_file))
+
+        run_gdal(command, input_file=input_file, output_file=output_file_path)
+
+
+    return output_file_path
 
 
 def main() -> None:
