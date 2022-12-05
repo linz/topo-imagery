@@ -12,8 +12,9 @@ from scripts.aws.aws_helper import is_s3, parse_path
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
+from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_band_offset, get_gdal_command
+from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -70,7 +71,8 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
                 write(input_cutline_path, read(cutline))
 
             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            # TODO check if the cutline actually intersects with the input_file as apply a cutline is much slower than conversion
+            # TODO check if the cutline actually intersects with the input_file 
+            # as apply a cutline is much slower than conversion
             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 

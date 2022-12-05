@@ -1,0 +1,44 @@
+from typing import List, Optional
+
+from linz_logger import get_log
+
+from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
+
+
+# Find a band from the color interpretation
+def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
+    for band in bands:
+        if band["colorInterpretation"] == color:
+            return band
+    return None
+
+
+# Determine what band numbers to use for the "-b" overrides for gdal_translate
+def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str]:
+    if info is None:
+        info = gdal_info(file, False)
+
+    bands = info["bands"]
+
+    alpha_band = find_band(bands, "Alpha")
+    alpha_band_info: List[str] = []
+    if alpha_band:
+        alpha_band_info.extend(["-b", str(alpha_band["band"])])
+
+    # Grey scale imagery, set R,G and B to just the grey_band
+    grey_band = find_band(bands, "Gray")
+    if grey_band:
+        grey_band_index = str(grey_band["band"])
+        return ["-b", grey_band_index, "-b", grey_band_index, "-b", grey_band_index] + alpha_band_info
+
+    band_red = find_band(bands, "Red")
+    band_green = find_band(bands, "Green")
+    band_blue = find_band(bands, "Blue")
+
+    if band_red is None or band_green is None or band_blue is None:
+        get_log().warn(
+            "gdal_info_bands_failed", band_red=band_red is None, band_green=band_green is None, band_blue=band_blue is None
+        )
+        return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
+
+    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + alpha_band_info

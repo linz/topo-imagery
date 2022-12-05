@@ -1,7 +1,7 @@
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 
 
-def test_preset_webp():
+def test_preset_webp() -> None:
     gdal_command = get_gdal_command("webp")
 
     # Basic cog creation
@@ -22,7 +22,7 @@ def test_preset_webp():
     assert "EPSG:2193" in gdal_command
 
 
-def test_preset_lzw():
+def test_preset_lzw() -> None:
     gdal_command = get_gdal_command("lzw")
 
     # Basic cog creation
@@ -43,7 +43,7 @@ def test_preset_lzw():
     assert "EPSG:2193" in gdal_command
 
 
-def test_cutline_params():
+def test_cutline_params() -> None:
     gdal_command = get_cutline_command("cutline.fgb")
 
     assert "-cutline" in gdal_command
