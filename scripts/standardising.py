@@ -4,7 +4,6 @@ import tempfile
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
-from scripts.files.fs import read, write
 
 import ulid
 from linz_logger import get_log
@@ -12,6 +11,7 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3, parse_path
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
+from scripts.files.fs import read, write
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_band_offset, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
