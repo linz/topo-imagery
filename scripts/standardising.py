@@ -40,6 +40,7 @@ def start_standardising(files: List[str], preset: str, cutline: Optional[str], c
 
     return output_files
 
+
 def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
     output_folder = "/tmp/"
 
@@ -52,17 +53,21 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
     with tempfile.TemporaryDirectory() as tmp_path:
         input_file = file
 
-        # Ensure the remote file can be read locally, having multiple s3 paths with different credentials 
+        # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
         # makes it hard for GDAL to do its thing
         if is_s3(input_file):
             input_file_path = os.path.join(tmp_path, str(ulid.ULID()) + ".tiff")
             write(input_file_path, read(input_file))
-            input_file = input_file_path;
+            input_file = input_file_path
 
         if cutline:
-            input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            # Ensure the input cutline is a easy spot for GDAL to read
-            write(input_cutline_path, read(cutline))
+            input_cutline_path = cutline
+            if is_s3(cutline):
+                if not cutline.endswith((".fgb", ".geojson")):
+                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
+                # Ensure the input cutline is a easy spot for GDAL to read
+                write(input_cutline_path, read(cutline))
 
             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
             # TODO check if the cutline actually intersects with the input_file as apply a cutline is much slower than conversion
@@ -73,7 +78,6 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
         command.extend(get_gdal_band_offset(input_file))
 
         run_gdal(command, input_file=input_file, output_file=output_file_path)
-
 
     return output_file_path
 
