@@ -5,16 +5,32 @@ from linz_logger import get_log
 from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
 
 
-# Find a band from the color interpretation
 def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
+    """Look for a specific colorInterperation inside of a gdalinfo band output
+
+    Args:
+        bands: Bands to search
+        color: Color to search, eg Red, Green, Gray
+
+    Returns:
+       Band if it exists, None otherwise
+    """
     for band in bands:
         if band["colorInterpretation"] == color:
             return band
     return None
 
 
-# Determine what band numbers to use for the "-b" overrides for gdal_translate
 def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str]:
+    """Get the banding parameters for a gdal_translate command
+
+    Args:
+        file: file to check
+        info: optional precomputed gdalinfo
+
+    Returns:
+        list of band mappings eg "-b 1 -b 1 -b 1"
+    """
     if info is None:
         info = gdal_info(file, False)
 

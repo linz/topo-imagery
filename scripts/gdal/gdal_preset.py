@@ -82,8 +82,11 @@ def get_gdal_command(preset: str) -> List[str]:
     return gdal_command
 
 
-# Get a command to create a virtual file which has a cutline and alpha applied
 def get_cutline_command(cutline: str) -> List[str]:
+    """
+    Get a "gdalwarp" command to create a virtual file (.vrt) which has a cutline applied and alpha added
+    """
+
     return [
         "gdalwarp",
         # Outputting a VRT makes things faster as its not recomputing everything
