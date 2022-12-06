@@ -18,8 +18,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=True)
-
+    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False)
     parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
