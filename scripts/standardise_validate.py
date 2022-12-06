@@ -14,6 +14,7 @@ from scripts.standardising import start_standardising
 
 
 def main() -> None:
+    # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
@@ -28,10 +29,8 @@ def main() -> None:
     arguments = parser.parse_args()
 
     source = format_source(arguments.source)
-    scale = int(arguments.scale)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    collection_id = arguments.collection_id
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -48,16 +47,20 @@ def main() -> None:
             continue
 
         # Validate the file
-        file_check = FileCheck(file, scale, srs)
+        file_check = FileCheck(file, int(arguments.scale), srs)
         if not file_check.validate():
-            get_log().info("non_visual_qa_errors", file=file_check.path, errors=file_check.errors)
+            vfs_path = ""
+            env_argo_template = os.environ.get("ARGO_TEMPLATE")
+            if env_argo_template:
+                argo_template = json.loads(env_argo_template)
+                s3_information = argo_template["archiveLocation"]["s3"]
+                vfs_path = os.path.join("/vsis3", s3_information["bucket"], s3_information["key"], file_check.path)
+            get_log().info("non_visual_qa_errors", file=file_check.path, vfspath=vfs_path, errors=file_check.errors)
         else:
             get_log().info("non_visual_qa_passed", file=file_check.path)
-        # Get the new path if the file has been renamed
-        file = file_check.path
+
         # Create STAC
-        gdalinfo = file_check.get_gdalinfo()
-        item = create_item(file, start_datetime, end_datetime, collection_id, gdalinfo)
+        item = create_item(file_check.path, start_datetime, end_datetime, arguments.collection_id, file_check.get_gdalinfo())
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))
         get_log().info("stac item written to tmp", location=tmp_file_path)
