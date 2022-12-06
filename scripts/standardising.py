@@ -42,6 +42,32 @@ def start_standardising(files: List[str], preset: str, cutline: Optional[str], c
     return output_files
 
 
+def download_tiff_file(input_file: str, tmp_path: str) -> str:
+    """Download a tiff file and some of its sidecar files if they exist
+
+    Args:
+        input_file: file to download
+        tmp_path: target folder to write too
+
+    Returns:
+        location of the downloaded tiff
+    """
+    target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
+    input_file_path = target_file_path + ".tiff"
+    write(input_file_path, read(input_file))
+    input_file = input_file_path
+
+    base_file_path = os.path.splitext(input_file)[0]
+    # Attempt to download sidecar files too
+    for ext in [".prj", ".tfw"]:
+        try:
+            write(target_file_path + ext, read(base_file_path + ext))
+        except: # pylint: disable-msg=bare-except
+            pass
+
+    return input_file_path
+
+
 def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
     output_folder = "/tmp/"
 
@@ -57,19 +83,7 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
         # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
         # makes it hard for GDAL to do its thing
         if is_s3(input_file):
-            target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
-            input_file_path = target_file_path + ".tiff"
-            write(input_file_path, read(input_file))
-            input_file = input_file_path
-
-            base_file_path = os.path.splitext(input_file)[0]
-            # Attempt to download sidecar files too
-            for ext in [".prj", ".tfw"]:
-                try: 
-                    write(target_file_path + ext, read(base_file_path + ext)) 
-                except:
-                    pass
-
+            input_file = download_tiff_file(input_file, tmp_path)
 
         if cutline:
             input_cutline_path = cutline
