@@ -57,9 +57,19 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
         # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
         # makes it hard for GDAL to do its thing
         if is_s3(input_file):
-            input_file_path = os.path.join(tmp_path, str(ulid.ULID()) + ".tiff")
+            target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
+            input_file_path = target_file_path + ".tiff"
             write(input_file_path, read(input_file))
             input_file = input_file_path
+
+            base_file_path = os.path.splitext(input_file)[0]
+            # Attempt to download sidecar files too
+            for ext in [".prj", ".tfw"]:
+                try: 
+                    write(target_file_path + ext, read(base_file_path + ext)) 
+                except:
+                    pass
+
 
         if cutline:
             input_cutline_path = cutline
