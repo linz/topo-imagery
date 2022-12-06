@@ -52,7 +52,7 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
 
     try:
         if needs_credentials:
-            s3 = get_session(path).client("s3")
+            s3 = get_session(path).resource("s3")
 
         s3_object = s3.Object(s3_path.bucket, key)
         file: bytes = s3_object.get()["Body"].read()
