@@ -34,7 +34,7 @@ class GdalInfo(TypedDict):
     driverLongName: str
     """Longer driver name
 
-    Example: 
+    Example:
         "GeoTIFF"
     """
 
