@@ -1,24 +1,38 @@
 import json
 import re
-from typing import Any, Dict
+from typing import Any, Dict, List, TypedDict
 
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 
+class GdalInfoBands(TypedDict):
+    band: int
+    block: List[int]
+    type: str
+    colorInterpretation: str
 
-def gdal_info(path: str) -> Dict[Any, Any]:
+class GdalInfo(TypedDict):
+    description: str
+    driverShortName: str
+    driverLongName: str
+    files: List[str]
+    size: List[int]
+    geoTransform: List[float]
+    metadata: Dict[any, any]
+    cornerCoordinates: Dict[any, any]
+    extent: Dict[any, any]
+    bands: List[GdalInfoBands]
+
+def gdal_info(path: str) -> GdalInfo:
     # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
     gdalinfo_command = ["gdalinfo", "-stats", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
-    gdalinfo_result = {}
     try:
         gdalinfo_process = run_gdal(gdalinfo_command, path)
-        try:
-            gdalinfo_result = json.loads(gdalinfo_process.stdout)
-        except json.JSONDecodeError as e:
-            get_log().error("load_gdalinfo_result_error", file=path, error=e)
-            raise e
-        return gdalinfo_result
+        return json.loads(gdalinfo_process.stdout)
+    except json.JSONDecodeError as e:
+        get_log().error("load_gdalinfo_result_error", file=path, error=e)
+        raise e
     except GDALExecutionException as gee:
         get_log().error("gdalinfo_failed", file=path, error=str(gee))
         raise gee
