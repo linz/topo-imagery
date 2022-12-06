@@ -55,7 +55,6 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
     input_file_path = target_file_path + ".tiff"
     write(input_file_path, read(input_file))
-    input_file = input_file_path
 
     base_file_path = os.path.splitext(input_file)[0]
     # Attempt to download sidecar files too
