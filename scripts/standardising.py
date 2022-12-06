@@ -1,20 +1,24 @@
 import argparse
 import os
+import tempfile
 from functools import partial
 from multiprocessing import Pool
-from typing import List
+from typing import List, Optional
 
+import ulid
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import parse_path
+from scripts.aws.aws_helper import is_s3, parse_path
 from scripts.cli.cli_helper import format_source, is_argo
-from scripts.files.files_helper import get_file_name_from_path, is_tiff
+from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
+from scripts.files.fs import read, write
+from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_gdal_command
+from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
 
 
-def start_standardising(files: List[str], preset: str, concurrency: int) -> List[str]:
+def start_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int) -> List[str]:
     start_time = time_in_ms()
     tiff_files = []
     output_files = []
@@ -23,13 +27,13 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
     get_log().info("standardising_start", gdalVersion=gdal_version)
 
     for file in files:
-        if is_tiff(file):
+        if is_tiff(file) or is_vrt(file):
             tiff_files.append(file)
         else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
     with Pool(concurrency) as p:
-        output_files = p.map(partial(standardising, preset=preset), tiff_files)
+        output_files = p.map(partial(standardising, preset=preset, cutline=cutline), tiff_files)
         p.close()
         p.join()
 
@@ -38,19 +42,46 @@ def start_standardising(files: List[str], preset: str, concurrency: int) -> List
     return output_files
 
 
-def standardising(file: str, preset: str) -> str:
+def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
     output_folder = "/tmp/"
 
-    get_log().info(f"standardising {file}", path=file)
+    get_log().info("standardising", path=file)
 
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
-    tmp_file_path = os.path.join(output_folder, standardized_file_name)
+    output_file_path = os.path.join(output_folder, standardized_file_name)
 
-    command = get_gdal_command(preset)
-    run_gdal(command, input_file=file, output_file=tmp_file_path)
+    with tempfile.TemporaryDirectory() as tmp_path:
+        input_file = file
 
-    return tmp_file_path
+        # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
+        # makes it hard for GDAL to do its thing
+        if is_s3(input_file):
+            input_file_path = os.path.join(tmp_path, str(ulid.ULID()) + ".tiff")
+            write(input_file_path, read(input_file))
+            input_file = input_file_path
+
+        if cutline:
+            input_cutline_path = cutline
+            if is_s3(cutline):
+                if not cutline.endswith((".fgb", ".geojson")):
+                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
+                # Ensure the input cutline is a easy spot for GDAL to read
+                write(input_cutline_path, read(cutline))
+
+            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+            # TODO check if the cutline actually intersects with the input_file
+            # as apply a cutline is much slower than conversion
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+
+        command = get_gdal_command(preset)
+        command.extend(get_gdal_band_offset(input_file))
+
+        run_gdal(command, input_file=input_file, output_file=output_file_path)
+
+    return output_file_path
 
 
 def main() -> None:
@@ -58,6 +89,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
+    parser.add_argument("--cutline", dest="cutline", required=False)
     arguments = parser.parse_args()
 
     source = format_source(arguments.source)
@@ -65,7 +97,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    start_standardising(source, arguments.preset, concurrency)
+    start_standardising(source, arguments.preset, arguments.cutline, concurrency)
 
 
 if __name__ == "__main__":

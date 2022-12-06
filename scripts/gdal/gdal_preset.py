@@ -2,121 +2,99 @@ from typing import List
 
 from linz_logger import get_log
 
-GDAL_PRESET_LZW = [
-    "gdal_translate",
+# Force the source projection as NZTM EPSG:2193
+NZTM_SOURCE = ["-a_srs", "EPSG:2193"]
+
+# Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA
+# Useful for imagery that does not have a alpha band
+SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
+
+BASE_COG = [
+    # Suppress progress monitor and other non-error output.
     "-q",
-    "-scale",
-    "0",
-    "255",
-    "0",
-    "254",
-    "-a_srs",
-    "EPSG:2193",
-    "-a_nodata",
-    "255",
-    "-b",
-    "1",
-    "-b",
-    "2",
-    "-b",
-    "3",
+    # Output to a COG
     "-of",
     "COG",
+    # Tile the image int 512x512px images
+    "-co",
+    "blocksize=512",
+    # Ensure all CPUs are used for gdal translate
+    "-co",
+    "num_threads=all_cpus",
+    # If not all tiles are needed in the tiff, instead of writing empty images write a null byte
+    # this significantly reduces the size of tiffs which are very sparse
+    "-co",
+    "sparse_ok=true",
+    # Force everything into big tiff
+    # this converts all offsets from 32bit to 64bit to support TIFFs > 4GB in size
+    "-co",
+    "bigtiff=yes",
+]
+
+COMPRESS_LZW = [
+    # Compress as LZW
     "-co",
     "compress=lzw",
-    "-co",
-    "num_threads=all_cpus",
+    # Predictor creates smaller files, for RGB imagery
     "-co",
     "predictor=2",
-    "-co",
-    "overview_compress=webp",
-    "-co",
-    "bigtiff=yes",
-    "-co",
-    "overview_resampling=lanczos",
-    "-co",
-    "blocksize=512",
-    "-co",
-    "overview_quality=90",
-    "-co",
-    "sparse_ok=true",
 ]
 
-GDAL_PRESET_WEBP = [
-    "gdal_translate",
-    "-q",
-    "-a_srs",
-    "EPSG:2193",
-    "-b",
-    "1",
-    "-b",
-    "2",
-    "-b",
-    "3",
-    "-of",
-    "COG",
+COMPRESS_WEBP_LOSSLESS = [
+    # Comppress into webp
     "-co",
     "compress=webp",
-    "-co",
-    "num_threads=all_cpus",
+    # Compress losslessly
     "-co",
     "quality=100",
-    "-co",
-    "overview_compress=webp",
-    "-co",
-    "bigtiff=yes",
-    "-co",
-    "overview_resampling=lanczos",
-    "-co",
-    "blocksize=512",
-    "-co",
-    "overview_quality=90",
-    "-co",
-    "sparse_ok=true",
 ]
 
-GDAL_PRESET_GRAY_WEBP = [
-    "gdal_translate",
-    "-q",
-    "-a_srs",
-    "EPSG:2193",
-    "-b",
-    "1",
-    "-b",
-    "1",
-    "-b",
-    "1",
-    "-a_nodata",
-    "255",
-    "-of",
-    "COG",
-    "-co",
-    "compress=webp",
-    "-co",
-    "num_threads=all_cpus",
-    "-co",
-    "quality=100",
+WEBP_OVERVIEWS = [
+    # When creating overviews also compress them into Webp
     "-co",
     "overview_compress=webp",
-    "-co",
-    "bigtiff=yes",
+    # When resampling overviews use lanczos
+    # see https://github.com/linz/basemaps/blob/master/docs/imagery/cog.quality.md
     "-co",
     "overview_resampling=lanczos",
-    "-co",
-    "blocksize=512",
+    # Reduce quality of overviews to 90%
     "-co",
     "overview_quality=90",
-    "-co",
-    "sparse_ok=true",
 ]
 
 
 def get_gdal_command(preset: str) -> List[str]:
     get_log().info("gdal_preset", preset=preset)
+    gdal_command: List[str] = ["gdal_translate"]
+
+    gdal_command.extend(BASE_COG)
+    gdal_command.extend(NZTM_SOURCE)
+
     if preset == "lzw":
-        return GDAL_PRESET_LZW
-    if preset == "webp":
-        return GDAL_PRESET_WEBP
-    if preset == "gray_webp":
-        return GDAL_PRESET_GRAY_WEBP
-    raise Exception(f"Unknown GDAL preset: {preset}")
+        gdal_command.extend(SCALE_254_ADD_NO_DATA)
+        gdal_command.extend(COMPRESS_LZW)
+
+    elif preset == "webp":
+        gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
+
+    gdal_command.extend(WEBP_OVERVIEWS)
+
+    return gdal_command
+
+
+def get_cutline_command(cutline: str) -> List[str]:
+    """
+    Get a "gdalwarp" command to create a virtual file (.vrt) which has a cutline applied and alpha added
+    """
+
+    return [
+        "gdalwarp",
+        # Outputting a VRT makes things faster as its not recomputing everything
+        "-of",
+        "VRT",
+        # Apply the cutline
+        "-cutline",
+        cutline,
+        # Ensure the target has a alpha channel
+        "-dstalpha",
+    ]

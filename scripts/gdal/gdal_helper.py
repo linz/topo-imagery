@@ -64,7 +64,7 @@ def run_gdal(
 
     Args:
         command (List[str]): each arguments of the GDAL command.
-        input_file (str, optional): the input file path.
+        input_file str: the input file path.
         output_file (str, optional): the output file path.
 
     Raises:
@@ -102,7 +102,7 @@ def run_gdal(
     if proc.stderr:
         get_log().warning("run_gdal_stderr", command=command_to_string(temp_command), stderr=proc.stderr.decode())
 
-    get_log().debug("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
+    get_log().trace("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
     return proc
 

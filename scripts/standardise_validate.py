@@ -18,7 +18,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument("--scale", dest="scale", required=True)
+    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=True)
+
+    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
         "--start-datetime", dest="start_datetime", help="start datetime in format YYYY-MM-DD", type=valid_date, required=True
@@ -35,7 +37,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    standardised_files = start_standardising(source, arguments.preset, concurrency)
+    standardised_files = start_standardising(source, arguments.preset, arguments.cutline, concurrency)
     if not standardised_files:
         get_log().info("Process skipped because no file has been standardised", action="standardise_validate", reason="skip")
         return
