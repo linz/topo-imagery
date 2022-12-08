@@ -1,4 +1,5 @@
 from scripts.files.file_tiff import FileTiff
+from scripts.gdal.tests.gdalinfo import add_band, fake_gdal_info
 
 
 def test_check_band_count_valid() -> None:
@@ -6,8 +7,10 @@ def test_check_band_count_valid() -> None:
     tests check_band_count when the input layer has a valid band count
     which is 3 bands
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [{"band": 1}, {"band": 2}, {"band": 3}]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
 
     file_tiff = FileTiff("test")
     file_tiff.check_band_count(gdalinfo)
@@ -20,8 +23,9 @@ def test_check_band_count_invalid() -> None:
     tests check_band_count when the input layer has a invalid band count of 2
     which is 3 bands to be valid
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [{"band": 1}, {"band": 2}]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
 
     file_tiff = FileTiff("test")
     file_tiff.check_band_count(gdalinfo)
@@ -33,18 +37,10 @@ def test_check_color_interpretation_valid() -> None:
     """
     tests check_color_interpretation with the correct color interpretation
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [
-        {
-            "colorInterpretation": "Red",
-        },
-        {
-            "colorInterpretation": "Green",
-        },
-        {
-            "colorInterpretation": "Blue",
-        },
-    ]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
 
     file_tiff = FileTiff("test")
     file_tiff.check_color_interpretation(gdalinfo)
@@ -56,21 +52,11 @@ def test_check_color_interpretation_invalid() -> None:
     """
     tests check_color_interpretation with the incorrect color interpretation
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [
-        {
-            "colorInterpretation": "Red",
-        },
-        {
-            "colorInterpretation": "Green",
-        },
-        {
-            "colorInterpretation": "Blue",
-        },
-        {
-            "colorInterpretation": "Undefined",
-        },
-    ]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
+    add_band(gdalinfo, color_interpretation="undefined")
 
     file_tiff = FileTiff("test")
     file_tiff.check_color_interpretation(gdalinfo)
@@ -82,12 +68,8 @@ def test_check_no_data_valid() -> None:
     """
     tests check_no_data when the input layer has a valid no data value of 255
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [
-        {
-            "noDataValue": 255,
-        }
-    ]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, no_data_value=255)
 
     file_tiff = FileTiff("test")
     file_tiff.check_no_data(gdalinfo)
@@ -99,8 +81,8 @@ def test_check_no_data_no_value() -> None:
     """
     tests check_no_data when the input layer has no no_data value assigned
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [{"test": 1}]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
 
     file_tiff = FileTiff("test")
     file_tiff.check_no_data(gdalinfo)
@@ -112,12 +94,8 @@ def test_check_no_data_invalid_value() -> None:
     """
     tests check_no_data when the input layer has the wrong value of 0 assigned
     """
-    gdalinfo = {}
-    gdalinfo["bands"] = [
-        {
-            "noDataValue": 0,
-        }
-    ]
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, no_data_value=0)
 
     file_tiff = FileTiff("test")
     file_tiff.check_no_data(gdalinfo)

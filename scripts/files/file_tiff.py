@@ -7,7 +7,7 @@ from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import gdal_info
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
 
 
@@ -84,7 +84,7 @@ class FileTiff:
                 return True
         return False
 
-    def check_no_data(self, gdalinfo: Dict[Any, Any]) -> None:
+    def check_no_data(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands"."""
         bands = gdalinfo["bands"]
         if "noDataValue" in bands[0]:
@@ -93,12 +93,12 @@ class FileTiff:
                 self.add_error(
                     error_type=FileTiffErrorType.NO_DATA,
                     error_message="noDataValue is not 255",
-                    custom_fields={"current": f"{int(current_nodata_val)}"},
+                    custom_fields={"current": f"{current_nodata_val}"},
                 )
         else:
             self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
-    def check_band_count(self, gdalinfo: Dict[Any, Any]) -> None:
+    def check_band_count(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is no exactly 3 bands found."""
         bands = gdalinfo["bands"]
         bands_num = len(bands)
@@ -121,7 +121,7 @@ class FileTiff:
         else:
             self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
-    def check_color_interpretation(self, gdalinfo: Dict[Any, Any]) -> None:
+    def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
         """Add an error if the colors don't match RGB.
 
         Args:
@@ -147,7 +147,7 @@ class FileTiff:
                 custom_fields={"missing": f"{', '.join(missing_bands)}"},
             )
 
-    def check_tile_and_rename(self, gdalinfo: Dict[Any, Any]) -> None:
+    def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
         origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
         try:
             tile_name = get_tile_name(origin, self._scale)
