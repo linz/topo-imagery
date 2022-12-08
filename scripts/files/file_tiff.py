@@ -32,7 +32,7 @@ class FileTiff:
         self._errors: List[Dict[str, Any]] = []
         self._scale = 0
         self._valid = True
-        self._gdalinfo: Dict[Any, Any] = {}
+        self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
 
     def set_srs(self, srs: bytes) -> None:
@@ -44,7 +44,7 @@ class FileTiff:
     def set_path_standardised(self, path: str) -> None:
         self._path_standardised = path
 
-    def get_gdalinfo(self) -> Optional[Dict[Any, Any]]:
+    def get_gdalinfo(self) -> Optional[GdalInfo]:
         if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
         if not self._gdalinfo:

@@ -34,7 +34,7 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
 
     with Pool(concurrency) as p:
-        output_files = p.map(partial(standardising, preset=preset, cutline=cutline), tiff_files)
+        standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
         p.close()
         p.join()
 
