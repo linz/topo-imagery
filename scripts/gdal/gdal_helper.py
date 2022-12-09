@@ -89,20 +89,23 @@ def run_gdal(
     if output_file:
         temp_command.append(output_file)
 
+    gdal_command = temp_command[0];
+    gdal_args = " ".join(temp_command[1:])
+
     start_time = time_in_ms()
     try:
-        get_log().debug("run_gdal_start", command=command_to_string(temp_command))
+        get_log().debug("run_gdal_start", command=gdal_command, command_args=gdal_args)
         proc = subprocess.run(temp_command, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     except subprocess.CalledProcessError as cpe:
-        get_log().error("run_gdal_failed", command=command_to_string(temp_command), error=str(cpe.stderr, "utf-8"))
+        get_log().error("run_gdal_failed", command=gdal_command, command_args=gdal_args, error=str(cpe.stderr, "utf-8"))
         raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
     finally:
-        get_log().info("run_gdal_end", command=command_to_string(temp_command), duration=time_in_ms() - start_time)
+        get_log().info("run_gdal_end", command=gdal_command, command_args=gdal_args, duration=time_in_ms() - start_time)
 
     if proc.stderr:
-        get_log().warning("run_gdal_stderr", command=command_to_string(temp_command), stderr=proc.stderr.decode())
+        get_log().warning("run_gdal_stderr", command=gdal_command, command_args=gdal_args, stderr=proc.stderr.decode())
 
-    get_log().trace("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
+    get_log().trace("run_gdal_succeeded", command=gdal_command, command_args=gdal_args, stdout=proc.stdout.decode())
 
     return proc
 

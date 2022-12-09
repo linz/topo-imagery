@@ -54,6 +54,7 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     """
     target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
     input_file_path = target_file_path + ".tiff"
+    get_log().info("download_tiff", source=input_file, target=target_file_path)
     write(input_file_path, read(input_file))
 
     base_file_path = os.path.splitext(input_file)[0]
@@ -61,6 +62,7 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     for ext in [".prj", ".tfw"]:
         try:
             write(target_file_path + ext, read(base_file_path + ext))
+            get_log().info("download_tiff_sidecar", source=base_file_path + ext, target=target_file_path + ext)
         except:  # pylint: disable-msg=bare-except
             pass
 
