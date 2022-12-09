@@ -89,7 +89,7 @@ def run_gdal(
     if output_file:
         temp_command.append(output_file)
 
-    gdal_command = temp_command[0];
+    gdal_command = temp_command[0]
     gdal_args = " ".join(temp_command[1:])
 
     start_time = time_in_ms()
