@@ -4,7 +4,6 @@ import tempfile
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
-from scripts.gdal.gdal_cutline import optimize_cutline
 
 import ulid
 from linz_logger import get_log
@@ -15,6 +14,7 @@ from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_cutline import optimize_cutline
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
