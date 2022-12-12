@@ -2,7 +2,7 @@ from typing import Optional
 
 # osgeo is embbed in the Docker image
 from osgeo import gdal  # pylint: disable=import-error
-from osgeo import ogr, Geometry, Layer  # pylint: disable=import-error
+from osgeo import Geometry, Layer, ogr  # pylint: disable=import-error
 
 
 def get_tiff_geom(tiff_path: str) -> Geometry:
