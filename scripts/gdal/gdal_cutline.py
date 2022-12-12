@@ -61,7 +61,7 @@ def clamp_cutline_to_tiff(output_location: str, tiff_geom: Geometry, cutline_geo
     return output_path
 
 
-def optimize_cutline(tiff_path: str, cutline_path: str, optimize=False) -> Optional[str]:
+def optimize_cutline(tiff_path: str, cutline_path: str, optimize: bool = False) -> Optional[str]:
     """Determine if a cutline needs to be applied to a tiff
 
     Args:
@@ -96,4 +96,4 @@ def optimize_cutline(tiff_path: str, cutline_path: str, optimize=False) -> Optio
     if not optimize:
         return cutline_path
 
-    return clamp_cutline_to_tiff(cutline_path, cutline_geom, tiff_geom)
+    return clamp_cutline_to_tiff(cutline_path, cutline_geom, tiff_geom, input_layer)
