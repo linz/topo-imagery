@@ -27,5 +27,5 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    get_log().info("imagery stac item created", file=file)
+    get_log().info("imagery stac item created", path=file)
     return item

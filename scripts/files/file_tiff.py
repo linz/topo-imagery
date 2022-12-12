@@ -11,7 +11,7 @@ from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
 
 
-class FileCheckErrorType(str, Enum):
+class FileTiffErrorType(str, Enum):
     GDAL_INFO = "gdalinfo"
     NO_DATA = "nodata"
     BANDS = "bands"
@@ -20,47 +20,66 @@ class FileCheckErrorType(str, Enum):
     COLOR = "color"
 
 
-class FileCheck:
+class FileTiff:
+    """Wrapper for the TIFF files"""
+
     def __init__(
         self,
         path: str,
-        scale: int,
-        srs: bytes,
     ) -> None:
-        self.path = path
-        self.scale = scale
-        self.errors: List[Dict[str, Any]] = []
+        self._path_original = path
+        self._path_standardised = ""
+        self._errors: List[Dict[str, Any]] = []
+        self._scale = 0
         self._valid = True
         self._gdalinfo: Optional[GdalInfo] = None
+        self._srs: Optional[bytes] = None
+
+    def set_srs(self, srs: bytes) -> None:
         self._srs = srs
 
+    def set_scale(self, scale: int) -> None:
+        self._scale = scale
+
+    def set_path_standardised(self, path: str) -> None:
+        self._path_standardised = path
+
     def get_gdalinfo(self) -> Optional[GdalInfo]:
-        if self.is_error_type(FileCheckErrorType.GDAL_INFO):
+        if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
         if not self._gdalinfo:
             try:
-                self._gdalinfo = gdal_info(self.path)
+                self._gdalinfo = gdal_info(self._path_standardised)
             except json.JSONDecodeError as jde:
-                self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
+                self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
             except GDALExecutionException as gee:
-                self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"failed: {str(gee)}")
+                self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"failed: {str(gee)}")
             except Exception as e:  # pylint: disable=broad-except
-                self.add_error(error_type=FileCheckErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
+                self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
+    def get_errors(self) -> List[Dict[str, Any]]:
+        return self._errors
+
+    def get_path_original(self) -> str:
+        return self._path_original
+
+    def get_path_standardised(self) -> str:
+        return self._path_standardised
+
     def add_error(
-        self, error_type: FileCheckErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
+        self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
     ) -> None:
         if not custom_fields:
             custom_fields = {}
-        self.errors.append({"type": error_type, "message": error_message, **custom_fields})
+        self._errors.append({"type": error_type, "message": error_message, **custom_fields})
         self._valid = False
 
     def is_valid(self) -> bool:
         return self._valid
 
     def is_error_type(self, error_type: str) -> bool:
-        for error in self.errors:
+        for error in self._errors:
             if error["type"] == error_type:
                 return True
         return False
@@ -72,12 +91,12 @@ class FileCheck:
             current_nodata_val = bands[0]["noDataValue"]
             if current_nodata_val != 255:
                 self.add_error(
-                    error_type=FileCheckErrorType.NO_DATA,
+                    error_type=FileTiffErrorType.NO_DATA,
                     error_message="noDataValue is not 255",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
         else:
-            self.add_error(error_type=FileCheckErrorType.NO_DATA, error_message="noDataValue not set")
+            self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is no exactly 3 bands found."""
@@ -85,7 +104,7 @@ class FileCheck:
         bands_num = len(bands)
         if bands_num != 3:
             self.add_error(
-                error_type=FileCheckErrorType.BANDS,
+                error_type=FileTiffErrorType.BANDS,
                 error_message="bands count is not 3",
                 custom_fields={"count": f"{int(bands_num)}"},
             )
@@ -96,8 +115,11 @@ class FileCheck:
         Args:
             gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
         """
-        if gdalsrsinfo_tif != self._srs:
-            self.add_error(error_type=FileCheckErrorType.SRS, error_message="different srs")
+        if self._srs:
+            if gdalsrsinfo_tif != self._srs:
+                self.add_error(error_type=FileTiffErrorType.SRS, error_message="different srs")
+        else:
+            self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
     def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
         """Add an error if the colors don't match RGB.
@@ -120,7 +142,7 @@ class FileCheck:
         if missing_bands:
             missing_bands.sort()
             self.add_error(
-                error_type=FileCheckErrorType.COLOR,
+                error_type=FileTiffErrorType.COLOR,
                 error_message="unexpected color interpretation bands",
                 custom_fields={"missing": f"{', '.join(missing_bands)}"},
             )
@@ -128,15 +150,15 @@ class FileCheck:
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
         origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
         try:
-            tile_name = get_tile_name(origin, self.scale)
-            if not tile_name == get_file_name_from_path(self.path):
-                new_path = os.path.join(os.path.dirname(self.path), tile_name + ".tiff")
-                os.rename(self.path, new_path)
-                get_log().info("renaming_file", path=new_path, old=self.path)
-                self.path = new_path
+            tile_name = get_tile_name(origin, self._scale)
+            if not tile_name == get_file_name_from_path(self._path_standardised):
+                new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
+                os.rename(self._path_standardised, new_path)
+                get_log().info("renaming_file", path=new_path, old=self._path_standardised)
+                self._path_standardised = new_path
 
         except TileIndexException as tie:
-            self.add_error(FileCheckErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
+            self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
 
     def validate(self) -> bool:
         gdalinfo = self.get_gdalinfo()
@@ -148,8 +170,8 @@ class FileCheck:
 
             gdalsrsinfo_tif_command = ["gdalsrsinfo", "-o", "wkt"]
             try:
-                gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, self.path)
+                gdalsrsinfo_tif_result = run_gdal(gdalsrsinfo_tif_command, self._path_standardised)
                 self.check_srs(gdalsrsinfo_tif_result.stdout)
             except GDALExecutionException as gee:
-                self.add_error(error_type=FileCheckErrorType.SRS, error_message=f"not checked: {str(gee)}")
+                self.add_error(error_type=FileTiffErrorType.SRS, error_message=f"not checked: {str(gee)}")
         return self.is_valid()

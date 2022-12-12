@@ -10,6 +10,7 @@ from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3, parse_path
 from scripts.cli.cli_helper import format_source, is_argo
+from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
@@ -18,28 +19,28 @@ from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
 
 
-def start_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int) -> List[str]:
+def run_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int) -> List[FileTiff]:
     start_time = time_in_ms()
-    tiff_files = []
-    output_files = []
-
-    gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version)
+    actual_tiffs = []
+    standardized_tiffs: List[FileTiff] = []
 
     for file in files:
         if is_tiff(file) or is_vrt(file):
-            tiff_files.append(file)
+            actual_tiffs.append(file)
         else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
+    gdal_version = get_gdal_version()
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
+
     with Pool(concurrency) as p:
-        output_files = p.map(partial(standardising, preset=preset, cutline=cutline), tiff_files)
+        standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
         p.close()
         p.join()
 
-    get_log().info("standardising_end", duration=time_in_ms() - start_time)
+    get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
-    return output_files
+    return standardized_tiffs
 
 
 def download_tiff_file(input_file: str, tmp_path: str) -> str:
@@ -67,14 +68,12 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     return input_file_path
 
 
-def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
+def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
+    get_log().info(f"standardising {file}", path=file)
     output_folder = "/tmp/"
-
-    get_log().info("standardising", path=file)
-
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
-    output_file_path = os.path.join(output_folder, standardized_file_name)
+    standardized_file_path = os.path.join(output_folder, standardized_file_name)
 
     with tempfile.TemporaryDirectory() as tmp_path:
         input_file = file
@@ -102,9 +101,12 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> str:
         command = get_gdal_command(preset)
         command.extend(get_gdal_band_offset(input_file))
 
-        run_gdal(command, input_file=input_file, output_file=output_file_path)
+        run_gdal(command, input_file=file, output_file=standardized_file_path)
 
-    return output_file_path
+    tiff = FileTiff(file)
+    tiff.set_path_standardised(standardized_file_path)
+
+    return tiff
 
 
 def main() -> None:
@@ -114,13 +116,12 @@ def main() -> None:
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--cutline", dest="cutline", required=False)
     arguments = parser.parse_args()
-
     source = format_source(arguments.source)
 
     if is_argo():
         concurrency = 4
 
-    start_standardising(source, arguments.preset, arguments.cutline, concurrency)
+    run_standardising(source, arguments.preset, arguments.cutline, concurrency)
 
 
 if __name__ == "__main__":
