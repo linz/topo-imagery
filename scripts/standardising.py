@@ -14,6 +14,7 @@ from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_cutline import optimize_cutline
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
@@ -55,6 +56,8 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     """
     target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
     input_file_path = target_file_path + ".tiff"
+    get_log().info("download_tiff", path=input_file, target_path=input_file_path)
+
     write(input_file_path, read(input_file))
 
     base_file_path = os.path.splitext(input_file)[0]
@@ -62,6 +65,8 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     for ext in [".prj", ".tfw"]:
         try:
             write(target_file_path + ext, read(base_file_path + ext))
+            get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
+
         except:  # pylint: disable-msg=bare-except
             pass
 
@@ -92,11 +97,12 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
                 # Ensure the input cutline is a easy spot for GDAL to read
                 write(input_cutline_path, read(cutline))
 
-            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            # TODO check if the cutline actually intersects with the input_file
-            # as apply a cutline is much slower than conversion
-            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-            input_file = target_vrt
+            optimized_cutline = optimize_cutline(input_file, input_cutline_path)
+            get_log().info("optimize_cutline", optimized_cutline=optimized_cutline, path=file)
+            if optimized_cutline:
+                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+                run_gdal(get_cutline_command(optimized_cutline), input_file=input_file, output_file=target_vrt)
+                input_file = target_vrt
 
         command = get_gdal_command(preset)
         command.extend(get_gdal_band_offset(input_file))
