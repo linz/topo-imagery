@@ -74,7 +74,7 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
 
 
 def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
-    get_log().info(f"standardising", path=file)
+    get_log().info("standardising", path=file)
     output_folder = "/tmp/"
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
