@@ -1,11 +1,10 @@
 from typing import Optional
 
 # osgeo is embbed in the Docker image
-from osgeo import gdal  # pylint: disable=import-error
-from osgeo import Geometry, Layer, ogr  # pylint: disable=import-error
+from osgeo import gdal, ogr  # pylint: disable=import-error
 
 
-def get_tiff_geom(tiff_path: str) -> Geometry:
+def get_tiff_geom(tiff_path: str) -> ogr.Geometry:
     """Load a tiff with gdal and create a geometry for the bounding box"""
     gdal_tiff = gdal.Open(tiff_path, gdal.GA_ReadOnly)
 
@@ -32,7 +31,9 @@ def get_tiff_geom(tiff_path: str) -> Geometry:
     return tiff_geom
 
 
-def clamp_cutline_to_tiff(output_location: str, tiff_geom: Geometry, cutline_geom: Geometry, input_layer: Layer) -> str:
+def clamp_cutline_to_tiff(
+    output_location: str, tiff_geom: ogr.Geometry, cutline_geom: ogr.Geometry, input_layer: ogr.Layer
+) -> str:
     """Optimize a cutline to a specific tiff_geomemtry
 
     Args:
