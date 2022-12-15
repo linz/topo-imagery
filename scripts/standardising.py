@@ -74,7 +74,7 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
 
 
 def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
-    get_log().info(f"standardising {file}", path=file)
+    get_log().info(f"standardising", path=file)
     output_folder = "/tmp/"
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
@@ -107,7 +107,7 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
         command = get_gdal_command(preset)
         command.extend(get_gdal_band_offset(input_file))
 
-        run_gdal(command, input_file=file, output_file=standardized_file_path)
+        run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 
     tiff = FileTiff(file)
     tiff.set_path_standardised(standardized_file_path)
