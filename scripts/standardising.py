@@ -99,7 +99,7 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
 
             optimized_cutline = optimize_cutline(input_file, input_cutline_path)
             get_log().info("optimize_cutline", optimized_cutline=optimized_cutline, path=file)
-            
+
             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
             run_gdal(get_cutline_command(optimized_cutline), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt

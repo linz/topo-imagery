@@ -95,9 +95,9 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
         # Ensure the target has a alpha channel
         "-dstalpha",
     ]
-    
+
     # Apply the cutline
-    if cutline: 
-        gdal_command += ["-cutline",cutline]
+    if cutline:
+        gdal_command += ["-cutline", cutline]
 
     return gdal_command
