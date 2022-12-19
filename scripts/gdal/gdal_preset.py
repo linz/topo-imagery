@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from linz_logger import get_log
 
