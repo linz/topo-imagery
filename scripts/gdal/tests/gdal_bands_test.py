@@ -44,7 +44,7 @@ def test_gdal_rgb_bands_detection() -> None:
     assert " ".join(bands) == "-b 1 -b 2 -b 3"
 
 
-def test_gdal_default_rgb() -> None:
+def test_gdal_default_grey_scale() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Pallette")
 
