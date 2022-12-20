@@ -55,6 +55,12 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
         get_log().warn(
             "gdal_info_bands_failed", band_red=band_red is None, band_green=band_green is None, band_blue=band_blue is None
         )
+
+        # Not enough bands for RGB assume it is grey scale
+        if len(bands) < 3:
+            return ["-b", "1", "-b", "1", "-b", "1"] + alpha_band_info
+
+        # Could be RGB assume it is RGB
         return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
 
     return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + alpha_band_info

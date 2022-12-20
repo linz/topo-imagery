@@ -46,7 +46,18 @@ def test_gdal_rgb_bands_detection() -> None:
 
 def test_gdal_default_rgb() -> None:
     gdalinfo = fake_gdal_info()
-    add_band(gdalinfo, color_interpretation="unknown")
+    add_band(gdalinfo, color_interpretation="Pallette")
+
+    bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
+
+    assert " ".join(bands) == "-b 1 -b 1 -b 1"
+
+
+def test_gdal_default_rgb() -> None:
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="R")
+    add_band(gdalinfo, color_interpretation="G")
+    add_band(gdalinfo, color_interpretation="B")
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
 
