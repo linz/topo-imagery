@@ -37,7 +37,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
-boto3 = "^1.24.12"
+boto3 = "^1.26.34"
 linz-logger = "^0.9.0"
 certifi = "^2022.6.15"
 py-multihash = "^2.0.1"
