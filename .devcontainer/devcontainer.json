@@ -1,0 +1,47 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "Python",
+	"context": "..",
+	"dockerFile": "Dockerfile",
+	// Some common Python extensions which are loaded within this dev container
+	// Additional extensions can be added here according to personal taste.
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash"
+					}
+				},
+				"editor.codeActionsOnSave": {
+					"source.organizeImports": true
+				},
+				"python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python3.10",
+				"python.formatting.blackPath": "${containerWorkspaceFolder}/.venv/bin/black",
+				"python.linting.mypyPath": "${containerWorkspaceFolder}/.venv/bin/mypy",
+				"python.linting.pylintPath": "${containerWorkspaceFolder}/.venv/bin/pylint",
+				"python.formatting.provider": "black",
+				"python.testing.pytestEnabled": true,
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true,
+				"editor.formatOnSave": true
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
+		}
+	},
+	// To avoid "fatal: detected dubious ownership in repository at '/workspaces/topo-imagery'"
+	//"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+	"postCreateCommand": "bash ./.devcontainer/init.sh",
+	"mounts": [
+		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind"
+	]
+	// Not using feature  as it's longer to deploy than installing git in the Dockerfile
+	/* "features": {
+		"git": "latest"
+	} */
+}
