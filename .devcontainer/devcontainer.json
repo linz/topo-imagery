@@ -7,11 +7,6 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"terminal.integrated.profiles.linux": {
-					"bash": {
-						"path": "/bin/bash"
-					}
-				},
 				"editor.codeActionsOnSave": {
 					"source.organizeImports": true
 				},
@@ -35,10 +30,11 @@
 	"postStartCommand": "bash ./.devcontainer/post_start.sh ${containerWorkspaceFolder}",
 	"postCreateCommand": "bash ./.devcontainer/post_create.sh",
 	"mounts": [
-		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind"
-	]
-	// Not using feature  as it takes longer to deploy than installing git from the Dockerfile
-	/* "features": {
-		"git": "latest"
-	} */
+		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind",
+		"source=${localEnv:HOME}/.bashrc,target=/root/.bashrc,type=bind,consistency=cached"
+		//"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	}
 }
