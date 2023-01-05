@@ -7,6 +7,11 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
+				"terminal.integrated.profiles.linux": {
+					"bash": {
+						"path": "/bin/bash"
+					}
+				},
 				"editor.codeActionsOnSave": {
 					"source.organizeImports": true
 				},
@@ -18,7 +23,8 @@
 				"python.testing.pytestEnabled": true,
 				"python.linting.enabled": true,
 				"python.linting.pylintEnabled": true,
-				"editor.formatOnSave": true
+				"editor.formatOnSave": true,
+				"autoDocstring.docstringFormat": "google-notypes"
 			},
 			"extensions": [
 				"ms-python.python",
@@ -30,9 +36,8 @@
 	"postStartCommand": "bash ./.devcontainer/post_start.sh ${containerWorkspaceFolder}",
 	"postCreateCommand": "bash ./.devcontainer/post_create.sh",
 	"mounts": [
-		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind",
+		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/root/.aws,type=bind",
 		"source=${localEnv:HOME}/.bashrc,target=/root/.bashrc,type=bind,consistency=cached"
-		//"source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
 	],
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
