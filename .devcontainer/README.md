@@ -16,6 +16,10 @@ It allows us to use common settings for the development environment.
 
 This script is run after the container is created.
 
+### `post_start.sh`
+
+This script is run everytime the container is started.
+
 ## Usage
 
 Once opened the local cloned repository in VSCode, click on the bottom left corner green button `><` `Open a Remote Window` and select the `Reopen in Container` option. Wait for the container to be build. Open a new terminal from VSCode. It should source the Python `venv`.
