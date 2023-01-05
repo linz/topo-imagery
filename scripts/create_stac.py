@@ -15,6 +15,18 @@ def create_item(
     collection_id: str,
     gdalinfo_result: Optional[GdalInfo] = None,
 ) -> ImageryItem:
+    """Create STAC item metadata for imagery
+
+    Args:
+        file: path the the image
+        start_datetime: start date
+        end_datetime: end date
+        collection_id: id of the collection
+        gdalinfo_result: result of gdalinfo. Defaults to None.
+
+    Returns:
+        ImageryItem object
+    """
     id_ = get_file_name_from_path(file)
 
     if not gdalinfo_result:
