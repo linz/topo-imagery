@@ -1,11 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "Python",
+	"name": "topo-imagery-dev",
 	"context": "..",
 	"dockerFile": "Dockerfile",
-	// Some common Python extensions which are loaded within this dev container
-	// Additional extensions can be added here according to personal taste.
 	"customizations": {
 		"vscode": {
 			"settings": {
@@ -27,20 +25,19 @@
 				"python.linting.pylintEnabled": true,
 				"editor.formatOnSave": true
 			},
-			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-python.python",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"njpwerner.autodocstring"
 			]
 		}
 	},
-	// To avoid "fatal: detected dubious ownership in repository at '/workspaces/topo-imagery'"
-	//"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-	"postCreateCommand": "bash ./.devcontainer/init.sh",
+	"postStartCommand": "bash ./.devcontainer/post_start.sh ${containerWorkspaceFolder}",
+	"postCreateCommand": "bash ./.devcontainer/post_create.sh",
 	"mounts": [
 		"source=${env:HOME}${env:USERPROFILE}/.aws,target=/root/.aws,type=bind"
 	]
-	// Not using feature  as it's longer to deploy than installing git in the Dockerfile
+	// Not using feature  as it takes longer to deploy than installing git from the Dockerfile
 	/* "features": {
 		"git": "latest"
 	} */

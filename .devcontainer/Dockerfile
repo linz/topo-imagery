@@ -1,16 +1,8 @@
-FROM osgeo/gdal:ubuntu-small-3.6.0
+FROM osgeo/gdal:ubuntu-small-3.6.1
 
-RUN apt-get update
-# Install pip
-RUN apt-get install python3-pip -y
-# Install Poetry
-RUN pip install poetry
+RUN apt update && apt install -y python3-pip python3-distutils git
 
-# Define the working directory for the following commands
-#WORKDIR /workspaces/topo-imagery
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-#ENV PYTHONPATH="/workspaces/topo-imagery"
-
-
-#WORKDIR /workspaces/topo-imagery/scripts
- 
+ENV PYTHONPATH="/lib/python3/dist-packages:/workspaces/topo-imagery:$PYTHONPATH"
+ENV PATH=/root/.local/bin:$PATH
