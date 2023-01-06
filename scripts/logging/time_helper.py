@@ -2,7 +2,7 @@ import time
 
 
 def time_in_ms() -> float:
-    """_summary_
+    """test
 
     Returns:
         _description_
