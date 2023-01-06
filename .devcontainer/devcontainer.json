@@ -35,7 +35,6 @@
   },
   "postCreateCommand": "bash ./.devcontainer/post_create.sh",
   "postStartCommand": "bash ./.devcontainer/post_start.sh ${containerWorkspaceFolder}",
-  // Share AWS credentials, bash user customization, and `tmp` folder
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/root/.aws,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bashrc,target=/root/.bashrc,type=bind,consistency=cached"
