@@ -39,3 +39,7 @@ Python version is set to `3.8.10` as it is the current version used by `osgeo/gd
 ```bash
 docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 'image-id'  python create_polygons.py --uri 's3://path-to-the-tiff/image.tif' --destination 'destination-bucket'
 ```
+
+#### Development
+
+This repo has a `devcontainer` which can be used within VSCode as a development environment with all of the required dependencies included. See the [.devcontainer/README.md](/.devcontainer/README.md) for more information.
