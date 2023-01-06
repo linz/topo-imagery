@@ -38,7 +38,7 @@
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws,target=/root/.aws,type=bind",
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bashrc,target=/root/.bashrc,type=bind,consistency=cached"
-    //"source=${localEnv:HOME}${localEnv:USERPROFILE}/tmp,target=/tmp,type=bind,consistency=cached"
+    //"source=${localEnv:HOME}${localEnv:USERPROFILE}/tmp,target=/tmp,type=bind"
   ],
   // https://containers.dev/features
   // NOTE: installing Git in that way took more time than within the Dockerfile
