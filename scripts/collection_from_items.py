@@ -62,7 +62,7 @@ def main() -> None:
     )
 
     destination = os.path.join(uri, "collection.json")
-    write(destination, json.dumps(collection.stac).encode("utf-8"))
+    collection.write_to(destination)
     get_log().info("collection written", destination=destination)
 
 

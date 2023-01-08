@@ -1,8 +1,10 @@
+import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import ulid
 
+from scripts.files.fs import write
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 
@@ -110,3 +112,6 @@ class ImageryCollection:
             self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
             self.stac["extent"]["temporal"]["interval"] = [interval]
+
+    def write_to(self, destination: str) -> None:
+        write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"))
