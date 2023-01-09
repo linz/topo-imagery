@@ -1,7 +1,12 @@
+import json
+import os
+from shutil import rmtree
+from tempfile import mkdtemp
 from typing import Generator
 
 import pytest
 
+from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 
@@ -90,3 +95,25 @@ def test_add_item(mocker, setup_collection: ImageryCollection) -> None:  # type:
     assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
     assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
+
+
+def test_write_collection(setup_collection: ImageryCollection) -> None:
+    target = mkdtemp()
+    collection_target = os.path.join(target, "collection.json")
+    setup_collection.write_to(collection_target)
+    collection = json.loads(read(collection_target))
+    rmtree(target)
+
+    assert collection["title"] == setup_collection.stac["title"]
+
+
+def test_write_collection_special_chars(setup_collection: ImageryCollection) -> None:
+    target = mkdtemp()
+    title = "Manawatū-Whanganui"
+    setup_collection.stac["title"] = title
+    collection_target = os.path.join(target, "collection.json")
+    setup_collection.write_to(collection_target)
+    collection = json.loads(read(collection_target))
+    rmtree(target)
+
+    assert collection["title"] == title
