@@ -45,5 +45,6 @@
   // NOTE: installing Git in that way took more time than within the Dockerfile
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  }
+  },
+  "waitFor": "postCreateCommand"
 }
