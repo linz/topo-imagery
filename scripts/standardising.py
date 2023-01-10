@@ -14,7 +14,6 @@ from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_cutline import optimize_cutline
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 from scripts.logging.time_helper import time_in_ms
@@ -97,11 +96,8 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
                 # Ensure the input cutline is a easy spot for GDAL to read
                 write(input_cutline_path, read(cutline))
 
-            optimized_cutline = optimize_cutline(input_file, input_cutline_path)
-            get_log().info("optimize_cutline", optimized_cutline=optimized_cutline, path=file)
-
             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            run_gdal(get_cutline_command(optimized_cutline), input_file=input_file, output_file=target_vrt)
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
         command = get_gdal_command(preset)
