@@ -21,9 +21,5 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Publish Containers
-        run: |
-          GIT_VERSION=$(git describe --tags --always --match 'v*')
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
-          docker push ghcr.io/linz/topo-imagery:${GIT_VERSION}
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
-          docker push ghcr.io/linz/topo-imagery:latest
+        run: ./.github/scripts/publish_containers.sh
+        shell: bash
