@@ -25,3 +25,5 @@ jobs:
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
           docker push ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
+          docker push ghcr.io/linz/topo-imagery:latest
