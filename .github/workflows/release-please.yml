@@ -15,6 +15,7 @@ jobs:
         with:
           release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-title-pattern: "release: ${version}"
 
   publish-release:
     needs: release-please
