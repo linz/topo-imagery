@@ -16,10 +16,3 @@ jobs:
           release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-title-pattern: "release: ${version}"
-
-  publish-release:
-    needs: release-please
-    runs-on: ubuntu-latest
-    if: ${{ needs.release-please.outputs.release_created }}
-    steps:
-      - uses: ./.github/workflows/containers
