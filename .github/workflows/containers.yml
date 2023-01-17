@@ -18,11 +18,11 @@ jobs:
           docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
 
       - name: Log in to registry
-        if: github.ref == 'refs/heads/master'
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Publish Containers
-        if: github.ref == 'refs/heads/master'
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
