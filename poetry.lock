@@ -553,14 +553,14 @@ files = [
 
 [[package]]
 name = "linz-logger"
-version = "0.9.0"
+version = "0.11.0"
 description = "LINZ standard Logging format"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "linz_logger-0.9.0-py3-none-any.whl", hash = "sha256:31cd8ea27fbf79330727b10f3fae242afc59a7399833c4ff0cb3392869f616c0"},
-    {file = "linz_logger-0.9.0.tar.gz", hash = "sha256:e8282540c305fab3645f9315dadf9eb68d33f9c0bcdea0586662333fd1836425"},
+    {file = "linz_logger-0.11.0-py3-none-any.whl", hash = "sha256:1e8ef3f85a77e9506728a022e7b9b6b835c32a7d784ee8d78b6bb28755cc264a"},
+    {file = "linz_logger-0.11.0.tar.gz", hash = "sha256:7454e18f613b5aafbb38cad1478d48eab15bacd4d3fe8bb70fcc55f4ea139a6b"},
 ]
 
 [package.dependencies]
@@ -1443,4 +1443,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "2f292579e9515af24e859727f1e02c85576e90f7b530bb211fb40a7bb7dfc388"
+content-hash = "03eaa15f54ee62c8251232380adbfc075bb89456bef39e34335aa8b1573df5f4"
