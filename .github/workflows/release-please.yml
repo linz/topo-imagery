@@ -16,3 +16,34 @@ jobs:
           release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-title-pattern: "release: ${version}"
+
+  publish-release:
+    needs: release-please
+    runs-on: ubuntu-latest
+    if: ${{ needs.release-please.outputs.release_created }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Build containers
+        run: |
+          docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+
+      - name: Publish Containers
+        run: |
+          GIT_VERSION=$(git describe --tags --always --match 'v*')
+          GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
+          GIT_VERSION_MAJOR_MINOR=$(echo $GIT_VERSION | cut -d. -f1,2)
+          docker tag topo-imagery-test ghcr.io/linz/topo-imagery:latest
+          docker tag topo-imagery-test ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker tag topo-imagery-test ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
+          docker tag topo-imagery-test ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
+          docker push ghcr.io/linz/topo-imagery:latest
+          docker push ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker push ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
+          docker push ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
