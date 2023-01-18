@@ -82,9 +82,11 @@ def test_add_item(mocker, setup_collection: ImageryCollection) -> None:  # type:
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
-
-    geometry = [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]
-    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
+    geometry = {
+        "type": "Polygon",
+        "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
+    }
+    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     start_datetime = "2021-01-27 00:00:00Z"
     end_datetime = "2021-01-27 00:00:00Z"
     item.update_spatial(geometry, bbox)

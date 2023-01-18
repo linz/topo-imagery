@@ -9,7 +9,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
         "type": "Polygon",
         "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
+    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
 

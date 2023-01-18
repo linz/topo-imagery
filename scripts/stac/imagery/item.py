@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Tuple
 
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -34,7 +34,8 @@ class ImageryItem:
             "datetime": None,
         }
 
-    def update_spatial(self, geometry: Dict[str, List[float]], bbox: Tuple[float]) -> None:
+    # FIXME: redefine the 'Any'
+    def update_spatial(self, geometry: Dict[str, Any], bbox: Tuple[float, ...]) -> None:
         self.stac["geometry"] = geometry
         self.stac["bbox"] = bbox
 
