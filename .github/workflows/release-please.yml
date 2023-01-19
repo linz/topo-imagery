@@ -39,12 +39,12 @@ jobs:
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
           GIT_VERSION_MAJOR_MINOR=$(echo $GIT_VERSION | cut -d. -f1,2)
-          
+
           docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
-          
+
           docker push ghcr.io/linz/topo-imagery:latest
           docker push ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
           docker push ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
