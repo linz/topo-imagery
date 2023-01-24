@@ -1,5 +1,5 @@
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.tests.gdalinfo import add_band, fake_gdal_info
+from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
 
 
 def test_gdal_grey_bands() -> None:
@@ -44,13 +44,22 @@ def test_gdal_rgb_bands_detection() -> None:
     assert " ".join(bands) == "-b 1 -b 2 -b 3"
 
 
-def test_gdal_default_grey_scale() -> None:
+def test_gdal_rgba_palette_detection() -> None:
     gdalinfo = fake_gdal_info()
-    add_band(gdalinfo, color_interpretation="Pallette")
+    add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))])
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
 
-    assert " ".join(bands) == "-b 1 -b 1 -b 1"
+    assert " ".join(bands) == "-expand rgba"
+
+
+def test_gdal_rgb_palette_detection() -> None:
+    gdalinfo = fake_gdal_info()
+    add_palette_band(gdalinfo, colour_table_entries=[[x, x, x] for x in reversed(range(256))])
+
+    bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
+
+    assert " ".join(bands) == "-expand rgb"
 
 
 def test_gdal_default_rgb() -> None:

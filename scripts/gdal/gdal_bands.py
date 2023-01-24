@@ -1,11 +1,34 @@
-from typing import List, Optional
+from typing import List, Optional, overload
 
 from linz_logger import get_log
 
-from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
+from scripts.gdal.gdalinfo import (
+    BandColours,
+    GdalInfo,
+    GdalInfoBand,
+    GdalInfoBandPalette,
+    GdalInfoBandSingle,
+    PaletteBandColours,
+    SingleBandColours,
+    gdal_info,
+)
 
 
-def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
+class UnknownBandsException(Exception):
+    pass
+
+
+@overload
+def find_band(bands: List[GdalInfoBand], color: SingleBandColours) -> Optional[GdalInfoBandSingle]:
+    ...
+
+
+@overload
+def find_band(bands: List[GdalInfoBand], color: PaletteBandColours) -> Optional[GdalInfoBandPalette]:
+    ...
+
+
+def find_band(bands: List[GdalInfoBand], color: BandColours) -> Optional[GdalInfoBand]:
     """Look for a specific colorInterperation inside of a gdalinfo band output
 
     Args:
@@ -36,16 +59,27 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
 
     bands = info["bands"]
 
-    alpha_band = find_band(bands, "Alpha")
-    alpha_band_info: List[str] = []
-    if alpha_band:
-        alpha_band_info.extend(["-b", str(alpha_band["band"])])
+    band_alpha_arg: List[str] = []
+    if band_alpha := find_band(bands, "Alpha"):
+        band_alpha_arg = ["-b", str(band_alpha["band"])]
 
     # Grey scale imagery, set R,G and B to just the grey_band
-    grey_band = find_band(bands, "Gray")
-    if grey_band:
-        grey_band_index = str(grey_band["band"])
-        return ["-b", grey_band_index, "-b", grey_band_index, "-b", grey_band_index] + alpha_band_info
+    if band_grey := find_band(bands, "Gray"):
+        band_grey_index = str(band_grey["band"])
+        return ["-b", band_grey_index, "-b", band_grey_index, "-b", band_grey_index] + band_alpha_arg
+
+    if band_palette := find_band(bands, "Palette"):
+        palette_channels = len(band_palette["colorTable"]["entries"][0])
+        if palette_channels == 4:
+            return ["-expand", "rgba"]
+        if palette_channels == 3:
+            return ["-expand", "rgb"]
+        get_log().error(
+            "unknown_palette_band_type",
+            palette_channels=palette_channels,
+            first_entry=band_palette["colorTable"]["entries"][0],
+        )
+        raise UnknownBandsException
 
     band_red = find_band(bands, "Red")
     band_green = find_band(bands, "Green")
@@ -58,9 +92,9 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
 
         # Not enough bands for RGB assume it is grey scale
         if len(bands) < 3:
-            return ["-b", "1", "-b", "1", "-b", "1"] + alpha_band_info
+            return ["-b", "1", "-b", "1", "-b", "1"] + band_alpha_arg
 
         # Could be RGB assume it is RGB
-        return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
+        return ["-b", "1", "-b", "2", "-b", "3"] + band_alpha_arg
 
-    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + alpha_band_info
+    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + band_alpha_arg

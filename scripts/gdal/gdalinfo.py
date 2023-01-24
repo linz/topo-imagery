@@ -1,24 +1,41 @@
 import json
 import re
-from typing import Any, Dict, List, Optional, TypedDict, cast
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union, cast
 
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 
+SingleBandColours = Literal["Red", "Green", "Blue", "Alpha", "Gray"]
+PaletteBandColours = Literal["Palette"]
+BandColours = Literal[SingleBandColours, PaletteBandColours]
 
-class GdalInfoBand(TypedDict):
+
+class GdalInfoBandBase(TypedDict):
     band: int
     """band offset, starting at 1
     """
     block: List[int]
     type: str
-    colorInterpretation: str
-    """Color
-    Examples:
-        "Red", "Green", "Blue", "Alpha", "Gray"
-    """
     noDataValue: Optional[int]
+
+
+class GdalInfoBandSingle(GdalInfoBandBase):
+    colorInterpretation: SingleBandColours
+
+
+class GdalInfoBandColorTable(TypedDict):
+    palette: str
+    count: int
+    entries: List[List[int]]
+
+
+class GdalInfoBandPalette(GdalInfoBandBase):
+    colorInterpretation: PaletteBandColours
+    colorTable: GdalInfoBandColorTable
+
+
+GdalInfoBand = Union[GdalInfoBandSingle, GdalInfoBandPalette]
 
 
 class GdalInfo(TypedDict):
