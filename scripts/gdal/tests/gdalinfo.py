@@ -1,6 +1,6 @@
 from typing import List, Optional, cast
 
-from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, GdalInfoBandPalette
+from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
 def fake_gdal_info() -> GdalInfo:
@@ -25,7 +25,7 @@ def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: List[List[int]], 
 
     gdalinfo["bands"].append(
         cast(
-            GdalInfoBandPalette,
+            GdalInfoBand,
             {
                 "band": len(gdalinfo["bands"]) + 1,
                 "colorInterpretation": "Palette",

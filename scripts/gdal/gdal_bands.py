@@ -1,34 +1,15 @@
-from typing import List, Optional, overload
+from typing import List, Optional
 
 from linz_logger import get_log
 
-from scripts.gdal.gdalinfo import (
-    BandColours,
-    GdalInfo,
-    GdalInfoBand,
-    GdalInfoBandPalette,
-    GdalInfoBandSingle,
-    PaletteBandColours,
-    SingleBandColours,
-    gdal_info,
-)
+from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
 
 
 class UnknownBandsException(Exception):
     pass
 
 
-@overload
-def find_band(bands: List[GdalInfoBand], color: SingleBandColours) -> Optional[GdalInfoBandSingle]:
-    ...
-
-
-@overload
-def find_band(bands: List[GdalInfoBand], color: PaletteBandColours) -> Optional[GdalInfoBandPalette]:
-    ...
-
-
-def find_band(bands: List[GdalInfoBand], color: BandColours) -> Optional[GdalInfoBand]:
+def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
     """Look for a specific colorInterperation inside of a gdalinfo band output
 
     Args:
@@ -69,16 +50,18 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
         return ["-b", band_grey_index, "-b", band_grey_index, "-b", band_grey_index] + band_alpha_arg
 
     if band_palette := find_band(bands, "Palette"):
-        palette_channels = len(band_palette["colorTable"]["entries"][0])
-        if palette_channels == 4:
-            return ["-expand", "rgba"]
-        if palette_channels == 3:
-            return ["-expand", "rgb"]
-        get_log().error(
-            "unknown_palette_band_type",
-            palette_channels=palette_channels,
-            first_entry=band_palette["colorTable"]["entries"][0],
-        )
+        if colour_table := band_palette["colorTable"]:
+            palette_channels = len(colour_table["entries"][0])
+            if palette_channels == 4:
+                return ["-expand", "rgba"]
+            if palette_channels == 3:
+                return ["-expand", "rgb"]
+            get_log().error(
+                "unknown_palette_band_type",
+                palette_channels=palette_channels,
+                first_entry=colour_table["entries"][0],
+            )
+        get_log().error("palette_band_missing_colorTable")
         raise UnknownBandsException
 
     band_red = find_band(bands, "Red")
