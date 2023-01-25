@@ -37,7 +37,7 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
         standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
         p.close()
         p.join()
-
+    standardized_tiffs = [tiff for tiff in standardized_tiffs if tiff is not None]
     get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
     return standardized_tiffs
@@ -72,43 +72,46 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     return input_file_path
 
 
-def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
+def standardising(file: str, preset: str, cutline: Optional[str]) -> Optional[FileTiff]:
     get_log().info("standardising", path=file)
     output_folder = "/tmp/"
     _, src_file_path = parse_path(file)
     standardized_file_name = f"{get_file_name_from_path(src_file_path)}.tiff"
     standardized_file_path = os.path.join(output_folder, standardized_file_name)
+    try:
+        with tempfile.TemporaryDirectory() as tmp_path:
+            input_file = file
 
-    with tempfile.TemporaryDirectory() as tmp_path:
-        input_file = file
+            # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
+            # makes it hard for GDAL to do its thing
+            if is_s3(input_file):
+                input_file = download_tiff_file(input_file, tmp_path)
 
-        # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
-        # makes it hard for GDAL to do its thing
-        if is_s3(input_file):
-            input_file = download_tiff_file(input_file, tmp_path)
+            if cutline:
+                input_cutline_path = cutline
+                if is_s3(cutline):
+                    if not cutline.endswith((".fgb", ".geojson")):
+                        raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                    input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
+                    # Ensure the input cutline is a easy spot for GDAL to read
+                    write(input_cutline_path, read(cutline))
 
-        if cutline:
-            input_cutline_path = cutline
-            if is_s3(cutline):
-                if not cutline.endswith((".fgb", ".geojson")):
-                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-                input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
-                # Ensure the input cutline is a easy spot for GDAL to read
-                write(input_cutline_path, read(cutline))
+                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+                run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+                input_file = target_vrt
 
-            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-            input_file = target_vrt
+            command = get_gdal_command(preset)
+            command.extend(get_gdal_band_offset(input_file))
 
-        command = get_gdal_command(preset)
-        command.extend(get_gdal_band_offset(input_file))
+            run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 
-        run_gdal(command, input_file=input_file, output_file=standardized_file_path)
+        tiff = FileTiff(file)
+        tiff.set_path_standardised(standardized_file_path)
 
-    tiff = FileTiff(file)
-    tiff.set_path_standardised(standardized_file_path)
-
-    return tiff
+        return tiff
+    except Exception as e:  # pylint:disable=broad-except
+        get_log().error("standardising_file_skipped", path=file, error=str(e))
+        return None
 
 
 def main() -> None:

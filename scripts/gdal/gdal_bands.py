@@ -60,6 +60,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
                 "unknown_palette_band_type",
                 palette_channels=palette_channels,
                 first_entry=colour_table["entries"][0],
+                path=file,
             )
         get_log().error("palette_band_missing_colorTable")
         raise UnknownBandsException
@@ -70,7 +71,11 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
 
     if band_red is None or band_green is None or band_blue is None:
         get_log().warn(
-            "gdal_info_bands_failed", band_red=band_red is None, band_green=band_green is None, band_blue=band_blue is None
+            "gdal_info_bands_failed",
+            band_red=band_red is None,
+            band_green=band_green is None,
+            band_blue=band_blue is None,
+            path=file,
         )
 
         # Not enough bands for RGB assume it is grey scale
