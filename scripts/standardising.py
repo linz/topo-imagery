@@ -22,7 +22,6 @@ from scripts.logging.time_helper import time_in_ms
 def run_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int) -> List[FileTiff]:
     start_time = time_in_ms()
     actual_tiffs = []
-    standardized_tiffs: List[FileTiff] = []
 
     for file in files:
         if is_tiff(file) or is_vrt(file):
@@ -37,10 +36,10 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
         standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
         p.close()
         p.join()
-    standardized_tiffs = [tiff for tiff in standardized_tiffs if tiff is not None]
-    get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
+    successfully_standardized_tiffs = [tiff for tiff in standardized_tiffs if tiff is not None]
+    get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(successfully_standardized_tiffs))
 
-    return standardized_tiffs
+    return successfully_standardized_tiffs
 
 
 def download_tiff_file(input_file: str, tmp_path: str) -> str:
