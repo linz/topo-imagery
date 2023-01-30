@@ -48,11 +48,6 @@ def main() -> None:
 
         # Validate the file
         if not file.validate():
-            get_log().info(
-                "non_visual_qa_errors",
-                originalPath=file.get_path_original(),
-                errors=file.get_errors(),
-            )
             original_path = file.get_path_original()
             standardised_path = file.get_path_standardised()
             env_argo_template = os.environ.get("ARGO_TEMPLATE")
