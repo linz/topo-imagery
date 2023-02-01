@@ -26,7 +26,6 @@ class ImageryCollection:
         }
 
     def add_item(self, item: Dict[Any, Any]) -> None:
-
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
             self.add_link(href=item_self_link["href"])
