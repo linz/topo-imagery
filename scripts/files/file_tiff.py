@@ -58,6 +58,26 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
+    def get_gdalinfo_original(self) -> Optional[GdalInfo]:
+        _original_gdalinfo = None
+        try:
+            _original_gdalinfo = gdal_info(self._path_original)
+        except json.JSONDecodeError as jde:
+            get_log().warning(
+                "GDALINFO Original Tiff Failed",
+                error_type=FileTiffErrorType.GDAL_INFO,
+                error_message=f"parsing result issue: {str(jde)}",
+            )
+        except GDALExecutionException as gee:
+            get_log().warning(
+                "GDALINFO Original Tiff Failed", error_type=FileTiffErrorType.GDAL_INFO, error_message=f"failed: {str(gee)}"
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            get_log().warning(
+                "GDALINFO Original Tiff Failed", error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}"
+            )
+        return _original_gdalinfo
+
     def get_errors(self) -> List[Dict[str, Any]]:
         return self._errors
 
@@ -98,14 +118,26 @@ class FileTiff:
         else:
             self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
-    def check_band_count(self, gdalinfo: GdalInfo) -> None:
-        """Add an error if there is no exactly 3 bands found."""
+    def check_no_data_original(self, gdalinfo: GdalInfo) -> bool:
+        """return True if "noDataValue" and the "noDataValue" is not equal to 255 in the "bands"."""
         bands = gdalinfo["bands"]
-        bands_num = len(bands)
-        if bands_num != 3:
+        if "noDataValue" not in bands[0]:
+            return False
+        elif bands[0]["noDataValue"] != 255:
+            return False
+        return True
+
+    def check_band_count(self, gdalinfo: GdalInfo) -> None:
+        """Add an error if there is not exactly 3 bands found."""
+        bands = gdalinfo["bands"]
+        bands_num = 3
+        for band in bands:
+            if band["colorInterpretation"] == "Alpha":
+                bands_num = 4
+        if len(bands) != bands_num:
             self.add_error(
                 error_type=FileTiffErrorType.BANDS,
-                error_message="bands count is not 3",
+                error_message=f"bands count is not {bands_num}",
                 custom_fields={"count": f"{int(bands_num)}"},
             )
 
@@ -130,11 +162,15 @@ class FileTiff:
         bands = gdalinfo["bands"]
         missing_bands = []
         band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
+        optional_colour_ints = {4: "Alpha"}
         n = 1
         for band in bands:
             colour_int = band["colorInterpretation"]
             if n in band_colour_ints:
                 if colour_int != band_colour_ints[n]:
+                    missing_bands.append(f"band {n} {colour_int}")
+            elif n in optional_colour_ints:
+                if colour_int != optional_colour_ints[n]:
                     missing_bands.append(f"band {n} {colour_int}")
             else:
                 missing_bands.append(f"band {n} {colour_int}")
