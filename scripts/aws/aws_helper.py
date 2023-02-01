@@ -24,6 +24,7 @@ client_sts = session.client("sts")
 
 bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-config/config.json")
 
+
 # Load bucket to roleArn mapping for LINZ internal buckets from SSM
 def _init_roles() -> None:
     s3 = session.resource("s3")
