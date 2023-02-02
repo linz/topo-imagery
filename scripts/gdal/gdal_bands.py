@@ -64,3 +64,20 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
         return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
 
     return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + alpha_band_info
+
+
+def get_gdal_band_type(file: str, info: Optional[GdalInfo] = None) -> str:
+    """Get the band type to determine the bit number
+
+    Args:
+        file: file to check
+        info: optional precomputed gdalinfo
+
+    Returns:
+        band type
+    """
+    if info is None:
+        info = gdal_info(file, False)
+
+    bands = info["bands"]
+    return bands[0]["type"]

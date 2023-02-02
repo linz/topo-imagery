@@ -1,4 +1,4 @@
-from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.tests.gdalinfo import add_band, fake_gdal_info
 
 
@@ -62,3 +62,14 @@ def test_gdal_default_rgb() -> None:
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
 
     assert " ".join(bands) == "-b 1 -b 2 -b 3"
+
+
+def test_get_band_type() -> None:
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, band_type="UInt16")
+    add_band(gdalinfo, band_type="UInt16")
+    add_band(gdalinfo, band_type="UInt16")
+
+    band_type = get_gdal_band_type("some_file.tiff", gdalinfo)
+
+    assert band_type == "UInt16"

@@ -13,9 +13,10 @@ from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
-from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
+from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -100,8 +101,14 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
-        command = get_gdal_command(preset)
-        command.extend(get_gdal_band_offset(input_file))
+        # gdalinfo to get band offset and band type
+        info = gdal_info(file, False)
+        convert_to_byte = False
+        if get_gdal_band_type(input_file, info) == "UInt16":
+            convert_to_byte = True
+
+        command = get_gdal_command(preset, convert_to_byte)
+        command.extend(get_gdal_band_offset(input_file, info))
 
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 
