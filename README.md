@@ -15,7 +15,7 @@ _A collection of Python scripts used to process imagery_
 
 # Package
 
-## [topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
+## [topo-imagery](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery)
 
 ### Container Description
 
