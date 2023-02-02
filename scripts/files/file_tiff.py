@@ -116,7 +116,8 @@ class FileTiff:
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
         else:
-            self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
+            if bands[4]["colorInterpretation"] != "Alpha":
+                self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
     def check_no_data_original(self, gdalinfo: GdalInfo) -> bool:
         """return True if "noDataValue" and the "noDataValue" is not equal to 255 in the "bands"."""
@@ -143,7 +144,6 @@ class FileTiff:
 
     def check_srs(self, gdalsrsinfo_tif: bytes) -> None:
         """Add an error if gdalsrsinfo and gdalsrsinfo_tif values are different.
-
         Args:
             gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
         """
