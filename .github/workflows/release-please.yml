@@ -15,7 +15,6 @@ jobs:
         with:
           release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
-          pull-request-title-pattern: "release: ${version}"
 
   publish-release:
     needs: release-please
@@ -29,8 +28,7 @@ jobs:
 
       - name: Build containers
         run: |
-          docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
-
+          docker build . --tag topo-imagery-test --label "github_run_id=${GITHUB_RUN_ID}"
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
@@ -39,10 +37,8 @@ jobs:
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
           GIT_VERSION_MAJOR_MINOR=$(echo $GIT_VERSION | cut -d. -f1,2)
-
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
-
-          docker push --all-tags ghcr.io/linz/topo-imagery
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:latest
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:${GIT_VERSION_MAJOR_MINOR}
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:${GIT_VERSION_MAJOR}
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:${GIT_VERSION}
+          docker push --all-tags ghcr.io/paulfouquet/topo-imagery-test
