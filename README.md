@@ -21,12 +21,12 @@ _A collection of Python scripts used to process imagery_
 
 The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-3.6.1` Docker image](https://hub.docker.com/r/osgeo/gdal/).
 
-
 #### Usage
 
 ##### Local
 
 Example:
+
 1. Build the Docker image:
    `docker build .`
 2. Log into AWS with `AWS-CLI`
@@ -40,4 +40,3 @@ docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 
 
 [googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
 The library generates a `changelog` based on the commit messages.
-
