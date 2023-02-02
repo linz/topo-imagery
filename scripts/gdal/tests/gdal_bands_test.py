@@ -63,6 +63,7 @@ def test_gdal_default_rgb() -> None:
 
     assert " ".join(bands) == "-b 1 -b 2 -b 3"
 
+
 def test_get_band_type() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, band_type="UInt16")
