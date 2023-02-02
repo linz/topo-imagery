@@ -11,7 +11,7 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
-_A collection of scripts used to process imagery_
+_A collection of Python scripts used to process imagery_
 
 # Package
 
@@ -19,18 +19,14 @@ _A collection of scripts used to process imagery_
 
 ### Container Description
 
-The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-latest` Docker image](https://hub.docker.com/r/osgeo/gdal/).
+The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-3.6.1` Docker image](https://hub.docker.com/r/osgeo/gdal/).
 
-#### Python scripts
-
-Python version is set to `3.8.10` as it is the current version used by `osgeo/gdal`.
-
-`create_polygons.py`
 
 #### Usage
 
-**Local**
+##### Local
 
+Example:
 1. Build the Docker image:
    `docker build .`
 2. Log into AWS with `AWS-CLI`
@@ -39,3 +35,9 @@ Python version is set to `3.8.10` as it is the current version used by `osgeo/gd
 ```bash
 docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 'image-id'  python create_polygons.py --uri 's3://path-to-the-tiff/image.tif' --destination 'destination-bucket'
 ```
+
+# Versioning and Release
+
+[googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
+The library generates a `changelog` based on the commit messages.
+
