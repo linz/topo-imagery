@@ -116,7 +116,7 @@ class FileTiff:
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
         else:
-            if bands[4]["colorInterpretation"] != "Alpha":
+            if len(bands) == 4 and bands[3]["colorInterpretation"] != "Alpha":
                 self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
     def check_no_data_original(self, gdalinfo: GdalInfo) -> bool:
