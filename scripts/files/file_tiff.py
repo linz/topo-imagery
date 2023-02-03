@@ -124,7 +124,7 @@ class FileTiff:
         bands = gdalinfo["bands"]
         if "noDataValue" not in bands[0]:
             return False
-        elif bands[0]["noDataValue"] != 255:
+        if bands[0]["noDataValue"] != 255:
             return False
         return True
 
