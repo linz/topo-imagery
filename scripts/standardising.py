@@ -103,7 +103,6 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
 
         # gdalinfo to get band offset and band type
         info = gdal_info(file, False)
-
         command = get_gdal_command(preset, convert_from=get_gdal_band_type(input_file, info))
         command.extend(get_gdal_band_offset(input_file, info))
 
