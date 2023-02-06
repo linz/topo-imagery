@@ -101,14 +101,11 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
-            # gdalinfo to get band offset and band type
-            info = gdal_info(file, False)
-            convert_to_byte = False
-            if get_gdal_band_type(input_file, info) == "UInt16":
-                convert_to_byte = True
+        # gdalinfo to get band offset and band type
+        info = gdal_info(file, False)
 
-            command = get_gdal_command(preset, convert_to_byte)
-            command.extend(get_gdal_band_offset(input_file, info))
+        command = get_gdal_command(preset, convert_from=get_gdal_band_type(input_file, info))
+        command.extend(get_gdal_band_offset(input_file, info))
 
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 

@@ -63,7 +63,7 @@ WEBP_OVERVIEWS = [
 ]
 
 # Arguments to convert TIFF from 16 bits to 8 bits
-CONVERT_BYTE = [
+CONVERT_16BITS_TO_8BITS = [
     "-ot",
     "Byte",
     "-scale",
@@ -76,7 +76,7 @@ CONVERT_BYTE = [
 ]
 
 
-def get_gdal_command(preset: str, convert_to_byte: Optional[bool] = False) -> List[str]:
+def get_gdal_command(preset: str, convert_from: Optional[str] = None) -> List[str]:
     get_log().info("gdal_preset", preset=preset)
     gdal_command: List[str] = ["gdal_translate"]
 
@@ -92,8 +92,8 @@ def get_gdal_command(preset: str, convert_to_byte: Optional[bool] = False) -> Li
 
     gdal_command.extend(WEBP_OVERVIEWS)
 
-    if convert_to_byte:
-        gdal_command.extend(CONVERT_BYTE)
+    if convert_from == "UInt16":
+        gdal_command.extend(CONVERT_16BITS_TO_8BITS)
 
     return gdal_command
 
