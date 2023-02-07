@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/linz/topo-imagery/compare/v0.3.0...v0.4.0) (2023-02-07)
+
+
+### Features
+
+* standardising 16bits TIFF TDE-628 ([#333](https://github.com/linz/topo-imagery/issues/333)) ([1a07683](https://github.com/linz/topo-imagery/commit/1a07683ece05da6dbafc46c03ca32f666e0e9627))
+
+
+### Bug Fixes
+
+* non visual qa errors logged twice TDE-563 ([#320](https://github.com/linz/topo-imagery/issues/320)) ([41c4c98](https://github.com/linz/topo-imagery/commit/41c4c98aa5ef0cfbf4bf28632bb07c1b5d398e9d))
+
+
+### Documentation
+
+* add versioning release section in readme ([#334](https://github.com/linz/topo-imagery/issues/334)) ([7ad502c](https://github.com/linz/topo-imagery/commit/7ad502c11c0ef8130beef3719fb0fb87852a16d8))
+
 ## [0.3.0](https://github.com/linz/topo-imagery/compare/v0.2.0...v0.3.0) (2023-01-19)
 
 
