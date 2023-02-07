@@ -138,8 +138,8 @@ class FileTiff:
         """Add an error if there is not exactly 3 or 4 bands found."""
         bands = gdalinfo["bands"]
         bands_num = 3
-        for band in bands:
-            if band["colorInterpretation"] == "Alpha":
+        if len(bands) == 4:
+            if bands[3]["colorInterpretation"] == "Alpha":
                 bands_num = 4
         if len(bands) != bands_num:
             self.add_error(
