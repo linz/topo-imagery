@@ -17,6 +17,7 @@ def test_check_band_count_valid_3() -> None:
 
     assert not file_tiff.get_errors()
 
+
 def test_check_band_count_valid_4() -> None:
     """
     tests check_band_count when the input layer has a valid band count
@@ -47,9 +48,10 @@ def test_check_band_count_invalid_2() -> None:
 
     assert file_tiff.get_errors()
 
+
 def test_check_band_count_invalid_4() -> None:
     """
-    tests check_band_count when the input layer has a invalid 
+    tests check_band_count when the input layer has a invalid
     band count of 4 wheere the 4th band is not Alpha
     """
     gdalinfo = fake_gdal_info()
@@ -152,6 +154,7 @@ def test_check_no_data_no_value() -> None:
 
     assert file_tiff.get_errors()
 
+
 def test_is_no_data_true() -> None:
     """
     tests is_no_data when the input layer that has no_data value assigned
@@ -161,6 +164,7 @@ def test_is_no_data_true() -> None:
 
     file_tiff = FileTiff("test")
     assert file_tiff.is_no_data(gdalinfo)
+
 
 def test_is_no_data_false() -> None:
     """
