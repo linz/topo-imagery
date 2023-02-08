@@ -111,6 +111,8 @@ class FileTiff:
     def check_no_data(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands"."""
         bands = gdalinfo["bands"]
+        if len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
+            return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
             if current_nodata_val != 255:
@@ -119,9 +121,6 @@ class FileTiff:
                     error_message="noDataValue is not 255",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
-        else:
-            if len(bands) == 4 and bands[3]["colorInterpretation"] != "Alpha":
-                self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
 
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
         """return True if there is a "noDataValue" and it is set to 255 in the "bands"."""

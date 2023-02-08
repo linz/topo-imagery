@@ -77,6 +77,38 @@ def test_check_no_data_valid() -> None:
     assert not file_tiff.get_errors()
 
 
+def test_check_no_data_valid_alpha() -> None:
+    """
+    tests check_no_data when the input layer has no no_data value assigned and Alpha
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="red")
+    add_band(gdalinfo, color_interpretation="green")
+    add_band(gdalinfo, color_interpretation="blue")
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff("test")
+    file_tiff.check_no_data(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
+def test_check_no_data_invalid_fourth_band() -> None:
+    """
+    tests check_no_data when the input layer has no no_data value assigned and invalid fourth band
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="red")
+    add_band(gdalinfo, color_interpretation="green")
+    add_band(gdalinfo, color_interpretation="blue")
+    add_band(gdalinfo, color_interpretation="invalid")
+
+    file_tiff = FileTiff("test")
+    file_tiff.check_no_data(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
 def test_check_no_data_no_value() -> None:
     """
     tests check_no_data when the input layer has no no_data value assigned
