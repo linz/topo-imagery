@@ -125,11 +125,9 @@ class FileTiff:
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
         """return True if there is a "noDataValue" and it is set to 255 in the "bands"."""
         bands = gdalinfo["bands"]
-        if "noDataValue" not in bands[0]:
-            return False
-        if bands[0]["noDataValue"] != 255:
-            return False
-        return True
+        if "noDataValue" in bands[0] and bands[0]["noDataValue"] == 255:
+            return True
+        return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is not exactly 3 or 4 bands found."""
