@@ -103,11 +103,12 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
-        gdalinfo_original_tiff = tiff.get_gdalinfo_original()
-        if not cutline and gdalinfo_original_tiff and tiff.is_no_data(gdalinfo_original_tiff):
-            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
-            input_file = target_vrt
+        else:
+            gdalinfo_original_tiff = tiff.get_gdalinfo_original()
+            if gdalinfo_original_tiff and tiff.is_no_data(gdalinfo_original_tiff):
+                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+                run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
+                input_file = target_vrt
 
         # gdalinfo to get band offset and band type
         info = gdal_info(file, False)
