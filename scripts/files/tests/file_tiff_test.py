@@ -2,7 +2,7 @@ from scripts.files.file_tiff import FileTiff
 from scripts.gdal.tests.gdalinfo import add_band, fake_gdal_info
 
 
-def test_check_band_count_valid() -> None:
+def test_check_band_count_valid_3() -> None:
     """
     tests check_band_count when the input layer has a valid band count
     which is 3 bands
@@ -17,13 +17,44 @@ def test_check_band_count_valid() -> None:
 
     assert not file_tiff.get_errors()
 
-
-def test_check_band_count_invalid() -> None:
+def test_check_band_count_valid_4() -> None:
     """
-    tests check_band_count when the input layer has a invalid band count of 2
-    which is 3 bands to be valid
+    tests check_band_count when the input layer has a valid band count
+    which is 4 bands where the fourth band is Alpha
     """
     gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff("test")
+    file_tiff.check_band_count(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
+def test_check_band_count_invalid_2() -> None:
+    """
+    tests check_band_count when the input layer has a invalid band count of 2
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+
+    file_tiff = FileTiff("test")
+    file_tiff.check_band_count(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+def test_check_band_count_invalid_4() -> None:
+    """
+    tests check_band_count when the input layer has a invalid 
+    band count of 4 wheere the 4th band is not Alpha
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
     add_band(gdalinfo)
     add_band(gdalinfo)
 
