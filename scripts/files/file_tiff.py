@@ -48,8 +48,8 @@ class OriginalTiff:
                     error_message=f"error(s): {str(e)}",
                 )
         return self._gdalinfo
-    
-    def get_path(self):
+
+    def get_path(self) -> str:
         return self._path
 
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
