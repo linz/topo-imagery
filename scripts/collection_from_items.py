@@ -16,6 +16,8 @@ def main() -> None:
     parser.add_argument("--collection-id", dest="collection_id", required=True)
     parser.add_argument("--title", dest="title", help="collection title", required=True)
     parser.add_argument("--description", dest="description", help="collection description", required=True)
+    parser.add_argument("--producer", dest="producer", help="imagery producer", required=True)
+    parser.add_argument("--licensor", dest="licensor", help="imagery licensor", required=True)
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )

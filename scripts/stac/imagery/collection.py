@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 import ulid
 
 from scripts.files.fs import write
+from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 
@@ -23,6 +24,13 @@ class ImageryCollection:
             "description": description,
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
+            "providers": [
+                {
+                    "name": "Toitū Te Whenua Land Information New Zealand",
+                    "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR],
+                    "url": "www.linz.govt.nz",
+                }
+            ],
         }
 
     def add_item(self, item: Dict[Any, Any]) -> None:
@@ -34,6 +42,10 @@ class ImageryCollection:
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+
+    def add_providers(self, providers: List[Provider]) -> None:
+        for p in providers:
+            self.stac["providers"].append(p)
 
     def update_spatial_extent(self, item_bbox: List[float]) -> None:
         if "extent" not in self.stac:

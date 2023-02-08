@@ -9,6 +9,7 @@ import pytest
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 @pytest.fixture(name="setup_collection", autouse=True)
@@ -119,3 +120,11 @@ def test_write_collection_special_chars(setup_collection: ImageryCollection) -> 
     rmtree(target)
 
     assert collection["title"] == title
+
+
+def test_add_providers(setup_collection: ImageryCollection) -> None:
+    collection = setup_collection
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    collection.add_providers([producer])
+
+    assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
