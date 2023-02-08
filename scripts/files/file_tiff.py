@@ -44,9 +44,7 @@ class FileTiff:
     def set_path_standardised(self, path: str) -> None:
         self._path_standardised = path
 
-    def get_gdalinfo(self, original: Optional[bool] = False) -> Optional[GdalInfo]:
-        if original:
-            return self._get_gdalinfo_original()
+    def get_gdalinfo(self) -> Optional[GdalInfo]:
         if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
         if not self._gdalinfo:
@@ -60,7 +58,7 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
-    def _get_gdalinfo_original(self) -> Optional[GdalInfo]:
+    def get_gdalinfo_original(self) -> Optional[GdalInfo]:
         try:
             _gdalinfo_original = gdal_info(self._path_original)
             return _gdalinfo_original
