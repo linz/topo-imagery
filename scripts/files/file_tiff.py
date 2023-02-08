@@ -20,6 +20,46 @@ class FileTiffErrorType(str, Enum):
     COLOR = "color"
 
 
+class OriginalTiff:
+    def __init__(self, path: str) -> None:
+        self._path = path
+        self._gdalinfo: Optional[GdalInfo] = None
+
+    def get_gdalinfo(self) -> Optional[GdalInfo]:
+        if not self._gdalinfo:
+            try:
+                self._gdalinfo = gdal_info(self._path, stats=False)
+            except json.JSONDecodeError as jde:
+                get_log().warning(
+                    "GDALINFO Original Tiff Failed",
+                    error_type=FileTiffErrorType.GDAL_INFO,
+                    error_message=f"parsing result issue: {str(jde)}",
+                )
+            except GDALExecutionException as gee:
+                get_log().warning(
+                    "GDALINFO Original Tiff Failed",
+                    error_type=FileTiffErrorType.GDAL_INFO,
+                    error_message=f"failed: {str(gee)}",
+                )
+            except Exception as e:  # pylint: disable=broad-except
+                get_log().warning(
+                    "GDALINFO Original Tiff Failed",
+                    error_type=FileTiffErrorType.GDAL_INFO,
+                    error_message=f"error(s): {str(e)}",
+                )
+        return self._gdalinfo
+    
+    def get_path(self):
+        return self._path
+
+    def is_no_data(self, gdalinfo: GdalInfo) -> bool:
+        """return True if bands have a "noDataValue" and it is set to 255."""
+        bands = gdalinfo["bands"]
+        if "noDataValue" in bands[0] and bands[0]["noDataValue"] == 255:
+            return True
+        return False
+
+
 class FileTiff:
     """Wrapper for the TIFF files"""
 
@@ -27,7 +67,7 @@ class FileTiff:
         self,
         path: str,
     ) -> None:
-        self._path_original = path
+        self.original_tiff = OriginalTiff(path)
         self._path_standardised = ""
         self._errors: List[Dict[str, Any]] = []
         self._scale = 0
@@ -58,35 +98,11 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
-    def get_gdalinfo_original(self) -> Optional[GdalInfo]:
-        try:
-            _gdalinfo_original = gdal_info(self._path_original)
-            return _gdalinfo_original
-        except json.JSONDecodeError as jde:
-            get_log().warning(
-                "GDALINFO Original Tiff Failed",
-                error_type=FileTiffErrorType.GDAL_INFO,
-                error_message=f"parsing result issue: {str(jde)}",
-            )
-        except GDALExecutionException as gee:
-            get_log().warning(
-                "GDALINFO Original Tiff Failed",
-                error_type=FileTiffErrorType.GDAL_INFO,
-                error_message=f"failed: {str(gee)}",
-            )
-        except Exception as e:  # pylint: disable=broad-except
-            get_log().warning(
-                "GDALINFO Original Tiff Failed",
-                error_type=FileTiffErrorType.GDAL_INFO,
-                error_message=f"error(s): {str(e)}",
-            )
-        return None
-
     def get_errors(self) -> List[Dict[str, Any]]:
         return self._errors
 
     def get_path_original(self) -> str:
-        return self._path_original
+        return self.original_tiff.get_path()
 
     def get_path_standardised(self) -> str:
         return self._path_standardised
@@ -121,13 +137,6 @@ class FileTiff:
                     error_message="noDataValue is not 255",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
-
-    def is_no_data(self, gdalinfo: GdalInfo) -> bool:
-        """return True if there is a "noDataValue" and it is set to 255 in the "bands"."""
-        bands = gdalinfo["bands"]
-        if "noDataValue" in bands[0] and bands[0]["noDataValue"] == 255:
-            return True
-        return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is not exactly 3 or 4 bands found."""
