@@ -128,3 +128,31 @@ def test_add_providers(setup_collection: ImageryCollection) -> None:
     collection.add_providers([producer])
 
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+
+def test_default_provider_present() -> None:
+    licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    title = "Test Urban Imagery"
+    description = "Test Urban Imagery Description"
+    collection = ImageryCollection(title, description, providers=[producer, licensor])
+
+    assert {
+        "name": "Toitū Te Whenua Land Information New Zealand",
+        "roles": ["licensor", "host", "processor"],
+    } in collection.stac["providers"]
+    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
+        "providers"
+    ]
+
+
+def test_default_provider_missing() -> None:
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    title = "Test Urban Imagery"
+    description = "Test Urban Imagery Description"
+    collection = ImageryCollection(title, description, providers=[producer])
+
+    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
+        "providers"
+    ]
+    assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]

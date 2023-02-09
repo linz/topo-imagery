@@ -1,7 +1,5 @@
 from enum import Enum
-from typing import List
-
-from typing_extensions import NotRequired, TypedDict
+from typing import List, TypedDict
 
 
 class ProviderRole(str, Enum):
@@ -16,5 +14,3 @@ class Provider(TypedDict):
     """Organization name"""
     roles: List[ProviderRole]
     """Organization roles"""
-    url: NotRequired[str]
-    """Organization homepage"""
