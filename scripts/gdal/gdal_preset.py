@@ -124,7 +124,7 @@ def get_alpha_command() -> List[str]:
     Get a "gdalwarp" command to create a virtual file (.vrt) which has an alpha added
     """
 
-    gdal_command = [
+    return [
         "gdalwarp",
         # Outputting a VRT makes things faster as its not recomputing everything
         "-of",
@@ -132,5 +132,3 @@ def get_alpha_command() -> List[str]:
         # Ensure the target has a alpha channel
         "-dstalpha",
     ]
-
-    return gdal_command
