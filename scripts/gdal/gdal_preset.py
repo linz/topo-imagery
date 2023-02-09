@@ -117,3 +117,18 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
         gdal_command += ["-cutline", cutline]
 
     return gdal_command
+
+
+def get_alpha_command() -> List[str]:
+    """
+    Get a "gdalwarp" command to create a virtual file (.vrt) which has an alpha added
+    """
+
+    return [
+        "gdalwarp",
+        # Outputting a VRT makes things faster as its not recomputing everything
+        "-of",
+        "VRT",
+        # Ensure the target has a alpha channel
+        "-dstalpha",
+    ]
