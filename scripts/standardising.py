@@ -16,6 +16,7 @@ from scripts.files.fs import read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_alpha_command, get_cutline_command, get_gdal_command
+from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -102,17 +103,16 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
             input_file = target_vrt
 
         else:
-            gdalinfo_original = tiff.original_tiff.get_gdalinfo()
-
-            if gdalinfo_original and tiff.original_tiff.is_no_data(gdalinfo_original):
+            info = gdal_info(input_file, stats=False)
+            if tiff.is_no_data(info):
                 target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                 run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                 input_file = target_vrt
 
         # gdalinfo to get band offset and band type
-        gdalinfo_original = tiff.original_tiff.get_gdalinfo()
-        command = get_gdal_command(preset, convert_from=get_gdal_band_type(input_file, gdalinfo_original))
-        command.extend(get_gdal_band_offset(input_file, gdalinfo_original))
+        info = gdal_info(input_file, stats=False)
+        command = get_gdal_command(preset, convert_from=get_gdal_band_type(input_file, info))
+        command.extend(get_gdal_band_offset(input_file, info))
 
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 

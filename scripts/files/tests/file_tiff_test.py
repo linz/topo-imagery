@@ -163,7 +163,7 @@ def test_is_no_data_true() -> None:
     add_band(gdalinfo, no_data_value=255)
 
     file_tiff = FileTiff("test")
-    assert file_tiff.original_tiff.is_no_data(gdalinfo)
+    assert file_tiff.is_no_data(gdalinfo)
 
 
 def test_is_no_data_false() -> None:
@@ -174,7 +174,7 @@ def test_is_no_data_false() -> None:
     add_band(gdalinfo)
 
     file_tiff = FileTiff("test")
-    assert not file_tiff.original_tiff.is_no_data(gdalinfo)
+    assert not file_tiff.is_no_data(gdalinfo)
 
 
 def test_check_no_data_invalid_value() -> None:
