@@ -97,7 +97,7 @@ class FileTiff:
                     error_message="noDataValue is not 255",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
-    
+
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
         """return True if bands have a "noDataValue" and it is set to 255."""
         bands = gdalinfo["bands"]
