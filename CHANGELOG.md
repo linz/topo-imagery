@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.1](https://github.com/linz/topo-imagery/compare/v0.4.0...v0.4.1) (2023-02-09)
+
+
+### Features
+
+* convert nodata to alpha TDE-625 ([#342](https://github.com/linz/topo-imagery/issues/342)) ([6710aea](https://github.com/linz/topo-imagery/commit/6710aea24306f5e651480e96215fdb447fe9aab8))
+
+
+### Bug Fixes
+
+* gdal info reference wrong file ([#347](https://github.com/linz/topo-imagery/issues/347)) ([52a2ee7](https://github.com/linz/topo-imagery/commit/52a2ee7354e939ed93b44f3b3d1d537e1d337d92))
+* log wrong vsis3 path non visual qa TDE-563 ([#343](https://github.com/linz/topo-imagery/issues/343)) ([388ae19](https://github.com/linz/topo-imagery/commit/388ae1936782c6bf71b980efce9a739f2671c519))
+
 ## [0.4.0](https://github.com/linz/topo-imagery/compare/v0.3.0...v0.4.0) (2023-02-07)
 
 
