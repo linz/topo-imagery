@@ -9,6 +9,7 @@ import pytest
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 @pytest.fixture(name="setup_collection", autouse=True)
@@ -119,3 +120,39 @@ def test_write_collection_special_chars(setup_collection: ImageryCollection) -> 
     rmtree(target)
 
     assert collection["title"] == title
+
+
+def test_add_providers(setup_collection: ImageryCollection) -> None:
+    collection = setup_collection
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    collection.add_providers([producer])
+
+    assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+
+def test_default_provider_present() -> None:
+    licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    title = "Test Urban Imagery"
+    description = "Test Urban Imagery Description"
+    collection = ImageryCollection(title, description, providers=[producer, licensor])
+
+    assert {
+        "name": "Toitū Te Whenua Land Information New Zealand",
+        "roles": ["licensor", "host", "processor"],
+    } in collection.stac["providers"]
+    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
+        "providers"
+    ]
+
+
+def test_default_provider_missing() -> None:
+    producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
+    title = "Test Urban Imagery"
+    description = "Test Urban Imagery Description"
+    collection = ImageryCollection(title, description, providers=[producer])
+
+    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
+        "providers"
+    ]
+    assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]

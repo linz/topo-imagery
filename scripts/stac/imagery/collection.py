@@ -5,13 +5,16 @@ from typing import Any, Dict, List, Optional
 import ulid
 
 from scripts.files.fs import write
+from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
 
 class ImageryCollection:
     stac: Dict[str, Any]
 
-    def __init__(self, title: str, description: str, collection_id: Optional[str] = None) -> None:
+    def __init__(
+        self, title: str, description: str, collection_id: Optional[str] = None, providers: Optional[List[Provider]] = None
+    ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
 
@@ -23,7 +26,25 @@ class ImageryCollection:
             "description": description,
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
+            "providers": [],
         }
+
+        # If the providers passed has already a LINZ provider: add its default roles to it
+        has_linz = False
+        if providers:
+            linz = next((p for p in providers if p["name"] == "Toitū Te Whenua Land Information New Zealand"), None)
+            if linz:
+                linz["roles"].extend([ProviderRole.HOST, ProviderRole.PROCESSOR])
+                has_linz = True
+        else:
+            providers = []
+
+        if not has_linz:
+            providers.append(
+                {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]}
+            )
+
+        self.add_providers(providers)
 
     def add_item(self, item: Dict[Any, Any]) -> None:
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
@@ -34,6 +55,10 @@ class ImageryCollection:
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+
+    def add_providers(self, providers: List[Provider]) -> None:
+        for p in providers:
+            self.stac["providers"].append(p)
 
     def update_spatial_extent(self, item_bbox: List[float]) -> None:
         if "extent" not in self.stac:
