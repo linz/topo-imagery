@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "common"
+version = "0.1.0"
+description = "Common Python utilities for Topo"
+authors = ["Paul Fouquet <pfouquet@linz.govt.nz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+shapely = "^1.8.5"
+boto3 = "^1.26.68"
+linz-logger = "^0.11.0"
+py-multihash = "^2.0.1"
+
+[tool.poetry.dev-dependencies]
+mypy-boto3-s3 = "^1.26.58"
+pytest = "^7.2.1"
+pytest-dependency = "^0.5.1"
+moto = "^4.1.2"
+pytest-mock = "^3.8.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

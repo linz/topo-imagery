@@ -1,0 +1,50 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 127
+
+[tool.isort]
+line_length = 127
+case_sensitive = true
+profile = "black"
+
+[tool.mypy]
+show_error_codes = true
+strict = true
+disable_error_code = [
+    "import",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "linz_logger",
+]
+ignore_missing_imports = true
+
+[tool.poetry]
+name = "imagery"
+version = "0.4.1"
+description = ""
+authors = [
+    "Blayne Chard <bchard@linz.govt.nz>",
+    "Daniel Silk <dsilk@linz.govt.nz>",
+    "Paul Fouquet <pfouquet@linz.govt.nz>",
+    "Alice Fage <afage@linz.govt.nz>",
+    "Megan Davidson <mdavidson@linz.govt.nz>"
+]
+
+[tool.poetry.dependencies]
+common = {path = "../common", develop = true }
+python = "^3.10.6"
+linz-logger = "^0.11.0"
+certifi = "^2022.12.7"
+
+[tool.poetry.dev-dependencies]
+black = "^23.1.0"
+isort = "^5.12.0"
+gitlint = "^0.18.0"
+mypy = "^1.0"
+pylint = "^2.16.1"
+pre-commit = "^2.21.0"

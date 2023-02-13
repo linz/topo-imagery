@@ -1,47 +1,17 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.black]
-line-length = 127
-
-[tool.isort]
-line_length = 127
-case_sensitive = true
-profile = "black"
-
-[tool.mypy]
-show_error_codes = true
-strict = true
-disable_error_code = [
-    "import",
-]
-
-[[tool.mypy.overrides]]
-module = [
-    "linz_logger",
-]
-ignore_missing_imports = true
-
 [tool.poetry]
-name = "gdal"
-version = "0.4.1"
+name = "topo-data-processing"
+version = "0.1.0"
 description = ""
-authors = [
-    "Blayne Chard <bchard@linz.govt.nz>",
-    "Daniel Silk <dsilk@linz.govt.nz>",
-    "Paul Fouquet <pfouquet@linz.govt.nz>",
-    "Alice Fage <afage@linz.govt.nz>",
-    "Megan Davidson <mdavidson@linz.govt.nz>"
-]
+authors = ["Paul Fouquet <pfouquet@linz.govt.nz>"]
+readme = "README.md"
+packages = [{include = "topo_data_processing"}]
 
 [tool.poetry.dependencies]
-python = "^3.10.6"
-boto3 = "^1.26.68"
-linz-logger = "^0.11.0"
-certifi = "^2022.12.7"
-py-multihash = "^2.0.1"
-shapely = "^1.8.5"
+python = "^3.10"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
@@ -50,8 +20,3 @@ gitlint = "^0.18.0"
 mypy = "^1.0"
 pylint = "^2.16.1"
 pre-commit = "^2.21.0"
-mypy-boto3-s3 = "^1.26.58"
-pytest = "^7.2.1"
-pytest-dependency = "^0.5.1"
-moto = "^4.1.2"
-pytest-mock = "^3.8.2"
