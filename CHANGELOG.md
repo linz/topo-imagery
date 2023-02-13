@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/linz/topo-imagery/compare/v0.4.1...v1.0.0) (2023-02-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* stac providers TDE-623 ([#348](https://github.com/linz/topo-imagery/issues/348))
+
+### Features
+
+* stac providers TDE-623 ([#348](https://github.com/linz/topo-imagery/issues/348)) ([9bc71a4](https://github.com/linz/topo-imagery/commit/9bc71a47492b9387acf337f738cad594f0c7586b))
+
 ## [0.4.1](https://github.com/linz/topo-imagery/compare/v0.4.0...v0.4.1) (2023-02-09)
 
 
