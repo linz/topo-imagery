@@ -6,6 +6,7 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
+from scripts.cli.cli_helper import parse_list
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
@@ -19,17 +20,22 @@ def main() -> None:
     parser.add_argument("--title", dest="title", help="collection title", required=True)
     parser.add_argument("--description", dest="description", help="collection description", required=True)
     parser.add_argument("--producer", dest="producer", help="imagery producer", required=True)
-    parser.add_argument("--licensor", dest="licensor", help="imagery licensor", required=True)
+    parser.add_argument("--licensor", dest="licensor", help="imagery licensor")
+    parser.add_argument("--licensor-list", dest="licensor_list", help="imagery licensor list")
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
 
     arguments = parser.parse_args()
     uri = arguments.uri
-    providers: List[Provider] = [
-        {"name": arguments.producer, "roles": [ProviderRole.PRODUCER]},
-        {"name": arguments.licensor, "roles": [ProviderRole.LICENSOR]},
-    ]
+    licensors: List[str] = parse_list(arguments.licensor_list)
+    if len(licensors) <= 1:
+        licensors = [arguments.licensor]
+
+    providers: List[Provider] = []
+    for licensor_name in licensors:
+        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+    providers.append({"name": arguments.producer, "roles": [ProviderRole.PRODUCER]})
 
     collection = ImageryCollection(
         title=arguments.title, description=arguments.description, collection_id=arguments.collection_id, providers=providers
