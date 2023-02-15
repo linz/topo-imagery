@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/linz/topo-imagery/compare/v1.0.0...v1.1.0) (2023-02-15)
+
+
+### Features
+
+* add multiple STAC licensors TDE-643 ([#355](https://github.com/linz/topo-imagery/issues/355)) ([001b9fc](https://github.com/linz/topo-imagery/commit/001b9fc39264d062b302fe9cb15a89d1668066ca))
+
 ## [1.0.0](https://github.com/linz/topo-imagery/compare/v0.4.1...v1.0.0) (2023-02-13)
 
 
