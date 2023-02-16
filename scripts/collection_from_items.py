@@ -58,14 +58,14 @@ def main() -> None:
         if not arguments.collection_id == item_stac["collection"]:
             get_log().trace(
                 "skipping: item.collection != collection.id",
-                file=key,
+                path=key,
                 action="collection_from_items",
                 reason="skip",
             )
             continue
 
         collection.add_item(item_stac)
-        get_log().info("item added to collection", item=item_stac["id"], file=key)
+        get_log().info("item added to collection", item=item_stac["id"], path=key)
 
     get_log().info(
         "Matching items added to collection",

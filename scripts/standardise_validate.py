@@ -36,7 +36,7 @@ def main() -> None:
     # Standardize the tiffs
     tiff_files = run_standardising(source, arguments.preset, arguments.cutline, concurrency)
     if len(tiff_files) == 0:
-        get_log().info("no_tiff_file", action="standardise_validate", reason="skipped")
+        get_log().info("standardising_no_file_processed")
         return
 
     # SRS needed for FileCheck (non visual QA)
@@ -63,8 +63,8 @@ def main() -> None:
                 original_path = get_vfs_path(file.get_path_original())
             get_log().info(
                 "non_visual_qa_errors",
-                originalPath=original_path,
-                standardisedPath=standardised_path,
+                original_path=original_path,
+                standardised_path=standardised_path,
                 errors=file.get_errors(),
             )
         else:

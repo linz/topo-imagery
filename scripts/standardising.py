@@ -29,17 +29,17 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
         if is_tiff(file) or is_vrt(file):
             actual_tiffs.append(file)
         else:
-            get_log().info("standardising_file_not_tiff_skipped", file=file)
+            get_log().info("standardising_file_not_tiff_skipped", path=file)
 
     gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
+    get_log().info("standardising_start", gdal_version=gdal_version, file_count=len(actual_tiffs))
 
     with Pool(concurrency) as p:
         standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
         p.close()
         p.join()
 
-    get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
+    get_log().info("standardising_end", duration=time_in_ms() - start_time, file_count=len(standardized_tiffs))
 
     return standardized_tiffs
 

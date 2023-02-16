@@ -75,10 +75,10 @@ def gdal_info(path: str, stats: bool = True) -> GdalInfo:
         gdalinfo_process = run_gdal(gdalinfo_command, path)
         return cast(GdalInfo, json.loads(gdalinfo_process.stdout))
     except json.JSONDecodeError as e:
-        get_log().error("load_gdalinfo_result_error", file=path, error=e)
+        get_log().error("load_gdalinfo_result_error", path=path, error=e)
         raise e
     except GDALExecutionException as e:
-        get_log().error("gdalinfo_failed", file=path, error=str(e))
+        get_log().error("gdalinfo_failed", path=path, error=str(e))
         raise e
 
 
