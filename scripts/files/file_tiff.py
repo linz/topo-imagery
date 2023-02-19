@@ -102,7 +102,7 @@ class FileTiff:
         """return True if bands have a "noDataValue" and it is set to 255."""
         bands = gdalinfo["bands"]
         # 0 in noDataValue can return false unless specific here about None
-        if "noDataValue" in bands[0] and not bands[0]["noDataValue"] == None:
+        if "noDataValue" in bands[0] and not bands[0]["noDataValue"] is None:
             return True
         return False
 

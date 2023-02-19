@@ -165,6 +165,7 @@ def test_is_no_data_true_255() -> None:
     file_tiff = FileTiff("test")
     assert file_tiff.is_no_data(gdalinfo)
 
+
 def test_is_no_data_true_0() -> None:
     """
     tests is_no_data when the input layer that has 0 no_data value assigned
