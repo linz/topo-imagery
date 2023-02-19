@@ -155,12 +155,22 @@ def test_check_no_data_no_value() -> None:
     assert file_tiff.get_errors()
 
 
-def test_is_no_data_true() -> None:
+def test_is_no_data_true_255() -> None:
     """
-    tests is_no_data when the input layer that has no_data value assigned
+    tests is_no_data when the input layer that has 255 no_data value assigned
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, no_data_value=255)
+
+    file_tiff = FileTiff("test")
+    assert file_tiff.is_no_data(gdalinfo)
+
+def test_is_no_data_true_0() -> None:
+    """
+    tests is_no_data when the input layer that has 0 no_data value assigned
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, no_data_value=0)
 
     file_tiff = FileTiff("test")
     assert file_tiff.is_no_data(gdalinfo)
