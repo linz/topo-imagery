@@ -101,7 +101,7 @@ class FileTiff:
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
         """return True if bands have a "noDataValue" and it is set to 255."""
         bands = gdalinfo["bands"]
-        if "noDataValue" in bands[0] and bands[0]["noDataValue"] == 255:
+        if "noDataValue" in bands[0] and bands[0]["noDataValue"]:
             return True
         return False
 
