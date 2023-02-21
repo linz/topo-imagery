@@ -57,7 +57,7 @@ You can see the tags in the [GitHub Packages page](https://github.com/linz/topo-
 ## Releases
 
 [googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
-Based on what have been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and create a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
+Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and create a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
 
 ### Publishing
 
