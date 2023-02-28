@@ -44,7 +44,11 @@ def main() -> None:
 
     for file in tiff_files:
         file.set_srs(srs)
-        file.set_scale(int(arguments.scale))
+        scale = arguments.scale
+        if scale == "None":
+            file.set_scale(0)
+        else:
+            file.set_scale(int(scale))
 
         # Validate the file
         if not file.validate():
