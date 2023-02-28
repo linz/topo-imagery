@@ -162,17 +162,18 @@ class FileTiff:
             )
 
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
-        origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
-        try:
-            tile_name = get_tile_name(origin, self._scale)
-            if not tile_name == get_file_name_from_path(self._path_standardised):
-                new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
-                os.rename(self._path_standardised, new_path)
-                get_log().info("renaming_file", path=new_path, old=self._path_standardised)
-                self._path_standardised = new_path
+        if self._scale > 0:
+            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            try:
+                tile_name = get_tile_name(origin, self._scale)
+                if not tile_name == get_file_name_from_path(self._path_standardised):
+                    new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
+                    os.rename(self._path_standardised, new_path)
+                    get_log().info("renaming_file", path=new_path, old=self._path_standardised)
+                    self._path_standardised = new_path
 
-        except TileIndexException as tie:
-            self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
+            except TileIndexException as tie:
+                self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
 
     def validate(self) -> bool:
         gdalinfo = self.get_gdalinfo()
