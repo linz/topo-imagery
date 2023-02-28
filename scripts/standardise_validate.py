@@ -36,7 +36,9 @@ def main() -> None:
         concurrency = 4
 
     # Standardize the tiffs
-    tiff_files = run_standardising(source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg)
+    tiff_files = run_standardising(
+        source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg
+    )
     if len(tiff_files) == 0:
         get_log().info("no_tiff_file", action="standardise_validate", reason="skipped")
         return

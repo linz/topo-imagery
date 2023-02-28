@@ -20,7 +20,10 @@ from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 
 
-def run_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int, source_epsg: str, target_epsg: str) -> List[FileTiff]:
+def run_standardising(
+    files: List[str], preset: str, cutline: Optional[str], concurrency: int, source_epsg: str, target_epsg: str
+) -> List[FileTiff]:
+    # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
     actual_tiffs = []
     standardized_tiffs: List[FileTiff] = []
@@ -35,7 +38,10 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
 
     with Pool(concurrency) as p:
-        standardized_tiffs = p.map(partial(standardising, preset=preset, source_epsg=source_epsg, target_epsg=target_epsg, cutline=cutline), actual_tiffs)
+        standardized_tiffs = p.map(
+            partial(standardising, preset=preset, source_epsg=source_epsg, target_epsg=target_epsg, cutline=cutline),
+            actual_tiffs,
+        )
         p.close()
         p.join()
 
@@ -73,6 +79,7 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     return input_file_path
 
 
+# pylint: disable-msg=too-many-locals
 def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cutline: Optional[str]) -> FileTiff:
     get_log().info("standardising", path=file)
     output_folder = "/tmp/"
@@ -117,10 +124,10 @@ def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cu
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 
         if source_epsg != target_epsg:
-            get_log().info("Transforming Tiff", path=standardized_file_path, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-            run_gdal(get_transform_srs_command(target_epsg), input_file=standardized_file_path, output_file=standardized_file_path)
-
-        
+            get_log().info("Reprojecting Tiff", path=standardized_file_path, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(
+                get_transform_srs_command(target_epsg), input_file=standardized_file_path, output_file=standardized_file_path
+            )
 
     tiff.set_path_standardised(standardized_file_path)
     return tiff
@@ -132,13 +139,22 @@ def main() -> None:
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--cutline", dest="cutline", required=False)
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
+    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
     arguments = parser.parse_args()
     source = format_source(arguments.source)
 
     if is_argo():
         concurrency = 4
 
-    run_standardising(source, arguments.preset, arguments.cutline, concurrency)
+    run_standardising(
+        source,
+        arguments.preset,
+        arguments.cutline,
+        concurrency,
+        source_epsg=arguments.source_epsg,
+        target_epsg=arguments.target_epsg,
+    )
 
 
 if __name__ == "__main__":

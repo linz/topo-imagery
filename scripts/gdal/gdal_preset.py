@@ -130,12 +130,9 @@ def get_alpha_command() -> List[str]:
         "-dstalpha",
     ]
 
+
 def get_transform_srs_command(target_epsg: str) -> List[str]:
     """
     Get a "Gdalwarp" command to transform the srs
     """
-    return [
-        "gdalwarp",
-        "-t_srs",
-        f"EPSG:{target_epsg}"
-    ]
+    return ["gdalwarp", "-t_srs", f"EPSG:{target_epsg}"]
