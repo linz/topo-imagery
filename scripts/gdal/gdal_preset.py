@@ -2,9 +2,6 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-# Force the source projection as NZTM EPSG:2193
-NZTM_SOURCE = ["-a_srs", "EPSG:2193"]
-
 # Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA
 # Useful for imagery that does not have a alpha band
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
@@ -76,12 +73,12 @@ CONVERT_16BITS_TO_8BITS = [
 ]
 
 
-def get_gdal_command(preset: str, convert_from: Optional[str] = None) -> List[str]:
+def get_gdal_command(preset: str, source_epsg: str, convert_from: Optional[str] = None) -> List[str]:
     get_log().info("gdal_preset", preset=preset)
     gdal_command: List[str] = ["gdal_translate"]
 
     gdal_command.extend(BASE_COG)
-    gdal_command.extend(NZTM_SOURCE)
+    gdal_command.extend(["-a_srs", f"EPSG:{source_epsg}"])
 
     if preset == "lzw":
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
@@ -131,4 +128,14 @@ def get_alpha_command() -> List[str]:
         "VRT",
         # Ensure the target has a alpha channel
         "-dstalpha",
+    ]
+
+def get_transform_srs_command(target_epsg: str) -> List[str]:
+    """
+    Get a "Gdalwarp" command to transform the srs
+    """
+    return [
+        "gdalwarp",
+        "-t_srs",
+        f"EPSG:{target_epsg}"
     ]
