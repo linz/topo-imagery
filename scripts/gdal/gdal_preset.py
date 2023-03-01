@@ -78,7 +78,7 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     gdal_command: List[str] = ["gdal_translate"]
 
     gdal_command.extend(BASE_COG)
-    # Force the source projection to source_epsg
+    # Force the source projection to an input EPSG
     gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
 
     if preset == "lzw":

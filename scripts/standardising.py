@@ -146,14 +146,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    run_standardising(
-        source,
-        arguments.preset,
-        arguments.cutline,
-        concurrency,
-        source_epsg=arguments.source_epsg,
-        target_epsg=arguments.target_epsg,
-    )
+    run_standardising(source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg)
 
 
 if __name__ == "__main__":
