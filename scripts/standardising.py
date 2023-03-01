@@ -116,18 +116,17 @@ def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cu
                 run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                 input_file = target_vrt
 
+        if source_epsg != target_epsg:
+            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+            get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+
         # gdalinfo to get band offset and band type
         info = gdal_info(input_file, False)
-
-        command = get_gdal_command(preset, source_epsg=source_epsg, convert_from=get_gdal_band_type(input_file, info))
+        command = get_gdal_command(preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, info))
         command.extend(get_gdal_band_offset(input_file, info))
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
-
-        if source_epsg != target_epsg:
-            get_log().info("Reprojecting Tiff", path=standardized_file_path, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-            run_gdal(
-                get_transform_srs_command(target_epsg), input_file=standardized_file_path, output_file=standardized_file_path
-            )
 
     tiff.set_path_standardised(standardized_file_path)
     return tiff

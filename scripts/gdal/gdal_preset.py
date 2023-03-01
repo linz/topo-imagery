@@ -73,13 +73,13 @@ CONVERT_16BITS_TO_8BITS = [
 ]
 
 
-def get_gdal_command(preset: str, source_epsg: str, convert_from: Optional[str] = None) -> List[str]:
+def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
     get_log().info("gdal_preset", preset=preset)
     gdal_command: List[str] = ["gdal_translate"]
 
     gdal_command.extend(BASE_COG)
     # Force the source projection to source_epsg
-    gdal_command.extend(["-a_srs", f"EPSG:{source_epsg}"])
+    gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
 
     if preset == "lzw":
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
@@ -132,8 +132,21 @@ def get_alpha_command() -> List[str]:
     ]
 
 
-def get_transform_srs_command(target_epsg: str) -> List[str]:
+def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
     """
     Get a "Gdalwarp" command to transform the srs
     """
-    return ["gdalwarp", "-t_srs", f"EPSG:{target_epsg}"]
+    return [
+        "gdalwarp",
+        "-of",
+        "VRT",
+        "-multi",
+        "-wo",
+        "NUM_THREADS=ALL_CPUS",
+        "-s_srs",
+        f"EPSG:{source_epsg}",
+        "-t_srs",
+        f"EPSG:{target_epsg}",
+        "-r",
+        "bilinear",
+    ]
