@@ -16,6 +16,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
+    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
@@ -34,7 +36,9 @@ def main() -> None:
         concurrency = 4
 
     # Standardize the tiffs
-    tiff_files = run_standardising(source, arguments.preset, arguments.cutline, concurrency)
+    tiff_files = run_standardising(
+        source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg
+    )
     if len(tiff_files) == 0:
         get_log().info("no_tiff_file", action="standardise_validate", reason="skipped")
         return
