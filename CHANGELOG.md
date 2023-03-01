@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/linz/topo-imagery/compare/v1.1.0...v1.2.0) (2023-03-01)
+
+
+### Features
+
+* make scale optional ([#372](https://github.com/linz/topo-imagery/issues/372)) ([20218bd](https://github.com/linz/topo-imagery/commit/20218bd3edc1af6113be1a917e6a7080525a5891))
+* take source and target epsg, if not the same transform TDE-699 ([#375](https://github.com/linz/topo-imagery/issues/375)) ([547ec88](https://github.com/linz/topo-imagery/commit/547ec88871236c3df674d08a3f75c37c6c0e14c5))
+
+
+### Bug Fixes
+
+* be specific about nodata being None ([#363](https://github.com/linz/topo-imagery/issues/363)) ([8fe8211](https://github.com/linz/topo-imagery/commit/8fe82113d3f027e46364ecf33cd0ede5271c70ba))
+* remove no data value (255) ensure is not none ([#360](https://github.com/linz/topo-imagery/issues/360)) ([a1154e8](https://github.com/linz/topo-imagery/commit/a1154e892053a6f15ef6b5c030d69ca261d95e39))
+
 ## [1.1.0](https://github.com/linz/topo-imagery/compare/v1.0.0...v1.1.0) (2023-02-15)
 
 
