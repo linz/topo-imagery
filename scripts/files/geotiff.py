@@ -5,7 +5,7 @@ from shapely.geometry import Polygon
 from scripts.gdal.gdalinfo import GdalInfo
 
 
-def get_extents(gdalinfo_result: GdalInfo) -> Tuple[Dict[str, List[float]], List[float]]:
+def get_extents(gdalinfo_result: GdalInfo) -> Tuple[Dict[str, List[float]], Tuple[float]]:
     if gdalinfo_result["wgs84Extent"] is None:
         raise Exception("No WGS84 Extent was found")
 

@@ -13,14 +13,17 @@ from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import read, write
-from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_cutline import optimize_cutline
+from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
+from scripts.gdal.gdal_preset import get_alpha_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 
 
-def run_standardising(files: List[str], preset: str, cutline: Optional[str], concurrency: int) -> List[FileTiff]:
+def run_standardising(
+    files: List[str], preset: str, cutline: Optional[str], concurrency: int, source_epsg: str, target_epsg: str
+) -> List[FileTiff]:
+    # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
     actual_tiffs = []
     standardized_tiffs: List[FileTiff] = []
@@ -35,7 +38,10 @@ def run_standardising(files: List[str], preset: str, cutline: Optional[str], con
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
 
     with Pool(concurrency) as p:
-        standardized_tiffs = p.map(partial(standardising, preset=preset, cutline=cutline), actual_tiffs)
+        standardized_tiffs = p.map(
+            partial(standardising, preset=preset, source_epsg=source_epsg, target_epsg=target_epsg, cutline=cutline),
+            actual_tiffs,
+        )
         p.close()
         p.join()
 
@@ -73,7 +79,8 @@ def download_tiff_file(input_file: str, tmp_path: str) -> str:
     return input_file_path
 
 
-def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
+# pylint: disable-msg=too-many-locals
+def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cutline: Optional[str]) -> FileTiff:
     get_log().info("standardising", path=file)
     output_folder = "/tmp/"
     _, src_file_path = parse_path(file)
@@ -82,6 +89,7 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
 
     with tempfile.TemporaryDirectory() as tmp_path:
         input_file = file
+        tiff = FileTiff(file)
 
         # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
         # makes it hard for GDAL to do its thing
@@ -97,21 +105,30 @@ def standardising(file: str, preset: str, cutline: Optional[str]) -> FileTiff:
                 # Ensure the input cutline is a easy spot for GDAL to read
                 write(input_cutline_path, read(cutline))
 
-            optimized_cutline = optimize_cutline(input_file, input_cutline_path)
-            get_log().info("optimize_cutline", optimized_cutline=optimized_cutline, path=file)
-
             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-            run_gdal(get_cutline_command(optimized_cutline), input_file=input_file, output_file=target_vrt)
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
-        command = get_gdal_command(preset)
-        command.extend(get_gdal_band_offset(input_file))
+        else:
+            info = gdal_info(input_file, stats=False)
+            if tiff.is_no_data(info):
+                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+                run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
+                input_file = target_vrt
 
+        if source_epsg != target_epsg:
+            target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
+            get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+
+        # gdalinfo to get band offset and band type
+        info = gdal_info(input_file, False)
+        command = get_gdal_command(preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, info))
+        command.extend(get_gdal_band_offset(input_file, info))
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
 
-    tiff = FileTiff(file)
     tiff.set_path_standardised(standardized_file_path)
-
     return tiff
 
 
@@ -121,13 +138,15 @@ def main() -> None:
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
     parser.add_argument("--cutline", dest="cutline", required=False)
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
+    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
     arguments = parser.parse_args()
     source = format_source(arguments.source)
 
     if is_argo():
         concurrency = 4
 
-    run_standardising(source, arguments.preset, arguments.cutline, concurrency)
+    run_standardising(source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg)
 
 
 if __name__ == "__main__":

@@ -46,3 +46,4 @@ repos:
     hooks:
       - id: prettier
         stages: [commit]
+        exclude_types: [python]

@@ -87,6 +87,8 @@ class FileTiff:
     def check_no_data(self, gdalinfo: GdalInfo) -> None:
         """Add an error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands"."""
         bands = gdalinfo["bands"]
+        if len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
+            return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
             if current_nodata_val != 255:
@@ -95,23 +97,31 @@ class FileTiff:
                     error_message="noDataValue is not 255",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
-        else:
-            self.add_error(error_type=FileTiffErrorType.NO_DATA, error_message="noDataValue not set")
+
+    def is_no_data(self, gdalinfo: GdalInfo) -> bool:
+        """return True if bands have a "noDataValue" set."""
+        bands = gdalinfo["bands"]
+        # 0 in noDataValue can return false unless specific here about None
+        if "noDataValue" in bands[0] and bands[0]["noDataValue"] is not None:
+            return True
+        return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
-        """Add an error if there is no exactly 3 bands found."""
+        """Add an error if there is not exactly 3 or 4 bands found."""
         bands = gdalinfo["bands"]
-        bands_num = len(bands)
-        if bands_num != 3:
+        bands_num = 3
+        if len(bands) == 4:
+            if bands[3]["colorInterpretation"] == "Alpha":
+                bands_num = 4
+        if len(bands) != bands_num:
             self.add_error(
                 error_type=FileTiffErrorType.BANDS,
-                error_message="bands count is not 3",
+                error_message=f"bands count is not {bands_num}",
                 custom_fields={"count": f"{int(bands_num)}"},
             )
 
     def check_srs(self, gdalsrsinfo_tif: bytes) -> None:
         """Add an error if gdalsrsinfo and gdalsrsinfo_tif values are different.
-
         Args:
             gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
         """
@@ -130,11 +140,15 @@ class FileTiff:
         bands = gdalinfo["bands"]
         missing_bands = []
         band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
+        optional_colour_ints = {4: "Alpha"}
         n = 1
         for band in bands:
             colour_int = band["colorInterpretation"]
             if n in band_colour_ints:
                 if colour_int != band_colour_ints[n]:
+                    missing_bands.append(f"band {n} {colour_int}")
+            elif n in optional_colour_ints:
+                if colour_int != optional_colour_ints[n]:
                     missing_bands.append(f"band {n} {colour_int}")
             else:
                 missing_bands.append(f"band {n} {colour_int}")
@@ -148,17 +162,18 @@ class FileTiff:
             )
 
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
-        origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
-        try:
-            tile_name = get_tile_name(origin, self._scale)
-            if not tile_name == get_file_name_from_path(self._path_standardised):
-                new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
-                os.rename(self._path_standardised, new_path)
-                get_log().info("renaming_file", path=new_path, old=self._path_standardised)
-                self._path_standardised = new_path
+        if self._scale > 0:
+            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            try:
+                tile_name = get_tile_name(origin, self._scale)
+                if not tile_name == get_file_name_from_path(self._path_standardised):
+                    new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
+                    os.rename(self._path_standardised, new_path)
+                    get_log().info("renaming_file", path=new_path, old=self._path_standardised)
+                    self._path_standardised = new_path
 
-        except TileIndexException as tie:
-            self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
+            except TileIndexException as tie:
+                self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
 
     def validate(self) -> bool:
         gdalinfo = self.get_gdalinfo()

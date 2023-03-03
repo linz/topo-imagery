@@ -2,7 +2,7 @@ from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 
 
 def test_preset_webp() -> None:
-    gdal_command = get_gdal_command("webp")
+    gdal_command = get_gdal_command("webp", epsg="2193")
 
     # Basic cog creation
     assert "COG" in gdal_command
@@ -23,7 +23,7 @@ def test_preset_webp() -> None:
 
 
 def test_preset_lzw() -> None:
-    gdal_command = get_gdal_command("lzw")
+    gdal_command = get_gdal_command("lzw", epsg="2193")
 
     # Basic cog creation
     assert "COG" in gdal_command

@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import List
+from typing import List, Optional
 
 from dateutil import parser, tz
 from linz_logger import get_log
@@ -70,3 +70,19 @@ def valid_date(s: str) -> datetime:
     except ValueError as e:
         msg = f"not a valid date: {s}"
         raise argparse.ArgumentTypeError(msg) from e
+
+
+def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
+    """Transform a string representing a list to a list of strings
+    example: "foo; bar; foo bar" -> ["foo", "bar", "foo bar"]
+
+    Args:
+        list_s: string representing a list to transform
+        separator: separator of the list
+
+    Returns:
+        a list of strings
+    """
+    if list_s:
+        return [s.strip() for s in list_s.split(separator) if s != ""]
+    return []

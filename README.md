@@ -11,25 +11,21 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
-_A collection of scripts used to process imagery_
+_A collection of Python scripts used to process imagery_
 
-# Package
+## Package
 
-## [topo-imagery](https://github.com/linz/topo-imagery/tree/master/containers/gdal)
+### [topo-imagery](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery)
 
-### Container Description
+#### Container Description
 
-The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-latest` Docker image](https://hub.docker.com/r/osgeo/gdal/).
+The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-3.6.1` Docker image](https://hub.docker.com/r/osgeo/gdal/).
 
-#### Python scripts
+##### Usage
 
-Python version is set to `3.8.10` as it is the current version used by `osgeo/gdal`.
+###### Local
 
-`create_polygons.py`
-
-#### Usage
-
-**Local**
+Example:
 
 1. Build the Docker image:
    `docker build .`
@@ -43,3 +39,35 @@ docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 
 #### Development
 
 This repo has a `devcontainer` which can be used within VSCode as a development environment with all of the required dependencies included. See the [.devcontainer/README.md](/.devcontainer/README.md) for more information.
+
+## Container package
+
+Publishing a container to the GitHub Package registry (`ghcr`) is handled automatically by GitHub Actions in this repo.
+
+A new container is published everytime a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
+
+- `latest`
+- `github` version (example: `v1.1.0-2-ga1154e8`)
+
+A new container is also published [when a release is merged to `master`](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml) (see section bellow). This container will be tagged with the following:
+
+- `latest`
+- `vX` (example: `v1`)
+- `vX.Y` (example: `v1.2`)
+- `vX.Y.Z` (example: `v1.2.4`)
+
+You can see the tags in the [GitHub Packages page](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery).
+
+## Releases
+
+[googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
+Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and create a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
+
+### Publishing
+
+To publish a release, the Pull Request opened by `release-please` bot needs to be merged:
+
+1. Open the PR and verify that the `CHANGELOG` contains what you expect in the release. If the latest change you expect is not there, double-check that a GitHub Actions is not currently running or failed.
+2. Approve the PR
+3. Add the `automerge` label and wait for the PR to be merged
+4. Once the Pull Request is merged to `master` a [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml) it creates the release and publish a new container tagged for this release.

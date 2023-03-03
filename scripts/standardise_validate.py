@@ -7,7 +7,7 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac import create_item
 from scripts.files.fs import write
-from scripts.gdal.gdal_helper import get_srs
+from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.standardising import run_standardising
 
 
@@ -16,7 +16,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)
     parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False)
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
+    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
+    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
@@ -34,7 +36,9 @@ def main() -> None:
         concurrency = 4
 
     # Standardize the tiffs
-    tiff_files = run_standardising(source, arguments.preset, arguments.cutline, concurrency)
+    tiff_files = run_standardising(
+        source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg
+    )
     if len(tiff_files) == 0:
         get_log().info("no_tiff_file", action="standardise_validate", reason="skipped")
         return
@@ -44,15 +48,14 @@ def main() -> None:
 
     for file in tiff_files:
         file.set_srs(srs)
-        file.set_scale(int(arguments.scale))
+        scale = arguments.scale
+        if scale == "None":
+            file.set_scale(0)
+        else:
+            file.set_scale(int(scale))
 
         # Validate the file
         if not file.validate():
-            get_log().info(
-                "non_visual_qa_errors",
-                originalPath=file.get_path_original(),
-                errors=file.get_errors(),
-            )
             original_path = file.get_path_original()
             standardised_path = file.get_path_standardised()
             env_argo_template = os.environ.get("ARGO_TEMPLATE")
@@ -60,11 +63,12 @@ def main() -> None:
                 argo_template = json.loads(env_argo_template)
                 s3_information = argo_template["archiveLocation"]["s3"]
                 standardised_path = os.path.join(
-                    "/vsis3", s3_information["bucket"], s3_information["key"], file.get_path_standardised()
+                    "/vsis3",
+                    s3_information["bucket"],
+                    s3_information["key"],
+                    *file.get_path_standardised().split("/"),
                 )
-                original_path = os.path.join(
-                    "/vsis3", s3_information["bucket"], s3_information["key"], file.get_path_original()
-                )
+                original_path = get_vfs_path(file.get_path_original())
             get_log().info(
                 "non_visual_qa_errors",
                 originalPath=original_path,
