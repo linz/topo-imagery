@@ -3,6 +3,7 @@ from typing import Optional
 from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
+from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 from scripts.stac.imagery.import_metadata import MetadataType, get_cloud_percent
@@ -16,7 +17,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: Optional[GdalInfo] = None,
-    sidecar_metadata: bytes = None,
+    sidecar_metadata: str = "",
     sidecar_metadata_type: MetadataType = None,
 ) -> ImageryItem:
     id_ = get_file_name_from_path(file)
@@ -32,8 +33,8 @@ def create_item(
     item.add_collection(collection_id)
 
     # Import sidecar metadata if needed
-    if sidecar_metadata is not None and sidecar_metadata_type == MetadataType.EARTHSCANNER:
-        cloud_cover = get_cloud_percent(sidecar_metadata.decode())
+    if sidecar_metadata != "" and sidecar_metadata_type == MetadataType.EARTHSCANNER:
+        cloud_cover = get_cloud_percent(read(sidecar_metadata).decode())
         if cloud_cover:
             item.add_stac_extension(StacExtensions.eo.value)
             item.add_eo_cloud_cover(cloud_cover)

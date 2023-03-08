@@ -51,7 +51,8 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
     assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
 
-def test_add_cloud_percentage(mocker) -> None:
+
+def test_add_cloud_percentage(mocker) -> None:  # type: ignore
     path = "./test/earth_scanner_001.tiff"
     id_ = get_file_name_from_path(path)
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"

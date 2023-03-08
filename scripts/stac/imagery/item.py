@@ -28,10 +28,9 @@ class ImageryItem:
         }
 
     def _get_properties(self) -> Dict[str, Any]:
-        properties = self.stac.get("properties")
-        if not properties:
+        if not self.stac.get("properties"):
             self.stac["properties"] = {}
-            properties = self.stac["properties"]
+        properties: Dict[str, Any] = self.stac["properties"]
         return properties
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
