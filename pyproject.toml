@@ -25,7 +25,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "gdal"
-version = "1.2.0"
+version = "1.2.1"
 description = ""
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
