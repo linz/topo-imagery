@@ -9,11 +9,11 @@ def test_parse_path_s3() -> None:
     assert path.bucket == "bucket-name"
     assert path.key == "path/to/the/file.test"
 
+
 def test_parse_path_local() -> None:
     local_path = "/home/tmp/file.test"
     _, file_path = parse_path(local_path)
 
-    #assert path.bucket == "bucket-name"
     assert file_path == "/home/tmp/file.test"
 
 

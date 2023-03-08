@@ -135,7 +135,7 @@ def parse_path(path: str) -> S3Path:
     parse = urlparse(path, allow_fragments=False)
     file_path = parse.path
     if is_s3(path):
-        file_path = file_path.strip('./')
+        file_path = file_path.strip("./")
     return S3Path(parse.netloc, file_path)
 
 
