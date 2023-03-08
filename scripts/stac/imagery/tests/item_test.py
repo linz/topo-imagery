@@ -50,3 +50,13 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     assert item.stac["collection"] == ulid
     assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
     assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+
+def test_add_cloud_percentage(mocker) -> None:
+    path = "./test/earth_scanner_001.tiff"
+    id_ = get_file_name_from_path(path)
+    checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
+    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
+    item = ImageryItem(id_, path)
+    item.add_eo_cloud_cover(50)
+
+    # assert {"properties": {"eo:cloud_cover": 50}} in item.stac

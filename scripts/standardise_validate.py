@@ -6,7 +6,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac import create_item
-from scripts.files.fs import write
+from scripts.files.fs import read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.standardising import run_standardising
 
@@ -27,6 +27,8 @@ def main() -> None:
     parser.add_argument(
         "--end-datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
+    parser.add_argument("--metadata-file", dest="metadata_file", help="Sidecar metadata file", required=True)
+    parser.add_argument("--metadata-type", dest="metadata_type", help="Sidecar metadata file", required=True)
     arguments = parser.parse_args()
     source = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
@@ -80,7 +82,13 @@ def main() -> None:
 
         # Create STAC
         item = create_item(
-            file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
+            file.get_path_standardised(),
+            start_datetime,
+            end_datetime,
+            arguments.collection_id,
+            file.get_gdalinfo(),
+            arguments.metadata_file,
+            arguments.metadata_type,
         )
         tmp_file_path = os.path.join("/tmp/", f"{item.stac['id']}.json")
         write(tmp_file_path, json.dumps(item.stac).encode("utf-8"))

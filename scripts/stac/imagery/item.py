@@ -27,12 +27,18 @@ class ImageryItem:
             "stac_extensions": [StacExtensions.file.value],
         }
 
+    def _get_properties(self) -> Dict[str, Any]:
+        properties = self.stac.get("properties")
+        if not properties:
+            self.stac["properties"] = {}
+            properties = self.stac["properties"]
+        return properties
+
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
-        self.stac["properties"] = {
-            "start_datetime": start_datetime,
-            "end_datetime": end_datetime,
-            "datetime": None,
-        }
+        properties = self._get_properties()
+        properties["start_datetime"] = start_datetime
+        properties["end_datetime"] = end_datetime
+        properties["datetime"] = None
 
     # FIXME: redefine the 'Any'
     def update_spatial(self, geometry: Dict[str, Any], bbox: Tuple[float, ...]) -> None:
@@ -46,3 +52,21 @@ class ImageryItem:
 
     def add_link(self, rel: str, href: str = "./collection.json", file_type: str = "application/json") -> None:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+
+    def add_stac_extension(self, link: str) -> None:
+        """add a stac extension link in the 'stac_extensions' list
+
+        Args:
+            link: to the extension json schema
+        """
+        self.stac["stac_extensions"].append(link)
+
+    def add_eo_cloud_cover(self, cloud_percent: int) -> None:
+        """add the cloud coverage to properties.'eo:cloud_cover'
+
+        Args:
+            cloud_percent: a number representing the estimated cloud coverage in %
+        """
+        properties = self._get_properties()
+        print(f"properties: {properties}")
+        properties["eo:cloud_cover"] = cloud_percent

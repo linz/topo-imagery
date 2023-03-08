@@ -5,7 +5,9 @@ from linz_logger import get_log
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+from scripts.stac.imagery.import_metadata import MetadataType, get_cloud_percent
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 def create_item(
@@ -14,6 +16,8 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: Optional[GdalInfo] = None,
+    sidecar_metadata: bytes = None,
+    sidecar_metadata_type: MetadataType = None,
 ) -> ImageryItem:
     id_ = get_file_name_from_path(file)
 
@@ -26,6 +30,13 @@ def create_item(
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
+
+    # Import sidecar metadata if needed
+    if sidecar_metadata is not None and sidecar_metadata_type == MetadataType.EARTHSCANNER:
+        cloud_cover = get_cloud_percent(sidecar_metadata.decode())
+        if cloud_cover:
+            item.add_stac_extension(StacExtensions.eo.value)
+            item.add_eo_cloud_cover(cloud_cover)
 
     get_log().info("imagery stac item created", path=file)
     return item
