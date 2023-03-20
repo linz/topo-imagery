@@ -18,6 +18,10 @@ BASE_COG = [
     # Ensure all CPUs are used for gdal translate
     "-co",
     "num_threads=all_cpus",
+    # Until GDAL 3.7.x this needs to be set as well as num_threads.
+    "--config",
+    "gdal_num_threads",
+    "all_cpus",
     # If not all tiles are needed in the tiff, instead of writing empty images write a null byte
     # this significantly reduces the size of tiffs which are very sparse
     "-co",
