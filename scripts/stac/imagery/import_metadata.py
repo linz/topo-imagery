@@ -12,7 +12,7 @@ def get_cloud_percent(xml_input: str) -> str:
     try:
         input_metadata = xmltodict.parse(xml_input)
         cloud_percent: str = input_metadata["MetaData"]["ProductInfo"]["CloudPercent"]
-    except Exception as e:  # pylint: disable-msg=broad-exception-caught
+    except Exception as e:
         get_log().error("Bad XML metadata format", error=e)
         return ""
     return cloud_percent

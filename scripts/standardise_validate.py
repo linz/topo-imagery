@@ -6,7 +6,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
 from scripts.create_stac import create_item
-from scripts.files.fs import read, write
+from scripts.files.fs import write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.standardising import run_standardising
 

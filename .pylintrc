@@ -4,7 +4,8 @@ disable =
         missing-class-docstring,
         missing-module-docstring,
         missing-function-docstring,
-        broad-exception-raised,
+        broad-except,
+        too-many-arguments,
 
 [FORMAT]
 max-line-length=127
