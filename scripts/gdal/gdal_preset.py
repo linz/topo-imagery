@@ -18,7 +18,7 @@ BASE_COG = [
     # Ensure all CPUs are used for gdal translate
     "-co",
     "num_threads=all_cpus",
-    # Until GDAL 3.7.x this needs to be set as well as num_threads.
+    # Until GDAL 3.7.x this needs to be set as well as num_threads (https://github.com/OSGeo/gdal/issues/7478)
     "--config",
     "gdal_num_threads",
     "all_cpus",
