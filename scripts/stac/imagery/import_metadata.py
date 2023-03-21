@@ -12,7 +12,7 @@ class MetadataType(str, Enum):
 def get_cloud_percent(xml_input: str) -> Optional[int]:
     try:
         input_metadata = xmltodict.parse(xml_input)
-        cloud_percent: int = input_metadata["MetaData"]["ProductInfo"]["CloudPercent"]
+        cloud_percent: int = int(input_metadata["MetaData"]["ProductInfo"]["CloudPercent"])
     except Exception as e:
         get_log().error("Bad XML metadata format", error=e)
         return None
