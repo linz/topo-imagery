@@ -5,6 +5,7 @@ disable =
         missing-module-docstring,
         missing-function-docstring,
         broad-except,
+        broad-exception-raised,
         too-many-arguments,
 
 [FORMAT]
