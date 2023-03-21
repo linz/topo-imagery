@@ -67,5 +67,4 @@ class ImageryItem:
             cloud_percent: a number representing the estimated cloud coverage in %
         """
         properties = self._get_properties()
-        print(f"properties: {properties}")
         properties["eo:cloud_cover"] = cloud_percent
