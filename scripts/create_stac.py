@@ -17,8 +17,8 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: Optional[GdalInfo] = None,
-    sidecar_metadata: str = "",
-    sidecar_metadata_type: MetadataType = None,
+    sidecar_metadata: Optional[str] = None,
+    sidecar_metadata_type: Optional[MetadataType] = None,
 ) -> ImageryItem:
     id_ = get_file_name_from_path(file)
 
@@ -32,12 +32,15 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    # Import sidecar metadata if needed
-    if sidecar_metadata != "" and sidecar_metadata_type == MetadataType.EARTHSCANNER:
-        cloud_cover = get_cloud_percent(read(sidecar_metadata).decode())
-        if cloud_cover:
-            item.add_stac_extension(StacExtensions.eo.value)
-            item.add_eo_cloud_cover(cloud_cover)
+    # Import sidecar metadata if specified
+    if sidecar_metadata:
+        if sidecar_metadata_type == MetadataType.EARTHSCANNER:
+            cloud_cover = get_cloud_percent(read(sidecar_metadata).decode())
+            if cloud_cover:
+                item.add_stac_extension(StacExtensions.eo.value)
+                item.add_eo_cloud_cover(cloud_cover)
+        else:
+            get_log().warn(f"unknown metadata type: {sidecar_metadata_type}")
 
     get_log().info("imagery stac item created", path=file)
     return item
