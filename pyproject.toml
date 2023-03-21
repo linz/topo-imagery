@@ -25,7 +25,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "gdal"
-version = "1.2.0"
+version = "1.2.1"
 description = ""
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
@@ -37,7 +37,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
-boto3 = "^1.26.83"
+boto3 = "^1.26.93"
 linz-logger = "^0.11.0"
 py-multihash = "^2.0.1"
 shapely = "^2.0.1"
