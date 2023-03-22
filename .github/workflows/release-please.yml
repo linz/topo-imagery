@@ -64,7 +64,6 @@ jobs:
           REPOSITORY: eks
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Q: do we need to reset this or will it be remembered from above?
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
           GIT_VERSION_MAJOR_MINOR=$(echo $GIT_VERSION | cut -d. -f1,2)

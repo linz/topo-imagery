@@ -50,7 +50,6 @@ jobs:
           REPOSITORY: eks
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Q: do we need to reset this or will it be remembered from above?
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           docker pull ghcr.io/linz/topo-imagery:${GIT_VERSION}
 
@@ -58,5 +57,4 @@ jobs:
           docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
 
           docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
-          # Q: do we want to push all containers? What is the cost and should we set up a mechanism to delete older versions?
           docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
