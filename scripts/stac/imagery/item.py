@@ -53,12 +53,13 @@ class ImageryItem:
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
 
     def add_stac_extension(self, link: str) -> None:
-        """add a stac extension link in the 'stac_extensions' list
+        """add a stac extension link in the 'stac_extensions' list if it does not already exist
 
         Args:
             link: to the extension json schema
         """
-        self.stac["stac_extensions"].append(link)
+        if link not in self.stac["stac_extensions"]:
+            self.stac["stac_extensions"].append(link)
 
     def add_eo_cloud_cover(self, cloud_percent: int) -> None:
         """add the cloud coverage to properties.'eo:cloud_cover'

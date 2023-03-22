@@ -1,6 +1,7 @@
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 def test_imagery_stac_item(mocker) -> None:  # type: ignore
@@ -61,3 +62,30 @@ def test_add_cloud_percentage(mocker) -> None:  # type: ignore
     item.add_eo_cloud_cover(50)
 
     assert item.stac["properties"]["eo:cloud_cover"] == 50
+
+
+def test_add_extension(mocker) -> None:  # type: ignore
+    path = "./test/earth_scanner_001.tiff"
+    id_ = get_file_name_from_path(path)
+    checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
+    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
+    item = ImageryItem(id_, path)
+    item.add_stac_extension(StacExtensions.eo.value)
+
+    assert StacExtensions.eo.value in item.stac["stac_extensions"]
+
+
+def test_add_extension_already_exist(mocker) -> None:  # type: ignore
+    path = "./test/earth_scanner_001.tiff"
+    id_ = get_file_name_from_path(path)
+    checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
+    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
+    item = ImageryItem(id_, path)
+    item.add_stac_extension(StacExtensions.eo.value)
+    item.add_stac_extension(StacExtensions.eo.value)
+
+    stac_extensions_list_length = len(item.stac["stac_extensions"])
+    # creating a set remove the duplicates
+    stac_extensions_set_length = len(set(item.stac["stac_extensions"]))
+
+    assert stac_extensions_list_length == stac_extensions_set_length
