@@ -60,4 +60,4 @@ def test_add_cloud_percentage(mocker) -> None:  # type: ignore
     item = ImageryItem(id_, path)
     item.add_eo_cloud_cover(50)
 
-    # assert {"properties": {"eo:cloud_cover": 50}} in item.stac
+    assert item.stac["properties"]["eo:cloud_cover"] == 50
