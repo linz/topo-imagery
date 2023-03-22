@@ -17,7 +17,7 @@ jobs:
         run: |
           docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
 
-      - name: Log in to registry
+      - name: Log in to Registry
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
@@ -29,3 +29,34 @@ jobs:
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
 
           docker push --all-tags ghcr.io/linz/topo-imagery
+
+      - name: Configure AWS Credentials
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ap-southeast-2
+          mask-aws-account-id: true
+          role-to-assume: ${{ secrets.AWS_CI_ROLE }}
+
+      - name: Login to Amazon ECR
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: eks
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Q: do we need to reset this or will it be remembered from above?
+          GIT_VERSION=$(git describe --tags --always --match 'v*')
+          docker pull ghcr.io/linz/topo-imagery:${GIT_VERSION}
+
+          docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
+          docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
+
+          docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
+          # Q: do we want to push all containers? What is the cost and should we set up a mechanism to delete older versions?
+          docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
