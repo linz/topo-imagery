@@ -28,7 +28,7 @@ def main() -> None:
         "--end-datetime", dest="end_datetime", help="end datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
     parser.add_argument("--metadata-file", dest="metadata_file", help="Sidecar metadata file")
-    parser.add_argument("--metadata-type", dest="metadata_type", help="Sidecar metadata file")
+    parser.add_argument("--metadata-type", dest="metadata_type", help="Sidecar metadata type")
     arguments = parser.parse_args()
     source = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
