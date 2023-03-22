@@ -12,13 +12,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 
 def create_item(
-    file: str,
-    start_datetime: str,
-    end_datetime: str,
-    collection_id: str,
-    gdalinfo_result: Optional[GdalInfo] = None,
-    sidecar_metadata: Optional[str] = None,
-    sidecar_metadata_type: Optional[MetadataType] = None,
+    file: str, start_datetime: str, end_datetime: str, collection_id: str, gdalinfo_result: Optional[GdalInfo] = None
 ) -> ImageryItem:
     id_ = get_file_name_from_path(file)
 
@@ -32,15 +26,23 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    # Import sidecar metadata if specified
-    if sidecar_metadata:
-        if sidecar_metadata_type == MetadataType.EARTHSCANNER:
-            cloud_cover = get_cloud_percent(read(sidecar_metadata).decode())
-            if cloud_cover:
-                item.add_stac_extension(StacExtensions.eo.value)
-                item.add_eo_cloud_cover(cloud_cover)
-        else:
-            get_log().warn(f"unknown metadata type: {sidecar_metadata_type}")
-
     get_log().info("imagery stac item created", path=file)
     return item
+
+
+def add_metadata(item: ImageryItem, metadata_file: str, metadata_type: MetadataType) -> None:
+    """Modify STAC item to add external metadata.
+
+    Args:
+        item: The item that will be modified to add external metadata
+        metadata_file: The path to the sidecar metadata file
+        metadata_type: The type of the metadata
+    """
+    # Import sidecar metadata if specified
+    if metadata_type == MetadataType.EARTHSCANNER:
+        cloud_cover = get_cloud_percent(read(metadata_file).decode())
+        if cloud_cover:
+            item.add_stac_extension(StacExtensions.eo.value)
+            item.add_eo_cloud_cover(cloud_cover)
+    else:
+        get_log().warn(f"unknown metadata type: {metadata_type}")
