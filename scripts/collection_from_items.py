@@ -16,12 +16,12 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
-    parser.add_argument("--collection-id", dest="collection_id", required=True)
-    parser.add_argument("--title", dest="title", help="collection title", required=True)
-    parser.add_argument("--description", dest="description", help="collection description", required=True)
-    parser.add_argument("--producer", dest="producer", help="imagery producer", required=True)
-    parser.add_argument("--licensor", dest="licensor", help="imagery licensor")
-    parser.add_argument("--licensor-list", dest="licensor_list", help="imagery licensor list")
+    parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
+    parser.add_argument("--title", dest="title", help="Collection title", required=True)
+    parser.add_argument("--description", dest="description", help="Collection description", required=True)
+    parser.add_argument("--producer", dest="producer", help="Imagery producer", required=True)
+    parser.add_argument("--licensor", dest="licensor", help="Imagery licensor")
+    parser.add_argument("--licensor-list", dest="licensor_list", help="Imagery licensor list")
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
