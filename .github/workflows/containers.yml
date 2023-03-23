@@ -43,7 +43,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push docker image to Amazon ECR
+      - name: Tag and push docker image to Amazon ECR
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
