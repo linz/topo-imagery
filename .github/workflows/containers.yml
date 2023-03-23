@@ -56,5 +56,4 @@ jobs:
           docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
           docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
 
-          docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
-          docker push ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
+          docker push --all-tags ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks
