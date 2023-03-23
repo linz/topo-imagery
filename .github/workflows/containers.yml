@@ -25,6 +25,8 @@ jobs:
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
+          echo "GIT_VERSION=$GIT_VERSION" >> $GITHUB_ENV
+
           docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
           docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
 
@@ -50,10 +52,9 @@ jobs:
           REPOSITORY: eks
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          GIT_VERSION=$(git describe --tags --always --match 'v*')
-          docker pull ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker pull ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }}
 
-          docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
-          docker tag ghcr.io/linz/topo-imagery:${GIT_VERSION} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${GIT_VERSION}
+          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery
+          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${{ env.GIT_VERSION }}
 
           docker push --all-tags ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks
