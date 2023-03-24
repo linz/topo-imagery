@@ -34,7 +34,7 @@ jobs:
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
-      - name: Publish Containers
+      - name: Publish Containers to GHCR
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
@@ -61,7 +61,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Tag and push docker image to Amazon ECR
+      - name: Publish Containers to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: eks
