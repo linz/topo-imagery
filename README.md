@@ -38,7 +38,7 @@ docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 
 
 ## Container package
 
-Publishing a container to the GitHub Package registry (`ghcr`) is handled automatically by GitHub Actions in this repo.
+GitHub Actions automatically handles publishing a container to the GitHub Package Registry (`ghcr`) and AWS Elastic Container Registry (ECR).
 
 A new container is published everytime a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
 
