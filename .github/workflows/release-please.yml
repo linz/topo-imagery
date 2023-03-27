@@ -20,6 +20,10 @@ jobs:
   publish-release:
     needs: release-please
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
     if: ${{ needs.release-please.outputs.release_created }}
     steps:
       - name: Checkout
