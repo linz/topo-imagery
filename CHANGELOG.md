@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.1](https://github.com/linz/topo-imagery/compare/v1.2.0...v1.2.1) (2023-03-08)
+
+
+### Bug Fixes
+
+* trailing char in local path is removed ([#389](https://github.com/linz/topo-imagery/issues/389)) ([604e591](https://github.com/linz/topo-imagery/commit/604e5911a7821d299cd6a2b5dc92176e4559a5eb))
+
+
+### Documentation
+
+* improve documentation about release process ([#362](https://github.com/linz/topo-imagery/issues/362)) ([d85653e](https://github.com/linz/topo-imagery/commit/d85653eec0ab254db15a86b1d3aad72a41e13083))
+
 ## [1.2.0](https://github.com/linz/topo-imagery/compare/v1.1.0...v1.2.0) (2023-03-01)
 
 

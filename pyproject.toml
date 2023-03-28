@@ -25,7 +25,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "gdal"
-version = "1.2.0"
+version = "1.2.1"
 description = ""
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
@@ -37,7 +37,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
-boto3 = "^1.26.83"
+boto3 = "^1.26.100"
 linz-logger = "^0.11.0"
 py-multihash = "^2.0.1"
 shapely = "^2.0.1"
@@ -45,12 +45,12 @@ shapely = "^2.0.1"
 [tool.poetry.dev-dependencies]
 black = "^23.1.0"
 isort = "^5.12.0"
-gitlint = "^0.18.0"
-mypy = "^1.0"
-pylint = "^2.16.2"
-pre-commit = "^3.0.4"
-mypy-boto3-s3 = "^1.26.58"
+gitlint = "^0.19.1"
+mypy = "^1.1"
+pylint = "^2.17.1"
+pre-commit = "^3.2.1"
+mypy-boto3-s3 = "^1.26.99"
 pytest = "^7.2.2"
 pytest-dependency = "^0.5.1"
-moto = "^4.1.2"
+moto = "^4.1.6"
 pytest-mock = "^3.8.2"
