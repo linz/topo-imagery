@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://github.com/linz/topo-imagery/compare/v1.2.1...v1.3.0) (2023-03-29)
+
+
+### Features
+
+* deploy containers to ecr TDE-689 ([#408](https://github.com/linz/topo-imagery/issues/408)) ([31c713c](https://github.com/linz/topo-imagery/commit/31c713c9d5b7336f6af408e8a3bd6d592db9f831))
+
+
+### Bug Fixes
+
+* add latest to tag ([#416](https://github.com/linz/topo-imagery/issues/416)) ([82645ec](https://github.com/linz/topo-imagery/commit/82645ec3432b7f141a9f3af672b4d1aef2a46e68))
+* add permissions ([#414](https://github.com/linz/topo-imagery/issues/414)) ([d05aa10](https://github.com/linz/topo-imagery/commit/d05aa1008eb51b8646f74fee675d56d4cbbfc9e9))
+* update permissions ([#415](https://github.com/linz/topo-imagery/issues/415)) ([71c3fe9](https://github.com/linz/topo-imagery/commit/71c3fe9434209c2f87c333fe2323569a9d24d6a9))
+* use multithreading for gdalwarp when creating COGS TDE-696 ([#399](https://github.com/linz/topo-imagery/issues/399)) ([061d3d6](https://github.com/linz/topo-imagery/commit/061d3d67bdb7a7385ffd84b0d060edde0010bd8c))
+
 ## [1.2.1](https://github.com/linz/topo-imagery/compare/v1.2.0...v1.2.1) (2023-03-08)
 
 
