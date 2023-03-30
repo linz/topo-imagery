@@ -54,7 +54,7 @@ jobs:
       - name: Publish Containers to ECR
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }/esk
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }/eks
           TAG: topo-imagery
         run: |
           docker tag ${{ env.TAG}} ${{ env.REGISTRY }}:${{ env.TAG }}-latest
