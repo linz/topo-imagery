@@ -27,14 +27,16 @@ jobs:
 
       - name: Publish Containers to GHCR
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        env:
+          TAG: topo-imagery
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           echo "GIT_VERSION=$GIT_VERSION" >> $GITHUB_ENV
 
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:latest
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:${GIT_VERSION}
 
-          docker push --all-tags ghcr.io/linz/topo-imagery
+          docker push --all-tags ghcr.io/linz/${{ env.TAG }}
 
       - name: Configure AWS Credentials
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
@@ -52,13 +54,10 @@ jobs:
       - name: Publish Containers to ECR
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: eks
-          IMAGE_TAG: ${{ github.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }/eks
+          TAG: topo-imagery
         run: |
-          docker pull ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }}
+          docker tag ${{ env.TAG}} ${{ env.REGISTRY }}:${{ env.TAG }}-latest
+          docker tag ${{ env.TAG}} ${{ env.REGISTRY }}:${{ env.TAG }}-${{ env.GIT_VERSION }}
 
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-latest
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${{ env.GIT_VERSION }}
-
-          docker push --all-tags ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks
+          docker push --all-tags ${{ env.REGISTRY }}

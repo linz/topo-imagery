@@ -39,6 +39,8 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
       - name: Publish Containers to GHCR
+        env:
+          TAG: topo-imagery
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
           GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
@@ -47,12 +49,12 @@ jobs:
           echo "GIT_VERSION_MAJOR=$GIT_VERSION_MAJOR" >> $GITHUB_ENV
           echo "GIT_VERSION_MAJOR_MINOR=$GIT_VERSION_MAJOR_MINOR" >> $GITHUB_ENV
 
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:latest
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR}
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION_MAJOR_MINOR}
-          docker tag topo-imagery ghcr.io/linz/topo-imagery:${GIT_VERSION}
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:latest
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:${GIT_VERSION_MAJOR}
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:${GIT_VERSION_MAJOR_MINOR}
+          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:${GIT_VERSION}
 
-          docker push --all-tags ghcr.io/linz/topo-imagery
+          docker push --all-tags ghcr.io/linz/${{ env.TAG }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -67,16 +69,12 @@ jobs:
 
       - name: Publish Containers to ECR
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: eks
-          IMAGE_TAG: ${{ github.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/eks
+          TAG: topo-imagery
         run: |
+          docker tag ${{ env.TAG }} ${{ env.REGISTRY }}:${{ env.TAG }}-latest
+          docker tag ${{ env.TAG }} ${{ env.REGISTRY }}:${{ env.TAG }}-${{ env.GIT_VERSION_MAJOR }}
+          docker tag ${{ env.TAG }} ${{ env.REGISTRY }}:${{ env.TAG }}-${{ env.GIT_VERSION_MAJOR_MINOR }}
+          docker tag ${{ env.TAG }} ${{ env.REGISTRY }}:${{ env.TAG }}-${{ env.GIT_VERSION }}
 
-          docker pull ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }}
-
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-latest
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${{ env.GIT_VERSION_MAJOR }}
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${{ env.GIT_VERSION_MAJOR_MINOR }}
-          docker tag ghcr.io/linz/topo-imagery:${{ env.GIT_VERSION }} ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks:topo-imagery-${{ env.GIT_VERSION }}
-
-          docker push --all-tags ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.ap-southeast-2.amazonaws.com/eks
+          docker push --all-tags ${{ env.REGISTRY }}
