@@ -1,7 +1,7 @@
 import argparse
 import json
 import os
-from typing import List
+from typing import List, Tuple
 
 from linz_logger import get_log
 
@@ -14,6 +14,45 @@ from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.standardising import run_standardising
 from scripts.tile.tile_index import Point, get_tile_name
+
+
+def get_processed_tiffs(source: List[str], target: str, scale: int) -> Tuple[List[str], List[FileTiff]]:
+    """By checking the target path, return a list of the source path that have been processed
+    and a list of tiff that haven't a STAC file associated.
+
+    Args:
+        source: the list of image source path
+        target: the target location for the processed output (tiff and stac)
+        scale: the scale of the dataset
+
+    Returns:
+        A tuple containing processed source path and a list of tiff with no stac
+    """
+    processed_tiffs: List[str] = []
+    no_stac: List[FileTiff] = []
+    for path in source:
+        if is_tiff(path) or is_vrt(path):
+            # gdalinfo the original file
+            gdalinfo = gdal_info(path)
+            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            tile_name = get_tile_name(origin, scale)
+            prefix = os.path.join(target, tile_name)
+            target_path_stac = prefix + ".json"
+            target_path_tiff = prefix + ".tiff"
+            # STAC item json file name
+            if exists(target_path_stac):
+                # STAC exists, consider the TIFF exists too
+                processed_tiffs.append(path)
+                continue
+
+            if exists(target_path_tiff):
+                # TIFF has been processed in previous run
+                processed_tiffs.append(path)
+                # TIFF exists but not STAC, needs to validate and create the STAC
+                tiff = FileTiff(path)
+                tiff.set_path_standardised(target_path_tiff)
+                no_stac.append(tiff)
+    return processed_tiffs, no_stac
 
 
 def main() -> None:
@@ -50,27 +89,9 @@ def main() -> None:
     is_resuming = exists(arguments.target)
     missing_stac_tiffs: List[FileTiff] = []
     if is_resuming:
-        processed_tiffs = []
-        for path in source:
-            if is_tiff(path) or is_vrt(path):
-                # gdalinfo the original file
-                gdalinfo = gdal_info(path)
-                origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
-                tile_name = get_tile_name(origin, int(arguments.scale))
-                target_stac = os.path.join(arguments.target, tile_name + ".json")
-                if exists(target_stac):
-                    # STAC exists, consider the TIFF exists too
-                    processed_tiffs.append(path)
-                    continue
+        # pylint: disable=unbalanced-tuple-unpacking
+        processed_tiffs, missing_stac_tiffs = get_processed_tiffs(source, arguments.target, int(arguments.scale))
 
-                target_tiff = os.path.join(arguments.target, tile_name + ".tiff")
-                if exists(target_tiff):
-                    # TIFF has been processed in previous run
-                    processed_tiffs.append(path)
-                    # TIFF exists but not STAC, needs to validate and create the STAC
-                    tiff = FileTiff(path)
-                    tiff.set_path_standardised(target_tiff)
-                    missing_stac_tiffs.append(tiff)
         for already_processed in processed_tiffs:
             get_log().info("tiff_already_processed", path=already_processed)
             source.remove(already_processed)
