@@ -5,7 +5,7 @@ from typing import Generator
 
 import pytest
 
-from scripts.files.fs_local import read, write
+from scripts.files.fs_local import exists, read, write
 
 
 @pytest.fixture(name="setup", autouse=True)
@@ -36,3 +36,18 @@ def test_read(setup: str) -> None:
     write(path, content)
     file_content = read(path)
     assert file_content == content
+
+
+@pytest.mark.dependency(name="exists", depends=["write"])
+def test_exists(setup: str) -> None:
+    content = b"test content"
+    target = setup
+    path = os.path.join(target, "test.file")
+    write(path, content)
+    found = exists(path)
+    assert found is True
+
+
+def test_exists_file_not_found() -> None:
+    found = exists("/tmp/test.file")
+    assert found is False

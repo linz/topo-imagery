@@ -76,6 +76,46 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     return file
 
 
+def exists(path: str, needs_credentials: bool = False) -> bool:
+    """Check if s3 Object exists
+
+    Args:
+        path: path to the s3 object/key
+        needs_credentials: if acces to object needs credentials. Defaults to False.
+
+    Raises:
+        ce: ClientError
+        nsb: NoSuchBucket
+
+    Returns:
+        True if the S3 Object exists
+    """
+    s3_path, key = parse_path(path)
+    s3 = boto3.resource("s3")
+
+    try:
+        if needs_credentials:
+            s3 = get_session(path).resource("s3")
+
+        bucket_name = bucket_name_from_path(s3_path)
+        bucket = s3.Bucket(bucket_name)
+        objects = bucket.objects.filter(Prefix=key)
+
+        if len(list(objects)) > 0:
+            return True
+        return False
+    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+        get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
+        return False
+    except s3.meta.client.exceptions.ClientError as ce:
+        if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
+            get_log().debug("read_s3_needs_credentials", path=path)
+            return exists(path, True)
+
+        get_log().error("s3_client_error", path=path, error=f"ClientError raised: {ce}")
+        raise ce
+
+
 def bucket_name_from_path(path: str) -> str:
     path_parts = path.replace("s3://", "").split("/")
     return path_parts.pop(0)
