@@ -99,3 +99,15 @@ def test_exists_object_not_exists() -> None:
     file_exists = exists("s3://testbucket/test.file")
 
     assert file_exists is False
+
+
+@mock_s3  # type: ignore
+def test_exists_object_starting_with_not_exists() -> None:
+    s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
+    client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="testbucket")
+    client.put_object(Bucket="testbucket", Key="hello/another.file", Body=b"test content")
+
+    file_exists = exists("s3://testbucket/hello/another.fi")
+
+    assert file_exists is False
