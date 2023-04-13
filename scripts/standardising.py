@@ -116,6 +116,7 @@ def standardising(
 
     if not exists(standardized_file_path):
         with tempfile.TemporaryDirectory() as tmp_path:
+            standardized_working_path = os.path.join(tmp_path, standardized_file_name)
             input_file = file
 
             # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
@@ -154,7 +155,9 @@ def standardising(
             info = gdal_info(input_file, False)
             command = get_gdal_command(preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, info))
             command.extend(get_gdal_band_offset(input_file, info))
-            run_gdal(command, input_file=input_file, output_file=standardized_file_path)
+            run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+
+            write(standardized_file_path, read(standardized_working_path))
     else:
         get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
 
