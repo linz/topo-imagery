@@ -48,6 +48,7 @@ def main() -> None:
         concurrency,
         arguments.source_epsg,
         arguments.target_epsg,
+        int(arguments.scale),
         arguments.target,
     )
 

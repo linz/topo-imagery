@@ -28,6 +28,7 @@ def run_standardising(
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
+    scale: int,
     target_output: Optional[str] = None,
 ) -> List[FileTiff]:
     # pylint: disable-msg=too-many-arguments
@@ -51,6 +52,7 @@ def run_standardising(
                 preset=preset,
                 source_epsg=source_epsg,
                 target_epsg=target_epsg,
+                scale=scale,
                 target_output=target_output,
                 cutline=cutline,
             ),
@@ -101,7 +103,7 @@ def standardising(
     target_epsg: str,
     scale: int,
     cutline: Optional[str],
-    target_output: Optional[str] = "/tmp/",
+    target_output: str = "/tmp/",
 ) -> FileTiff:
     get_log().info("standardising", path=file)
     gdalinfo = gdal_info(file)
@@ -136,7 +138,7 @@ def standardising(
 
             else:
                 info = tiff.get_gdalinfo()
-                if tiff.is_no_data(info):
+                if info and tiff.is_no_data(info):
                     target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                     run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                     input_file = target_vrt
@@ -168,13 +170,22 @@ def main() -> None:
     parser.add_argument("--cutline", dest="cutline", required=False)
     parser.add_argument("--source-epsg", dest="source_epsg", required=True)
     parser.add_argument("--target-epsg", dest="target_epsg", required=True)
+    parser.add_argument("--scale", dest="scale", required=True)
     arguments = parser.parse_args()
     source = format_source(arguments.source)
 
     if is_argo():
         concurrency = 4
 
-    run_standardising(source, arguments.preset, arguments.cutline, concurrency, arguments.source_epsg, arguments.target_epsg)
+    run_standardising(
+        source,
+        arguments.preset,
+        arguments.cutline,
+        concurrency,
+        arguments.source_epsg,
+        arguments.target_epsg,
+        int(arguments.scale),
+    )
 
 
 if __name__ == "__main__":
