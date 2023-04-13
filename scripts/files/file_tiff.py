@@ -49,6 +49,7 @@ class FileTiff:
             return None
         if not self._gdalinfo:
             try:
+                # TODO Do we need gdalinfo with --stats?
                 self._gdalinfo = gdal_info(self._path_standardised)
             except json.JSONDecodeError as jde:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
@@ -57,6 +58,9 @@ class FileTiff:
             except Exception as e:  # pylint: disable=broad-except
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
+
+    def set_gdalinfo(self, gdalinfo: GdalInfo) -> None:
+        self._gdalinfo = gdalinfo
 
     def get_errors(self) -> List[Dict[str, Any]]:
         return self._errors
