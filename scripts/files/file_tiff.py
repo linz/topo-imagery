@@ -7,8 +7,8 @@ from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
-from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
+from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 
 class FileTiffErrorType(str, Enum):
@@ -163,7 +163,7 @@ class FileTiff:
 
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
         if self._scale > 0:
-            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            origin = get_origin(gdalinfo)
             try:
                 tile_name = get_tile_name(origin, self._scale)
                 if not tile_name == get_file_name_from_path(self._path_standardised):

@@ -11,9 +11,9 @@ from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
-from scripts.gdal.gdalinfo import gdal_info
+from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.standardising import run_standardising
-from scripts.tile.tile_index import Point, get_tile_name
+from scripts.tile.tile_index import get_tile_name
 
 
 def get_processed_tiffs(source: List[str], target: str, scale: int) -> Tuple[List[str], List[FileTiff]]:
@@ -34,7 +34,7 @@ def get_processed_tiffs(source: List[str], target: str, scale: int) -> Tuple[Lis
         if is_tiff(path) or is_vrt(path):
             # gdalinfo the original file
             gdalinfo = gdal_info(path)
-            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            origin = get_origin(gdalinfo)
             tile_name = get_tile_name(origin, scale)
             prefix = os.path.join(target, tile_name)
             target_path_stac = prefix + ".json"

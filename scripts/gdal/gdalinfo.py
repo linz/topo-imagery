@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, TypedDict, cast
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.tile.tile_index import Point
 
 
 class GdalInfoBand(TypedDict):
@@ -92,3 +93,7 @@ def format_wkt(wkt: str) -> str:
         str: The wkt output formatted.
     """
     return re.sub(r"\s+", " ", (wkt.replace('"', "'").replace("\n", "")))
+
+
+def get_origin(gdalinfo: GdalInfo) -> Point:
+    return Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
