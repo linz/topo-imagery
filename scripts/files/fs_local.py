@@ -29,7 +29,7 @@ def exists(path: str) -> bool:
     """Check if path (file or directory) exists
 
     Args:
-        path: A local path to a file/directory
+        path: A local path to a directory or file
 
     Returns:
         True if the path exists
