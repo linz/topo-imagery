@@ -110,7 +110,7 @@ def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cu
             input_file = target_vrt
 
         else:
-            info = gdal_info(input_file, stats=False)
+            info = gdal_info(input_file)
             if tiff.is_no_data(info):
                 target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                 run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
@@ -123,7 +123,7 @@ def standardising(file: str, preset: str, source_epsg: str, target_epsg: str, cu
             input_file = target_vrt
 
         # gdalinfo to get band offset and band type
-        info = gdal_info(input_file, False)
+        info = gdal_info(input_file)
         command = get_gdal_command(preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, info))
         command.extend(get_gdal_band_offset(input_file, info))
         run_gdal(command, input_file=input_file, output_file=standardized_file_path)
