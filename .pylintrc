@@ -16,6 +16,4 @@ ignore-comments=yes
 ignore-docstrings=yes
 ignore-imports=yes
 [DESIGN]
-max-branches=20
-max-statements=100
 max-args = 8
