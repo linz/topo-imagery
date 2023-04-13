@@ -34,7 +34,7 @@ def exists(path: str) -> bool:
     """Check if path (file or directory) exists
 
     Args:
-        path: A path to a directory
+        path: A path to a directory or file
 
     Returns:
         True if the path exists
