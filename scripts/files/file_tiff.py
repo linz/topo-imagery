@@ -49,8 +49,7 @@ class FileTiff:
             return None
         if not self._gdalinfo:
             try:
-                # TODO Do we need gdalinfo with --stats?
-                self._gdalinfo = gdal_info(self._path_standardised)
+                self._gdalinfo = gdal_info(self._path_standardised, False)
             except json.JSONDecodeError as jde:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
             except GDALExecutionException as gee:

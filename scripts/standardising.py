@@ -106,13 +106,12 @@ def standardising(
     target_output: str = "/tmp/",
 ) -> FileTiff:
     get_log().info("standardising", path=file)
-    gdalinfo = gdal_info(file)
-    origin = get_origin(gdalinfo)
+    original_gdalinfo = gdal_info(file, False)
+    origin = get_origin(original_gdalinfo)
     tile_name = get_tile_name(origin, scale)
     standardized_file_name = f"{tile_name}.tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
     tiff = FileTiff(file)
-    tiff.set_gdalinfo(gdalinfo)
 
     if not exists(standardized_file_path):
         with tempfile.TemporaryDirectory() as tmp_path:
@@ -138,8 +137,7 @@ def standardising(
                 input_file = target_vrt
 
             else:
-                info = tiff.get_gdalinfo()
-                if info and tiff.is_no_data(info):
+                if tiff.is_no_data(original_gdalinfo):
                     target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                     run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                     input_file = target_vrt
@@ -151,10 +149,11 @@ def standardising(
                 input_file = target_vrt
 
             # gdalinfo to get band offset and band type
-            # TODO Do we need to run a new gdalinfo here?
-            info = gdal_info(input_file, False)
-            command = get_gdal_command(preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, info))
-            command.extend(get_gdal_band_offset(input_file, info))
+            transformed_image_gdalinfo = gdal_info(input_file, False)
+            command = get_gdal_command(
+                preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, transformed_image_gdalinfo)
+            )
+            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo))
             run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
             write(standardized_file_path, read(standardized_working_path))
