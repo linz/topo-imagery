@@ -8,6 +8,7 @@ def write(destination: str, source: bytes) -> None:
         destination (str): The local path to the file to write.
         source (bytes): The source file in bytes.
     """
+    os.makedirs(os.path.dirname(destination), mode=0o777, exist_ok=True)
     with open(destination, "wb") as file:
         file.write(source)
 

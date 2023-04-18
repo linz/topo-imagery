@@ -28,6 +28,13 @@ def test_write(setup: str) -> None:
     assert os.path.isfile(path)
 
 
+def test_write_non_existing_dir(setup: str) -> None:
+    target = setup
+    path = os.path.join(target, "new_dir/test.file")
+    write(path, b"test")
+    assert os.path.isfile(path)
+
+
 @pytest.mark.dependency(name="read", depends=["write"])
 def test_read(setup: str) -> None:
     content = b"test content"
