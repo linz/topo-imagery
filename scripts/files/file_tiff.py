@@ -7,8 +7,8 @@ from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
-from scripts.tile.tile_index import Point, TileIndexException, get_tile_name
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
+from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 
 class FileTiffErrorType(str, Enum):
@@ -49,7 +49,7 @@ class FileTiff:
             return None
         if not self._gdalinfo:
             try:
-                self._gdalinfo = gdal_info(self._path_standardised)
+                self._gdalinfo = gdal_info(self._path_standardised, False)
             except json.JSONDecodeError as jde:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
             except GDALExecutionException as gee:
@@ -57,6 +57,9 @@ class FileTiff:
             except Exception as e:  # pylint: disable=broad-except
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
+
+    def set_gdalinfo(self, gdalinfo: GdalInfo) -> None:
+        self._gdalinfo = gdalinfo
 
     def get_errors(self) -> List[Dict[str, Any]]:
         return self._errors
@@ -163,7 +166,7 @@ class FileTiff:
 
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
         if self._scale > 0:
-            origin = Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])
+            origin = get_origin(gdalinfo)
             try:
                 tile_name = get_tile_name(origin, self._scale)
                 if not tile_name == get_file_name_from_path(self._path_standardised):
