@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.0](https://github.com/linz/topo-imagery/compare/v1.3.0...v2.0.0) (2023-04-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* resume standardise validate TDE-710 ([#444](https://github.com/linz/topo-imagery/issues/444))
+
+### Features
+
+* fs.exists() checks if path exists TDE-710 ([#441](https://github.com/linz/topo-imagery/issues/441)) ([f79bd7a](https://github.com/linz/topo-imagery/commit/f79bd7a8b1ea7ef950479a3638595662f3417ed6))
+* resume standardise validate TDE-710 ([#444](https://github.com/linz/topo-imagery/issues/444)) ([b4022a5](https://github.com/linz/topo-imagery/commit/b4022a509dc7d92e8d10eb384fa1b3408c45463e))
+
+
+### Bug Fixes
+
+* fs_local.write() fails when directory does not exist ([#445](https://github.com/linz/topo-imagery/issues/445)) ([935a041](https://github.com/linz/topo-imagery/commit/935a0419ee7c550793088c279e060d315bf8dad9))
+* fs_s3.read() exceptions are not caught properly ([#432](https://github.com/linz/topo-imagery/issues/432)) ([3a855d5](https://github.com/linz/topo-imagery/commit/3a855d55f9a59bfe2d081835663b18b574380faa))
+* unescaped bracket ([#426](https://github.com/linz/topo-imagery/issues/426)) ([f579638](https://github.com/linz/topo-imagery/commit/f57963854d0d3f61585055d2fbc5e3174f7948ea))
+
 ## [1.3.0](https://github.com/linz/topo-imagery/compare/v1.2.1...v1.3.0) (2023-03-29)
 
 
