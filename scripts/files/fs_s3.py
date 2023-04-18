@@ -76,6 +76,56 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     return file
 
 
+def exists(path: str, needs_credentials: bool = False) -> bool:
+    """Check if s3 Object exists
+
+    Args:
+        path: path to the s3 object/key
+        needs_credentials: if acces to object needs credentials. Defaults to False.
+
+    Raises:
+        ce: ClientError
+        nsb: NoSuchBucket
+
+    Returns:
+        True if the S3 Object exists
+    """
+    s3_path, key = parse_path(path)
+    s3 = boto3.resource("s3")
+
+    try:
+        if needs_credentials:
+            s3 = get_session(path).resource("s3")
+
+        if path.endswith("/"):
+            bucket_name = bucket_name_from_path(s3_path)
+            bucket = s3.Bucket(bucket_name)
+            # MaxKeys limits to 1 object in the response
+            objects = bucket.objects.filter(Prefix=key, MaxKeys=1)
+
+            if len(list(objects)) > 0:
+                return True
+            return False
+
+        # load() fetch the metadata, not the data. Calls a `head` behind the scene.
+        s3.Object(s3_path, key).load()
+        return True
+    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+        get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
+        return False
+    except s3.meta.client.exceptions.ClientError as ce:
+        if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
+            get_log().debug("read_s3_needs_credentials", path=path)
+            return exists(path, True)
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
+        # 404 for NoSuchKey - https://github.com/boto/boto3/issues/2442
+        if ce.response["Error"]["Code"] == "404":
+            get_log().debug("s3_key_not_found", path=path, info=f"The specified key does not seem to exist: {ce}")
+            return False
+        get_log().error("s3_client_error", path=path, error=f"ClientError raised: {ce}")
+        raise ce
+
+
 def bucket_name_from_path(path: str) -> str:
     path_parts = path.replace("s3://", "").split("/")
     return path_parts.pop(0)

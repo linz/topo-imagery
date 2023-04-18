@@ -28,3 +28,17 @@ def read(path: str) -> bytes:
         return fs_s3.read(path)
 
     return fs_local.read(path)
+
+
+def exists(path: str) -> bool:
+    """Check if path (file or directory) exists
+
+    Args:
+        path: A path to a directory or file
+
+    Returns:
+        True if the path exists
+    """
+    if is_s3(path):
+        return fs_s3.exists(path)
+    return fs_local.exists(path)

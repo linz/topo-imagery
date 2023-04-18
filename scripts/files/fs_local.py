@@ -1,3 +1,6 @@
+import os
+
+
 def write(destination: str, source: bytes) -> None:
     """Write the source to the local destination file.
 
@@ -20,3 +23,15 @@ def read(path: str) -> bytes:
     """
     with open(path, "rb") as file:
         return file.read()
+
+
+def exists(path: str) -> bool:
+    """Check if path (file or directory) exists
+
+    Args:
+        path: A local path to a directory or file
+
+    Returns:
+        True if the path exists
+    """
+    return os.path.exists(path)
