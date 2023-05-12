@@ -112,7 +112,7 @@ def standardising(
         tile_name = get_tile_name(origin, scale)
     except TileIndexException as tie:
         if scale > 0:
-            get_log().error("The output file name won't be standardised", error=str(tie))
+            get_log().error("File name not standardised", error=str(tie))
         else:
             get_log().debug("File name not standardised: scale is None")
         tile_name = get_file_name_from_path(file)
