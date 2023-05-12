@@ -110,11 +110,14 @@ def standardising(
     origin = get_origin(original_gdalinfo)
     try:
         tile_name = get_tile_name(origin, scale)
-        standardized_file_name = f"{tile_name}.tiff"
     except TileIndexException as tie:
-        get_log().debug("The output file name won't be standardised", error=str(tie))
-        standardized_file_name = f"{get_file_name_from_path(file)}.tiff"
+        if scale > 0:
+            get_log().error("The output file name won't be standardised", error=str(tie))
+        else:
+            get_log().debug("File name not standardised: scale is None")
+        tile_name = get_file_name_from_path(file)
 
+    standardized_file_name = f"{tile_name}.tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
     tiff = FileTiff(file)
 
