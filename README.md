@@ -54,7 +54,7 @@ This package is used to be run in a [Kubernetes](https://kubernetes.io/) cluster
 
 GitHub Actions automatically handles publishing a container to the GitHub Package Registry (`ghcr`) and in a private AWS Elastic Container Registry (ECR).
 
-A new container is published everytime a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
+A new container is published every time a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
 
 - `latest`
 - `github` version (example: `v1.1.0-2-ga1154e8`)
