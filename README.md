@@ -10,36 +10,51 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 [![Code Style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
-_A collection of Python scripts used to process imagery_
+## Description
 
-## Package
+This is a collection of Python scripts used for processing topographic data in and for the cloud (AWS).
 
-### [topo-imagery](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery)
+The associated Docker container is provided to run the Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-*` Docker image](https://github.com/OSGeo/gdal/pkgs/container/gdal).
 
-#### Container Description
+The Docker container is available [in GitHub Packages](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery).
 
-The purpose of this Docker container is to run Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-3.6.1` Docker image](https://hub.docker.com/r/osgeo/gdal/).
+### Usage
 
-##### Usage
+The scripts have been implemented to be run inside the Docker container only.
 
-###### Local
+#### Local
 
-Example:
-
-1. Build the Docker image:
-   `docker build .`
-2. Log into AWS with `AWS-CLI`
-3. Run the following command
+- Build the Docker image:
 
 ```bash
-docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE 'image-id'  python create_polygons.py --uri 's3://path-to-the-tiff/image.tif' --destination 'destination-bucket'
+docker build . -t topo-imagery
 ```
 
-## Container package
+- Running `standardising_validate.py` script
 
-GitHub Actions automatically handles publishing a container to the GitHub Package Registry (`ghcr`) and AWS Elastic Container Registry (ECR).
+This script takes a file (or list of files) in input that need to be standardised to a [COG](https://www.cogeo.org/) with a creation of a [STAC](https://stacspec.org/) Item file containing the metadata.
 
-A new container is published everytime a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
+1. Example with local files. In this example the source file is in a `/tmp/` directory in your machine, the output will be created in `/tmp/output/`:
+
+```bash
+docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --source /tmp/file_to_standardise.tiff --scale None --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+```
+
+2. Example using a source file on AWS, after logging into AWS with [AWS CLI](https://aws.amazon.com/cli/):
+
+```bash
+docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --source s3://bucket/file_to_standardise.tiff --scale None --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+```
+
+### In the cloud
+
+This package is used to be run in a [Kubernetes](https://kubernetes.io/) cluster using a workflow system. More information can be found in the [linz/topo-workflows](https://github.com/linz/topo-workflows) repository.
+
+## Versioning
+
+GitHub Actions automatically handles publishing a container to the GitHub Package Registry (`ghcr`) and in a private AWS Elastic Container Registry (ECR).
+
+A new container is published every time a change is [merged to the `master` branch](https://github.com/linz/topo-imagery/blob/master/.github/workflows/containers.yml). This container will be tagged with the following:
 
 - `latest`
 - `github` version (example: `v1.1.0-2-ga1154e8`)
@@ -55,8 +70,10 @@ You can see the tags in the [GitHub Packages page](https://github.com/linz/topo-
 
 ## Releases
 
+### Managing
+
 [googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
-Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and create a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
+Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and creates a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
 
 ### Publishing
 
