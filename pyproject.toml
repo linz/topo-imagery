@@ -24,9 +24,9 @@ module = [
 ignore_missing_imports = true
 
 [tool.poetry]
-name = "gdal"
+name = "topo-imagery"
 version = "2.0.0"
-description = ""
+description = "A collection of scripts for processing imagery"
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
     "Daniel Silk <dsilk@linz.govt.nz>",
