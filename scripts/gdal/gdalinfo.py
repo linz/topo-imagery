@@ -96,4 +96,12 @@ def format_wkt(wkt: str) -> str:
 
 
 def get_origin(gdalinfo: GdalInfo) -> Point:
+    """Parse the `GdalInfo` to get the origin coordinates.
+
+    Args:
+        gdalinfo: the output of gdalinfo
+
+    Returns:
+        a `Point` of the origin
+    """
     return Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])

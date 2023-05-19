@@ -15,6 +15,18 @@ def create_item(
     collection_id: str,
     gdalinfo_result: Optional[GdalInfo] = None,
 ) -> ImageryItem:
+    """Create an ImageryItem (STAC) to be linked to a Collection.
+
+    Args:
+        file: asset tiff file
+        start_datetime: start date of the survey
+        end_datetime: end date of the survey
+        collection_id: collection id to link to the Item
+        gdalinfo_result: result of the gdalinfo command. Defaults to None.
+
+    Returns:
+        a STAC Item wrapped in ImageryItem
+    """
     id_ = get_file_name_from_path(file)
 
     if not gdalinfo_result:
@@ -27,5 +39,5 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    get_log().info("imagery stac item created", path=file)
+    get_log().info("ImageryItem created", path=file)
     return item

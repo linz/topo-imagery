@@ -31,6 +31,21 @@ def run_standardising(
     scale: int,
     target_output: Optional[str] = None,
 ) -> List[FileTiff]:
+    """Run `standardising()` in parallel (`concurrency`).
+
+    Args:
+        files: list of source files to standardise
+        preset: gdal preset to use. See `gdal.gdal_preset.py`
+        cutline: path to the cutline. Must be `.fgb` or `.geojson`.
+        concurrency: number of concurrent files to process
+        source_epsg: EPSG code of the source file
+        target_epsg: EPSG code of reprojection
+        scale: scale on what is based the file to standardise
+        target_output: output directory path. Defaults to "/tmp/"
+
+    Returns:
+        a list of FileTiff wrapper
+    """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
     actual_tiffs = []
@@ -67,7 +82,7 @@ def run_standardising(
 
 
 def download_tiff_file(input_file: str, tmp_path: str) -> str:
-    """Download a tiff file and some of its sidecar files if they exist
+    """Download a tiff file and some of its sidecar files if they exist.
 
     Args:
         input_file: file to download
@@ -105,6 +120,23 @@ def standardising(
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> FileTiff:
+    """Apply transformations using GDAL to the source file.
+
+    Args:
+        file: path to the file to standardise
+        preset: gdal preset to use. See `gdal.gdal_preset.py`
+        source_epsg: EPSG code of the source file
+        target_epsg: EPSG code of reprojection
+        scale: scale on what is based the file to standardise
+        cutline: path to the cutline. Must be `.fgb` or `.geojson`
+        target_output: output directory path. Defaults to "/tmp/"
+
+    Raises:
+        Exception: if cutline is not a .fgb or .geojson file
+
+    Returns:
+        a FileTiff wrapper
+    """
     get_log().info("standardising", path=file)
     original_gdalinfo = gdal_info(file, False)
     origin = get_origin(original_gdalinfo)

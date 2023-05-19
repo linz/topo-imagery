@@ -6,8 +6,8 @@ def write(destination: str, source: bytes) -> None:
     """Write a file from its source to a destination path.
 
     Args:
-        destination (str): A path to where the file will be written.
-        source (bytes): The source file in bytes.
+        destination: A path to where the file will be written.
+        source: The source file in bytes.
     """
     if is_s3(destination):
         fs_s3.write(destination, source)
@@ -19,7 +19,7 @@ def read(path: str) -> bytes:
     """Read a file from its path.
 
     Args:
-        path (str): A path to a file to read.
+        path: A path to a file to read.
 
     Returns:
         bytes: The bytes content of the file.
@@ -31,13 +31,13 @@ def read(path: str) -> bytes:
 
 
 def exists(path: str) -> bool:
-    """Check if path (file or directory) exists
+    """Check if path (file or directory) exists.
 
     Args:
         path: A path to a directory or file
 
     Returns:
-        True if the path exists
+        bool: True if the path exists
     """
     if is_s3(path):
         return fs_s3.exists(path)

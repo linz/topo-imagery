@@ -21,7 +21,7 @@ class FileTiffErrorType(str, Enum):
 
 
 class FileTiff:
-    """Wrapper for the TIFF files"""
+    """Wrapper to carry information about the TIFF file."""
 
     def __init__(
         self,
@@ -36,15 +36,36 @@ class FileTiff:
         self._srs: Optional[bytes] = None
 
     def set_srs(self, srs: bytes) -> None:
+        """Set the srs.
+
+        Args:
+            srs: the srs in bytes
+        """
         self._srs = srs
 
     def set_scale(self, scale: int) -> None:
+        """Set the scale.
+
+        Args:
+            scale: the scale as `int`
+        """
         self._scale = scale
 
     def set_path_standardised(self, path: str) -> None:
+        """Set the standardised file path.
+
+        Args:
+            path: the path to the standardised file
+        """
         self._path_standardised = path
 
     def get_gdalinfo(self) -> Optional[GdalInfo]:
+        """Get the `gdalinfo` output for the file.
+        Run gdalinfo if not already ran.
+
+        Returns:
+            the `gdalinfo` output
+        """
         if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
         if not self._gdalinfo:
@@ -59,36 +80,81 @@ class FileTiff:
         return self._gdalinfo
 
     def set_gdalinfo(self, gdalinfo: GdalInfo) -> None:
+        """Set the `gdalinfo` output for the file.
+
+        Args:
+            gdalinfo: the `gdalinfo` output
+        """
         self._gdalinfo = gdalinfo
 
     def get_errors(self) -> List[Dict[str, Any]]:
+        """Get the Non Visual QA errors.
+
+        Returns:
+            a list of errors
+        """
         return self._errors
 
     def get_path_original(self) -> str:
+        """Get the path of the original (non standardised) file.
+
+        Returns:
+            a file path
+        """
         return self._path_original
 
     def get_path_standardised(self) -> str:
+        """Get the path of the standardised file.
+
+        Returns:
+            a file path
+        """
         return self._path_standardised
 
     def add_error(
         self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
     ) -> None:
+        """Add an error in Non Visual QA errors list.
+        Change the `_valid` property to False.
+
+        Args:
+            error_type: the type of the error
+            error_message: the message of the error
+            custom_fields: some custom properties. Defaults to None.
+        """
         if not custom_fields:
             custom_fields = {}
         self._errors.append({"type": error_type, "message": error_message, **custom_fields})
         self._valid = False
 
     def is_valid(self) -> bool:
+        """Check if the file is set to valid or not.
+
+        Returns:
+            the value of `_valid`
+        """
         return self._valid
 
-    def is_error_type(self, error_type: str) -> bool:
+    def is_error_type(self, error_type: FileTiffErrorType) -> bool:
+        """Check if the file has a Non Visual QA error of the type `error_type`.
+
+        Args:
+            error_type: one of the value of `FileTiffErrorType`
+
+        Returns:
+            True if the the `error_type` is found
+        """
         for error in self._errors:
             if error["type"] == error_type:
                 return True
         return False
 
     def check_no_data(self, gdalinfo: GdalInfo) -> None:
-        """Add an error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands"."""
+        """Add a Non Visual QA error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands".
+
+        Args:
+            gdalinfo: `gdalinfo` output
+        """
         bands = gdalinfo["bands"]
         if len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
             return
@@ -102,7 +168,14 @@ class FileTiff:
                 )
 
     def is_no_data(self, gdalinfo: GdalInfo) -> bool:
-        """return True if bands have a "noDataValue" set."""
+        """Check if the bands have a "noDataValue" set.
+
+        Args:
+            gdalinfo: `gdalinfo` output
+
+        Returns:
+            True if a `noDataValue` is found
+        """
         bands = gdalinfo["bands"]
         # 0 in noDataValue can return false unless specific here about None
         if "noDataValue" in bands[0] and bands[0]["noDataValue"] is not None:
@@ -110,7 +183,11 @@ class FileTiff:
         return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
-        """Add an error if there is not exactly 3 or 4 bands found."""
+        """Add a Non Visual QA error if there is not exactly 3 or 4 bands found.
+
+        Args:
+            gdalinfo: `gdalinfo` output
+        """
         bands = gdalinfo["bands"]
         bands_num = 3
         if len(bands) == 4:
@@ -124,9 +201,10 @@ class FileTiff:
             )
 
     def check_srs(self, gdalsrsinfo_tif: bytes) -> None:
-        """Add an error if gdalsrsinfo and gdalsrsinfo_tif values are different.
+        """Add a Non Visual QA error if gdalsrsinfo and gdalsrsinfo_tif values are different.
+
         Args:
-            gdalsrsinfo_tif (str): Value returned by gdalsrsinfo for the tif as a string.
+            gdalsrsinfo_tif : value returned by gdalsrsinfo for the tif as a string
         """
         if self._srs:
             if gdalsrsinfo_tif != self._srs:
@@ -135,10 +213,10 @@ class FileTiff:
             self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
     def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
-        """Add an error if the colors don't match RGB.
+        """Add a Non Visual QA error if the colors don't match RGB.
 
         Args:
-            gdalinfo (Dict[str, Any]): JSON returned by gdalinfo as a Python Dictionary.
+            gdalinfo: `gdalinfo` output
         """
         bands = gdalinfo["bands"]
         missing_bands = []
@@ -165,6 +243,11 @@ class FileTiff:
             )
 
     def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
+        """Validate the TIFF origin within its scale and standardise the filename.
+
+        Args:
+            gdalinfo: `gdalinfo` output
+        """
         if self._scale > 0:
             origin = get_origin(gdalinfo)
             try:
@@ -179,6 +262,11 @@ class FileTiff:
                 self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
 
     def validate(self) -> bool:
+        """Run the Non Visual QA checks.
+
+        Returns:
+            True if there is no error
+        """
         gdalinfo = self.get_gdalinfo()
         if gdalinfo:
             self.check_tile_and_rename(gdalinfo)
