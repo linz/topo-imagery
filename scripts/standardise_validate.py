@@ -5,9 +5,9 @@ import os
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import format_date, format_source, is_argo, valid_date
-from scripts.create_stac import create_item
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
+from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
 
 
