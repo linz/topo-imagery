@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from os import environ
 from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
@@ -7,7 +6,7 @@ from urllib.parse import urlparse
 
 import boto3
 import botocore
-from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials
+from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials, ReadOnlyCredentials
 from linz_logger import get_log
 
 from scripts.aws.aws_credential_source import CredentialSource
@@ -82,18 +81,7 @@ def get_session(prefix: str) -> boto3.Session:
     return current_session
 
 
-@dataclass
-class AwsFrozenCredentials:
-    """
-    work around as I couldn't find the type for get_frozen_credentials()
-    """
-
-    access_key: str
-    secret_key: str
-    token: str
-
-
-def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCredentials:
+def get_session_credentials(prefix: str, retry_count: int = 3) -> ReadOnlyCredentials:
     """
     Attempt to get credentials for a prefix, retrying upto retry_count amount of times
     """
@@ -101,7 +89,7 @@ def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCrede
     for retry in range(1, retry_count + 1):
         try:
             # Get credentials may give differing access_key and secret_key
-            credentials: AwsFrozenCredentials = get_session(prefix).get_credentials().get_frozen_credentials()
+            credentials = get_session(prefix).get_credentials().get_frozen_credentials()
             return credentials
         except client_sts.exceptions.InvalidIdentityTokenException as e:
             get_log().warn("bucket_load_retry", retry_count=retry)
