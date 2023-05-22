@@ -730,14 +730,14 @@ files = [
 
 [[package]]
 name = "moto"
-version = "4.1.8"
+version = "4.1.10"
 description = ""
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "moto-4.1.8-py2.py3-none-any.whl", hash = "sha256:df5b52eff70bf125ee03ea72c4e01f2daff243796f984a534c3dee92a0b93522"},
-    {file = "moto-4.1.8.tar.gz", hash = "sha256:c3ecc2dda1a7b3a3c46655490bc6a4660b7bb47e31eaed7bbd54adeb01f8471f"},
+    {file = "moto-4.1.10-py2.py3-none-any.whl", hash = "sha256:86ee1f6b23a0c3dcf5c829fb1210fa3f293a2e8f1c95412538c0ea4a2f437021"},
+    {file = "moto-4.1.10.tar.gz", hash = "sha256:65e15fc3e80a9589f50f8a5267b9a99f327224ed4d5cc44fe20edcbdb9248e06"},
 ]
 
 [package.dependencies]
@@ -1554,4 +1554,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "599a2dff44ab0d622f50d1687949b38994be03f31bd6c5df660f5e108376ef48"
+content-hash = "d24084731d0f44d9206aa70c4f51bb733d8810a62baaf79400fa08050c4d5284"
