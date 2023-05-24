@@ -163,7 +163,8 @@ def main() -> None:
             report_w.writerow(
                 compress(compression=compression, input_file=base_gtiff, tile_name=tile_name, output_dir=output_dir)
             )
-        report.close()
+
+    report.close()
 
 
 if __name__ == "__main__":
