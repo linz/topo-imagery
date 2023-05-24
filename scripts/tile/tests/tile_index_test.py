@@ -1,7 +1,16 @@
 from pytest import CaptureFixture, raises
 
+from scripts.cog_compression import format_file_name
 from scripts.tile.tests.tile_index_data import MAP_SHEET_DATA
-from scripts.tile.tile_index import Point, TileIndexException, get_tile_name, round_with_correction
+from scripts.tile.tile_index import (
+    Bounds,
+    Point,
+    Size,
+    TileIndexException,
+    get_bounds_from_name,
+    get_tile_name,
+    round_with_correction,
+)
 
 
 def test_check_alignment_build_correct_sheet_code() -> None:
@@ -49,3 +58,14 @@ def test_round_origin() -> None:
     assert round_with_correction(5444160.051) == 5444160.05
     assert round_with_correction(5444160.015) == 5444160
     assert round_with_correction(5444160.985) == 5444161
+
+
+def test_get_bounds_from_name() -> None:
+    expected_bounds = Bounds(Point(x=1236640, y=4837560), Size(width=240, height=360))
+    bounds = get_bounds_from_name("CG10_500_080037")
+    assert expected_bounds == bounds
+
+
+def test_format_file_name() -> None:
+    formatted_name = format_file_name("DEM_CF15_2021_1000_0121")
+    assert formatted_name == "CF15_1000_0121"

@@ -1,5 +1,7 @@
 from typing import NamedTuple, Union
 
+from scripts.tile.util import charcodeat
+
 SHEET_WIDTH = 24_000
 """ Width of Topo 1:50k mapsheets (meters) """
 SHEET_HEIGHT = 36_000
@@ -73,6 +75,9 @@ GRID_SIZE_MAX = 50_000
 """ Base scale Topo 1:50k mapsheets (meters) """
 ROUND_CORRECTION = 0.01
 """ Correction set to `1` centimer """
+MAPSHEET_REGEX = r"/([A-Z]{2}\d{2})_(\d+)_(\d+)/"
+CHAR_A = charcodeat("A", 0)
+CHAR_S = charcodeat("S", 0)
 
 
 class TileIndexException(Exception):
@@ -84,6 +89,16 @@ class Point(NamedTuple):
 
     x: Union[int, float]
     y: Union[int, float]
+
+
+class Size(NamedTuple):
+    width: Union[int, float]
+    height: Union[int, float]
+
+
+class Bounds(NamedTuple):
+    point: Point
+    size: Size
 
 
 def round_with_correction(value: Union[int, float]) -> int | float:
@@ -179,3 +194,50 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
     tile_id = f"{tile_y:0{nb_digits}d}{tile_x:0{nb_digits}d}"
 
     return f"{sheet_code}_{grid_size}_{tile_id}"
+
+
+def get_bounds_from_name(file_name: str) -> Bounds:
+    name_parts = file_name.replace(".tiff", "").replace(".tif", "").split("_")
+    map_sheet = name_parts[0]
+    grid_size = int(name_parts[1])
+
+    x = int(name_parts[2][-2:])
+    y = int(name_parts[2][:2])
+    if grid_size == 500:
+        x = int(name_parts[2][-3:])
+        y = int(name_parts[2][:3])
+
+    origin = get_mapsheet_offset(map_sheet)
+    tile_offset = get_tile_offset(grid_size=grid_size, x=x, y=y)
+    return Bounds(
+        Point(x=origin.x + tile_offset.point.x, y=origin.y - tile_offset.point.y),
+        Size(tile_offset.size.width, tile_offset.size.height),
+    )
+
+
+def get_mapsheet_offset(sheet_code: str) -> Point:
+    ms = sheet_code[:2]
+    x = int(float(sheet_code[-2:]))
+
+    base_y_offset = CHAR_S - CHAR_A
+    first_letter_offset = (charcodeat(ms, 0) - CHAR_A) * 26
+    second_letter_offset = charcodeat(ms, 1) - CHAR_A
+
+    y = first_letter_offset + second_letter_offset - base_y_offset
+
+    # There are three missing map sheets
+    if ms > "CI":
+        y -= 3
+    elif ms > "BO":
+        y -= 2
+    elif ms > "BI":
+        y -= 1
+
+    return Point(x=SHEET_WIDTH * x + SHEET_ORIGIN_LEFT, y=SHEET_ORIGIN_TOP - SHEET_HEIGHT * y)
+
+
+def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
+    scale = grid_size / GRID_SIZE_MAX
+    offset_x = SHEET_WIDTH * scale
+    offset_y = SHEET_HEIGHT * scale
+    return Bounds(Point(x=(x - 1) * offset_x, y=(y - 1) * offset_y), Size(width=offset_x, height=offset_y))

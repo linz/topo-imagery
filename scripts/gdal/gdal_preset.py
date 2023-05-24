@@ -2,6 +2,8 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
+from scripts.tile.tile_index import Point
+
 # Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA
 # Useful for imagery that does not have a alpha band
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
@@ -150,3 +152,40 @@ def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
         "-r",
         "bilinear",
     ]
+
+
+def get_build_vrt_command(files: List[str], output: str = "output.vrt") -> List[str]:
+    gdal_command = ["gdalbuildvrt", output]
+    gdal_command += files
+    return gdal_command
+
+
+def get_custom_translate(
+    compression: str,
+    input_file: str,
+    output_file: str,
+    extent_min: Optional[Point] = None,
+    extent_max: Optional[Point] = None,
+    predictor: int = 0,
+    level: int = 0,
+    driver: str = "COG",
+) -> List[str]:
+    gdal_command = [
+        "gdal_translate",
+        "-of",
+        driver,
+        input_file,
+        output_file,
+        "-co",
+        "NUM_THREADS=ALL_CPUS",
+        "-co",
+        f"COMPRESS={compression}",
+    ]
+    if extent_min and extent_max:
+        gdal_command += ["-co", f"EXTENT={extent_min.x},{extent_min.y},{extent_max.x},{extent_max.y}"]
+    if predictor > 0:
+        gdal_command += ["-co", f"PREDICTOR={predictor}"]
+    if level > 0:
+        gdal_command += ["-co", f"LEVEL={level}"]
+
+    return gdal_command
