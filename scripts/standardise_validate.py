@@ -37,6 +37,11 @@ def main() -> None:
     source = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
+    scale = arguments.scale
+    if scale == "None":
+        scale = 0
+    else:
+        scale = int(arguments.scale)
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -48,7 +53,7 @@ def main() -> None:
         concurrency,
         arguments.source_epsg,
         arguments.target_epsg,
-        int(arguments.scale),
+        scale,
         arguments.target,
     )
 
@@ -63,11 +68,7 @@ def main() -> None:
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + ".json"
         if not exists(stac_item_path):
             file.set_srs(srs)
-            scale = arguments.scale
-            if scale == "None":
-                file.set_scale(0)
-            else:
-                file.set_scale(int(scale))
+            file.set_scale(scale)
 
             # Validate the file
             if not file.validate():
