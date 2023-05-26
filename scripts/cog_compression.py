@@ -124,14 +124,10 @@ def main() -> None:
         {"driver": "COG", "type": "LZW", "predictor": 2, "level": 0},
         {"driver": "COG", "type": "LZW", "predictor": 3, "level": 0},
         {"driver": "COG", "type": "ZSTD", "predictor": 0, "level": 9},
-        {"driver": "COG", "type": "ZSTD", "predictor": 0, "level": 15},
-        {"driver": "COG", "type": "ZSTD", "predictor": 0, "level": 22},
         {"driver": "COG", "type": "ZSTD", "predictor": 2, "level": 9},
         {"driver": "COG", "type": "ZSTD", "predictor": 2, "level": 12},
-        {"driver": "COG", "type": "ZSTD", "predictor": 2, "level": 15},
         {"driver": "COG", "type": "ZSTD", "predictor": 3, "level": 9},
         {"driver": "COG", "type": "ZSTD", "predictor": 3, "level": 12},
-        {"driver": "COG", "type": "ZSTD", "predictor": 3, "level": 15},
         {"driver": "COG", "type": "DEFLATE", "predictor": 0, "level": 0},
         {"driver": "COG", "type": "DEFLATE", "predictor": 2, "level": 0},
         {"driver": "COG", "type": "DEFLATE", "predictor": 3, "level": 0},
@@ -146,7 +142,7 @@ def main() -> None:
     report_w.writerow(["file_name", "driver", "compression", "predictor", "level", "size (MB)", "duration (ms)"])
 
     source_files = [os.path.join(source, f) for f in os.listdir(source) if os.path.isfile(os.path.join(source, f))]
-    retiled_cogs = retile(source_files, 10000, source, "CF15_10000_0202")
+    retiled_cogs = retile(source_files, 10000, source, "CF15")
 
     for cog in retiled_cogs:
         # Convert the base COG to GTiff to make the test more "real"
