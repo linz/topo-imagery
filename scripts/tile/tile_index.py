@@ -66,7 +66,7 @@ For example `"AS": [(21, 22), (24, 24)]` means the valid sheets in row AS are AS
 See `sheet index diagram` at 
 https://www.linz.govt.nz/products-services/maps/new-zealand-topographic-maps/topo50-map-chooser/topo50-sheet-index """
 
-
+# FIXME: create an enum
 GRID_SIZES = [10_000, 5_000, 2_000, 1_000, 500]
 """ Allowed grid sized, these should exist in the LINZ Data service (meters) """
 GRID_SIZE_MAX = 50_000

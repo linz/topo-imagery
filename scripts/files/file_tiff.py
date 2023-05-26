@@ -36,18 +36,66 @@ class FileTiff:
         self._srs: Optional[bytes] = None
 
     def set_srs(self, srs: bytes) -> None:
-        """Set the srs.
+        """Set the Spatial Reference System returned by `gdalsrsinfo` for the TIFF.
 
         Args:
             srs: the srs in bytes
+
+        Example:
+            ```
+            $ gdalsrsinfo RGB_1000_CC16_4127_2013.tiff
+
+            PROJ.4 : +proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80
+            +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
+
+            OGC WKT2:2018 :
+            PROJCRS["NZGD2000 / New Zealand Transverse Mercator 2000",
+                BASEGEOGCRS["NZGD2000",
+                    DATUM["New Zealand Geodetic Datum 2000",
+                        ELLIPSOID["GRS 1980",6378137,298.257222101,
+                            LENGTHUNIT["metre",1]]],
+                    PRIMEM["Greenwich",0,
+                        ANGLEUNIT["degree",0.0174532925199433]],
+                    ID["EPSG",4167]],
+                CONVERSION["New Zealand Transverse Mercator 2000",
+                    METHOD["Transverse Mercator",
+                        ID["EPSG",9807]],
+                    PARAMETER["Latitude of natural origin",0,
+                        ANGLEUNIT["degree",0.0174532925199433],
+                        ID["EPSG",8801]],
+                    PARAMETER["Longitude of natural origin",173,
+                        ANGLEUNIT["degree",0.0174532925199433],
+                        ID["EPSG",8802]],
+                    PARAMETER["Scale factor at natural origin",0.9996,
+                        SCALEUNIT["unity",1],
+                        ID["EPSG",8805]],
+                    PARAMETER["False easting",1600000,
+                        LENGTHUNIT["metre",1],
+                        ID["EPSG",8806]],
+                    PARAMETER["False northing",10000000,
+                        LENGTHUNIT["metre",1],
+                        ID["EPSG",8807]]],
+                CS[Cartesian,2],
+                    AXIS["northing (N)",north,
+                        ORDER[1],
+                        LENGTHUNIT["metre",1]],
+                    AXIS["easting (E)",east,
+                        ORDER[2],
+                        LENGTHUNIT["metre",1]],
+                USAGE[
+                    SCOPE["Engineering survey, topographic mapping."],
+                    AREA["New Zealand - North Island, South Island, Stewart Island - onshore."],
+                    BBOX[-47.33,166.37,-34.1,178.63]],
+                ID["EPSG",2193]
+        ```
         """
         self._srs = srs
 
     def set_scale(self, scale: int) -> None:
-        """Set the scale.
+        """Set the cartographic scale of the TIFF.
 
         Args:
-            scale: the scale as `int`
+            scale: the scale as `int` between tile_index.GRID_SIZES
         """
         self._scale = scale
 
@@ -56,6 +104,11 @@ class FileTiff:
 
         Args:
             path: the path to the standardised file
+
+        Example:
+            ```
+            >>> file_tiff.set_path_standardised("/output/BY12_5000_0805.tiff")
+            ```
         """
         self._path_standardised = path
 
@@ -66,6 +119,7 @@ class FileTiff:
         Returns:
             the `gdalinfo` output
         """
+        # FIXME: Should not return None but not try running `gdalinfo` if there has already been an error
         if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
         if not self._gdalinfo:
