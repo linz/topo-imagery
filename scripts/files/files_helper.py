@@ -16,8 +16,7 @@ def get_file_name_from_path(path: str) -> str:
         "file.ext"
         ```
     """
-    filename, _ = os.path.splitext(os.path.basename(path))
-    return filename
+    return os.path.splitext(os.path.basename(path))[0]
 
 
 def is_tiff(path: str) -> bool:

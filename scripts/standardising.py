@@ -11,14 +11,14 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import format_source, is_argo
 from scripts.files.file_tiff import FileTiff
-from scripts.files.files_helper import is_tiff, is_vrt
+from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_alpha_command, get_cutline_command, get_gdal_command, get_transform_srs_command
 from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.logging.time_helper import time_in_ms
-from scripts.tile.tile_index import get_tile_name
+from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 
 def run_standardising(
@@ -140,7 +140,15 @@ def standardising(
     get_log().info("standardising", path=file)
     original_gdalinfo = gdal_info(file, False)
     origin = get_origin(original_gdalinfo)
-    tile_name = get_tile_name(origin, scale)
+    try:
+        tile_name = get_tile_name(origin, scale)
+    except TileIndexException as tie:
+        if scale > 0:
+            get_log().error("File name not standardised", error=str(tie))
+        else:
+            get_log().debug("File name not standardised: scale is None")
+        tile_name = get_file_name_from_path(file)
+
     standardized_file_name = f"{tile_name}.tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
     tiff = FileTiff(file)
