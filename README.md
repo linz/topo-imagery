@@ -80,6 +80,5 @@ Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `re
 To publish a release, the Pull Request opened by `release-please` bot needs to be merged:
 
 1. Open the PR and verify that the `CHANGELOG` contains what you expect in the release. If the latest change you expect is not there, double-check that a GitHub Actions is not currently running or failed.
-2. Approve the PR
-3. Add the `automerge` label and wait for the PR to be merged
-4. Once the Pull Request is merged to `master` a [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml) it creates the release and publish a new container tagged for this release.
+2. Approve and merge the PR.
+3. Once the Pull Request is merged to `master` a [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml) it creates the release and publish a new container tagged for this release.
