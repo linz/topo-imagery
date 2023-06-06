@@ -28,6 +28,12 @@ class ImageryItem:
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
+        """Update the Item `start_datetime` and `end_datetime` property.
+
+        Args:
+            start_datetime: a start date in `YYYY-MM-DD` format
+            end_datetime: a end date in `YYYY-MM-DD` format
+        """
         self.stac["properties"] = {
             "start_datetime": start_datetime,
             "end_datetime": end_datetime,
@@ -36,10 +42,21 @@ class ImageryItem:
 
     # FIXME: redefine the 'Any'
     def update_spatial(self, geometry: Dict[str, Any], bbox: Tuple[float, ...]) -> None:
+        """Update the `geometry` and `bbox` (bounding box) of the Item.
+
+        Args:
+            geometry: a geometry
+            bbox: a bounding box
+        """
         self.stac["geometry"] = geometry
         self.stac["bbox"] = bbox
 
     def add_collection(self, collection_id: str) -> None:
+        """Link a Collection to the Item as its `collection` and `parent`.
+
+        Args:
+            collection_id: the id of the collection to link
+        """
         self.stac["collection"] = collection_id
         self.add_link(rel="collection")
         self.add_link(rel="parent")

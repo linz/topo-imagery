@@ -15,8 +15,8 @@ def write(destination: str, source: bytes) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
     Args:
-        destination (str): The AWS S3 path to the file to write.
-        source (bytes): The source file in bytes.
+        destination: The AWS S3 path to the file to write.
+        source: The source file in bytes.
     """
     start_time = time_in_ms()
     if source is None:
@@ -127,16 +127,53 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
 
 
 def bucket_name_from_path(path: str) -> str:
+    """Get the bucket name from an `s3` path.
+
+    Args:
+        path: an `s3` path
+
+    Returns:
+        the bucket name
+
+    Example:
+        ```
+        >>> bucket_name_from_path("s3://linz-imagery/wellingon/")
+        "linz-imagery"
+        ```
+    """
     path_parts = path.replace("s3://", "").split("/")
     return path_parts.pop(0)
 
 
 def prefix_from_path(path: str) -> str:
+    """Get the s3 prefix from an s3 path.
+
+    Args:
+        path: an `s3` path
+
+    Returns:
+        the prefix
+
+    Example:
+        ```
+        >>> prefix_from_path("s3://linz-imagery/wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff")
+        "wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff"
+        ```
+    """
     bucket_name = bucket_name_from_path(path)
     return path.replace(f"s3://{bucket_name}/", "")
 
 
 def list_json_in_uri(uri: str, s3_client: Optional[boto3.client]) -> List[str]:
+    """Get the `JSON` files from a s3 path
+
+    Args:
+        uri: an s3 path
+        s3_client: an s3 client
+
+    Returns:
+        a list of JSON files
+    """
     if not s3_client:
         s3_client = boto3.client("s3")
     files = []
@@ -155,6 +192,16 @@ def list_json_in_uri(uri: str, s3_client: Optional[boto3.client]) -> List[str]:
 
 
 def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
+    """Get the object from `s3`
+
+    Args:
+        bucket: a `s3` bucket
+        file_name: the name of the object
+        s3_client: an `s3` client
+
+    Returns:
+        an s3 object
+    """
     get_log().info("Retrieving File", path=f"s3://{bucket}/{file_name}")
     return s3_client.get_object(Bucket=bucket, Key=file_name)
 
@@ -162,6 +209,17 @@ def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
 def get_object_parallel_multithreading(
     bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
+    """Get s3 objects in parallel
+
+    Args:
+        bucket: a `s3` bucket
+        files_to_read: list of object names to get
+        s3_client: an `s3` client
+        concurrency: number of concurrent calls
+
+    Yields:
+        the object when got
+    """
     if not s3_client:
         s3_client = boto3.client("s3")
     with ThreadPoolExecutor(max_workers=concurrency) as executor:

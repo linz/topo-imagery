@@ -63,12 +63,12 @@ def run_gdal(
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
     Args:
-        command (List[str]): each arguments of the GDAL command.
-        input_file str: the input file path.
-        output_file (str, optional): the output file path.
+        command: each arguments of the GDAL command
+        input_file: the input file path
+        output_file: the output file path
 
     Raises:
-        cpe: CalledProcessError is raised if something goes wrong during the execution of the command.
+        cpe: CalledProcessError is raised if something goes wrong during the execution of the command
 
     Returns:
         subprocess.CompletedProcess: the output process.
@@ -108,6 +108,14 @@ def run_gdal(
 
 
 def get_srs() -> bytes:
+    """Run `gdalsrsinfo` with the EPSG code `2193`
+
+    Raises:
+        Exception: if `gdal` has an stderr
+
+    Returns:
+        the output of `gdalsrsinfo`
+    """
     gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
     gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
     if gdalsrsinfo_result.stderr:

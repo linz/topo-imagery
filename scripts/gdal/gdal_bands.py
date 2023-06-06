@@ -6,7 +6,7 @@ from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
 
 
 def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
-    """Look for a specific colorInterperation inside of a gdalinfo band output
+    """Look for a specific colorInterperation inside of a `gdalinfo` band output.
 
     Args:
         bands: Bands to search
@@ -22,7 +22,7 @@ def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
 
 
 def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str]:
-    """Get the banding parameters for a gdal_translate command
+    """Get the banding parameters for a `gdal_translate` command.
 
     Args:
         file: file to check
@@ -67,7 +67,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
 
 
 def get_gdal_band_type(file: str, info: Optional[GdalInfo] = None) -> str:
-    """Get the band type of the first band
+    """Get the band type of the first band.
 
     Args:
         file: file to check

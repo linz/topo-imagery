@@ -2,9 +2,10 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-# Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA
-# Useful for imagery that does not have a alpha band
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
+""" Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA. 
+Useful for imagery that does not have a alpha band.
+"""
 
 BASE_COG = [
     # Suppress progress monitor and other non-error output.
@@ -74,6 +75,16 @@ CONVERT_16BITS_TO_8BITS = [
 
 
 def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
+    """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
+
+    Args:
+        preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
+        epsg: the EPSG code of the file
+        convert_from: Defaults to None.
+
+    Returns:
+        a list of arguments to run `gdal_translate`
+    """
     get_log().info("gdal_preset", preset=preset)
     gdal_command: List[str] = ["gdal_translate"]
 
@@ -97,8 +108,13 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
 
 
 def get_cutline_command(cutline: Optional[str]) -> List[str]:
-    """
-    Get a "gdalwarp" command to create a virtual file (.vrt) which has a cutline applied and alpha added
+    """Get a `gdalwarp` command to create a virtual file (`.vrt`) which has a cutline applied and alpha added.
+
+    Args:
+        cutline: path to the cutline
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
 
     gdal_command = [
@@ -118,8 +134,10 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
 
 
 def get_alpha_command() -> List[str]:
-    """
-    Get a "gdalwarp" command to create a virtual file (.vrt) which has an alpha added
+    """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
 
     return [
@@ -133,8 +151,14 @@ def get_alpha_command() -> List[str]:
 
 
 def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
-    """
-    Get a "Gdalwarp" command to transform the srs
+    """Get a `gdalwarp` command to transform the srs.
+
+    Args:
+        source_epsg: the EPSG code of the source file
+        target_epsg: the EPSG code for the output file
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
     return [
         "gdalwarp",
