@@ -169,7 +169,6 @@ class FileTiff:
         self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
     ) -> None:
         """Add an error in Non Visual QA errors list.
-        Change the `_valid` property to False.
 
         Args:
             error_type: the type of the error
@@ -179,15 +178,16 @@ class FileTiff:
         if not custom_fields:
             custom_fields = {}
         self._errors.append({"type": error_type, "message": error_message, **custom_fields})
-        self._valid = False
 
     def is_valid(self) -> bool:
         """Check if the file is set to valid or not.
 
         Returns:
-            the value of `_valid`
+            true if _errors is empty
         """
-        return self._valid
+        if len(self._errors) == 0:
+            return True
+        return False
 
     def is_error_type(self, error_type: FileTiffErrorType) -> bool:
         """Check if the file has a Non Visual QA error of the type `error_type`.
