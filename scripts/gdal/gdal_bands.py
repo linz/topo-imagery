@@ -21,7 +21,7 @@ def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
     return None
 
 
-def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str]:
+def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Optional[str] = None) -> List[str]:
     """Get the banding parameters for a `gdal_translate` command.
 
     Args:
@@ -41,10 +41,13 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None) -> List[str
     if alpha_band:
         alpha_band_info.extend(["-b", str(alpha_band["band"])])
 
-    # Grey scale imagery, set R,G and B to just the grey_band
     grey_band = find_band(bands, "Gray")
     if grey_band:
         grey_band_index = str(grey_band["band"])
+        if preset == "dem_lerc":
+            # return single band if DEM/DSM
+            return ["-b", grey_band_index] + alpha_band_info
+        # Grey scale imagery, set R,G and B to just the grey_band
         return ["-b", grey_band_index, "-b", grey_band_index, "-b", grey_band_index] + alpha_band_info
 
     band_red = find_band(bands, "Red")

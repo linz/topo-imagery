@@ -193,7 +193,7 @@ def standardising(
             command = get_gdal_command(
                 preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, transformed_image_gdalinfo)
             )
-            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo))
+            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
             run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
             write(standardized_file_path, read(standardized_working_path))
