@@ -54,7 +54,6 @@ def test_preset_dem_lerc() -> None:
     # LERC compression
     assert "compress=lerc" in gdal_command
     assert "max_z_error=0.001" in gdal_command
-    # assert "predictor=2" in gdal_command
 
     # No webp overviews
     assert "overview_compress=webp" not in gdal_command

@@ -34,6 +34,7 @@ DEM_LERC = [
     "-co",
     "compress=lerc",
     "-co",
+    # Set Max Z Error to 0.001
     "max_z_error=0.001",
 ]
 
