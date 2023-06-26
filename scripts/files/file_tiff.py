@@ -26,14 +26,18 @@ class FileTiff:
     def __init__(
         self,
         path: str,
+        preset: Optional[str] = None,
     ) -> None:
         self._path_original = path
         self._path_standardised = ""
         self._errors: List[Dict[str, Any]] = []
         self._scale = 0
-        self._valid = True
         self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
+        if preset == "dem_lerc":
+            self._tiff_type = "DEM"
+        else:
+            self._tiff_type = "Imagery"
 
     def set_srs(self, srs: bytes) -> None:
         """Set the Spatial Reference System returned by `gdalsrsinfo` for the TIFF.
@@ -242,11 +246,14 @@ class FileTiff:
         Args:
             gdalinfo: `gdalinfo` output
         """
-        bands = gdalinfo["bands"]
         bands_num = 3
-        if len(bands) == 4:
-            if bands[3]["colorInterpretation"] == "Alpha":
-                bands_num = 4
+        if self._tiff_type == "DEM":
+            bands_num = 1
+
+        bands = gdalinfo["bands"]
+        if len(bands) == bands_num + 1:
+            if bands[bands_num]["colorInterpretation"] == "Alpha":
+                bands_num += 1
         if len(bands) != bands_num:
             self.add_error(
                 error_type=FileTiffErrorType.BANDS,
@@ -276,6 +283,9 @@ class FileTiff:
         missing_bands = []
         band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
         optional_colour_ints = {4: "Alpha"}
+        if self._tiff_type == "DEM":
+            band_colour_ints = {1: "Gray"}
+            optional_colour_ints = {2: "Alpha"}
         n = 1
         for band in bands:
             colour_int = band["colorInterpretation"]
@@ -321,6 +331,7 @@ class FileTiff:
         Returns:
             True if there is no error
         """
+
         gdalinfo = self.get_gdalinfo()
         if gdalinfo:
             self.check_tile_and_rename(gdalinfo)

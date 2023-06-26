@@ -137,6 +137,7 @@ def standardising(
     Returns:
         a FileTiff wrapper
     """
+
     get_log().info("standardising", path=file)
     original_gdalinfo = gdal_info(file, False)
     origin = get_origin(original_gdalinfo)
@@ -151,7 +152,7 @@ def standardising(
 
     standardized_file_name = f"{tile_name}.tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
-    tiff = FileTiff(file)
+    tiff = FileTiff(file, preset)
 
     if not exists(standardized_file_path):
         with tempfile.TemporaryDirectory() as tmp_path:
