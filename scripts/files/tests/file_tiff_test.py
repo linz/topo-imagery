@@ -97,8 +97,8 @@ def test_check_band_count_valid_2_DEM() -> None:
 
 def test_check_band_count_invalid_3_DEM() -> None:
     """
-    tests check_band_count when the input layer has a valid band count
-    which is 2 bands where the second band is Alpha and DEM preset
+    tests check_band_count when the input layer has an invalid band count
+    which is 3 bands where the preset is DEM.
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo)
