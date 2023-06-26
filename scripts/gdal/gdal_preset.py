@@ -29,6 +29,14 @@ BASE_COG = [
     "bigtiff=yes",
 ]
 
+DEM_LERC = [
+    "-stats",
+    "-co",
+    "compress=lerc",
+    "-co",
+    "max_z_error=0.001",
+]
+
 COMPRESS_LZW = [
     # Compress as LZW
     "-co",
@@ -95,11 +103,14 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     if preset == "lzw":
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
         gdal_command.extend(COMPRESS_LZW)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
     elif preset == "webp":
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
-    gdal_command.extend(WEBP_OVERVIEWS)
+    elif preset == "dem_lerc":
+        gdal_command.extend(DEM_LERC)
 
     if convert_from == "UInt16":
         gdal_command.extend(CONVERT_16BITS_TO_8BITS)
