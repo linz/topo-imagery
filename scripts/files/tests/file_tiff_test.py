@@ -80,7 +80,7 @@ def test_check_band_count_valid_1_DEM() -> None:
     assert not file_tiff.get_errors()
 
 
-def test_check_band_count_valid_2_DEM() -> None:
+def test_check_band_count_invalid_alpha_DEM() -> None:
     """
     tests check_band_count when the input layer has a valid band count
     which is 2 bands where the second band is Alpha and DEM preset
@@ -92,7 +92,7 @@ def test_check_band_count_valid_2_DEM() -> None:
     file_tiff = FileTiff("test", "dem_lerc")
     file_tiff.check_band_count(gdalinfo)
 
-    assert not file_tiff.get_errors()
+    assert file_tiff.get_errors()
 
 
 def test_check_band_count_invalid_3_DEM() -> None:

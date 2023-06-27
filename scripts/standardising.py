@@ -178,7 +178,7 @@ def standardising(
                 input_file = target_vrt
 
             else:
-                if tiff.is_no_data(original_gdalinfo):
+                if tiff.is_no_data(original_gdalinfo) and tiff.get_tiff_type() == "Imagery":
                     target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                     run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                     input_file = target_vrt

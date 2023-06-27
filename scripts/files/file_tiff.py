@@ -169,6 +169,9 @@ class FileTiff:
         """
         return self._path_standardised
 
+    def get_tiff_type(self) -> str:
+        return self._tiff_type
+
     def add_error(
         self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
     ) -> None:
@@ -247,13 +250,12 @@ class FileTiff:
             gdalinfo: `gdalinfo` output
         """
         bands_num = 3
-        if self._tiff_type == "DEM":
-            bands_num = 1
-
         bands = gdalinfo["bands"]
         if len(bands) == bands_num + 1:
             if bands[bands_num]["colorInterpretation"] == "Alpha":
                 bands_num += 1
+        if self._tiff_type == "DEM":
+            bands_num = 1
         if len(bands) != bands_num:
             self.add_error(
                 error_type=FileTiffErrorType.BANDS,

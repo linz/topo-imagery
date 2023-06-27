@@ -46,7 +46,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
         grey_band_index = str(grey_band["band"])
         if preset == "dem_lerc":
             # return single band if DEM/DSM
-            return ["-b", grey_band_index] + alpha_band_info
+            return ["-b", grey_band_index]
         # Grey scale imagery, set R,G and B to just the grey_band
         return ["-b", grey_band_index, "-b", grey_band_index, "-b", grey_band_index] + alpha_band_info
 
