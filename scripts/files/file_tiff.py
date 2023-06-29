@@ -287,7 +287,6 @@ class FileTiff:
         optional_colour_ints = {4: "Alpha"}
         if self._tiff_type == "DEM":
             band_colour_ints = {1: "Gray"}
-            optional_colour_ints = {2: "Alpha"}
         n = 1
         for band in bands:
             colour_int = band["colorInterpretation"]
