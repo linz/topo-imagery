@@ -13,6 +13,7 @@ BASE_COG = [
     # Output to a COG
     "-of",
     "COG",
+    "-stats",
     # Tile the image int 512x512px images
     "-co",
     "blocksize=512",
@@ -27,6 +28,14 @@ BASE_COG = [
     # this converts all offsets from 32bit to 64bit to support TIFFs > 4GB in size
     "-co",
     "bigtiff=yes",
+]
+
+DEM_LERC = [
+    "-co",
+    "compress=lerc",
+    "-co",
+    # Set Max Z Error to 1mm
+    "max_z_error=0.001",
 ]
 
 COMPRESS_LZW = [
@@ -95,11 +104,14 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     if preset == "lzw":
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
         gdal_command.extend(COMPRESS_LZW)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
     elif preset == "webp":
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
-    gdal_command.extend(WEBP_OVERVIEWS)
+    elif preset == "dem_lerc":
+        gdal_command.extend(DEM_LERC)
 
     if convert_from == "UInt16":
         gdal_command.extend(CONVERT_16BITS_TO_8BITS)

@@ -137,6 +137,7 @@ def standardising(
     Returns:
         a FileTiff wrapper
     """
+
     get_log().info("standardising", path=file)
     original_gdalinfo = gdal_info(file, False)
     origin = get_origin(original_gdalinfo)
@@ -151,7 +152,7 @@ def standardising(
 
     standardized_file_name = f"{tile_name}.tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
-    tiff = FileTiff(file)
+    tiff = FileTiff(file, preset)
 
     if not exists(standardized_file_path):
         with tempfile.TemporaryDirectory() as tmp_path:
@@ -177,7 +178,7 @@ def standardising(
                 input_file = target_vrt
 
             else:
-                if tiff.is_no_data(original_gdalinfo):
+                if tiff.is_no_data(original_gdalinfo) and tiff.get_tiff_type() == "Imagery":
                     target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
                     run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
                     input_file = target_vrt
@@ -193,7 +194,7 @@ def standardising(
             command = get_gdal_command(
                 preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, transformed_image_gdalinfo)
             )
-            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo))
+            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
             run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
             write(standardized_file_path, read(standardized_working_path))

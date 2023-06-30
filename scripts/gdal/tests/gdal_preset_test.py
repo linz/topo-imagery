@@ -43,6 +43,26 @@ def test_preset_lzw() -> None:
     assert "EPSG:2193" in gdal_command
 
 
+def test_preset_dem_lerc() -> None:
+    gdal_command = get_gdal_command("dem_lerc", epsg="2193")
+    # Basic cog creation
+    assert "COG" in gdal_command
+    assert "blocksize=512" in gdal_command
+    assert "num_threads=all_cpus" in gdal_command
+    assert "bigtiff=yes" in gdal_command
+
+    # LERC compression
+    assert "compress=lerc" in gdal_command
+    assert "max_z_error=0.001" in gdal_command
+
+    # No webp overviews
+    assert "overview_compress=webp" not in gdal_command
+    assert "overview_resampling=lanczos" not in gdal_command
+    assert "overview_quality=90" not in gdal_command
+
+    assert "EPSG:2193" in gdal_command
+
+
 def test_cutline_params() -> None:
     gdal_command = get_cutline_command("cutline.fgb")
 

@@ -21,6 +21,15 @@ def test_gdal_grey_bands_detection() -> None:
     assert " ".join(bands) == "-b 2 -b 2 -b 2 -b 1"
 
 
+def test_gdal_grey_bands_DEM_detection() -> None:
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Gray")
+
+    bands = get_gdal_band_offset("some_file.tiff", gdalinfo, "dem_lerc")
+
+    assert " ".join(bands) == "-b 1"
+
+
 def test_gdal_rgba_bands_detection() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Alpha")
