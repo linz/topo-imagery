@@ -6,7 +6,7 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import parse_list
+from scripts.cli.cli_helper import coalesce_multi_single
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
@@ -14,7 +14,6 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 def main() -> None:
-    # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
@@ -39,22 +38,10 @@ def main() -> None:
     arguments = parser.parse_args()
     uri = arguments.uri
 
-    producers: List[str] = []
-    if arguments.producer_list and ";" in arguments.producer_list:
-        producers.extend(parse_list(arguments.producer_list))
-    elif arguments.producer:
-        producers.append(arguments.producer)
-
-    licensors: List[str] = []
-    if arguments.licensor_list and ";" in arguments.licensor_list:
-        licensors.extend(parse_list(arguments.licensor_list))
-    elif arguments.licensor:
-        licensors.append(arguments.licensor)
-
     providers: List[Provider] = []
-    for producer_name in producers:
+    for producer_name in coalesce_multi_single(arguments.producer_list, arguments.producer):
         providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in licensors:
+    for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
     collection = ImageryCollection(
