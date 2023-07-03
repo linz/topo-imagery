@@ -55,7 +55,7 @@ def main() -> None:
     ):
         item_stac = json.loads(result["Body"].read().decode("utf-8"))
 
-        if not arguments.collection_id == item_stac["collection"]:
+        if not arguments.collection_id == item_stac.get("collection"):
             get_log().trace(
                 "skipping: item.collection != collection.id",
                 file=key,
