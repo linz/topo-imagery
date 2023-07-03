@@ -79,8 +79,8 @@ def run_standardising(
             get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
 
         tiff.set_path_standardised(standardized_file_path)
-        return tiff
-
+        standardized_tiffs.append(tiff)
+        return standardized_tiffs
     else:
         with Pool(concurrency) as p:
             standardized_tiffs = p.map(
