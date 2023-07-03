@@ -19,23 +19,34 @@ def main() -> None:
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument("--title", dest="title", help="Collection title", required=True)
     parser.add_argument("--description", dest="description", help="Collection description", required=True)
-    parser.add_argument("--producer", dest="producer", help="Imagery producer", required=True)
+    parser.add_argument("--producer", dest="producer", help="Imagery producer")
+    parser.add_argument("--producer-list", dest="producer_list", help="Semicolon delimited list of imagery producers")
     parser.add_argument("--licensor", dest="licensor", help="Imagery licensor")
-    parser.add_argument("--licensor-list", dest="licensor_list", help="Imagery licensor list")
+    parser.add_argument("--licensor-list", dest="licensor_list", help="Semicolon delimited list of imagery licensors")
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
 
     arguments = parser.parse_args()
     uri = arguments.uri
-    licensors: List[str] = parse_list(arguments.licensor_list)
-    if len(licensors) <= 1:
-        licensors = [arguments.licensor]
+
+    producers: List[str] = []
+    if arguments.producer:
+        producers.append(arguments.producer)
+    if arguments.producer_list and ";" in arguments.producer_list:
+        producers.extend(parse_list(arguments.producer_list))
+
+    licensors: List[str] = []
+    if arguments.licensor:
+        licensors.append(arguments.licensor)
+    if arguments.licensor_list and ";" in arguments.licensor_list:
+        licensors.extend(parse_list(arguments.licensor_list))
 
     providers: List[Provider] = []
+    for producer_name in producers:
+        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
     for licensor_name in licensors:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
-    providers.append({"name": arguments.producer, "roles": [ProviderRole.PRODUCER]})
 
     collection = ImageryCollection(
         title=arguments.title, description=arguments.description, collection_id=arguments.collection_id, providers=providers
