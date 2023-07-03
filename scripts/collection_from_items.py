@@ -14,14 +14,23 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 def main() -> None:
+    # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument("--title", dest="title", help="Collection title", required=True)
     parser.add_argument("--description", dest="description", help="Collection description", required=True)
-    parser.add_argument("--producer", dest="producer", help="Imagery producer")
+    parser.add_argument(
+        "--producer",
+        dest="producer",
+        help="Imagery producer. Ignored if --producer-list passed with a semicolon delimited list.",
+    )
     parser.add_argument("--producer-list", dest="producer_list", help="Semicolon delimited list of imagery producers")
-    parser.add_argument("--licensor", dest="licensor", help="Imagery licensor")
+    parser.add_argument(
+        "--licensor",
+        dest="licensor",
+        help="Imagery licensor. Ignored if --licensor-list passed with a semicolon delimited list.",
+    )
     parser.add_argument("--licensor-list", dest="licensor_list", help="Semicolon delimited list of imagery licensors")
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
@@ -31,16 +40,16 @@ def main() -> None:
     uri = arguments.uri
 
     producers: List[str] = []
-    if arguments.producer:
-        producers.append(arguments.producer)
     if arguments.producer_list and ";" in arguments.producer_list:
         producers.extend(parse_list(arguments.producer_list))
+    elif arguments.producer:
+        producers.append(arguments.producer)
 
     licensors: List[str] = []
-    if arguments.licensor:
-        licensors.append(arguments.licensor)
     if arguments.licensor_list and ";" in arguments.licensor_list:
         licensors.extend(parse_list(arguments.licensor_list))
+    elif arguments.licensor:
+        licensors.append(arguments.licensor)
 
     providers: List[Provider] = []
     for producer_name in producers:
