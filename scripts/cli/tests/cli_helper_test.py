@@ -56,7 +56,6 @@ def test_coalesce_multi_no_single() -> None:
     multi_items = "foo; bar baz"
     single_item = ""
     coalesced_list = coalesce_multi_single(multi_items, single_item)
-    assert isinstance(coalesced_list, list)
     assert coalesced_list == ["foo", "bar baz"]
 
 
@@ -64,13 +63,12 @@ def test_coalesce_single_no_multi() -> None:
     multi_items = ""
     single_item = "foo"
     coalesced_list = coalesce_multi_single(multi_items, single_item)
-    assert isinstance(coalesced_list, list)
     assert coalesced_list == ["foo"]
 
 
 def test_coalesce_nothing() -> None:
+    # pylint: disable-msg=use-implicit-booleaness-not-comparison
     multi_items = ""
     single_item = ""
     coalesced_list = coalesce_multi_single(multi_items, single_item)
-    assert isinstance(coalesced_list, list)
     assert coalesced_list == []
