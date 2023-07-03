@@ -1,4 +1,4 @@
-from scripts.cli.cli_helper import format_source, parse_list
+from scripts.cli.cli_helper import coalesce_multi_single, format_source, parse_list
 
 
 def test_format_source_from_basemaps_cli_file() -> None:
@@ -50,3 +50,27 @@ def test_parse_list() -> None:
 def test_parse_list_empty() -> None:
     list_parsed = parse_list("")
     assert list_parsed == []
+
+
+def test_coalesce_multi_no_single() -> None:
+    multi_items = "foo; bar baz"
+    single_item = ""
+    coalesced_list = coalesce_multi_single(multi_items, single_item)
+    assert isinstance(coalesced_list, list)
+    assert coalesced_list == ["foo", "bar baz"]
+
+
+def test_coalesce_single_no_multi() -> None:
+    multi_items = ""
+    single_item = "foo"
+    coalesced_list = coalesce_multi_single(multi_items, single_item)
+    assert isinstance(coalesced_list, list)
+    assert coalesced_list == ["foo"]
+
+
+def test_coalesce_nothing() -> None:
+    multi_items = ""
+    single_item = ""
+    coalesced_list = coalesce_multi_single(multi_items, single_item)
+    assert isinstance(coalesced_list, list)
+    assert coalesced_list == []
