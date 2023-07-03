@@ -16,12 +16,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--source", dest="source", nargs="+", required=True, help="The path to the input tiffs")
-    parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSP code of the source imagery")
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
     parser.add_argument(
         "--target-epsg",
         dest="target_epsg",
         required=True,
-        help="The target EPSP code. If different to source the imagery will be reprojected",
+        help="The target EPSG code. If different to source the imagery will be reprojected",
     )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
@@ -34,7 +34,8 @@ def main() -> None:
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
-    source = format_source(arguments.source)
+    source = format_source(arguments.source)[0]
+    output_tilename = format_source(arguments.source)[1]
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     scale = arguments.scale
@@ -48,6 +49,7 @@ def main() -> None:
 
     tiff_files = run_standardising(
         source,
+        output_tilename,
         arguments.preset,
         arguments.cutline,
         concurrency,

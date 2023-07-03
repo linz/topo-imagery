@@ -3,7 +3,7 @@ import os
 import tempfile
 from functools import partial
 from multiprocessing import Pool
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import ulid
 from linz_logger import get_log
@@ -15,7 +15,7 @@ from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_alpha_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdal_preset import get_alpha_command, get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
 from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import TileIndexException, get_tile_name
@@ -23,6 +23,7 @@ from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 def run_standardising(
     files: List[str],
+    output_tilename: Optional[str],
     preset: str,
     cutline: Optional[str],
     concurrency: int,
@@ -60,21 +61,42 @@ def run_standardising(
     gdal_version = get_gdal_version()
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
 
-    with Pool(concurrency) as p:
-        standardized_tiffs = p.map(
-            partial(
-                standardising,
-                preset=preset,
-                source_epsg=source_epsg,
-                target_epsg=target_epsg,
-                scale=scale,
-                target_output=target_output,
-                cutline=cutline,
-            ),
-            actual_tiffs,
-        )
-        p.close()
-        p.join()
+    if output_tilename:
+        # Retiling is necessary
+        standardized_file_name = f"{output_tilename}.tiff"
+        standardized_file_path = os.path.join(target_output, standardized_file_name)
+        tiff = FileTiff(file, preset)
+        if not exists(standardized_file_path):
+            with tempfile.TemporaryDirectory() as tmp_path:
+                standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+            # Create the `vrt` file
+                vrt_path = os.path.join(tmp_path, f"{output_tilename}.vrt")
+                run_gdal(command=get_build_vrt_command(files=actual_tiffs, output=vrt_path))
+                command = get_gdal_command(preset, epsg=target_epsg)
+                run_gdal(command, input_file=vrt_path, output_file=standardized_working_path)
+                write(standardized_file_path, read(standardized_working_path))
+        else:
+            get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
+
+        tiff.set_path_standardised(standardized_file_path)
+        return tiff
+
+    else:
+        with Pool(concurrency) as p:
+            standardized_tiffs = p.map(
+                partial(
+                    standardising,
+                    preset=preset,
+                    source_epsg=source_epsg,
+                    target_epsg=target_epsg,
+                    scale=scale,
+                    target_output=target_output,
+                    cutline=cutline,
+                ),
+                actual_tiffs,
+            )
+            p.close()
+            p.join()
 
     get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
@@ -206,6 +228,7 @@ def standardising(
 
 
 def main() -> None:
+
     concurrency: int = 1
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True)

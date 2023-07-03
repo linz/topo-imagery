@@ -145,6 +145,11 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
+def get_build_vrt_command(files: List[str], output: str = "output.vrt") -> List[str]:
+    gdal_command = ["gdalbuildvrt", output]
+    gdal_command += files
+    return gdal_command
+
 def get_alpha_command() -> List[str]:
     """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
 
