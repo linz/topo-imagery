@@ -150,6 +150,7 @@ def get_build_vrt_command(files: List[str], output: str = "output.vrt") -> List[
     gdal_command += files
     return gdal_command
 
+
 def get_alpha_command() -> List[str]:
     """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
 

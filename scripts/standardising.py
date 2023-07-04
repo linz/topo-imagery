@@ -15,7 +15,13 @@ from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_alpha_command, get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdal_preset import (
+    get_alpha_command,
+    get_build_vrt_command,
+    get_cutline_command,
+    get_gdal_command,
+    get_transform_srs_command,
+)
 from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import TileIndexException, get_tile_name
@@ -49,7 +55,7 @@ def run_standardising(
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
-    actual_tiffs = []
+    actual_tiffs: List[str] = []
     standardized_tiffs: List[FileTiff] = []
 
     for file in files:
@@ -63,15 +69,23 @@ def run_standardising(
 
     if output_tilename:
         # Retiling is necessary
+        local_files: List[str] = []
         standardized_file_name = f"{output_tilename}.tiff"
-        standardized_file_path = os.path.join(target_output, standardized_file_name)
+        # TODO this used target_output but mypy complained it was Optional, expecting string
+        standardized_file_path = os.path.join("/tmp", standardized_file_name)
         tiff = FileTiff(file, preset)
         if not exists(standardized_file_path):
             with tempfile.TemporaryDirectory() as tmp_path:
                 standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-            # Create the `vrt` file
+                # get the input files
+                for at in actual_tiffs:
+                    if is_s3(at):
+                        local_files.append(download_tiff_file(at, tmp_path))
+                    else:
+                        local_files = actual_tiffs
+                # Create the `vrt` file
                 vrt_path = os.path.join(tmp_path, f"{output_tilename}.vrt")
-                run_gdal(command=get_build_vrt_command(files=actual_tiffs, output=vrt_path))
+                run_gdal(command=get_build_vrt_command(files=local_files, output=vrt_path))
                 command = get_gdal_command(preset, epsg=target_epsg)
                 run_gdal(command, input_file=vrt_path, output_file=standardized_working_path)
                 write(standardized_file_path, read(standardized_working_path))
@@ -227,32 +241,31 @@ def standardising(
     return tiff
 
 
-def main() -> None:
+# def main() -> None:
+#     concurrency: int = 1
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--preset", dest="preset", required=True)
+#     parser.add_argument("--source", dest="source", nargs="+", required=True)
+#     parser.add_argument("--cutline", dest="cutline", required=False)
+#     parser.add_argument("--source-epsg", dest="source_epsg", required=True)
+#     parser.add_argument("--target-epsg", dest="target_epsg", required=True)
+#     parser.add_argument("--scale", dest="scale", required=True)
+#     arguments = parser.parse_args()
+#     source = format_source(arguments.source)
 
-    concurrency: int = 1
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=True)
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument("--cutline", dest="cutline", required=False)
-    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
-    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
-    parser.add_argument("--scale", dest="scale", required=True)
-    arguments = parser.parse_args()
-    source = format_source(arguments.source)
+#     if is_argo():
+#         concurrency = 4
 
-    if is_argo():
-        concurrency = 4
-
-    run_standardising(
-        source,
-        arguments.preset,
-        arguments.cutline,
-        concurrency,
-        arguments.source_epsg,
-        arguments.target_epsg,
-        int(arguments.scale),
-    )
+#     run_standardising(
+#         source,
+#         arguments.preset,
+#         arguments.cutline,
+#         concurrency,
+#         arguments.source_epsg,
+#         arguments.target_epsg,
+#         int(arguments.scale),
+#     )
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

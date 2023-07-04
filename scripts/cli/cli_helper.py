@@ -24,25 +24,24 @@ def format_source(source: List[str]) -> Tuple[List[str], Optional[str]]:
             get_log().debug("Decoding Json Failed", msg=e)
     elif len(source) == 1 and source[0].startswith("["):
         try:
-            source_json_input: List[str] = json.loads(source[0])
-            source_json_output = None
-            return source_json_input, source_json_output
+            source_json_input_list: List[str] = json.loads(source[0])
+            return source_json_input_list, None
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
     return source, None
 
 
-def parse_source() -> List[str]:
-    """Parse the CLI argument '--source' and format it to a list of paths.
+# def parse_source() -> List[str]:
+#     """Parse the CLI argument '--source' and format it to a list of paths.
 
-    Returns:
-        List[str]: A list of paths.
-    """
-    parser_args = argparse.ArgumentParser()
-    parser_args.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser_args.parse_args()
+#     Returns:
+#         List[str]: A list of paths.
+#     """
+#     parser_args = argparse.ArgumentParser()
+#     parser_args.add_argument("--source", dest="source", nargs="+", required=True)
+#     arguments = parser_args.parse_args()
 
-    return format_source(arguments.source)
+#     return format_source(arguments.source)
 
 
 def is_argo() -> bool:
