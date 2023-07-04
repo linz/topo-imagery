@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.1.0](https://github.com/linz/topo-imagery/compare/v2.0.0...v2.1.0) (2023-07-04)
+
+
+### Features
+
+* add --producer-list to allow multiple producers TDE-781 ([#531](https://github.com/linz/topo-imagery/issues/531)) ([0a28d6f](https://github.com/linz/topo-imagery/commit/0a28d6f6f00deae2841d088f9b6a99bfdb437b14))
+* add dem_lerc  preset TDE-779 ([#522](https://github.com/linz/topo-imagery/issues/522)) ([3e7378d](https://github.com/linz/topo-imagery/commit/3e7378d1506a5884b7151a29f6dd3a7281c3650a))
+
+
+### Bug Fixes
+
+* handle already existing collection JSON ([#532](https://github.com/linz/topo-imagery/issues/532)) ([7a26bae](https://github.com/linz/topo-imagery/commit/7a26bae03d8b2d9090cfb8dfb24d42473a0b2b62))
+* standardising_validate.py fails when scale is 'None' ([#480](https://github.com/linz/topo-imagery/issues/480)) ([17296f1](https://github.com/linz/topo-imagery/commit/17296f1e0ffbb46d5160814ca6096d4c5893c996))
+
+
+### Documentation
+
+* add missing docstring ([#487](https://github.com/linz/topo-imagery/issues/487)) ([dd27c7c](https://github.com/linz/topo-imagery/commit/dd27c7c3f7209e58416e5e517498b0b68e7b3ca5))
+* update docstring for tile_index.py ([#473](https://github.com/linz/topo-imagery/issues/473)) ([38ef275](https://github.com/linz/topo-imagery/commit/38ef275c304164c990675837cbba83076f80e512))
+* update README release please instructions ([#496](https://github.com/linz/topo-imagery/issues/496)) ([d7369e0](https://github.com/linz/topo-imagery/commit/d7369e096b7d782e8f97bca10b6b384b70f33f89))
+* update README.md ([#481](https://github.com/linz/topo-imagery/issues/481)) ([79add3c](https://github.com/linz/topo-imagery/commit/79add3cd3cd3fb8f5d75ba7a8ca2029145fd0b5a))
+
 ## [2.0.0](https://github.com/linz/topo-imagery/compare/v1.3.0...v2.0.0) (2023-04-18)
 
 
