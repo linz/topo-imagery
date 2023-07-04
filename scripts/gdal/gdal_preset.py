@@ -36,6 +36,8 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
+    "-mo",
+    "AREA_OR_POINT=AREA",
 ]
 
 COMPRESS_LZW = [
