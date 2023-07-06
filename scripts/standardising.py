@@ -26,6 +26,13 @@ from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import TileIndexException, get_tile_name
 
+TEMP_FOLDER = "/tmp"
+
+def retile(input_tiffs: List[str], tilename: str, output_dir: str) -> str:
+    
+
+
+
 
 def run_standardising(
     files: List[str],
@@ -68,12 +75,14 @@ def run_standardising(
     gdal_version = get_gdal_version()
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(source_tiffs))
 
+
     if output_tilename:
         # Retiling is necessary
         local_files: List[str] = []
         standardized_file_name = f"{output_tilename}.tiff"
         # TODO this used target_output but mypy complained it was Optional, expecting string
         standardized_file_path = os.path.join(target_output, standardized_file_name)
+
         tiff = FileTiff(file, preset)
         if not exists(standardized_file_path):
             with tempfile.TemporaryDirectory() as tmp_path:
@@ -81,9 +90,8 @@ def run_standardising(
                 # get the input files
                 for st in source_tiffs:
                     local_files.append(download_tiff_file(st, tmp_path))
-                # Create the `vrt` file
-                vrt_path = os.path.join(tmp_path, f"{output_tilename}.vrt")
-                run_gdal(command=get_build_vrt_command(files=local_files, output=vrt_path))
+                vrt_path = retile(source_tiffs, output_tilename, tmp_path)
+
                 command = get_gdal_command(preset, epsg=target_epsg)
                 run_gdal(command, input_file=vrt_path, output_file=standardized_working_path)
                 write(standardized_file_path, read(standardized_working_path))
@@ -115,33 +123,7 @@ def run_standardising(
     return standardized_tiffs
 
 
-def download_tiff_file(input_file: str, tmp_path: str) -> str:
-    """Download a tiff file and some of its sidecar files if they exist.
 
-    Args:
-        input_file: file to download
-        tmp_path: target folder to write too
-
-    Returns:
-        location of the downloaded tiff
-    """
-    target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
-    input_file_path = target_file_path + ".tiff"
-    get_log().info("download_tiff", path=input_file, target_path=input_file_path)
-
-    write(input_file_path, read(input_file))
-
-    base_file_path = os.path.splitext(input_file)[0]
-    # Attempt to download sidecar files too
-    for ext in [".prj", ".tfw"]:
-        try:
-            write(target_file_path + ext, read(base_file_path + ext))
-            get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
-
-        except:  # pylint: disable-msg=bare-except
-            pass
-
-    return input_file_path
 
 
 # pylint: disable-msg=too-many-locals

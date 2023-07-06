@@ -2,36 +2,26 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, NamedTuple, Optional, Tuple, Union
 
 from dateutil import parser, tz
 from linz_logger import get_log
 
+class TileFiles(NamedTuple):
+    output: str
+    input: List[str]
 
-def format_source(source: List[str]) -> Tuple[List[str], Optional[str]]:
-    """Due to Argo constraints if using the basemaps cli list command
-    the source has a string that contains a list that needs to be split.
-    example: ["[\"s3://test/image_one.tiff\", \"s3://test/image_two.tiff\"]"]
-    If retiling is required, the source will be in the form of a Dictionary.
-    """
+
+def format_source(source: List[str]) -> List[TileFiles]:
     # TODO add comments in main section with input types and examples
-    if source[0].startswith("{"):
+    if source.startswith("["):
         try:
-            source_json: Dict[str, Union[List[str], str]] = json.loads(source[0])
-            input_files: List[str] = source_json["input"]
-            output_tilename: str = source_json["output"]
-            return input_files, output_tilename
+            source_json: List[TileFiles] = json.loads(source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"]))
+            return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-    elif len(source) == 1 and source[0].startswith("["):
-        try:
-            input_files: List[str] = json.loads(source[0])
-            return input_files, None
-        except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", msg=e)
-    return source, None
 
-
+    return [TileFiles(output="", input=source)]
 # def parse_source() -> List[str]:
 #     """Parse the CLI argument '--source' and format it to a list of paths.
 
