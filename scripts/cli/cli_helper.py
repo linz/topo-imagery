@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from dateutil import parser, tz
 from linz_logger import get_log
@@ -14,18 +14,19 @@ def format_source(source: List[str]) -> Tuple[List[str], Optional[str]]:
     example: ["[\"s3://test/image_one.tiff\", \"s3://test/image_two.tiff\"]"]
     If retiling is required, the source will be in the form of a Dictionary.
     """
+    # TODO add comments in main section with input types and examples
     if source[0].startswith("{"):
         try:
-            source_json: Dict[str, Any] = json.loads(source[0])
-            source_json_input: List[str] = source_json["input"]
-            source_json_output: str = source_json["output"]
-            return source_json_input, source_json_output
+            source_json: Dict[str, Union[List[str], str]] = json.loads(source[0])
+            input_files: List[str] = source_json["input"]
+            output_tilename: str = source_json["output"]
+            return input_files, output_tilename
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
     elif len(source) == 1 and source[0].startswith("["):
         try:
-            source_json_input_list: List[str] = json.loads(source[0])
-            return source_json_input_list, None
+            input_files: List[str] = json.loads(source[0])
+            return input_files, None
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
     return source, None

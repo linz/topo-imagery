@@ -13,6 +13,7 @@ from scripts.standardising import run_standardising
 
 def main() -> None:
     # pylint: disable-msg=too-many-locals
+    # TODO: make arguments into reusable code for standardising and standardise-validate
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--source", dest="source", nargs="+", required=True, help="The path to the input tiffs")

@@ -36,8 +36,9 @@ def run_standardising(
     source_epsg: str,
     target_epsg: str,
     scale: int,
-    target_output: Optional[str] = None,
+    target_output: Optional[str] = "/tmp",
 ) -> List[FileTiff]:
+    # TODO update help
     """Run `standardising()` in parallel (`concurrency`).
 
     Args:
@@ -55,34 +56,31 @@ def run_standardising(
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
-    actual_tiffs: List[str] = []
+    source_tiffs: List[str] = []
     standardized_tiffs: List[FileTiff] = []
 
     for file in files:
         if is_tiff(file) or is_vrt(file):
-            actual_tiffs.append(file)
+            source_tiffs.append(file)
         else:
             get_log().info("standardising_file_not_tiff_skipped", file=file)
 
     gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(source_tiffs))
 
     if output_tilename:
         # Retiling is necessary
         local_files: List[str] = []
         standardized_file_name = f"{output_tilename}.tiff"
         # TODO this used target_output but mypy complained it was Optional, expecting string
-        standardized_file_path = os.path.join("/tmp", standardized_file_name)
+        standardized_file_path = os.path.join(target_output, standardized_file_name)
         tiff = FileTiff(file, preset)
         if not exists(standardized_file_path):
             with tempfile.TemporaryDirectory() as tmp_path:
                 standardized_working_path = os.path.join(tmp_path, standardized_file_name)
                 # get the input files
-                for at in actual_tiffs:
-                    if is_s3(at):
-                        local_files.append(download_tiff_file(at, tmp_path))
-                    else:
-                        local_files = actual_tiffs
+                for st in source_tiffs:
+                    local_files.append(download_tiff_file(st, tmp_path))
                 # Create the `vrt` file
                 vrt_path = os.path.join(tmp_path, f"{output_tilename}.vrt")
                 run_gdal(command=get_build_vrt_command(files=local_files, output=vrt_path))
@@ -107,7 +105,7 @@ def run_standardising(
                     target_output=target_output,
                     cutline=cutline,
                 ),
-                actual_tiffs,
+                source_tiffs,
             )
             p.close()
             p.join()
