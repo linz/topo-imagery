@@ -36,7 +36,7 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
-    # Force all DEMS to AREA to be consistent 
+    # Force all DEMS to AREA to be consistent
     # input tiffs vary between AREA or POINT
     "-mo",
     "AREA_OR_POINT=AREA",
