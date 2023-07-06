@@ -28,10 +28,7 @@ from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 TEMP_FOLDER = "/tmp"
 
-def retile(input_tiffs: List[str], tilename: str, output_dir: str) -> str:
-    
-
-
+# def retile(input_tiffs: List[str], tilename: str, output_dir: str) -> str:
 
 
 def run_standardising(
@@ -74,7 +71,6 @@ def run_standardising(
 
     gdal_version = get_gdal_version()
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(source_tiffs))
-
 
     if output_tilename:
         # Retiling is necessary
@@ -121,9 +117,6 @@ def run_standardising(
     get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
     return standardized_tiffs
-
-
-
 
 
 # pylint: disable-msg=too-many-locals

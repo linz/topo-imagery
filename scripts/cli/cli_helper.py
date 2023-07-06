@@ -2,10 +2,11 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
 from linz_logger import get_log
+
 
 class TileFiles(NamedTuple):
     output: str
@@ -13,26 +14,34 @@ class TileFiles(NamedTuple):
 
 
 def format_source(source: List[str]) -> List[TileFiles]:
-    # TODO add comments in main section with input types and examples
-    if source.startswith("["):
+    """Tranform a list of file names (local) or dictionnaries (Argo Workflows) to a list of `TileFiles`
+
+    Args:
+        source: a list of file names or containing a stringify list of dictionnary
+
+    Returns:
+        a list of `TileFiles` namedtuple
+
+    Example:
+    ```
+    >>> format_source(["[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]"])
+    [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
+    >>> format_source(["s3://bucket/SN9457_CE16_10k_0501.tif", "s3://bucket/SN9457_CE16_10k_0502.tif"])
+    [TileFiles(output='output', input=['s3://bucket/SN9457_CE16_10k_0501.tif', 's3://bucket/SN9457_CE16_10k_0502.tif'])])]
+    ```
+    """
+    print(f"THIS IS THE SOURCE: {source}")
+    if source[0].startswith("[{"):
+        print("IS JSON ARRAY")
         try:
-            source_json: List[TileFiles] = json.loads(source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"]))
+            source_json: List[TileFiles] = json.loads(
+                source[0], object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+            )
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-
-    return [TileFiles(output="", input=source)]
-# def parse_source() -> List[str]:
-#     """Parse the CLI argument '--source' and format it to a list of paths.
-
-#     Returns:
-#         List[str]: A list of paths.
-#     """
-#     parser_args = argparse.ArgumentParser()
-#     parser_args.add_argument("--source", dest="source", nargs="+", required=True)
-#     arguments = parser_args.parse_args()
-
-#     return format_source(arguments.source)
+    # FIXME: this is when it runs locally. As the tilename is not get anymore here, "output" is a placeholder for the output tile when executed locally
+    return [TileFiles(output="output", input=source)]
 
 
 def is_argo() -> bool:
