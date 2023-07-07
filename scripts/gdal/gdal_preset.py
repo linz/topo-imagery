@@ -143,7 +143,7 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
 
 
 def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha=False) -> List[str]:
-    gdal_command = ["gdalbuildvrt", "-hidenodata"]
+    gdal_command = ["gdalbuildvrt", "-hidenodata", "-strict"]
     if add_alpha:
         gdal_command.append("-addalpha")
     gdal_command.append(output)
