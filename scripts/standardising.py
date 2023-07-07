@@ -172,7 +172,6 @@ def standardising(
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
-        os.mkdir(tmp_path)  # ensure the temp folder exists
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
 
         source_tiffs = download_tiffs(todo.input, tmp_path)
