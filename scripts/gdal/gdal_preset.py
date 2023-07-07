@@ -83,7 +83,7 @@ CONVERT_16BITS_TO_8BITS = [
 ]
 
 
-def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
+def get_gdal_command(preset: str, epsg: str) -> List[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
@@ -112,9 +112,6 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
 
     elif preset == "dem_lerc":
         gdal_command.extend(DEM_LERC)
-
-    if convert_from == "UInt16":
-        gdal_command.extend(CONVERT_16BITS_TO_8BITS)
 
     return gdal_command
 
@@ -145,9 +142,13 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: List[str], output: str = "output.vrt") -> List[str]:
-    gdal_command = ["gdalbuildvrt", output]
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha=False) -> List[str]:
+    gdal_command = ["gdalbuildvrt", "-hidenodata"]
+    if add_alpha:
+        gdal_command.append("-addalpha")
+    gdal_command.append(output)
     gdal_command += files
+
     return gdal_command
 
 

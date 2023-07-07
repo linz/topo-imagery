@@ -14,10 +14,10 @@ from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path, run_gdal
 from scripts.gdal.gdal_preset import get_build_vrt_command
 from scripts.stac.imagery.create_stac import create_item
-from scripts.standardising import TEMP_FOLDER, run_standardising
+from scripts.standardising import run_standardising
 
 
-def bulk_download_tiffs(files: List[TileFiles], concurrency: int) -> List[TileFiles]:
+def bulk_download_tiffs(files: List[TileFiles], concurrency: int) -> Dict[str, List[str]]:
     # need to identify each input files to its output tile name
     #     [
     #   {
@@ -61,11 +61,11 @@ def bulk_download_tiffs(files: List[TileFiles], concurrency: int) -> List[TileFi
     #     ]
     #   },
 
-    tileList: List[Tuple[str, str]] = []
+    tile_list: List[Tuple[str, str]] = []
 
     for tile in files:
         for input in tile.input:
-            tileList.append((input, tile.output))
+            tile_list.append((input, tile.output))
 
     with Pool(concurrency) as p:
         download_tiffs = p.map(
@@ -73,22 +73,21 @@ def bulk_download_tiffs(files: List[TileFiles], concurrency: int) -> List[TileFi
                 download_tiff_file,
                 tmp_path=TEMP_FOLDER,
             ),
-            tileList,
+            tile_list,
         )
         p.close()
         p.join()
-    print(download_tiffs)
-    
-    localList: Dict[str, List[str]] = {}
+
+    local_list: Dict[str, List[str]] = {}
     for output in download_tiffs:
-        print(output)
         filepath = output[0]
         tilename = output[1]
-        if localList.get(tilename):
-            localList[tilename].append(filepath)
+        if local_list.get(tilename):
+            local_list[tilename].append(filepath)
         else:
-            localList[tilename] = [filepath]
-    print(localList)
+            local_list[tilename] = [filepath]
+    print(local_list)
+    return local_list
 
 
 def download_tiff_file(file: Tuple[str, str], tmp_path: str) -> Tuple[str, str]:
@@ -111,46 +110,36 @@ def download_tiff_file(file: Tuple[str, str], tmp_path: str) -> Tuple[str, str]:
     input_file_path = target_file_path + ".tiff"
     get_log().info("download_tiff", path=file[0], target_path=input_file_path)
 
-    # write(input_file_path, read(file[0]))
+    write(input_file_path, read(file[0]))
 
-    # base_file_path = os.path.splitext(file[0])[0]
-    # # Attempt to download sidecar files too
-    # for ext in [".prj", ".tfw"]:
-    #     try:
-    #         write(target_file_path + ext, read(base_file_path + ext))
-    #         get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
+    base_file_path = os.path.splitext(file[0])[0]
+    # Attempt to download sidecar files too
+    for ext in [".prj", ".tfw"]:
+        try:
+            write(target_file_path + ext, read(base_file_path + ext))
+            get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
 
-    #     except:  # pylint: disable-msg=bare-except
-    #         pass
+        except:  # pylint: disable-msg=bare-except
+            pass
 
     return (input_file_path, file[1])
-
-
-# def get_vrts(source_tiffs: List[str], tilename: Optional[str] = None) -> List[str]:
-#     # Create the `vrt` file
-#     if not tilename:
-
-#     vrt_file = f"{tilename}.vrt"
-#     vrt_path = os.path.join(TEMP_FOLDER, vrt_file)
-#     run_gdal(command=get_build_vrt_command(files=input_tiffs, output=vrt_path))
-#     return vrt_path
 
 
 def main() -> None:
     # pylint: disable-msg=too-many-locals
     # TODO: make arguments into reusable code for standardising and standardise-validate
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
+    parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--source", dest="source", nargs="+", required=True, help="The path to the input tiffs")
-    # parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
-    # parser.add_argument(
-    #     "--target-epsg",
-    #     dest="target_epsg",
-    #     required=True,
-    #     help="The target EPSG code. If different to source the imagery will be reprojected",
-    # )
-    # parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
-    # parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
+    parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
+    parser.add_argument(
+        "--target-epsg",
+        dest="target_epsg",
+        required=True,
+        help="The target EPSG code. If different to source the imagery will be reprojected",
+    )
+    parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
+    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     # parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     # parser.add_argument(
     #     "--start-datetime", dest="start_datetime", help="Start datetime in format YYYY-MM-DD", type=valid_date, required=True
@@ -158,7 +147,7 @@ def main() -> None:
     # parser.add_argument(
     #     "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
     # )
-    # parser.add_argument("--target", dest="target", help="Target output", required=True)
+    parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
     tile_files: List[TileFiles] = format_source(arguments.source)
     # start_datetime = format_date(arguments.start_datetime)
@@ -185,7 +174,7 @@ def main() -> None:
     #       "s3://linz-topographic-upload/skyvuw/SN9457/TILES/SN9457_CE16_10k_0502.tif"
     #     ]
     #   },
-    # ]
+    # ]vrts = get_vrts()
 
     #     [
     #   {
@@ -202,32 +191,29 @@ def main() -> None:
     #   },
     # ]
 
-    # Download files
-    # If retiling
-    # For each tile, download the corresponding source tiffs
-    # TODO Do we want the concurrency more than 4?
+    # # Download files
+    # # For each tile, download the corresponding source tiffs
+    # # TODO Do we want the concurrency more than 4?
+    # file_list = bulk_download_tiffs(tile_files, concurrency)
 
-    bulk_download_tiffs(tile_files, concurrency)
-    return
-    # # Is retiling needed
-    # output_tilename = format_source(arguments.source)[1]
-    # source_files = format_source(arguments.source)[0]
+    # # Create VRTs
+    # vrt_to_standardise: List[str] = []
+    # for tilename, files in file_list.items():
+    #     # TODO remove debug
+    #     print(f"Create VRTs for tile {tilename} containing files {files}")
+    #     vrt_to_standardise.append(create_vrt(files, tilename))
+    # # TODO remove debug
+    # print(f"VRTs to process: {vrt_to_standardise}")
 
-    # vrts = get_vrts()
-    # if output_tilename:
-    #     # get vrts
-
-    # tiff_files = run_standardising(
-    #     vrts,
-    #     output_tilename,
-    #     arguments.preset,
-    #     arguments.cutline,
-    #     concurrency,
-    #     arguments.source_epsg,
-    #     arguments.target_epsg,
-    #     scale,
-    #     arguments.target,
-    # )
+    tiff_files = run_standardising(
+        tile_files,
+        arguments.preset,
+        arguments.cutline,
+        concurrency,
+        arguments.source_epsg,
+        arguments.target_epsg,
+        arguments.target,
+    )
 
     # if len(tiff_files) == 0:
     #     get_log().info("no_tiff_to_process", action="standardise_validate", reason="skipped")
