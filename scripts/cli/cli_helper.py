@@ -40,7 +40,8 @@ def format_source(source: List[str]) -> List[TileFiles]:
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-    # FIXME: this is when it runs locally. As the tilename is not get anymore here, "output" is a placeholder for the output tile when executed locally
+    # FIXME: this is when it runs locally. As the tilename is not get anymore here,
+    # "output" is a placeholder for the output tile when executed locally
     return [TileFiles(output="output", input=source)]
 
 

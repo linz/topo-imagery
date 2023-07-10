@@ -36,6 +36,8 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
+    "-a_nodata",
+    "-9999",
 ]
 
 COMPRESS_LZW = [
@@ -142,7 +144,7 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha=False) -> List[str]:
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
     gdal_command = ["gdalbuildvrt", "-hidenodata", "-strict"]
     if add_alpha:
         gdal_command.append("-addalpha")

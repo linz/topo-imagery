@@ -1,4 +1,3 @@
-import argparse
 import os
 import tempfile
 from functools import partial
@@ -9,22 +8,14 @@ import ulid
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
-from scripts.cli.cli_helper import format_source, is_argo, TileFiles
+from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff
-from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
-from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
+from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import (
-    get_alpha_command,
-    get_build_vrt_command,
-    get_cutline_command,
-    get_gdal_command,
-    get_transform_srs_command,
-)
-from scripts.gdal.gdalinfo import gdal_info, get_origin
+from scripts.gdal.gdal_preset import get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
-from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 
 def run_standardising(
@@ -53,14 +44,6 @@ def run_standardising(
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
-    # actual_tiffs = []
-    # standardized_tiffs: List[FileTiff] = []
-
-    # for file in files:
-    #     if is_tiff(file) or is_vrt(file):
-    #         actual_tiffs.append(file)
-    #     else:
-    #         get_log().info("standardising_file_not_tiff_skipped", file=file)
 
     gdal_version = get_gdal_version()
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(files))
@@ -83,9 +66,6 @@ def run_standardising(
     get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
     return standardized_tiffs
-
-
-# { input : List[Tiff], otuput: str }
 
 
 def download_tiffs(files: List[str], target: str) -> List[str]:
@@ -126,7 +106,7 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
     return downloaded_files
 
 
-def create_vrt(source_tiffs: List[str], target_path: str, add_alpha=False) -> str:
+def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
     # FIXME throw error if warnings generated
@@ -164,11 +144,13 @@ def standardising(
     """
     standardized_file_name = todo.output + ".tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
+    tiff = FileTiff(todo.input, preset)
+    tiff.set_path_standardised(standardized_file_path)
 
     # Already proccessed can skip processing
     if exists(standardized_file_path):
         get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
-        return FileTiff(standardized_file_path, preset)
+        return tiff
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
@@ -180,10 +162,11 @@ def standardising(
         for file in source_tiffs:
             gdal_data = gdal_info(file, False)
             # gdal_data.epsg # ["epsg"]
-            # TODO does gdal_data have alpha
-            # if has_alpha(gdal_data):
-            # vrt_add_alpha = False
-
+            bands = gdal_data["bands"]
+            if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
+                len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
+            ):
+                vrt_add_alpha = False
             # TODO ensure bands are the same for all imagery
 
         # Start from base VRT
@@ -218,92 +201,4 @@ def standardising(
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
         write(standardized_file_path, read(standardized_working_path))
-
-        return FileTiff(standardized_file_path, preset)
-    # get_log().info("standardising", path=todo.output)
-    # original_gdalinfo = gdal_info(standardized_file_path, False)
-
-    # standardized_file_name = file.replace(".vrt", ".tiff")
-    # standardized_file_path = os.path.join(target_output, get_file_name_from_path(standardized_file_name))
-
-    # if not exists(standardized_file_path):
-    #     # FIXME: move temp dir creation into standardise-validate
-    #     with tempfile.TemporaryDirectory() as tmp_path:
-    #         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-    #         input_file = file
-
-    #         if cutline:
-    #             input_cutline_path = cutline
-    #             if is_s3(cutline):
-    #                 if not cutline.endswith((".fgb", ".geojson")):
-    #                     raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-    #                 input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
-    #                 # Ensure the input cutline is a easy spot for GDAL to read
-    #                 write(input_cutline_path, read(cutline))
-
-    #             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-    #             # TODO: test a cutline with a VRT file
-    #             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-    #             input_file = target_vrt
-
-    #         else:
-    #             # TODO Check with VRT containing tiff with nodatavalue and other not
-    #             if tiff.is_no_data(original_gdalinfo) and tiff.get_tiff_type() == "Imagery":
-    #                 target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-    #                 run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
-    #                 input_file = target_vrt
-
-    #         if source_epsg != target_epsg:
-    #             target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-    #             get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-    #             run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
-    #             input_file = target_vrt
-
-    #         # gdalinfo to get band offset and band type
-    #         transformed_image_gdalinfo = gdal_info(input_file, False)
-    #         command = get_gdal_command(
-    #             preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, transformed_image_gdalinfo)
-    #         )
-    #         command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
-    #         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
-
-    #         write(standardized_file_path, read(standardized_working_path))
-    # else:
-    #     get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
-
-    # tiff.set_path_standardised(standardized_file_path)
-    # return tiff
-
-
-# data = [
-# Imagery is generally 1-to-1
-# {"input": ["s3://linz-elevation-staging/abc.dem.tiff"], "output": "CH13_5000_0101" },
-# {"input": ["b.tiff"], "output": "CH13_5000_0101" },
-# {"input": ["c.tiff"], "output": "CH13_5000_0101" },
-
-
-# # DEMS 100-to-1 1.4MB files
-# {"input": ["a.tiff", "b.tiff",... 100 files], "output": "CH13_5000_0101" }
-# {"input": ["c.tiff", "d.tiff", "e.tiff"], "output": "CH13_5000_0102" }
-# ... x1,000
-# ]
-
-# for input in data:
-#     # thread
-#         # thread ??
-#         # s5cmd
-#     download_input_files(input.input, download_path)
-
-#     run_standardise(download_path)
-#         for tiff in download_path:
-#             if tiff has alpha:
-#                 add_alpha=False
-
-#         vrt = build_vrt(download_path, add_alpha=add_alpha) # gdalbuild buildvrt -hidenodata output.vrt xyz.tiff
-
-#         vrt = apply_cutline(vrt)
-
-#         if source_espg != target_epsg:
-#             vrt = apply_warp(vrt)
-
-#         gdal_make_cog(vrt)
+        return tiff

@@ -42,7 +42,8 @@ def test_parse_list_empty() -> None:
 
 def test_format_source_tiles() -> None:
     input_source = [
-        '[{"output": "tile_name","input": ["file_a.tiff", "file_b.tiff"]}, {"output": "tile_name2","input": ["file_a.tiff", "file_b.tiff"]}]'
+        """[{"output": "tile_name","input": ["file_a.tiff", "file_b.tiff"]}, 
+        {"output": "tile_name2","input": ["file_a.tiff", "file_b.tiff"]}]"""
     ]
     expected_output_filename = "tile_name"
     expected_output_filename_b = "tile_name2"

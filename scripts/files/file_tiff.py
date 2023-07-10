@@ -25,7 +25,7 @@ class FileTiff:
 
     def __init__(
         self,
-        path: str,
+        path: List[str],
         preset: Optional[str] = None,
     ) -> None:
         self._path_original = path
@@ -153,11 +153,12 @@ class FileTiff:
         """
         return self._errors
 
-    def get_path_original(self) -> str:
-        """Get the path of the original (non standardised) file.
+    def get_path_original(self) -> List[str]:
+        """Get the path(es) of the original (non standardised) file.
+        It can be a list of path if the standardised file is a retiled image.
 
         Returns:
-            a file path
+            a list of file path
         """
         return self._path_original
 
@@ -221,7 +222,16 @@ class FileTiff:
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
-            if current_nodata_val != 255:
+            print(f"====> NODATAVALUE: {current_nodata_val}")
+            print(f"====> gdalinfo: {self._gdalinfo}")
+            # GDALINFO shows the `noDataValue` as `-9999.0`
+            if self._tiff_type == "DEM" and int(current_nodata_val) != -9999:
+                self.add_error(
+                    error_type=FileTiffErrorType.NO_DATA,
+                    error_message="noDataValue is not -9999",
+                    custom_fields={"current": f"{current_nodata_val}"},
+                )
+            elif self._tiff_type == "Imagery" and current_nodata_val != 255:
                 self.add_error(
                     error_type=FileTiffErrorType.NO_DATA,
                     error_message="noDataValue is not 255",
