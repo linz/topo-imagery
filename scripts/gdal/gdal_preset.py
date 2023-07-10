@@ -20,10 +20,6 @@ BASE_COG = [
     # Ensure all CPUs are used for gdal translate
     "-co",
     "num_threads=all_cpus",
-    # Until GDAL 3.7.x this needs to be set as well as num_threads (https://github.com/OSGeo/gdal/issues/7478)
-    "--config",
-    "gdal_num_threads",
-    "all_cpus",
     # If not all tiles are needed in the tiff, instead of writing empty images write a null byte
     # this significantly reduces the size of tiffs which are very sparse
     "-co",
@@ -40,6 +36,8 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
+    "-a_nodata",
+    "-9999",
 ]
 
 COMPRESS_LZW = [
@@ -87,7 +85,7 @@ CONVERT_16BITS_TO_8BITS = [
 ]
 
 
-def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
+def get_gdal_command(preset: str, epsg: str) -> List[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
@@ -117,9 +115,6 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     elif preset == "dem_lerc":
         gdal_command.extend(DEM_LERC)
 
-    if convert_from == "UInt16":
-        gdal_command.extend(CONVERT_16BITS_TO_8BITS)
-
     return gdal_command
 
 
@@ -145,6 +140,16 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     # Apply the cutline
     if cutline:
         gdal_command += ["-cutline", cutline]
+
+    return gdal_command
+
+
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+    gdal_command = ["gdalbuildvrt", "-hidenodata", "-strict"]
+    if add_alpha:
+        gdal_command.append("-addalpha")
+    gdal_command.append(output)
+    gdal_command += files
 
     return gdal_command
 

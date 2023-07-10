@@ -6,7 +6,7 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single
+from scripts.cli.cli_helper import parse_list
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
@@ -19,30 +19,23 @@ def main() -> None:
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument("--title", dest="title", help="Collection title", required=True)
     parser.add_argument("--description", dest="description", help="Collection description", required=True)
-    parser.add_argument(
-        "--producer",
-        dest="producer",
-        help="Imagery producer. Ignored if --producer-list passed with a semicolon delimited list.",
-    )
-    parser.add_argument("--producer-list", dest="producer_list", help="Semicolon delimited list of imagery producers")
-    parser.add_argument(
-        "--licensor",
-        dest="licensor",
-        help="Imagery licensor. Ignored if --licensor-list passed with a semicolon delimited list.",
-    )
-    parser.add_argument("--licensor-list", dest="licensor_list", help="Semicolon delimited list of imagery licensors")
+    parser.add_argument("--producer", dest="producer", help="Imagery producer", required=True)
+    parser.add_argument("--licensor", dest="licensor", help="Imagery licensor")
+    parser.add_argument("--licensor-list", dest="licensor_list", help="Imagery licensor list")
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
 
     arguments = parser.parse_args()
     uri = arguments.uri
+    licensors: List[str] = parse_list(arguments.licensor_list)
+    if len(licensors) <= 1:
+        licensors = [arguments.licensor]
 
     providers: List[Provider] = []
-    for producer_name in coalesce_multi_single(arguments.producer_list, arguments.producer):
-        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
+    for licensor_name in licensors:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+    providers.append({"name": arguments.producer, "roles": [ProviderRole.PRODUCER]})
 
     collection = ImageryCollection(
         title=arguments.title, description=arguments.description, collection_id=arguments.collection_id, providers=providers
@@ -62,7 +55,7 @@ def main() -> None:
     ):
         item_stac = json.loads(result["Body"].read().decode("utf-8"))
 
-        if not arguments.collection_id == item_stac.get("collection"):
+        if not arguments.collection_id == item_stac["collection"]:
             get_log().trace(
                 "skipping: item.collection != collection.id",
                 file=key,

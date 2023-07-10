@@ -1,4 +1,3 @@
-import argparse
 import os
 import tempfile
 from functools import partial
@@ -9,27 +8,25 @@ import ulid
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
-from scripts.cli.cli_helper import format_source, is_argo
+from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff
-from scripts.files.files_helper import get_file_name_from_path, is_tiff, is_vrt
 from scripts.files.fs import exists, read, write
-from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
+from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_alpha_command, get_cutline_command, get_gdal_command, get_transform_srs_command
-from scripts.gdal.gdalinfo import gdal_info, get_origin
+from scripts.gdal.gdal_preset import get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
-from scripts.tile.tile_index import TileIndexException, get_tile_name
+from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
 def run_standardising(
-    files: List[str],
+    files: List[TileFiles],
     preset: str,
     cutline: Optional[str],
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
-    scale: int,
-    target_output: Optional[str] = None,
+    target_output: str = "/tmp/",
 ) -> List[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
 
@@ -48,17 +45,9 @@ def run_standardising(
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
-    actual_tiffs = []
-    standardized_tiffs: List[FileTiff] = []
-
-    for file in files:
-        if is_tiff(file) or is_vrt(file):
-            actual_tiffs.append(file)
-        else:
-            get_log().info("standardising_file_not_tiff_skipped", file=file)
 
     gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(actual_tiffs))
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(files))
 
     with Pool(concurrency) as p:
         standardized_tiffs = p.map(
@@ -67,11 +56,10 @@ def run_standardising(
                 preset=preset,
                 source_epsg=source_epsg,
                 target_epsg=target_epsg,
-                scale=scale,
                 target_output=target_output,
                 cutline=cutline,
             ),
-            actual_tiffs,
+            files,
         )
         p.close()
         p.join()
@@ -81,42 +69,60 @@ def run_standardising(
     return standardized_tiffs
 
 
-def download_tiff_file(input_file: str, tmp_path: str) -> str:
-    """Download a tiff file and some of its sidecar files if they exist.
+def download_tiffs(files: List[str], target: str) -> List[str]:
+    """Download a tiff file and some of its sidecar files if they exist to the target dir.
 
     Args:
-        input_file: file to download
-        tmp_path: target folder to write too
+        files: links source filename to target tilename
+        target: target folder to write too
 
     Returns:
-        location of the downloaded tiff
+        linked downloaded filename to target tilename
+
+    Example:
+    ```
+    >>> download_tiff_file(("s3://elevation/SN9457_CE16_10k_0502.tif", "CE16_5000_1003"), "/tmp/")
+    ("/tmp/123456.tif", "CE16_5000_1003")
+    ```
     """
-    target_file_path = os.path.join(tmp_path, str(ulid.ULID()))
-    input_file_path = target_file_path + ".tiff"
-    get_log().info("download_tiff", path=input_file, target_path=input_file_path)
+    downloaded_files: List[str] = []
+    for file in files:
+        target_file_path = os.path.join(target, str(ulid.ULID()))
+        input_file_path = target_file_path + ".tiff"
+        get_log().info("download_tiff", path=file, target_path=input_file_path)
 
-    write(input_file_path, read(input_file))
+        write(input_file_path, read(file))
+        downloaded_files.append(input_file_path)
 
-    base_file_path = os.path.splitext(input_file)[0]
-    # Attempt to download sidecar files too
-    for ext in [".prj", ".tfw"]:
-        try:
-            write(target_file_path + ext, read(base_file_path + ext))
-            get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
+        base_file_path = os.path.splitext(file)[0]
+        # Attempt to download sidecar files too
+        for ext in [".prj", ".tfw"]:
+            try:
+                write(target_file_path + ext, read(base_file_path + ext))
+                get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
 
-        except:  # pylint: disable-msg=bare-except
-            pass
+            except:  # pylint: disable-msg=bare-except
+                pass
 
-    return input_file_path
+    return downloaded_files
+
+
+def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
+    # Create the `vrt` file
+    vrt_path = os.path.join(target_path, "source.vrt")
+    # FIXME throw error if warnings generated
+    # gdalbuildvrt does not support heterogeneous band color
+    # gdalbuildvrt does not support heterogeneous projection: expected NZGD2000 / New Zealand Transverse
+    run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha))
+    return vrt_path
 
 
 # pylint: disable-msg=too-many-locals
 def standardising(
-    file: str,
+    todo: TileFiles,
     preset: str,
     source_epsg: str,
     target_epsg: str,
-    scale: int,
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> FileTiff:
@@ -137,99 +143,84 @@ def standardising(
     Returns:
         a FileTiff wrapper
     """
-
-    get_log().info("standardising", path=file)
-    original_gdalinfo = gdal_info(file, False)
-    origin = get_origin(original_gdalinfo)
-    try:
-        tile_name = get_tile_name(origin, scale)
-    except TileIndexException as tie:
-        if scale > 0:
-            get_log().error("File name not standardised", error=str(tie))
-        else:
-            get_log().debug("File name not standardised: scale is None")
-        tile_name = get_file_name_from_path(file)
-
-    standardized_file_name = f"{tile_name}.tiff"
+    standardized_file_name = todo.output + ".tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
-    tiff = FileTiff(file, preset)
-
-    if not exists(standardized_file_path):
-        with tempfile.TemporaryDirectory() as tmp_path:
-            standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-            input_file = file
-
-            # Ensure the remote file can be read locally, having multiple s3 paths with different credentials
-            # makes it hard for GDAL to do its thing
-            if is_s3(input_file):
-                input_file = download_tiff_file(input_file, tmp_path)
-
-            if cutline:
-                input_cutline_path = cutline
-                if is_s3(cutline):
-                    if not cutline.endswith((".fgb", ".geojson")):
-                        raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-                    input_cutline_path = os.path.join(tmp_path, str(ulid.ULID()) + os.path.splitext(cutline)[1])
-                    # Ensure the input cutline is a easy spot for GDAL to read
-                    write(input_cutline_path, read(cutline))
-
-                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-                run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-                input_file = target_vrt
-
-            else:
-                if tiff.is_no_data(original_gdalinfo) and tiff.get_tiff_type() == "Imagery":
-                    target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-                    run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
-                    input_file = target_vrt
-
-            if source_epsg != target_epsg:
-                target_vrt = os.path.join(tmp_path, str(ulid.ULID()) + ".vrt")
-                get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-                run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
-                input_file = target_vrt
-
-            # gdalinfo to get band offset and band type
-            transformed_image_gdalinfo = gdal_info(input_file, False)
-            command = get_gdal_command(
-                preset, epsg=target_epsg, convert_from=get_gdal_band_type(input_file, transformed_image_gdalinfo)
-            )
-            command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
-            run_gdal(command, input_file=input_file, output_file=standardized_working_path)
-
-            write(standardized_file_path, read(standardized_working_path))
-    else:
-        get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
-
+    tiff = FileTiff(todo.input, preset)
     tiff.set_path_standardised(standardized_file_path)
-    return tiff
 
+    # Already proccessed can skip processing
+    if exists(standardized_file_path):
+        get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
+        return tiff
 
-def main() -> None:
-    concurrency: int = 1
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=True)
-    parser.add_argument("--source", dest="source", nargs="+", required=True)
-    parser.add_argument("--cutline", dest="cutline", required=False)
-    parser.add_argument("--source-epsg", dest="source_epsg", required=True)
-    parser.add_argument("--target-epsg", dest="target_epsg", required=True)
-    parser.add_argument("--scale", dest="scale", required=True)
-    arguments = parser.parse_args()
-    source = format_source(arguments.source)
+    # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
+    with tempfile.TemporaryDirectory() as tmp_path:
+        standardized_working_path = os.path.join(tmp_path, standardized_file_name)
 
-    if is_argo():
-        concurrency = 4
+        source_tiffs = download_tiffs(todo.input, tmp_path)
+        vrt_add_alpha = True
 
-    run_standardising(
-        source,
-        arguments.preset,
-        arguments.cutline,
-        concurrency,
-        arguments.source_epsg,
-        arguments.target_epsg,
-        int(arguments.scale),
-    )
+        for file in source_tiffs:
+            gdal_data = gdal_info(file, False)
+            # gdal_data.epsg # ["epsg"]
+            bands = gdal_data["bands"]
+            if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
+                len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
+            ):
+                vrt_add_alpha = False
+            # TODO ensure bands are the same for all imagery
 
+        # Start from base VRT
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
 
-if __name__ == "__main__":
-    main()
+        # Create base COG from original file
+        # base_cog = os.path.join(output_dir, f"{output_tile}_c-LZW.tiff")
+        # custom_translate = get_custom_translate(
+        #     compression="LZW",
+        #     input_file=vrt_path,
+        #     output_file=base_cog,
+        #     extent_max=Point(max_x, max_y),
+        #     extent_min=Point(min_x, min_y),
+        #     driver="COG",
+        # )
+        # run_gdal(command=custom_translate)
+
+        # Apply cutline
+        if cutline:
+            input_cutline_path = cutline
+            if is_s3(cutline):
+                if not cutline.endswith((".fgb", ".geojson")):
+                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                input_cutline_path = os.path.join(tmp_path, "culine" + os.path.splitext(cutline)[1])
+                # Ensure the input cutline is a easy spot for GDAL to read
+                write(input_cutline_path, read(cutline))
+
+            target_vrt = os.path.join(tmp_path, "cutline.vrt")
+            # TODO: test a cutline with a VRT file
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+
+        # Reproject tiff if needed
+        if source_epsg != target_epsg:
+            target_vrt = os.path.join(tmp_path, "reproject.vrt")
+            get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+
+        transformed_image_gdalinfo = gdal_info(input_file, False)
+        command = get_gdal_command(preset, epsg=target_epsg)
+        command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
+
+        output_bounds: Bounds = get_bounds_from_name(todo.output)
+        min_x = output_bounds.point.x
+        max_y = output_bounds.point.y
+        min_y = max_y - output_bounds.size.height
+        max_x = min_x + output_bounds.size.width
+        tileExtent = [min_x, min_y, max_x, max_y]
+        command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f'EXTENT={",".join(str(e) for e in tileExtent)}'])
+
+        # Need GDAL to write to temporary location so no broken files end up in the done folder.
+        run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+
+        write(standardized_file_path, read(standardized_working_path))
+        return tiff
