@@ -30,9 +30,7 @@ def format_source(source: List[str]) -> List[TileFiles]:
     [TileFiles(output='output', input=['s3://bucket/SN9457_CE16_10k_0501.tif', 's3://bucket/SN9457_CE16_10k_0502.tif'])])]
     ```
     """
-    print(f"THIS IS THE SOURCE: {source}")
     if source[0].startswith("[{"):
-        print("IS JSON ARRAY")
         try:
             source_json: List[TileFiles] = json.loads(
                 source[0], object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
