@@ -7,10 +7,6 @@ on:
 jobs:
   build-containers:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -19,45 +15,17 @@ jobs:
 
       - name: Build containers
         run: |
-          docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
+          docker build . --tag topo-imagery-test --label "github_run_id=${GITHUB_RUN_ID}"
 
-      - name: Log in to Registry
+      - name: Log in to registry
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
 
-      - name: Publish Containers to GHCR
+      - name: Publish Containers
         if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
-        env:
-          TAG: topo-imagery
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
-          echo "GIT_VERSION=$GIT_VERSION" >> $GITHUB_ENV
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:latest
+          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:${GIT_VERSION}
 
-          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:latest
-          docker tag ${{ env.TAG }} ghcr.io/linz/${{ env.TAG }}:${GIT_VERSION}
-
-          docker push --all-tags ghcr.io/linz/${{ env.TAG }}
-
-      - name: Configure AWS Credentials
-        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-region: ap-southeast-2
-          mask-aws-account-id: true
-          role-to-assume: ${{ secrets.AWS_CI_ROLE }}
-
-      - name: Login to Amazon ECR
-        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Publish Containers to ECR
-        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}/eks
-          TAG: topo-imagery
-        run: |
-          docker tag ${{ env.TAG}} ${{ env.REGISTRY }}:${{ env.TAG }}-latest
-          docker tag ${{ env.TAG}} ${{ env.REGISTRY }}:${{ env.TAG }}-${{ env.GIT_VERSION }}
-
-          docker push --all-tags ${{ env.REGISTRY }}
+          docker push --all-tags ghcr.io/paulfouquet/topo-imagery-test

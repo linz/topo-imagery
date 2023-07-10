@@ -2,37 +2,47 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import List, Optional
+from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
 from linz_logger import get_log
 
 
-def format_source(source: List[str]) -> List[str]:
-    """Due to Argo constraints if using the basemaps cli list command
-    the source has a string that contains a list that needs to be split.
-    example: ["[\"s3://test/image_one.tiff\", \"s3://test/image_two.tiff\"]"]
+class TileFiles(NamedTuple):
+    output: str
+    input: List[str]
+
+
+def format_source(source: List[str]) -> List[TileFiles]:
+    """Tranform a list of file names (local) or dictionnaries (Argo Workflows) to a list of `TileFiles`
+
+    Args:
+        source: a list of file names or containing a stringify list of dictionnary
+
+    Returns:
+        a list of `TileFiles` namedtuple
+
+    Example:
+    ```
+    >>> format_source(["[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]"])
+    [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
+    >>> format_source(["s3://bucket/SN9457_CE16_10k_0501.tif", "s3://bucket/SN9457_CE16_10k_0502.tif"])
+    [TileFiles(output='output', input=['s3://bucket/SN9457_CE16_10k_0501.tif', 's3://bucket/SN9457_CE16_10k_0502.tif'])])]
+    ```
     """
-    if len(source) == 1 and source[0].startswith("["):
+    print(f"THIS IS THE SOURCE: {source}")
+    if source[0].startswith("[{"):
+        print("IS JSON ARRAY")
         try:
-            source_json: List[str] = json.loads(source[0])
+            source_json: List[TileFiles] = json.loads(
+                source[0], object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+            )
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-    return source
-
-
-def parse_source() -> List[str]:
-    """Parse the CLI argument '--source' and format it to a list of paths.
-
-    Returns:
-        List[str]: A list of paths.
-    """
-    parser_args = argparse.ArgumentParser()
-    parser_args.add_argument("--source", dest="source", nargs="+", required=True)
-    arguments = parser_args.parse_args()
-
-    return format_source(arguments.source)
+    # FIXME: this is when it runs locally. As the tilename is not get anymore here,
+    # "output" is a placeholder for the output tile when executed locally
+    return [TileFiles(output="output", input=source)]
 
 
 def is_argo() -> bool:
@@ -86,23 +96,3 @@ def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
     if list_s:
         return [s.strip() for s in list_s.split(separator) if s != ""]
     return []
-
-
-def coalesce_multi_single(multi_items: Optional[str], single_item: Optional[str]) -> List[str]:
-    """Coalesce strings containing either semicolon delimited values or a single
-    value into a list. `single_item` is used only if `multi_items` is falsy.
-    If both are falsy, an empty list is returned.
-
-    Args:
-        multi_items: string with semicolon delimited values
-        single_item: string with a single value
-
-    Returns:
-        a list of values
-    """
-    output = []
-    if multi_items:
-        output.extend(parse_list(multi_items))
-    elif single_item:
-        output.append(single_item)
-    return output
