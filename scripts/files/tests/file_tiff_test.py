@@ -89,7 +89,7 @@ def test_check_band_count_invalid_alpha_DEM() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo, color_interpretation="Alpha")
 
-    file_tiff = FileTiff("test", "dem_lerc")
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -105,7 +105,7 @@ def test_check_band_count_invalid_3_DEM() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test", "dem_lerc")
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -149,7 +149,7 @@ def test_check_color_interpretation_valid_DEM() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Gray")
 
-    file_tiff = FileTiff("test", "dem_lerc")
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -164,7 +164,7 @@ def test_check_color_interpretation_invalid_DEM() -> None:
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
 
-    file_tiff = FileTiff("test", "dem_lerc")
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert file_tiff.get_errors()

@@ -1,4 +1,5 @@
 from typing import NamedTuple, Union
+
 from scripts.tile.util import charcodeat
 
 SHEET_WIDTH = 24_000
@@ -214,11 +215,29 @@ def get_bounds_from_name(tile_name: str) -> Bounds:
 
 
 def get_mapsheet_offset(sheet_code: str) -> Point:
-    ms = sheet_code[:2]
-    x = int(float(sheet_code[-2:]))
+    """Convert a mapsheet code into the origin point for the mapsheet
 
+    Args:
+        sheet_code: topo 50 map sheet code eg "CG10"
+
+    Returns:
+        Point: The top left point of the mapsheet
+
+    Example:
+        >>> get_mapsheet_offset("CG10")
+        Point(x=1228000, y=4866000)
+    """
+
+    # from a mapsheet of "CG10", Y offset is "CG", X offset is 10
+    # Y:"CG" x:"10"
+    x = int(sheet_code[-2:])  # x = 10
+
+    ms = sheet_code[:2]  # 'CG'
+    # position difference of "S" and "A" as mapsheets start at "AS"
     base_y_offset = CHAR_S - CHAR_A
+    # "C" -> C:67 - A:65 = 2 * 26 (Mapsheet codes A-Z)
     first_letter_offset = (charcodeat(ms, 0) - CHAR_A) * 26
+    # "G" -> G:71 - A:65 = 6
     second_letter_offset = charcodeat(ms, 1) - CHAR_A
 
     y = first_letter_offset + second_letter_offset - base_y_offset

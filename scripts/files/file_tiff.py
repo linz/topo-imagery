@@ -222,10 +222,8 @@ class FileTiff:
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
-            print(f"====> NODATAVALUE: {current_nodata_val}")
-            print(f"====> gdalinfo: {self._gdalinfo}")
             # GDALINFO shows the `noDataValue` as `-9999.0`
-            if self._tiff_type == "DEM" and int(current_nodata_val) != -9999:
+            if self._tiff_type == "DEM" and current_nodata_val and int(current_nodata_val) != -9999:
                 self.add_error(
                     error_type=FileTiffErrorType.NO_DATA,
                     error_message="noDataValue is not -9999",

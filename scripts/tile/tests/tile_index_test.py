@@ -1,7 +1,16 @@
 from pytest import CaptureFixture, raises
 
 from scripts.tile.tests.tile_index_data import MAP_SHEET_DATA
-from scripts.tile.tile_index import Point, TileIndexException, get_tile_name, round_with_correction
+from scripts.tile.tile_index import (
+    Bounds,
+    Point,
+    Size,
+    TileIndexException,
+    get_bounds_from_name,
+    get_mapsheet_offset,
+    get_tile_name,
+    round_with_correction,
+)
 
 
 def test_check_alignment_build_correct_sheet_code() -> None:
@@ -49,3 +58,17 @@ def test_round_origin() -> None:
     assert round_with_correction(5444160.051) == 5444160.05
     assert round_with_correction(5444160.015) == 5444160
     assert round_with_correction(5444160.985) == 5444161
+
+
+def test_get_bounds_from_name() -> None:
+    expected_bounds = Bounds(Point(x=1236640, y=4837560), Size(width=240, height=360))
+    bounds = get_bounds_from_name("CG10_500_080037")
+    assert expected_bounds == bounds
+
+
+def test_get_mapsheet_offset() -> None:
+    # Point(x=SHEET_WIDTH * x + SHEET_ORIGIN_LEFT, y=SHEET_ORIGIN_TOP - SHEET_HEIGHT * y)
+    for sheet_data in MAP_SHEET_DATA:
+        map_sheet_offset = get_mapsheet_offset(sheet_data["code"])
+        origin = Point(x=sheet_data["origin"]["x"], y=sheet_data["origin"]["y"])
+        assert map_sheet_offset == origin
