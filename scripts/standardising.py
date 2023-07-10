@@ -16,6 +16,7 @@ from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
+from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
 def run_standardising(
@@ -172,6 +173,18 @@ def standardising(
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
 
+        # Create base COG from original file
+        # base_cog = os.path.join(output_dir, f"{output_tile}_c-LZW.tiff")
+        # custom_translate = get_custom_translate(
+        #     compression="LZW",
+        #     input_file=vrt_path,
+        #     output_file=base_cog,
+        #     extent_max=Point(max_x, max_y),
+        #     extent_min=Point(min_x, min_y),
+        #     driver="COG",
+        # )
+        # run_gdal(command=custom_translate)
+
         # Apply cutline
         if cutline:
             input_cutline_path = cutline
@@ -197,6 +210,15 @@ def standardising(
         transformed_image_gdalinfo = gdal_info(input_file, False)
         command = get_gdal_command(preset, epsg=target_epsg)
         command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
+
+        output_bounds: Bounds = get_bounds_from_name(todo.output)
+        min_x = output_bounds.point.x
+        max_y = output_bounds.point.y
+        min_y = max_y - output_bounds.size.height
+        max_x = min_x + output_bounds.size.width
+        tileExtent = [min_x, min_y, max_x, max_y]
+        command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f'EXTENT={",".join(str(e) for e in tileExtent)}'])
+
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
