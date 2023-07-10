@@ -94,3 +94,23 @@ def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
     if list_s:
         return [s.strip() for s in list_s.split(separator) if s != ""]
     return []
+
+
+def coalesce_multi_single(multi_items: Optional[str], single_item: Optional[str]) -> List[str]:
+    """Coalesce strings containing either semicolon delimited values or a single
+    value into a list. `single_item` is used only if `multi_items` is falsy.
+    If both are falsy, an empty list is returned.
+
+    Args:
+        multi_items: string with semicolon delimited values
+        single_item: string with a single value
+
+    Returns:
+        a list of values
+    """
+    output = []
+    if multi_items:
+        output.extend(parse_list(multi_items))
+    elif single_item:
+        output.append(single_item)
+    return output
