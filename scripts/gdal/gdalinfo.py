@@ -8,6 +8,12 @@ from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.tile.tile_index import Point
 
 
+class GdalInfoBandColorTable(TypedDict):
+    palette: str
+    count: int
+    entries: List[List[int]]
+
+
 class GdalInfoBand(TypedDict):
     band: int
     """band offset, starting at 1
@@ -17,9 +23,10 @@ class GdalInfoBand(TypedDict):
     colorInterpretation: str
     """Color
     Examples:
-        "Red", "Green", "Blue", "Alpha", "Gray"
+        "Red", "Green", "Blue", "Alpha", "Gray", "Palette"
     """
     noDataValue: Optional[int]
+    colorTable: Optional[GdalInfoBandColorTable]
 
 
 class GdalInfo(TypedDict):

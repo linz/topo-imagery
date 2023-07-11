@@ -36,19 +36,31 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
 
     bands = info["bands"]
 
-    alpha_band = find_band(bands, "Alpha")
-    alpha_band_info: List[str] = []
-    if alpha_band:
-        alpha_band_info.extend(["-b", str(alpha_band["band"])])
+    band_alpha_arg: List[str] = []
+    if band_alpha := find_band(bands, "Alpha"):
+        band_alpha_arg.extend(["-b", str(band_alpha["band"])])
 
-    grey_band = find_band(bands, "Gray")
-    if grey_band:
-        grey_band_index = str(grey_band["band"])
+    if band_grey := find_band(bands, "Gray"):
+        band_grey_index = str(band_grey["band"])
         if preset == "dem_lerc":
             # return single band if DEM/DSM
-            return ["-b", grey_band_index]
+            return ["-b", band_grey_index]
         # Grey scale imagery, set R,G and B to just the grey_band
-        return ["-b", grey_band_index, "-b", grey_band_index, "-b", grey_band_index] + alpha_band_info
+        return ["-b", band_grey_index, "-b", band_grey_index, "-b", band_grey_index] + band_alpha_arg
+
+    if band_palette := find_band(bands, "Palette"):
+        if colour_table := band_palette["colorTable"]:
+            palette_channels = len(colour_table["entries"][0])
+            if palette_channels == 4:
+                return ["-expand", "rgba"]
+            if palette_channels == 3:
+                return ["-expand", "rgb"]
+            get_log().error(
+                "unknown_palette_band_type",
+                palette_channels=palette_channels,
+                first_entry=colour_table["entries"][0],
+            )
+        get_log().error("palette_band_missing_colorTable")
 
     band_red = find_band(bands, "Red")
     band_green = find_band(bands, "Green")
@@ -61,12 +73,12 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
 
         # Not enough bands for RGB assume it is grey scale
         if len(bands) < 3:
-            return ["-b", "1", "-b", "1", "-b", "1"] + alpha_band_info
+            return ["-b", "1", "-b", "1", "-b", "1"] + band_alpha_arg
 
         # Could be RGB assume it is RGB
-        return ["-b", "1", "-b", "2", "-b", "3"] + alpha_band_info
+        return ["-b", "1", "-b", "2", "-b", "3"] + band_alpha_arg
 
-    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + alpha_band_info
+    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + band_alpha_arg
 
 
 def get_gdal_band_type(file: str, info: Optional[GdalInfo] = None) -> str:
