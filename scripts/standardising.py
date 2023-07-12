@@ -110,9 +110,6 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
-    # FIXME throw error if warnings generated
-    # gdalbuildvrt does not support heterogeneous band color
-    # gdalbuildvrt does not support heterogeneous projection: expected NZGD2000 / New Zealand Transverse
     run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha))
     return vrt_path
 
