@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
@@ -24,6 +24,23 @@ def add_band(
                 "colorInterpretation": color_interpretation,
                 "noDataValue": no_data_value,
                 "type": band_type,
+            },
+        )
+    )
+
+
+def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: List[List[int]], no_data_value: Optional[int] = None) -> None:
+    if gdalinfo.get("bands", None) is None:
+        gdalinfo["bands"] = []
+
+    gdalinfo["bands"].append(
+        cast(
+            GdalInfoBand,
+            {
+                "band": len(gdalinfo["bands"]) + 1,
+                "colorInterpretation": "Palette",
+                "noDataValue": no_data_value,
+                "colorTable": {"palette": "RGB", "count": len(colour_table_entries), "entries": colour_table_entries},
             },
         )
     )
