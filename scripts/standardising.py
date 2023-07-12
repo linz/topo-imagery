@@ -20,7 +20,7 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
 def run_standardising(
-    files: List[TileFiles],
+    todo: List[TileFiles],
     preset: str,
     cutline: Optional[str],
     concurrency: int,
@@ -47,7 +47,7 @@ def run_standardising(
     start_time = time_in_ms()
 
     gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(files))
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(todo))
 
     with Pool(concurrency) as p:
         standardized_tiffs = p.map(
@@ -59,7 +59,7 @@ def run_standardising(
                 target_output=target_output,
                 cutline=cutline,
             ),
-            files,
+            todo,
         )
         p.close()
         p.join()
