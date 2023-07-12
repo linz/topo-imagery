@@ -60,8 +60,11 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
                 "unknown_palette_band_type",
                 palette_channels=palette_channels,
                 first_entry=colour_table["entries"][0],
+                path=file,
             )
-        get_log().error("palette_band_missing_colorTable")
+            raise RuntimeError("unknown_palette_band_type")
+        get_log().error("palette_band_missing_colorTable", path=file)
+        raise RuntimeError("palette_band_missing_colorTable")
 
     band_red = find_band(bands, "Red")
     band_green = find_band(bands, "Green")
