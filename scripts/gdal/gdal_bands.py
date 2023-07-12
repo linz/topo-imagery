@@ -21,6 +21,7 @@ def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
     return None
 
 
+# pylint: disable-msg=too-many-return-statements
 def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Optional[str] = None) -> List[str]:
     """Get the banding parameters for a `gdal_translate` command.
 
