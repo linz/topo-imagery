@@ -20,7 +20,7 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
 def run_standardising(
-    files: List[TileFiles],
+    todo: List[TileFiles],
     preset: str,
     cutline: Optional[str],
     concurrency: int,
@@ -47,7 +47,7 @@ def run_standardising(
     start_time = time_in_ms()
 
     gdal_version = get_gdal_version()
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(files))
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(todo))
 
     with Pool(concurrency) as p:
         standardized_tiffs = p.map(
@@ -59,7 +59,7 @@ def run_standardising(
                 target_output=target_output,
                 cutline=cutline,
             ),
-            files,
+            todo,
         )
         p.close()
         p.join()
@@ -110,16 +110,13 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
-    # FIXME throw error if warnings generated
-    # gdalbuildvrt does not support heterogeneous band color
-    # gdalbuildvrt does not support heterogeneous projection: expected NZGD2000 / New Zealand Transverse
     run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha))
     return vrt_path
 
 
 # pylint: disable-msg=too-many-locals
 def standardising(
-    todo: TileFiles,
+    files: TileFiles,
     preset: str,
     source_epsg: str,
     target_epsg: str,
@@ -143,9 +140,9 @@ def standardising(
     Returns:
         a FileTiff wrapper
     """
-    standardized_file_name = todo.output + ".tiff"
+    standardized_file_name = files.output + ".tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
-    tiff = FileTiff(todo.input, preset)
+    tiff = FileTiff(files.input, preset)
     tiff.set_path_standardised(standardized_file_path)
 
     # Already proccessed can skip processing
@@ -157,33 +154,19 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
 
-        source_tiffs = download_tiffs(todo.input, tmp_path)
+        source_tiffs = download_tiffs(files.input, tmp_path)
         vrt_add_alpha = True
 
         for file in source_tiffs:
             gdal_data = gdal_info(file, False)
-            # gdal_data.epsg # ["epsg"]
             bands = gdal_data["bands"]
             if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
                 len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
             ):
                 vrt_add_alpha = False
-            # TODO ensure bands are the same for all imagery
 
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
-
-        # Create base COG from original file
-        # base_cog = os.path.join(output_dir, f"{output_tile}_c-LZW.tiff")
-        # custom_translate = get_custom_translate(
-        #     compression="LZW",
-        #     input_file=vrt_path,
-        #     output_file=base_cog,
-        #     extent_max=Point(max_x, max_y),
-        #     extent_min=Point(min_x, min_y),
-        #     driver="COG",
-        # )
-        # run_gdal(command=custom_translate)
 
         # Apply cutline
         if cutline:
@@ -211,13 +194,12 @@ def standardising(
         command = get_gdal_command(preset, epsg=target_epsg)
         command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
 
-        output_bounds: Bounds = get_bounds_from_name(todo.output)
+        output_bounds: Bounds = get_bounds_from_name(files.output)
         min_x = output_bounds.point.x
         max_y = output_bounds.point.y
         min_y = max_y - output_bounds.size.height
         max_x = min_x + output_bounds.size.width
-        tileExtent = [min_x, min_y, max_x, max_y]
-        command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f'EXTENT={",".join(str(e) for e in tileExtent)}'])
+        command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
