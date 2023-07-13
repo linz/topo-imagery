@@ -1,11 +1,15 @@
 import argparse
 import json
+import os
 from datetime import datetime
 from os import environ
+from threading import local
 from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
 from linz_logger import get_log
+
+from scripts.files.files_helper import get_file_name_from_path
 
 
 class TileFiles(NamedTuple):
@@ -15,6 +19,7 @@ class TileFiles(NamedTuple):
 
 def format_source(source: List[str]) -> List[TileFiles]:
     """Tranform a list of file names (local) or dictionnaries (Argo Workflows) to a list of `TileFiles`
+    When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
 
     Args:
         source: a list of file names or containing a stringify list of dictionnary
@@ -38,9 +43,12 @@ def format_source(source: List[str]) -> List[TileFiles]:
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-    # FIXME: this is when it runs locally. As the tilename is not get anymore here,
-    # "output" is a placeholder for the output tile when executed locally
-    return [TileFiles(output="output", input=source)]
+    
+    local_tile_file: List[TileFiles] = []
+    for s in source:
+        local_tile_file.append(TileFiles(output=os.path.splitext(get_file_name_from_path(s))[0], input=s))
+
+    return local_tile_file
 
 
 def is_argo() -> bool:
