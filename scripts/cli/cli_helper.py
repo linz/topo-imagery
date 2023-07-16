@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime
 from os import environ
-from threading import local
 from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
@@ -43,10 +42,10 @@ def format_source(source: List[str]) -> List[TileFiles]:
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-    
+
     local_tile_file: List[TileFiles] = []
     for s in source:
-        local_tile_file.append(TileFiles(output=os.path.splitext(get_file_name_from_path(s))[0], input=s))
+        local_tile_file.append(TileFiles(output=os.path.splitext(get_file_name_from_path(s))[0], input=[s]))
 
     return local_tile_file
 
