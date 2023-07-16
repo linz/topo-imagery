@@ -17,8 +17,13 @@ def test_format_source_multiple_inputs() -> None:
     source = ["s3://test/image_one.tiff", "s3://test/image_two.tiff"]
     tile_files: List[TileFiles] = format_source(source)
     input_files = tile_files[0].input
-    assert len(input_files) == 2
-    assert input_files == ["s3://test/image_one.tiff", "s3://test/image_two.tiff"]
+    assert len(input_files) == 1
+    assert input_files == ["s3://test/image_one.tiff"]
+    assert tile_files[0].output == "image_one"
+    input_files = tile_files[1].input
+    assert len(input_files) == 1
+    assert input_files == ["s3://test/image_two.tiff"]
+    assert tile_files[1].output == "image_two"
 
 
 def test_format_source_json_loading_error() -> None:
