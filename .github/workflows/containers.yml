@@ -14,7 +14,10 @@ jobs:
     env:
       AWS_CI_ROLE: ${{ secrets.AWS_CI_ROLE }}
     steps:
-      - uses: linz/action-typescript@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup GIT version
         id: version
