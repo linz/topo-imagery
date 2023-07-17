@@ -13,7 +13,7 @@ from scripts.files.file_tiff import FileTiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_alpha_command, get_build_vrt_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdal_preset import get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
@@ -107,10 +107,10 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
     return downloaded_files
 
 
-def create_vrt(source_tiffs: List[str], target_path: str) -> str:
+def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
-    run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path))
+    run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha))
     return vrt_path
 
 
@@ -166,9 +166,7 @@ def standardising(
                 vrt_add_alpha = False
 
         # Start from base VRT
-        input_file = create_vrt(source_tiffs, tmp_path)
-        target_vrt = "target.vrt"
-        input_cutline_path = ""
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
 
         # Apply cutline
         if cutline:
@@ -180,9 +178,9 @@ def standardising(
                 # Ensure the input cutline is a easy spot for GDAL to read
                 write(input_cutline_path, read(cutline))
 
-        # TODO: test a cutline with a VRT file
-        if cutline or vrt_add_alpha:
-            run_gdal(get_alpha_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            target_vrt = os.path.join(tmp_path, "cutline.vrt")
+            # TODO: test a cutline with a VRT file
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
         # Reproject tiff if needed

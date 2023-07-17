@@ -122,7 +122,7 @@ def get_gdal_command(preset: str, epsg: str) -> List[str]:
     return gdal_command
 
 
-def get_alpha_command(cutline: Optional[str]) -> List[str]:
+def get_cutline_command(cutline: Optional[str]) -> List[str]:
     """Get a `gdalwarp` command to create a virtual file (`.vrt`) which has a cutline applied and alpha added.
 
     Args:
@@ -148,12 +148,31 @@ def get_alpha_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: List[str], output: str = "output.vrt") -> List[str]:
-    gdal_command = ["gdalbuildvrt", "-strict"]
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+    gdal_command = ["gdalbuildvrt", "-hidenodata", "-strict"]
+    if add_alpha:
+        gdal_command.append("-addalpha")
     gdal_command.append(output)
     gdal_command += files
 
     return gdal_command
+
+
+def get_alpha_command() -> List[str]:
+    """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
+
+    Returns:
+        a list of arguments to run `gdalwarp`
+    """
+
+    return [
+        "gdalwarp",
+        # Outputting a VRT makes things faster as its not recomputing everything
+        "-of",
+        "VRT",
+        # Ensure the target has a alpha channel
+        "-dstalpha",
+    ]
 
 
 def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:

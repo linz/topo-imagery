@@ -1,4 +1,4 @@
-from scripts.gdal.gdal_preset import get_alpha_command, get_gdal_command
+from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
 
 
 def test_preset_webp() -> None:
@@ -64,7 +64,7 @@ def test_preset_dem_lerc() -> None:
 
 
 def test_cutline_params() -> None:
-    gdal_command = get_alpha_command("cutline.fgb")
+    gdal_command = get_cutline_command("cutline.fgb")
 
     assert "-cutline" in gdal_command
     assert "cutline.fgb" in gdal_command
