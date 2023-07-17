@@ -33,7 +33,7 @@ def run_standardising(
     Args:
         files: list of source files to standardise
         preset: gdal preset to use. See `gdal.gdal_preset.py`
-        cutline: path to the cutline. Must be `.fgb` or `.geojson`.
+        cutline: path to the cutline. Must be `.fgb` or `.geojson`
         concurrency: number of concurrent files to process
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
