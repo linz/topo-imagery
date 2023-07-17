@@ -7,25 +7,79 @@ on:
 jobs:
   build-containers:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - uses: linz/action-typescript@v3
 
-      - name: Build containers
-        run: |
-          docker build . --tag topo-imagery-test --label "github_run_id=${GITHUB_RUN_ID}"
-
-      - name: Log in to registry
-        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-
-      - name: Publish Containers
-        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+      - name: Setup GIT version
+        id: version
         run: |
           GIT_VERSION=$(git describe --tags --always --match 'v*')
-          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:latest
-          docker tag topo-imagery-test ghcr.io/paulfouquet/topo-imagery-test:${GIT_VERSION}
+          GIT_VERSION_MAJOR=$(echo $GIT_VERSION | cut -d. -f1)
+          GIT_VERSION_MAJOR_MINOR=$(echo $GIT_VERSION | cut -d. -f1,2)
+          echo "version=${GIT_VERSION}" >> $GITHUB_OUTPUT
+          echo "version_major=${GIT_VERSION_MAJOR}" >> $GITHUB_OUTPUT
+          echo "version_major_minor=${GIT_VERSION_MAJOR_MINOR}" >> $GITHUB_OUTPUT
 
-          docker push --all-tags ghcr.io/paulfouquet/topo-imagery-test
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ github.repository }}
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      - name: Login to GitHub Container Registry
+        if: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure AWS Credentials
+        if: ${{ secrets.AWS_CI_ROLE }} && ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ap-southeast-2
+          mask-aws-account-id: true
+          role-to-assume: ${{ secrets.AWS_CI_ROLE }}
+      
+      - name: Login to Amazon ECR
+        if: ${{ secrets.AWS_CI_ROLE }} && ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Setup docker tags
+        id: tags
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const tags = [];
+            tags.push('ghcr.io/${{ github.repository }}:latest');
+            tags.push('ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}');
+            if ("${{ steps.login-ecr.outputs.registry }}") {
+            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-latest');
+            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-${{ steps.version.outputs.version }}');
+            }
+            return tags.join(', ')
+
+      - name: Build and push container
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          tags: ${{ steps.tags.outputs.result }}
+          push: ${{(github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:'))}}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_HASH=${{ github.sha }}
+            GIT_VERSION=${{ steps.version.outputs.version }} 
+            GITHUB_RUN_ID=${{ github.run_id}}
