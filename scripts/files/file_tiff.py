@@ -20,6 +20,11 @@ class FileTiffErrorType(str, Enum):
     COLOR = "color"
 
 
+class FileTiffType(str, Enum):
+    IMAGERY = "Imagery"
+    DEM = "DEM"
+
+
 class FileTiff:
     """Wrapper to carry information about the TIFF file."""
 
@@ -35,9 +40,9 @@ class FileTiff:
         self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
         if preset == "dem_lerc":
-            self._tiff_type = "DEM"
+            self._tiff_type = FileTiffType.DEM
         else:
-            self._tiff_type = "Imagery"
+            self._tiff_type = FileTiffType.IMAGERY
 
     def set_srs(self, srs: bytes) -> None:
         """Set the Spatial Reference System returned by `gdalsrsinfo` for the TIFF.

@@ -9,11 +9,17 @@ from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
-from scripts.files.file_tiff import FileTiff
+from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
-from scripts.gdal.gdal_preset import get_build_vrt_command, get_cutline_command, get_gdal_command, get_transform_srs_command
+from scripts.gdal.gdal_preset import (
+    get_alpha_command,
+    get_build_vrt_command,
+    get_cutline_command,
+    get_gdal_command,
+    get_transform_srs_command,
+)
 from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
@@ -167,6 +173,7 @@ def standardising(
 
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
+        target_vrt = os.path.join(tmp_path, "output.vrt")
 
         # Apply cutline
         if cutline:
@@ -179,8 +186,11 @@ def standardising(
                 write(input_cutline_path, read(cutline))
 
             target_vrt = os.path.join(tmp_path, "cutline.vrt")
-            # TODO: test a cutline with a VRT file
             run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+        elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
+            target_vrt = os.path.join(tmp_path, "target.vrt")
+            run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
         # Reproject tiff if needed
