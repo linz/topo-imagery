@@ -1,0 +1,43 @@
+name: TEST
+on:
+  workflow_call:
+  push:
+    branches:
+      - master
+jobs:
+  build-containers:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    env:
+      AWS_CI_ROLE: ${{ secrets.AWS_CI_ROLE }}
+      ENV_TEST: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: test
+        id: test
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            console.log('env.AWS_CI_ROLE:');
+            console.log(${{ env.AWS_CI_ROLE }});
+            console.log('env.ENV_TEST:');
+            console.log(${{ env.ENV_TEST }});
+
+      - name: Should or should not run
+        if: ${{ env.ENV_TEST != '' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ap-southeast-2
+          mask-aws-account-id: true
+          role-to-assume: ${{ env.AWS_CI_ROLE }}
+
+
+    
