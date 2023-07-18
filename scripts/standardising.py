@@ -114,6 +114,16 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
 
 
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
+    """Create a VRT from a list of tiffs files
+
+    Args:
+        source_tiffs: list of tiffs to create the VRT from
+        target_path: path of the generated VRT
+        add_alpha: add alpha band to the VRT. Defaults to False.
+
+    Returns:
+        the path to the VRT created
+    """
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
     run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha))
