@@ -14,7 +14,6 @@ from scripts.standardising import run_standardising
 
 def main() -> None:
     # pylint: disable-msg=too-many-locals
-    # TODO: make arguments into reusable code for standardising and standardise-validate
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--source", dest="source", nargs="+", required=True, help="The path to the input tiffs")
@@ -26,7 +25,6 @@ def main() -> None:
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
-    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
         "--start-datetime", dest="start_datetime", help="Start datetime in format YYYY-MM-DD", type=valid_date, required=True
@@ -39,11 +37,6 @@ def main() -> None:
     tile_files: List[TileFiles] = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
-    scale = arguments.scale
-    if scale == "None":
-        scale = 0
-    else:
-        scale = int(arguments.scale)
     concurrency: int = 2
     if is_argo():
         concurrency = 4
@@ -69,7 +62,6 @@ def main() -> None:
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + ".json"
         if not exists(stac_item_path):
             file.set_srs(srs)
-            file.set_scale(scale)
 
             # Validate the file
             if not file.validate():

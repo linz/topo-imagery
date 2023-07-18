@@ -37,13 +37,12 @@ def run_standardising(
     """Run `standardising()` in parallel (`concurrency`).
 
     Args:
-        files: list of source files to standardise
+        todo: list of TileFiles (tile name and input files) to standardise
         preset: gdal preset to use. See `gdal.gdal_preset.py`
         cutline: path to the cutline. Must be `.fgb` or `.geojson`.
         concurrency: number of concurrent files to process
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
-        scale: scale on what is based the file to standardise
         target_output: output directory path. Defaults to "/tmp/"
 
     Returns:
@@ -146,7 +145,6 @@ def standardising(
         preset: gdal preset to use. See `gdal.gdal_preset.py`
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
-        scale: scale on what is based the file to standardise
         cutline: path to the cutline. Must be `.fgb` or `.geojson`
         target_output: output directory path. Defaults to "/tmp/"
 

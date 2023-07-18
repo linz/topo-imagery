@@ -39,26 +39,6 @@ def is_tiff(path: str) -> bool:
     return path.lower().endswith((".tiff", ".tif"))
 
 
-def is_vrt(path: str) -> bool:
-    """Verify if file is a VRT.
-
-    Args:
-        path: a path to a file
-
-    Returns:
-        True if the file is a VRT
-
-    Examples:
-        ```
-        >>> is_tiff("/a/path/to/file.vrt")
-        True
-        >>> is_tiff("/a/path/to/file.shp")
-        False
-        ```
-    """
-    return path.lower().endswith(".vrt")
-
-
 def is_json(path: str) -> bool:
     """Verify if file is a JSON.
 
