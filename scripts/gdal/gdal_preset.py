@@ -149,6 +149,16 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
 
 
 def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+    """Build a VRT from a list of tiff files.
+
+    Args:
+        files: list of tiffs to build the vrt from
+        output: the name of the VRT generated. Defaults to "output.vrt".
+        add_alpha: use `-addalpha`. Defaults to False.
+
+    Returns:
+        The GDAL command to build the VRT.
+    """
     gdal_command = ["gdalbuildvrt", "-strict"]
     if add_alpha:
         gdal_command.append("-addalpha")
