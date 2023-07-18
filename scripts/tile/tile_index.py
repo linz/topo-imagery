@@ -196,6 +196,7 @@ def get_tile_name(origin: Point, grid_size: int) -> str:
 
 
 def get_bounds_from_name(tile_name: str) -> Bounds:
+    #TODO add missing docstring
     name_parts = tile_name.split("_")
     map_sheet = name_parts[0]
     grid_size = int(name_parts[1])
@@ -254,6 +255,7 @@ def get_mapsheet_offset(sheet_code: str) -> Point:
 
 
 def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
+    #TODO add missing docstring
     scale = grid_size / GRID_SIZE_MAX
     offset_x = SHEET_WIDTH * scale
     offset_y = SHEET_HEIGHT * scale
