@@ -1,43 +1,41 @@
 import json
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from linz_logger import get_log
-
-from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
-from scripts.tile.tile_index import TileIndexException, get_tile_name
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
 
 class FileTiffErrorType(str, Enum):
     GDAL_INFO = "gdalinfo"
     NO_DATA = "nodata"
     BANDS = "bands"
-    TILE_ALIGNMENT = "tile_alignment"
     SRS = "srs"
     COLOR = "color"
 
 
+class FileTiffType(str, Enum):
+    IMAGERY = "Imagery"
+    DEM = "DEM"
+
+
 class FileTiff:
-    """Wrapper to carry information about the TIFF file."""
+    """Wrapper to carry information about the TIFF or list of TIFF within the same tile."""
 
     def __init__(
         self,
-        path: str,
+        path: List[str],
         preset: Optional[str] = None,
     ) -> None:
         self._path_original = path
         self._path_standardised = ""
         self._errors: List[Dict[str, Any]] = []
-        self._scale = 0
         self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
         if preset == "dem_lerc":
-            self._tiff_type = "DEM"
+            self._tiff_type = FileTiffType.DEM
         else:
-            self._tiff_type = "Imagery"
+            self._tiff_type = FileTiffType.IMAGERY
 
     def set_srs(self, srs: bytes) -> None:
         """Set the Spatial Reference System returned by `gdalsrsinfo` for the TIFF.
@@ -95,14 +93,6 @@ class FileTiff:
         """
         self._srs = srs
 
-    def set_scale(self, scale: int) -> None:
-        """Set the cartographic scale of the TIFF.
-
-        Args:
-            scale: the scale as `int` between tile_index.GRID_SIZES
-        """
-        self._scale = scale
-
     def set_path_standardised(self, path: str) -> None:
         """Set the standardised file path.
 
@@ -137,14 +127,6 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
-    def set_gdalinfo(self, gdalinfo: GdalInfo) -> None:
-        """Set the `gdalinfo` output for the file.
-
-        Args:
-            gdalinfo: the `gdalinfo` output
-        """
-        self._gdalinfo = gdalinfo
-
     def get_errors(self) -> List[Dict[str, Any]]:
         """Get the Non Visual QA errors.
 
@@ -153,11 +135,12 @@ class FileTiff:
         """
         return self._errors
 
-    def get_path_original(self) -> str:
-        """Get the path of the original (non standardised) file.
+    def get_path_original(self) -> List[str]:
+        """Get the path(es) of the original (non standardised) file.
+        It can be a list of path if the standardised file is a retiled image.
 
         Returns:
-            a file path
+            a list of file path
         """
         return self._path_original
 
@@ -169,7 +152,12 @@ class FileTiff:
         """
         return self._path_standardised
 
-    def get_tiff_type(self) -> str:
+    def get_tiff_type(self) -> FileTiffType:
+        """Get the TIFF type.
+
+        Returns:
+            an element of `FileTiffType`
+        """
         return self._tiff_type
 
     def add_error(
@@ -221,7 +209,14 @@ class FileTiff:
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
-            if current_nodata_val != 255:
+            # GDALINFO shows the `noDataValue` as `-9999.0`
+            if self._tiff_type == "DEM" and current_nodata_val and int(current_nodata_val) != -9999:
+                self.add_error(
+                    error_type=FileTiffErrorType.NO_DATA,
+                    error_message="noDataValue is not -9999",
+                    custom_fields={"current": f"{current_nodata_val}"},
+                )
+            elif self._tiff_type == "Imagery" and current_nodata_val != 255:
                 self.add_error(
                     error_type=FileTiffErrorType.NO_DATA,
                     error_message="noDataValue is not 255",
@@ -307,25 +302,6 @@ class FileTiff:
                 custom_fields={"missing": f"{', '.join(missing_bands)}"},
             )
 
-    def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
-        """Validate the TIFF origin within its scale and standardise the filename.
-
-        Args:
-            gdalinfo: `gdalinfo` output
-        """
-        if self._scale > 0:
-            origin = get_origin(gdalinfo)
-            try:
-                tile_name = get_tile_name(origin, self._scale)
-                if not tile_name == get_file_name_from_path(self._path_standardised):
-                    new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
-                    os.rename(self._path_standardised, new_path)
-                    get_log().info("renaming_file", path=new_path, old=self._path_standardised)
-                    self._path_standardised = new_path
-
-            except TileIndexException as tie:
-                self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
-
     def validate(self) -> bool:
         """Run the Non Visual QA checks.
 
@@ -335,7 +311,6 @@ class FileTiff:
 
         gdalinfo = self.get_gdalinfo()
         if gdalinfo:
-            self.check_tile_and_rename(gdalinfo)
             self.check_no_data(gdalinfo)
             self.check_band_count(gdalinfo)
             self.check_color_interpretation(gdalinfo)
