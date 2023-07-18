@@ -26,7 +26,7 @@ class FileTiffType(str, Enum):
 
 
 class FileTiff:
-    """Wrapper to carry information about the TIFF file."""
+    """Wrapper to carry information about the TIFF or list of TIFF within the same tile."""
 
     def __init__(
         self,
