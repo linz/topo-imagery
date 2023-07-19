@@ -21,7 +21,7 @@ def format_source(source: List[str]) -> List[TileFiles]:
     When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
 
     Args:
-        source: a list of file names or containing a stringify list of dictionnary
+        source: a list of file names or containing a stringify list of dictionary
 
     Returns:
         a list of `TileFiles` namedtuple
