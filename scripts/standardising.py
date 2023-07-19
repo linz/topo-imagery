@@ -189,7 +189,7 @@ def standardising(
             if is_s3(cutline):
                 if not cutline.endswith((".fgb", ".geojson")):
                     raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-                input_cutline_path = os.path.join(tmp_path, "culine" + os.path.splitext(cutline)[1])
+                input_cutline_path = os.path.join(tmp_path, "cutline" + os.path.splitext(cutline)[1])
                 # Ensure the input cutline is a easy spot for GDAL to read
                 write(input_cutline_path, read(cutline))
 
