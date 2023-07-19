@@ -17,7 +17,7 @@ class TileFiles(NamedTuple):
 
 
 def format_source(source: List[str]) -> List[TileFiles]:
-    """Tranform a list of file names (local) or dictionnaries (Argo Workflows) to a list of `TileFiles`
+    """Transform a list of file names (local) or dictionaries (Argo Workflows) to a list of `TileFiles`
     When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
 
     Args:
