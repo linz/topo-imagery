@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.2.1](https://github.com/linz/topo-imagery/compare/v2.2.0...v2.2.1) (2023-07-12)
+
+
+### Bug Fixes
+
+* create a new release please PR to fix bug ([#548](https://github.com/linz/topo-imagery/issues/548)) ([c809721](https://github.com/linz/topo-imagery/commit/c8097217c318a04875d5918ce474552a4e4a3e93))
+
+## [2.2.0](https://github.com/linz/topo-imagery/compare/v2.1.0...v2.2.0) (2023-07-12)
+
+
+### Features
+
+* handle standardising paletted tiffs ([#547](https://github.com/linz/topo-imagery/issues/547)) ([aa6ce05](https://github.com/linz/topo-imagery/commit/aa6ce05a7737f34bbaf5287e47e39e34474a01e7))
+
+
+### Reverts
+
+* "chore: upgrade gdal from 3.6.1 to 3.7.0 ([#479](https://github.com/linz/topo-imagery/issues/479))" ([#536](https://github.com/linz/topo-imagery/issues/536)) ([810b73c](https://github.com/linz/topo-imagery/commit/810b73c566e482b3caf29a73c1ffaccc32a6a1b4))
+
 ## [2.1.0](https://github.com/linz/topo-imagery/compare/v2.0.0...v2.1.0) (2023-07-04)
 
 

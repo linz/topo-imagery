@@ -37,13 +37,13 @@ This script takes a file (or list of files) in input that need to be standardise
 1. Example with local files. In this example the source file is in a `/tmp/` directory in your machine, the output will be created in `/tmp/output/`:
 
 ```bash
-docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --source /tmp/file_to_standardise.tiff --scale None --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --source /tmp/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
 ```
 
 2. Example using a source file on AWS, after logging into AWS with [AWS CLI](https://aws.amazon.com/cli/):
 
 ```bash
-docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --source s3://bucket/file_to_standardise.tiff --scale None --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --source s3://bucket/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
 ```
 
 ### In the cloud

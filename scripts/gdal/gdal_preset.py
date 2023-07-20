@@ -39,7 +39,9 @@ DEM_LERC = [
     # Force all DEMS to AREA to be consistent
     # input tiffs vary between AREA or POINT
     "-mo",
-    "AREA_OR_POINT=AREA",
+    "AREA_OR_POINT=Area",
+    "-a_nodata",
+    "-9999",
 ]
 
 COMPRESS_LZW = [
@@ -73,21 +75,8 @@ WEBP_OVERVIEWS = [
     "overview_quality=90",
 ]
 
-# Arguments to convert TIFF from 16 bits to 8 bits
-CONVERT_16BITS_TO_8BITS = [
-    "-ot",
-    "Byte",
-    "-scale",
-    # 16 bit --> 2^16 = 65536 values --> 0-65535
-    "0",
-    "65535",
-    # 8 bit --> 2^8 = 256 values --> 0-255
-    "0",
-    "255",
-]
 
-
-def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
+def get_gdal_command(preset: str, epsg: str) -> List[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
@@ -117,9 +106,6 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     elif preset == "dem_lerc":
         gdal_command.extend(DEM_LERC)
 
-    if convert_from == "UInt16":
-        gdal_command.extend(CONVERT_16BITS_TO_8BITS)
-
     return gdal_command
 
 
@@ -145,6 +131,26 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     # Apply the cutline
     if cutline:
         gdal_command += ["-cutline", cutline]
+
+    return gdal_command
+
+
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+    """Build a VRT from a list of tiff files.
+
+    Args:
+        files: list of tiffs to build the vrt from
+        output: the name of the VRT generated. Defaults to "output.vrt".
+        add_alpha: use `-addalpha`. Defaults to False.
+
+    Returns:
+        The GDAL command to build the VRT.
+    """
+    gdal_command = ["gdalbuildvrt", "-strict"]
+    if add_alpha:
+        gdal_command.append("-addalpha")
+    gdal_command.append(output)
+    gdal_command += files
 
     return gdal_command
 
