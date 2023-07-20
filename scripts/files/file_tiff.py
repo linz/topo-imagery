@@ -199,13 +199,14 @@ class FileTiff:
         return False
 
     def check_no_data(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if there is no "noDataValue" or the "noDataValue" is not equal to 255 in the "bands".
+        """Add a Non Visual QA error if there is no "noDataValue" or the "noDataValue" is not equal to 255
+        or -9999 for DEM in the "bands".
 
         Args:
             gdalinfo: `gdalinfo` output
         """
         bands = gdalinfo["bands"]
-        if len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
+        if self._tiff_type != "DEM" and len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]

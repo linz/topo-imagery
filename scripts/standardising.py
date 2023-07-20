@@ -198,6 +198,7 @@ def standardising(
             input_file = target_vrt
         elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
             target_vrt = os.path.join(tmp_path, "target.vrt")
+            # add alpha band to all imagery for consistency allowing GDAL to run correctly (TDE-804)
             run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
