@@ -8,8 +8,10 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import TileFiles, format_date, format_source, is_argo, valid_date
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
+from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
+from scripts.files.file_tiff import check_tile_and_rename
 
 
 def main() -> None:
@@ -33,7 +35,14 @@ def main() -> None:
         "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
+    parser.add_argument("--dev", target="dev", help="Developer mode - source should be a link to a single local file (add S3?)", required=False)
     arguments = parser.parse_args()
+    if arguments.dev:
+        # build a nice source
+        # run gdal_info
+        gdal_info(arguments.source)
+        #tile_name = 
+        tile_files_local: List[TileFiles] = f
     tile_files: List[TileFiles] = format_source(arguments.source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
