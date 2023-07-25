@@ -1,12 +1,13 @@
 import argparse
 import json
 import os
+import sys
 from typing import List
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import TileFiles, format_date, format_source, is_argo, valid_date
-from scripts.files.fs import exists, write
+from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
@@ -16,7 +17,10 @@ def main() -> None:
     # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
-    parser.add_argument("--source", dest="source", nargs="+", required=True, help="The path to the input tiffs")
+    parser.add_argument("--source", dest="source", nargs="+", required=False, help="The path to the input tiffs")
+    parser.add_argument(
+        "--from-file", dest="from_file", required=False, help="The path to a json file containing the input tiffs"
+    )
     parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
     parser.add_argument(
         "--target-epsg",
@@ -34,7 +38,19 @@ def main() -> None:
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
-    tile_files: List[TileFiles] = format_source(arguments.source)
+
+    source = arguments.source
+    from_file = arguments.from_file
+
+    if not source and not from_file:
+        get_log().error("source_or_from_file_not_specified")
+        sys.exit(1)
+
+    if from_file:
+        # FIXME: `source` has to be a list to be parsed in `format_source()`
+        source = [json.dumps(json.loads(read(arguments.from_file)))]
+
+    tile_files: List[TileFiles] = format_source(source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     concurrency: int = 1
