@@ -42,6 +42,7 @@ def main() -> None:
     parser.add_argument("--dev", target="dev", help="Developer mode - source should be a link to a single local file (add S3?)", required=False)
     arguments = parser.parse_args()
 
+    dev = arguments.dev
     source = arguments.source
     from_file = arguments.from_file
 
@@ -53,12 +54,12 @@ def main() -> None:
         # FIXME: `source` has to be a list to be parsed in `format_source()`
         source = [json.dumps(json.loads(read(arguments.from_file)))]
 
-    if arguments.dev:
-        # build a nice source
-        # run gdal_info
-        gdal_info(arguments.source)
-        #tile_name = 
-        tile_files_local: List[TileFiles] = f
+    # if dev:
+    #     # build a nice source
+    #     # run gdal_info
+    #     gdal_info(source)
+    #     #tile_name = 
+    #     tile_files_local: List[TileFiles] = f
     tile_files: List[TileFiles] = format_source(source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
