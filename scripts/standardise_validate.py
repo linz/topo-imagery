@@ -6,20 +6,17 @@ from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import TileFiles, format_date, format_source, is_argo, valid_date
+from scripts.cli.cli_helper import TileFiles, format_date, get_tile_files, transform_dev_source, is_argo, valid_date
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
-from scripts.gdal.gdalinfo import gdal_info, get_origin
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
-from scripts.files.file_tiff import check_tile_and_rename
 
 
 def main() -> None:
     # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
-    parser.add_argument("--source", dest="source", nargs="+", required=False, help="The path to the input tiffs")
     parser.add_argument(
         "--from-file", dest="from_file", required=False, help="The path to a json file containing the input tiffs"
     )
@@ -39,28 +36,28 @@ def main() -> None:
         "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
-    parser.add_argument("--dev", target="dev", help="Developer mode - source should be a link to a single local file (add S3?)", required=False)
+    parser.add_argument("--dev", dest="dev", help="Developer mode - source should be a path to a single local file (add S3?)", required=False, nargs='+')
     arguments = parser.parse_args()
 
-    dev = arguments.dev
-    source = arguments.source
+    dev: List[str] = arguments.dev
     from_file = arguments.from_file
 
-    if not source and not from_file:
-        get_log().error("source_or_from_file_not_specified")
+    if not dev and not from_file:
+        get_log().error("dev_or_from_file_not_specified")
+        sys.exit(1)
+
+    if dev and from_file:
+        get_log().error("dev_and_from_file_both_specified")
         sys.exit(1)
 
     if from_file:
         # FIXME: `source` has to be a list to be parsed in `format_source()`
         source = [json.dumps(json.loads(read(arguments.from_file)))]
 
-    # if dev:
-    #     # build a nice source
-    #     # run gdal_info
-    #     gdal_info(source)
-    #     #tile_name = 
-    #     tile_files_local: List[TileFiles] = f
-    tile_files: List[TileFiles] = format_source(source)
+    if dev:
+        source = transform_dev_source(dev)
+
+    tile_files: List[TileFiles] = get_tile_files(source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     concurrency: int = 1

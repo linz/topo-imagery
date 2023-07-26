@@ -1,6 +1,5 @@
 import os
 
-
 def get_file_name_from_path(path: str) -> str:
     """Get the file name from a path.
 
