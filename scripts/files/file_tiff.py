@@ -8,6 +8,7 @@ from linz_logger import get_log
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
+
 class FileTiffErrorType(str, Enum):
     GDAL_INFO = "gdalinfo"
     NO_DATA = "nodata"

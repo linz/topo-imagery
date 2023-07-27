@@ -273,4 +273,3 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
     offset_x = SHEET_WIDTH * scale
     offset_y = SHEET_HEIGHT * scale
     return Bounds(Point(x=(x - 1) * offset_x, y=(y - 1) * offset_y), Size(width=offset_x, height=offset_y))
-
