@@ -15,8 +15,8 @@ def write(destination: str, source: bytes) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
     Args:
-        destination (str): The AWS S3 path to the file to write.
-        source (bytes): The source file in bytes.
+        destination: The AWS S3 path to the file to write.
+        source: The source file in bytes.
     """
     start_time = time_in_ms()
     if source is None:
@@ -76,17 +76,104 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     return file
 
 
+def exists(path: str, needs_credentials: bool = False) -> bool:
+    """Check if s3 Object exists
+
+    Args:
+        path: path to the s3 object/key
+        needs_credentials: if acces to object needs credentials. Defaults to False.
+
+    Raises:
+        ce: ClientError
+        nsb: NoSuchBucket
+
+    Returns:
+        True if the S3 Object exists
+    """
+    s3_path, key = parse_path(path)
+    s3 = boto3.resource("s3")
+
+    try:
+        if needs_credentials:
+            s3 = get_session(path).resource("s3")
+
+        if path.endswith("/"):
+            bucket_name = bucket_name_from_path(s3_path)
+            bucket = s3.Bucket(bucket_name)
+            # MaxKeys limits to 1 object in the response
+            objects = bucket.objects.filter(Prefix=key, MaxKeys=1)
+
+            if len(list(objects)) > 0:
+                return True
+            return False
+
+        # load() fetch the metadata, not the data. Calls a `head` behind the scene.
+        s3.Object(s3_path, key).load()
+        return True
+    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+        get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
+        return False
+    except s3.meta.client.exceptions.ClientError as ce:
+        if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
+            get_log().debug("read_s3_needs_credentials", path=path)
+            return exists(path, True)
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
+        # 404 for NoSuchKey - https://github.com/boto/boto3/issues/2442
+        if ce.response["Error"]["Code"] == "404":
+            get_log().debug("s3_key_not_found", path=path, info=f"The specified key does not seem to exist: {ce}")
+            return False
+        get_log().error("s3_client_error", path=path, error=f"ClientError raised: {ce}")
+        raise ce
+
+
 def bucket_name_from_path(path: str) -> str:
+    """Get the bucket name from an `s3` path.
+
+    Args:
+        path: an `s3` path
+
+    Returns:
+        the bucket name
+
+    Example:
+        ```
+        >>> bucket_name_from_path("s3://linz-imagery/wellingon/")
+        "linz-imagery"
+        ```
+    """
     path_parts = path.replace("s3://", "").split("/")
     return path_parts.pop(0)
 
 
 def prefix_from_path(path: str) -> str:
+    """Get the s3 prefix from an s3 path.
+
+    Args:
+        path: an `s3` path
+
+    Returns:
+        the prefix
+
+    Example:
+        ```
+        >>> prefix_from_path("s3://linz-imagery/wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff")
+        "wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff"
+        ```
+    """
     bucket_name = bucket_name_from_path(path)
     return path.replace(f"s3://{bucket_name}/", "")
 
 
 def list_json_in_uri(uri: str, s3_client: Optional[boto3.client]) -> List[str]:
+    """Get the `JSON` files from a s3 path
+
+    Args:
+        uri: an s3 path
+        s3_client: an s3 client
+
+    Returns:
+        a list of JSON files
+    """
     if not s3_client:
         s3_client = boto3.client("s3")
     files = []
@@ -105,6 +192,16 @@ def list_json_in_uri(uri: str, s3_client: Optional[boto3.client]) -> List[str]:
 
 
 def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
+    """Get the object from `s3`
+
+    Args:
+        bucket: a `s3` bucket
+        file_name: the name of the object
+        s3_client: an `s3` client
+
+    Returns:
+        an s3 object
+    """
     get_log().info("Retrieving File", path=f"s3://{bucket}/{file_name}")
     return s3_client.get_object(Bucket=bucket, Key=file_name)
 
@@ -112,6 +209,17 @@ def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
 def get_object_parallel_multithreading(
     bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
+    """Get s3 objects in parallel
+
+    Args:
+        bucket: a `s3` bucket
+        files_to_read: list of object names to get
+        s3_client: an `s3` client
+        concurrency: number of concurrent calls
+
+    Yields:
+        the object when got
+    """
     if not s3_client:
         s3_client = boto3.client("s3")
     with ThreadPoolExecutor(max_workers=concurrency) as executor:

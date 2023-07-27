@@ -47,6 +47,11 @@ class ImageryCollection:
         self.add_providers(providers)
 
     def add_item(self, item: Dict[Any, Any]) -> None:
+        """Add an `Item` to the `links` of the `Collection`.
+
+        Args:
+            item: STAC Item to add
+        """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
             self.add_link(href=item_self_link["href"])
@@ -54,13 +59,30 @@ class ImageryCollection:
             self.update_spatial_extent(item["bbox"])
 
     def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
+        """Add a `link` to the existing `links` list of the Collection.
+
+        Args:
+            href: path
+            rel: type of link. Defaults to "item".
+            file_type: type of file pointed by the link. Defaults to "application/json".
+        """
         self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
 
     def add_providers(self, providers: List[Provider]) -> None:
+        """Add a list of Providers to the existing list of `providers` of the Collection.
+
+        Args:
+            providers: a list of `Provider` objects
+        """
         for p in providers:
             self.stac["providers"].append(p)
 
     def update_spatial_extent(self, item_bbox: List[float]) -> None:
+        """Update (if needed) the Collection spatial extent from a bounding box.
+
+        Args:
+            item_bbox: bounding box of an item added to the Collection
+        """
         if "extent" not in self.stac:
             self.update_extent(bbox=item_bbox)
             return
@@ -92,6 +114,12 @@ class ImageryCollection:
         self.update_extent(bbox=[min_x, min_y, max_x, max_y])
 
     def update_temporal_extent(self, item_start_datetime: str, item_end_datetime: str) -> None:
+        """Update (if needed) the temporal extent of the collection.
+
+        Args:
+            item_start_datetime: start date of an item added to the Collection
+            item_end_datetime: end date of an item added to the Collection
+        """
         if "extent" not in self.stac:
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
@@ -124,6 +152,12 @@ class ImageryCollection:
         )
 
     def update_extent(self, bbox: Optional[List[float]] = None, interval: Optional[List[str]] = None) -> None:
+        """Update an extent of the Collection whereas it's spatial or temporal.
+
+        Args:
+            bbox: bounding box. Defaults to None.
+            interval: datetime interval. Defaults to None.
+        """
         if "extent" not in self.stac:
             self.stac["extent"] = {
                 "spatial": {
@@ -138,4 +172,9 @@ class ImageryCollection:
             self.stac["extent"]["temporal"]["interval"] = [interval]
 
     def write_to(self, destination: str) -> None:
+        """Write the Collection in JSON format to the specified `destination`.
+
+        Args:
+            destination: path of the destination
+        """
         write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"))

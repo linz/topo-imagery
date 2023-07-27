@@ -5,7 +5,7 @@ from typing import Generator
 
 import pytest
 
-from scripts.files.fs_local import read, write
+from scripts.files.fs_local import exists, read, write
 
 
 @pytest.fixture(name="setup", autouse=True)
@@ -28,6 +28,13 @@ def test_write(setup: str) -> None:
     assert os.path.isfile(path)
 
 
+def test_write_non_existing_dir(setup: str) -> None:
+    target = setup
+    path = os.path.join(target, "new_dir/test.file")
+    write(path, b"test")
+    assert os.path.isfile(path)
+
+
 @pytest.mark.dependency(name="read", depends=["write"])
 def test_read(setup: str) -> None:
     content = b"test content"
@@ -36,3 +43,18 @@ def test_read(setup: str) -> None:
     write(path, content)
     file_content = read(path)
     assert file_content == content
+
+
+@pytest.mark.dependency(name="exists", depends=["write"])
+def test_exists(setup: str) -> None:
+    content = b"test content"
+    target = setup
+    path = os.path.join(target, "test.file")
+    write(path, content)
+    found = exists(path)
+    assert found is True
+
+
+def test_exists_file_not_found() -> None:
+    found = exists("/tmp/test.file")
+    assert found is False

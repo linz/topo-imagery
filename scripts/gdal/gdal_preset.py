@@ -2,9 +2,10 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-# Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA
-# Useful for imagery that does not have a alpha band
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
+""" Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA. 
+Useful for imagery that does not have a alpha band.
+"""
 
 BASE_COG = [
     # Suppress progress monitor and other non-error output.
@@ -12,16 +13,13 @@ BASE_COG = [
     # Output to a COG
     "-of",
     "COG",
+    "-stats",
     # Tile the image int 512x512px images
     "-co",
     "blocksize=512",
     # Ensure all CPUs are used for gdal translate
     "-co",
     "num_threads=all_cpus",
-    # Until GDAL 3.7.x this needs to be set as well as num_threads (https://github.com/OSGeo/gdal/issues/7478)
-    "--config",
-    "gdal_num_threads",
-    "all_cpus",
     # If not all tiles are needed in the tiff, instead of writing empty images write a null byte
     # this significantly reduces the size of tiffs which are very sparse
     "-co",
@@ -30,6 +28,20 @@ BASE_COG = [
     # this converts all offsets from 32bit to 64bit to support TIFFs > 4GB in size
     "-co",
     "bigtiff=yes",
+]
+
+DEM_LERC = [
+    "-co",
+    "compress=lerc",
+    "-co",
+    # Set Max Z Error to 1mm
+    "max_z_error=0.001",
+    # Force all DEMS to AREA to be consistent
+    # input tiffs vary between AREA or POINT
+    "-mo",
+    "AREA_OR_POINT=Area",
+    "-a_nodata",
+    "-9999",
 ]
 
 COMPRESS_LZW = [
@@ -63,21 +75,18 @@ WEBP_OVERVIEWS = [
     "overview_quality=90",
 ]
 
-# Arguments to convert TIFF from 16 bits to 8 bits
-CONVERT_16BITS_TO_8BITS = [
-    "-ot",
-    "Byte",
-    "-scale",
-    # 16 bit --> 2^16 = 65536 values --> 0-65535
-    "0",
-    "65535",
-    # 8 bit --> 2^8 = 256 values --> 0-255
-    "0",
-    "255",
-]
 
+def get_gdal_command(preset: str, epsg: str) -> List[str]:
+    """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
-def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None) -> List[str]:
+    Args:
+        preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
+        epsg: the EPSG code of the file
+        convert_from: Defaults to None.
+
+    Returns:
+        a list of arguments to run `gdal_translate`
+    """
     get_log().info("gdal_preset", preset=preset)
     gdal_command: List[str] = ["gdal_translate"]
 
@@ -88,21 +97,26 @@ def get_gdal_command(preset: str, epsg: str, convert_from: Optional[str] = None)
     if preset == "lzw":
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
         gdal_command.extend(COMPRESS_LZW)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
     elif preset == "webp":
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
+        gdal_command.extend(WEBP_OVERVIEWS)
 
-    gdal_command.extend(WEBP_OVERVIEWS)
-
-    if convert_from == "UInt16":
-        gdal_command.extend(CONVERT_16BITS_TO_8BITS)
+    elif preset == "dem_lerc":
+        gdal_command.extend(DEM_LERC)
 
     return gdal_command
 
 
 def get_cutline_command(cutline: Optional[str]) -> List[str]:
-    """
-    Get a "gdalwarp" command to create a virtual file (.vrt) which has a cutline applied and alpha added
+    """Get a `gdalwarp` command to create a virtual file (`.vrt`) which has a cutline applied and alpha added.
+
+    Args:
+        cutline: path to the cutline
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
 
     gdal_command = [
@@ -121,9 +135,31 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
-def get_alpha_command() -> List[str]:
+def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+    """Build a VRT from a list of tiff files.
+
+    Args:
+        files: list of tiffs to build the vrt from
+        output: the name of the VRT generated. Defaults to "output.vrt".
+        add_alpha: use `-addalpha`. Defaults to False.
+
+    Returns:
+        The GDAL command to build the VRT.
     """
-    Get a "gdalwarp" command to create a virtual file (.vrt) which has an alpha added
+    gdal_command = ["gdalbuildvrt", "-strict"]
+    if add_alpha:
+        gdal_command.append("-addalpha")
+    gdal_command.append(output)
+    gdal_command += files
+
+    return gdal_command
+
+
+def get_alpha_command() -> List[str]:
+    """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
 
     return [
@@ -137,8 +173,14 @@ def get_alpha_command() -> List[str]:
 
 
 def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
-    """
-    Get a "Gdalwarp" command to transform the srs
+    """Get a `gdalwarp` command to transform the srs.
+
+    Args:
+        source_epsg: the EPSG code of the source file
+        target_epsg: the EPSG code for the output file
+
+    Returns:
+        a list of arguments to run `gdalwarp`
     """
     return [
         "gdalwarp",

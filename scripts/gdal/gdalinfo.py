@@ -5,6 +5,28 @@ from typing import Any, Dict, List, Optional, TypedDict, cast
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
+from scripts.tile.tile_index import Point
+
+
+class GdalInfoBandColorTable(TypedDict):
+    palette: str
+    """Colour palette type
+    Example: "RGB" """
+    count: int
+    """Count of entries in the colour palette
+    Example: 256"""
+    entries: List[List[int]]
+    """List of colour palette entries. Each is a list of colour channel values
+    Example:
+    [
+        [255,255,255,255],
+        [254,254,254,255],
+        [253,253,253,255],
+        [252,252,252,255],
+        [251,251,251,255],
+        [250,250,250,255]
+        ...
+    ]"""
 
 
 class GdalInfoBand(TypedDict):
@@ -16,9 +38,10 @@ class GdalInfoBand(TypedDict):
     colorInterpretation: str
     """Color
     Examples:
-        "Red", "Green", "Blue", "Alpha", "Gray"
+        "Red", "Green", "Blue", "Alpha", "Gray", "Palette"
     """
     noDataValue: Optional[int]
+    colorTable: Optional[GdalInfoBandColorTable]
 
 
 class GdalInfo(TypedDict):
@@ -87,3 +110,15 @@ def format_wkt(wkt: str) -> str:
         str: The wkt output formatted.
     """
     return re.sub(r"\s+", " ", (wkt.replace('"', "'").replace("\n", "")))
+
+
+def get_origin(gdalinfo: GdalInfo) -> Point:
+    """Parse the `GdalInfo` to get the origin coordinates.
+
+    Args:
+        gdalinfo: the output of gdalinfo
+
+    Returns:
+        a `Point` of the origin
+    """
+    return Point(gdalinfo["cornerCoordinates"]["upperLeft"][0], gdalinfo["cornerCoordinates"]["upperLeft"][1])

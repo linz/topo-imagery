@@ -12,7 +12,7 @@ def test_check_band_count_valid_3() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_band_count(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -29,7 +29,7 @@ def test_check_band_count_valid_4() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo, color_interpretation="Alpha")
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_band_count(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -43,7 +43,7 @@ def test_check_band_count_invalid_2() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -60,7 +60,52 @@ def test_check_band_count_invalid_4() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_band_count(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_band_count_valid_1_DEM() -> None:
+    """
+    tests check_band_count when the input layer has a valid band count
+    which is 1 bands and a DEM preset
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff.check_band_count(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
+def test_check_band_count_invalid_alpha_DEM() -> None:
+    """
+    tests check_band_count when the input layer has a valid band count
+    which is 2 bands where the second band is Alpha and DEM preset
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff.check_band_count(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_band_count_invalid_3_DEM() -> None:
+    """
+    tests check_band_count when the input layer has an invalid band count
+    which is 3 bands where the preset is DEM.
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -75,7 +120,7 @@ def test_check_color_interpretation_valid() -> None:
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -91,7 +136,35 @@ def test_check_color_interpretation_invalid() -> None:
     add_band(gdalinfo, color_interpretation="Blue")
     add_band(gdalinfo, color_interpretation="undefined")
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_color_interpretation_valid_DEM() -> None:
+    """
+    tests check_color_interpretation with the correct color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Gray")
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
+def test_check_color_interpretation_invalid_DEM() -> None:
+    """
+    tests check_color_interpretation with the incorrect color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -104,7 +177,7 @@ def test_check_no_data_valid() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, no_data_value=255)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_no_data(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -120,7 +193,7 @@ def test_check_no_data_valid_alpha() -> None:
     add_band(gdalinfo, color_interpretation="blue")
     add_band(gdalinfo, color_interpretation="Alpha")
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_no_data(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -136,7 +209,7 @@ def test_check_no_data_invalid_not_alpha() -> None:
     add_band(gdalinfo, color_interpretation="blue")
     add_band(gdalinfo, color_interpretation="invalid")
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_no_data(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -149,7 +222,7 @@ def test_check_no_data_no_value() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_no_data(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -162,7 +235,7 @@ def test_is_no_data_true_255() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, no_data_value=255)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     assert file_tiff.is_no_data(gdalinfo)
 
 
@@ -173,7 +246,7 @@ def test_is_no_data_true_0() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, no_data_value=0)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     assert file_tiff.is_no_data(gdalinfo)
 
 
@@ -184,7 +257,7 @@ def test_is_no_data_false() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     assert not file_tiff.is_no_data(gdalinfo)
 
 
@@ -195,7 +268,7 @@ def test_check_no_data_invalid_value() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, no_data_value=0)
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.check_no_data(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -208,7 +281,7 @@ def test_check_srs_valid() -> None:
     srs_to_test_against = b"SRS Test"
     srs_tif = b"SRS Test"
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.set_srs(srs_to_test_against)
     file_tiff.check_srs(srs_tif)
 
@@ -222,7 +295,7 @@ def test_check_srs_invalid() -> None:
     srs_to_test_against = b"SRS Test"
     srs_tif = b"SRS Different"
 
-    file_tiff = FileTiff("test")
+    file_tiff = FileTiff(["test"])
     file_tiff.set_srs(srs_to_test_against)
     file_tiff.check_srs(srs_tif)
 

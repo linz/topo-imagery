@@ -1,5 +1,65 @@
 # Changelog
 
+## [2.2.1](https://github.com/linz/topo-imagery/compare/v2.2.0...v2.2.1) (2023-07-12)
+
+
+### Bug Fixes
+
+* create a new release please PR to fix bug ([#548](https://github.com/linz/topo-imagery/issues/548)) ([c809721](https://github.com/linz/topo-imagery/commit/c8097217c318a04875d5918ce474552a4e4a3e93))
+
+## [2.2.0](https://github.com/linz/topo-imagery/compare/v2.1.0...v2.2.0) (2023-07-12)
+
+
+### Features
+
+* handle standardising paletted tiffs ([#547](https://github.com/linz/topo-imagery/issues/547)) ([aa6ce05](https://github.com/linz/topo-imagery/commit/aa6ce05a7737f34bbaf5287e47e39e34474a01e7))
+
+
+### Reverts
+
+* "chore: upgrade gdal from 3.6.1 to 3.7.0 ([#479](https://github.com/linz/topo-imagery/issues/479))" ([#536](https://github.com/linz/topo-imagery/issues/536)) ([810b73c](https://github.com/linz/topo-imagery/commit/810b73c566e482b3caf29a73c1ffaccc32a6a1b4))
+
+## [2.1.0](https://github.com/linz/topo-imagery/compare/v2.0.0...v2.1.0) (2023-07-04)
+
+
+### Features
+
+* add --producer-list to allow multiple producers TDE-781 ([#531](https://github.com/linz/topo-imagery/issues/531)) ([0a28d6f](https://github.com/linz/topo-imagery/commit/0a28d6f6f00deae2841d088f9b6a99bfdb437b14))
+* add dem_lerc  preset TDE-779 ([#522](https://github.com/linz/topo-imagery/issues/522)) ([3e7378d](https://github.com/linz/topo-imagery/commit/3e7378d1506a5884b7151a29f6dd3a7281c3650a))
+
+
+### Bug Fixes
+
+* handle already existing collection JSON ([#532](https://github.com/linz/topo-imagery/issues/532)) ([7a26bae](https://github.com/linz/topo-imagery/commit/7a26bae03d8b2d9090cfb8dfb24d42473a0b2b62))
+* standardising_validate.py fails when scale is 'None' ([#480](https://github.com/linz/topo-imagery/issues/480)) ([17296f1](https://github.com/linz/topo-imagery/commit/17296f1e0ffbb46d5160814ca6096d4c5893c996))
+
+
+### Documentation
+
+* add missing docstring ([#487](https://github.com/linz/topo-imagery/issues/487)) ([dd27c7c](https://github.com/linz/topo-imagery/commit/dd27c7c3f7209e58416e5e517498b0b68e7b3ca5))
+* update docstring for tile_index.py ([#473](https://github.com/linz/topo-imagery/issues/473)) ([38ef275](https://github.com/linz/topo-imagery/commit/38ef275c304164c990675837cbba83076f80e512))
+* update README release please instructions ([#496](https://github.com/linz/topo-imagery/issues/496)) ([d7369e0](https://github.com/linz/topo-imagery/commit/d7369e096b7d782e8f97bca10b6b384b70f33f89))
+* update README.md ([#481](https://github.com/linz/topo-imagery/issues/481)) ([79add3c](https://github.com/linz/topo-imagery/commit/79add3cd3cd3fb8f5d75ba7a8ca2029145fd0b5a))
+
+## [2.0.0](https://github.com/linz/topo-imagery/compare/v1.3.0...v2.0.0) (2023-04-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* resume standardise validate TDE-710 ([#444](https://github.com/linz/topo-imagery/issues/444))
+
+### Features
+
+* fs.exists() checks if path exists TDE-710 ([#441](https://github.com/linz/topo-imagery/issues/441)) ([f79bd7a](https://github.com/linz/topo-imagery/commit/f79bd7a8b1ea7ef950479a3638595662f3417ed6))
+* resume standardise validate TDE-710 ([#444](https://github.com/linz/topo-imagery/issues/444)) ([b4022a5](https://github.com/linz/topo-imagery/commit/b4022a509dc7d92e8d10eb384fa1b3408c45463e))
+
+
+### Bug Fixes
+
+* fs_local.write() fails when directory does not exist ([#445](https://github.com/linz/topo-imagery/issues/445)) ([935a041](https://github.com/linz/topo-imagery/commit/935a0419ee7c550793088c279e060d315bf8dad9))
+* fs_s3.read() exceptions are not caught properly ([#432](https://github.com/linz/topo-imagery/issues/432)) ([3a855d5](https://github.com/linz/topo-imagery/commit/3a855d55f9a59bfe2d081835663b18b574380faa))
+* unescaped bracket ([#426](https://github.com/linz/topo-imagery/issues/426)) ([f579638](https://github.com/linz/topo-imagery/commit/f57963854d0d3f61585055d2fbc5e3174f7948ea))
+
 ## [1.3.0](https://github.com/linz/topo-imagery/compare/v1.2.1...v1.3.0) (2023-03-29)
 
 

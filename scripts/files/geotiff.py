@@ -6,6 +6,17 @@ from scripts.gdal.gdalinfo import GdalInfo
 
 
 def get_extents(gdalinfo_result: GdalInfo) -> Tuple[Dict[str, List[float]], Tuple[float]]:
+    """Get the geometry and bounding box from the `gdalinfo`.
+
+    Args:
+        gdalinfo_result: a `gdalinfo` output
+
+    Raises:
+        Exception: if there is no `wgs84Extent` in the `gdalinfo`
+
+    Returns:
+        geometry and bbox
+    """
     if gdalinfo_result["wgs84Extent"] is None:
         raise Exception("No WGS84 Extent was found")
 

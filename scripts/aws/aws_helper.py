@@ -1,5 +1,4 @@
 import json
-from dataclasses import dataclass
 from os import environ
 from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
@@ -7,7 +6,7 @@ from urllib.parse import urlparse
 
 import boto3
 import botocore
-from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials
+from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials, ReadOnlyCredentials
 from linz_logger import get_log
 
 from scripts.aws.aws_credential_source import CredentialSource
@@ -25,8 +24,8 @@ client_sts = session.client("sts")
 bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-config/config.json")
 
 
-# Load bucket to roleArn mapping for LINZ internal buckets from SSM
 def _init_roles() -> None:
+    """Load bucket to roleArn mapping for LINZ internal buckets from SSM"""
     s3 = session.resource("s3")
     config_path = parse_path(bucket_config_path)
     content_object = s3.Object(config_path.bucket, config_path.key)
@@ -49,6 +48,17 @@ def _get_client_creator(local_session: boto3.Session) -> Any:
 
 
 def get_session(prefix: str) -> boto3.Session:
+    """Get an AWS session to deal with an object on `s3`.
+
+    Args:
+        prefix: the `s3` object prefix (`key`)
+
+    Raises:
+        Exception: if there is no AWS role found for this prefix
+
+    Returns:
+        an AWS (boto3) session
+    """
     cfg = _get_credential_config(prefix)
     if cfg is None:
         raise Exception(f"Unable to find role for prefix: {prefix}")
@@ -82,26 +92,24 @@ def get_session(prefix: str) -> boto3.Session:
     return current_session
 
 
-@dataclass
-class AwsFrozenCredentials:
-    """
-    work around as I couldn't find the type for get_frozen_credentials()
-    """
+def get_session_credentials(prefix: str, retry_count: int = 3) -> ReadOnlyCredentials:
+    """Attempt to get credentials for a `prefix`, retrying upto `retry_count` amount of times.
 
-    access_key: str
-    secret_key: str
-    token: str
+    Args:
+        prefix: the `s3` object path (key)
+        retry_count: number of retries. Defaults to 3.
 
+    Raises:
+        last_error: if there is still an error on the last retry
 
-def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCredentials:
-    """
-    Attempt to get credentials for a prefix, retrying upto retry_count amount of times
+    Returns:
+        an AWS credential (`access_key`, `secret_key`, `token`)
     """
     last_error: Exception = Exception(f"Invalid retry count: {retry_count}")
     for retry in range(1, retry_count + 1):
         try:
             # Get credentials may give differing access_key and secret_key
-            credentials: AwsFrozenCredentials = get_session(prefix).get_credentials().get_frozen_credentials()
+            credentials = get_session(prefix).get_credentials().get_frozen_credentials()
             return credentials
         except client_sts.exceptions.InvalidIdentityTokenException as e:
             get_log().warn("bucket_load_retry", retry_count=retry)
@@ -112,6 +120,14 @@ def get_session_credentials(prefix: str, retry_count: int = 3) -> AwsFrozenCrede
 
 
 def _get_credential_config(prefix: str) -> Optional[CredentialSource]:
+    """Get the credential config (`bucket-config`) for the `prefix`.
+
+    Args:
+        prefix: the `s3` object path (key)
+
+    Returns:
+        the AWS credentials. @see `aws_credential_source.py`
+    """
     get_log().debug("get_credentials_bucket_name", prefix=prefix)
     if not bucket_roles:
         _init_roles()
@@ -127,10 +143,10 @@ def parse_path(path: str) -> S3Path:
     """Parse the path and split it into bucket name and key.
 
     Args:
-        path (str): A S3 path.
+        path: A S3 path.
 
     Returns:
-        S3Path (NamedTuple): s3_path.bucket (str), s3_path.key (str)
+        S3Path: s3_path.bucket , s3_path.key
     """
     parse = urlparse(path, allow_fragments=False)
     file_path = parse.path
