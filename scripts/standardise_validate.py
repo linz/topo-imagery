@@ -42,6 +42,11 @@ def main() -> None:
 
     dev = arguments.dev
     from_file = arguments.from_file
+    scale = arguments.scale
+    if scale == "None":
+        scale = 0
+    else:
+        scale = int(arguments.scale)
 
     if not dev and not from_file:
         get_log().error("dev_or_from_file_not_specified")
@@ -59,7 +64,7 @@ def main() -> None:
         # Expect space separated image paths
         source = dev
 
-    tile_files: List[TileFiles] = get_tile_files(source, arguments.scale)
+    tile_files: List[TileFiles] = get_tile_files(source, scale)
     print(tile_files)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)

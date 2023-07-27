@@ -1,10 +1,5 @@
-import os
 from typing import NamedTuple, Union
 
-from linz_logger import get_log
-
-from scripts.files.files_helper import get_file_name_from_path
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
 from scripts.tile.util import charcodeat
 
 SHEET_WIDTH = 24_000
@@ -279,20 +274,3 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
     offset_y = SHEET_HEIGHT * scale
     return Bounds(Point(x=(x - 1) * offset_x, y=(y - 1) * offset_y), Size(width=offset_x, height=offset_y))
 
-def check_tile_and_rename(dev_image_path: str, scale: str) -> None:
-    """Validate the TIFF origin within its scale and standardise the filename.
-    """
-    gdalinfo: GdalInfo = gdal_info(dev_image_path, False)
-
-    if scale > 0:
-        origin = get_origin(gdalinfo)
-        try:
-            tile_name = get_tile_name(origin, scale)
-            if not tile_name == get_file_name_from_path(dev_image_path):
-                new_path = os.path.join(os.path.dirname(dev_image_path), tile_name + ".tiff")
-                os.rename(dev_image_path, new_path)
-                get_log().info("renaming_file", path=new_path, old=dev_image_path)
-                return new_path
-
-        except TileIndexException as tie:
-            get_log().error("rename_file_failed", path=new_path, old=dev_image_path)

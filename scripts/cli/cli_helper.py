@@ -7,7 +7,8 @@ from typing import List, NamedTuple, Optional
 from dateutil import parser, tz
 from linz_logger import get_log
 
-from scripts.tile.tile_index import check_tile_and_rename
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
+from scripts.tile.tile_index import get_tile_name, TileIndexException
 
 class TileFiles(NamedTuple):
     output: str
@@ -41,12 +42,16 @@ def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileF
     else:
         source_dev: List[TileFiles] = []
         for s in source:
-            tile_name = check_tile_and_rename(s, scale)
-            print(tile_name)
-            # tf = TileFiles(os.path.splitext(os.path.basename(s))[0], [s])
-            source_dev.append(tile_name)
+            gdalinfo: GdalInfo = gdal_info(s, False)
+            if scale > 0:
+                origin = get_origin(gdalinfo)
+            try:
+                tile_name = get_tile_name(origin, scale)
+                tf = TileFiles(tile_name, [s])
+            except TileIndexException as tie:
+                get_log().error("get_tile_name_failed", path=s, error=tie)
+            source_dev.append(tf)
         return source_dev
-
 
 def is_argo() -> bool:
     return bool(environ.get("ARGO_TEMPLATE"))
