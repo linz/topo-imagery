@@ -49,6 +49,7 @@ def run_standardising(
         a list of FileTiff wrapper
     """
     # pylint: disable-msg=too-many-arguments
+
     start_time = time_in_ms()
 
     gdal_version = get_gdal_version()

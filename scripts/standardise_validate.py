@@ -6,7 +6,7 @@ from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import TileFiles, format_date, get_tile_files, transform_dev_source, is_argo, valid_date
+from scripts.cli.cli_helper import TileFiles, format_date, get_tile_files, is_argo, valid_date
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.stac.imagery.create_stac import create_item
@@ -35,11 +35,12 @@ def main() -> None:
     parser.add_argument(
         "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
+    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     parser.add_argument("--dev", dest="dev", help="Developer mode - source should be a path to a single local file (add S3?)", required=False, nargs='+')
     arguments = parser.parse_args()
 
-    dev: List[str] = arguments.dev
+    dev = arguments.dev
     from_file = arguments.from_file
 
     if not dev and not from_file:
@@ -55,9 +56,11 @@ def main() -> None:
         source = [json.dumps(json.loads(read(arguments.from_file)))]
 
     if dev:
-        source = transform_dev_source(dev)
+        # Expect space separated image paths
+        source = dev
 
-    tile_files: List[TileFiles] = get_tile_files(source)
+    tile_files: List[TileFiles] = get_tile_files(source, arguments.scale)
+    print(tile_files)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     concurrency: int = 1

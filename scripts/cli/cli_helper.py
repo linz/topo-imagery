@@ -1,22 +1,20 @@
 import argparse
 import json
-import os
 from datetime import datetime
 from os import environ
-from typing import Dict, List, NamedTuple, Optional
+from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
 from linz_logger import get_log
 
-from scripts.files.files_helper import get_file_name_from_path
-
+from scripts.tile.tile_index import check_tile_and_rename
 
 class TileFiles(NamedTuple):
     output: str
     input: List[str]
 
 
-def get_tile_files(source: List[str]) -> List[TileFiles]:
+def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileFiles]:
     """Transform a list of file names (local) or dictionaries (Argo Workflows) to a list of `TileFiles`
     When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
 
@@ -40,15 +38,14 @@ def get_tile_files(source: List[str]) -> List[TileFiles]:
             return source_json
         except json.JSONDecodeError as e:
             get_log().debug("Decoding Json Failed", msg=e)
-
-def transform_dev_source(dev_source: List[str]) -> List[Dict[str, str]]:
-    source_list: List[Dict[str, str]] = []
-    for s in source_list:
-        tmp_dict: Dict[str,str] = {}
-        tmp_dict["output"] = os.path.basename(s)
-        tmp_dict["input"] = s
-        source_list.append(tmp_dict)
-    return source_list
+    else:
+        source_dev: List[TileFiles] = []
+        for s in source:
+            tile_name = check_tile_and_rename(s, scale)
+            print(tile_name)
+            # tf = TileFiles(os.path.splitext(os.path.basename(s))[0], [s])
+            source_dev.append(tile_name)
+        return source_dev
 
 
 def is_argo() -> bool:

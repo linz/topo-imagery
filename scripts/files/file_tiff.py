@@ -1,9 +1,13 @@
 import json
+import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from linz_logger import get_log
+
+from scripts.files.files_helper import get_file_name_from_path
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
 from scripts.tile.tile_index import TileIndexException, get_tile_name
 
 class FileTiffErrorType(str, Enum):
@@ -303,6 +307,25 @@ class FileTiff:
                 custom_fields={"missing": f"{', '.join(missing_bands)}"},
             )
 
+    def check_tile_and_rename(self, gdalinfo: GdalInfo) -> None:
+        """Validate the TIFF origin within its scale and standardise the filename.
+
+        Args:
+            gdalinfo: `gdalinfo` output
+        """
+        if self._scale > 0:
+            origin = get_origin(gdalinfo)
+            try:
+                tile_name = get_tile_name(origin, self._scale)
+                if not tile_name == get_file_name_from_path(self._path_standardised):
+                    new_path = os.path.join(os.path.dirname(self._path_standardised), tile_name + ".tiff")
+                    os.rename(self._path_standardised, new_path)
+                    get_log().info("renaming_file", path=new_path, old=self._path_standardised)
+                    self._path_standardised = new_path
+
+            except TileIndexException as tie:
+                self.add_error(FileTiffErrorType.TILE_ALIGNMENT, error_message=f"{tie}")
+
     def validate(self) -> bool:
         """Run the Non Visual QA checks.
 
@@ -312,6 +335,7 @@ class FileTiff:
 
         gdalinfo = self.get_gdalinfo()
         if gdalinfo:
+            #self.check_tile_and_rename(gdalinfo) - only for local tiles
             self.check_no_data(gdalinfo)
             self.check_band_count(gdalinfo)
             self.check_color_interpretation(gdalinfo)
