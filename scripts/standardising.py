@@ -1,21 +1,12 @@
 import os
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
-from scripts.files.fs_s3 import bucket_name_from_path
 
-import csv
 import ulid
 from linz_logger import get_log
-import boto3
-from concurrent import futures
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any, Generator, List, Optional, Union
-
-import boto3
-
-# import tqdm
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
@@ -38,10 +29,10 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 def run_standardising(
     todo: List[TileFiles],
     preset: str,
-    # cutline: Optional[str],
+    cutline: Optional[str],
     concurrency: int,
-    # source_epsg: str,
-    # target_epsg: str,
+    source_epsg: str,
+    target_epsg: str,
     target_output: str = "/tmp/",
 ) -> List[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
@@ -69,10 +60,10 @@ def run_standardising(
             partial(
                 standardising,
                 preset=preset,
-                # source_epsg=source_epsg,
-                # target_epsg=target_epsg,
+                source_epsg=source_epsg,
+                target_epsg=target_epsg,
                 target_output=target_output,
-                # cutline=cutline,
+                cutline=cutline,
             ),
             todo,
         )
@@ -84,74 +75,57 @@ def run_standardising(
     return standardized_tiffs
 
 
-def download_tiffs(files: List[str], target: str) -> List[str]:
-    """Download a tiff file and some of its sidecar files if they exist to the target dir.
+# def download_tiffs(files: List[str], target: str) -> List[str]:
+#     """Download a tiff file and some of its sidecar files if they exist to the target dir.
 
-    Args:
-        files: links source filename to target tilename
-        target: target folder to write too
+#     Args:
+#         files: links source filename to target tilename
+#         target: target folder to write too
 
-    Returns:
-        linked downloaded filename to target tilename
+#     Returns:
+#         linked downloaded filename to target tilename
 
-    Example:
-    ```
-    >>> download_tiff_file(("s3://elevation/SN9457_CE16_10k_0502.tif", "CE16_5000_1003"), "/tmp/")
-    ("/tmp/123456.tif", "CE16_5000_1003")
-    ```
-    """
-    downloaded_files: List[str] = []
-    for file in files:
-        target_file_path = os.path.join(target, str(ulid.ULID()))
-        input_file_path = target_file_path + ".tiff"
-        get_log().info("download_tiff", path=file, target_path=input_file_path)
-
-        write(input_file_path, read(file))
-        downloaded_files.append(input_file_path)
-
-        base_file_path = os.path.splitext(file)[0]
-        # Attempt to download sidecar files too
-        for ext in [".prj", ".tfw"]:
-            try:
-                write(target_file_path + ext, read(base_file_path + ext))
-                get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
-
-            except:  # pylint: disable-msg=bare-except
-                pass
-
-    return downloaded_files
+#     Example:
+#     ```
+#     >>> download_tiff_file(("s3://elevation/SN9457_CE16_10k_0502.tif", "CE16_5000_1003"), "/tmp/")
+#     ("/tmp/123456.tif", "CE16_5000_1003")
+#     ```
+#     """
 
 
-def download_one_file(bucket: str, destination: str, client: boto3.client, s3_file: str):
+def download_one_file(destination: str, s3_file: str) -> None:
     """
     Download a single file from S3
     Args:
-        bucket (str): S3 bucket where images are hosted
-        output (str): Dir to store the images
-        client (boto3.client): S3 client
+        destination (str): Path to store the images
         s3_file (str): S3 object name
     """
-    if bucket in s3_file:
-        s3_file = s3_file.replace(f"s3://{bucket}/", "")
-    get_log().info("Retrieving File", path=f"s3://{bucket}/{s3_file}")
-    client.download_file(Bucket=bucket, Key=s3_file, Filename=os.path.join(destination, f"{str(ulid.ULID())}.tiff"))
+    get_log().info("Download File Called", path=s3_file, target_path=destination)
+    write(destination, read(s3_file))
+    for ext in [".prj", ".tfw"]:
+        try:
+            write(destination.replace(".tiff", ext), read(s3_file.replace(".tif", ext)))
+            get_log().info(
+                "download_tiff_sidecar", path=s3_file.replace(".tif", ext), target_path=destination.replace(".tiff", ext)
+            )
+        except:  # pylint: disable-msg=bare-except
+            pass
 
 
-def downloads_multithread_tiffs(bucket: str, inputs: List[str], destination: str, concurrency: int = 10):
-    # Creating only one session and one client
-    session = boto3.Session()
-    client = session.client("s3")
-    # The client is shared between threads
-    func = partial(download_one_file, bucket, destination, client)
-
+def download_tiffs_multithreaded(inputs: List[str], destination: str, concurrency: int = 10) -> List[str]:
+    downloaded_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        # Using a dict for preserving the downloaded file for each future, to store it as a failure if we need that
-        futures = {executor.submit(func, input): input for input in inputs}
-        for future in as_completed(futures):
-            # TODO: add returned dowload to list.
+        download_path = os.path.join(destination, f"{str(ulid.ULID())}.tiff")
+        futuress = {
+            executor.submit(download_one_file, os.path.join(destination, input.split("/")[-1]), input): input
+            for input in inputs
+        }
+        for future in as_completed(futuress):
             if future.exception():
-                print(future.exception())
-                get_log().info("Failed Download", error=future.exception())
+                get_log().warn("Failed Download", error=future.exception())
+            else:
+                downloaded_tiffs.append(download_path)
+    return downloaded_tiffs
 
 
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
@@ -175,9 +149,9 @@ def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = Fals
 def standardising(
     files: TileFiles,
     preset: str,
-    # source_epsg: str,
-    # target_epsg: str,
-    # cutline: Optional[str],
+    source_epsg: str,
+    target_epsg: str,
+    cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> FileTiff:
     """Apply transformations using GDAL to the source file.
@@ -207,71 +181,66 @@ def standardising(
         return tiff
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
-    tmp_path = tempfile.mkdtemp()
-    # with tempfile.TemporaryDirectory() as tmp_path:
-    standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+    with tempfile.TemporaryDirectory() as tmp_path:
+        standardized_working_path = os.path.join(tmp_path, standardized_file_name)
 
-    # source_tiffs = download_tiffs(files.input, tmp_path)
-    s3_client = boto3.client("s3")
-    downloads_multithread_tiffs(bucket_name_from_path(files.input[0]), files.input, tmp_path)
-    # for key, target, result in downloads_multithread_tiffs(
-    #     bucket_name_from_path(files.input[0]), files.input, s3_client, 10, tmp_path
-    # ):
-    #     print(key)
-    #     print(target)
-    vrt_add_alpha = True
+        source_tiffs = download_tiffs_multithreaded(files.input, tmp_path)
+        if len(source_tiffs) != len(files.input):
+            get_log().error("Download Error", input_count=len(files.input), download_count=len(source_tiffs))
 
-    # for file in source_tiffs:
-    #     gdal_data = gdal_info(file, False)
-    #     bands = gdal_data["bands"]
-    #     if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
-    #         len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
-    #     ):
-    #         vrt_add_alpha = False
+        vrt_add_alpha = True
 
-    # # Start from base VRT
-    # input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
-    # target_vrt = os.path.join(tmp_path, "output.vrt")
+        for file in source_tiffs:
+            gdal_data = gdal_info(file, False)
+            bands = gdal_data["bands"]
+            if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
+                len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
+            ):
+                vrt_add_alpha = False
 
-    # # Apply cutline
-    # if cutline:
-    #     input_cutline_path = cutline
-    #     if is_s3(cutline):
-    #         if not cutline.endswith((".fgb", ".geojson")):
-    #             raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-    #         input_cutline_path = os.path.join(tmp_path, "cutline" + os.path.splitext(cutline)[1])
-    #         # Ensure the input cutline is a easy spot for GDAL to read
-    #         write(input_cutline_path, read(cutline))
+        # Start from base VRT
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
+        target_vrt = os.path.join(tmp_path, "output.vrt")
 
-    #     target_vrt = os.path.join(tmp_path, "cutline.vrt")
-    #     run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-    #     input_file = target_vrt
-    # elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
-    #     target_vrt = os.path.join(tmp_path, "target.vrt")
-    #     # add alpha band to all imagery for consistency allowing GDAL to run correctly (TDE-804)
-    #     run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
-    #     input_file = target_vrt
+        # Apply cutline
+        if cutline:
+            input_cutline_path = cutline
+            if is_s3(cutline):
+                if not cutline.endswith((".fgb", ".geojson")):
+                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                input_cutline_path = os.path.join(tmp_path, "cutline" + os.path.splitext(cutline)[1])
+                # Ensure the input cutline is a easy spot for GDAL to read
+                write(input_cutline_path, read(cutline))
 
-    # # Reproject tiff if needed
-    # if source_epsg != target_epsg:
-    #     target_vrt = os.path.join(tmp_path, "reproject.vrt")
-    #     get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-    #     run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
-    #     input_file = target_vrt
+            target_vrt = os.path.join(tmp_path, "cutline.vrt")
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+        elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
+            target_vrt = os.path.join(tmp_path, "target.vrt")
+            # add alpha band to all imagery for consistency allowing GDAL to run correctly (TDE-804)
+            run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
 
-    # transformed_image_gdalinfo = gdal_info(input_file, False)
-    # command = get_gdal_command(preset, epsg=target_epsg)
-    # command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
+        # Reproject tiff if needed
+        if source_epsg != target_epsg:
+            target_vrt = os.path.join(tmp_path, "reproject.vrt")
+            get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
 
-    # output_bounds: Bounds = get_bounds_from_name(files.output)
-    # min_x = output_bounds.point.x
-    # max_y = output_bounds.point.y
-    # min_y = max_y - output_bounds.size.height
-    # max_x = min_x + output_bounds.size.width
-    # command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
+        transformed_image_gdalinfo = gdal_info(input_file, False)
+        command = get_gdal_command(preset, epsg=target_epsg)
+        command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
 
-    # # Need GDAL to write to temporary location so no broken files end up in the done folder.
-    # run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+        output_bounds: Bounds = get_bounds_from_name(files.output)
+        min_x = output_bounds.point.x
+        max_y = output_bounds.point.y
+        min_y = max_y - output_bounds.size.height
+        max_x = min_x + output_bounds.size.width
+        command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
-    # write(standardized_file_path, read(standardized_working_path))
-    return tiff
+        # Need GDAL to write to temporary location so no broken files end up in the done folder.
+        run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+
+        write(standardized_file_path, read(standardized_working_path))
+        return tiff
