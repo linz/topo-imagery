@@ -1,9 +1,6 @@
 import json
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
-
-from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
@@ -315,7 +312,6 @@ class FileTiff:
 
         gdalinfo = self.get_gdalinfo()
         if gdalinfo:
-            #self.check_tile_and_rename(gdalinfo) - only for local tiles
             self.check_no_data(gdalinfo)
             self.check_band_count(gdalinfo)
             self.check_color_interpretation(gdalinfo)
