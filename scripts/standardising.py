@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import tempfile
 from functools import partial
@@ -73,8 +74,7 @@ def run_standardising(
 
     return standardized_tiffs
 
-
-def download_tiffs(files: List[str], target: str) -> List[str]:
+    # def download_tiffs(files: List[str], target: str) -> List[str]:
     """Download a tiff file and some of its sidecar files if they exist to the target dir.
 
     Args:
@@ -90,26 +90,41 @@ def download_tiffs(files: List[str], target: str) -> List[str]:
     ("/tmp/123456.tif", "CE16_5000_1003")
     ```
     """
-    downloaded_files: List[str] = []
-    for file in files:
-        target_file_path = os.path.join(target, str(ulid.ULID()))
-        input_file_path = target_file_path + ".tiff"
-        get_log().info("download_tiff", path=file, target_path=input_file_path)
 
-        write(input_file_path, read(file))
-        downloaded_files.append(input_file_path)
 
-        base_file_path = os.path.splitext(file)[0]
-        # Attempt to download sidecar files too
-        for ext in [".prj", ".tfw"]:
-            try:
-                write(target_file_path + ext, read(base_file_path + ext))
-                get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
+def download_one_file(destination: str, s3_file: str) -> None:
+    """
+    Download a single file from S3
+    Args:
+        destination (str): Path to store the images
+        s3_file (str): S3 object name
+    """
+    get_log().info("Download File Called", path=s3_file, target_path=destination)
+    write(destination, read(s3_file))
+    for ext in [".prj", ".tfw"]:
+        try:
+            write(destination.replace(".tiff", ext), read(s3_file.replace(".tif", ext)))
+            get_log().info(
+                "download_tiff_sidecar", path=s3_file.replace(".tif", ext), target_path=destination.replace(".tiff", ext)
+            )
+        except:  # pylint: disable-msg=bare-except
+            pass
 
-            except:  # pylint: disable-msg=bare-except
-                pass
 
-    return downloaded_files
+def download_tiffs_multithreaded(inputs: List[str], destination: str, concurrency: int = 10) -> List[str]:
+    downloaded_tiffs: List[str] = []
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        download_path = os.path.join(destination, f"{str(ulid.ULID())}.tiff")
+        futuress = {
+            executor.submit(download_one_file, os.path.join(destination, input.split("/")[-1]), input): input
+            for input in inputs
+        }
+        for future in as_completed(futuress):
+            if future.exception():
+                get_log().warn("Failed Download", error=future.exception())
+            else:
+                downloaded_tiffs.append(download_path)
+    return downloaded_tiffs
 
 
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
@@ -168,7 +183,7 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
 
-        source_tiffs = download_tiffs(files.input, tmp_path)
+        source_tiffs = download_tiffs_multithreaded(files.input, tmp_path)
         vrt_add_alpha = True
 
         for file in source_tiffs:
