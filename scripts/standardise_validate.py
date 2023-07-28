@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import sys
 from typing import List
 
 from linz_logger import get_log
@@ -17,9 +16,6 @@ def main() -> None:
     # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
-    parser.add_argument(
-        "--from-file", dest="from_file", required=False, help="The path to a json file containing the input tiffs"
-    )
     parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
     parser.add_argument(
         "--target-epsg",
@@ -37,35 +33,28 @@ def main() -> None:
     )
     parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
     parser.add_argument("--target", dest="target", help="Target output", required=True)
-    parser.add_argument("--dev", dest="dev", help="Developer mode - source should be a path to a single local file (add S3?)", required=False, nargs='+')
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--from-file", dest="from_file", help="The path to a json file containing the input tiffs")
+    group.add_argument("--dev", dest="dev", nargs="+", help="Developer mode - path to local files separated by spaces")
+
     arguments = parser.parse_args()
 
     dev = arguments.dev
     from_file = arguments.from_file
-    scale = arguments.scale
-    if scale == "None":
+
+    if arguments.scale == "None":
         scale = 0
     else:
         scale = int(arguments.scale)
 
-    if not dev and not from_file:
-        get_log().error("dev_or_from_file_not_specified")
-        sys.exit(1)
-
-    if dev and from_file:
-        get_log().error("dev_and_from_file_both_specified")
-        sys.exit(1)
-
+    # FIXME: `source` has to be a list to be parsed in `get_tile_files()`
     if from_file:
-        # FIXME: `source` has to be a list to be parsed in `format_source()`
         source = [json.dumps(json.loads(read(arguments.from_file)))]
-
-    if dev:
-        # Expect space separated image paths
+    else:
         source = dev
 
     tile_files: List[TileFiles] = get_tile_files(source, scale)
-    print(tile_files)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     concurrency: int = 1

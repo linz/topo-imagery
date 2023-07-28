@@ -79,6 +79,8 @@ ROUND_CORRECTION = 0.01
 
 class TileIndexException(Exception):
     pass
+
+
 CHAR_A = charcodeat("A", 0)
 CHAR_S = charcodeat("S", 0)
 
@@ -90,7 +92,6 @@ class Point(NamedTuple):
     y: Union[int, float]
 
 
-
 class Size(NamedTuple):
     width: Union[int, float]
     height: Union[int, float]
@@ -99,6 +100,7 @@ class Size(NamedTuple):
 class Bounds(NamedTuple):
     point: Point
     size: Size
+
 
 def round_with_correction(value: Union[int, float]) -> int | float:
     """Round a value to the next or previous unit ROUND_CORRECTION.
@@ -132,8 +134,9 @@ def round_with_correction(value: Union[int, float]) -> int | float:
 
     if correction.is_integer():
         return int(correction)
-    
+
     return correction
+
 
 def get_tile_name(origin: Point, grid_size: int) -> str:
     """Get the tile name from an origin point and the grid size (or scale).

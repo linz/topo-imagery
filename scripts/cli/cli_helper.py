@@ -5,19 +5,19 @@ from os import environ
 from typing import List, NamedTuple, Optional
 
 from dateutil import parser, tz
-from linz_logger import get_log
 
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info, get_origin
-from scripts.tile.tile_index import get_tile_name, TileIndexException
+from scripts.tile.tile_index import TileIndexException, get_tile_name
+
 
 class TileFiles(NamedTuple):
     output: str
     input: List[str]
 
 
-def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileFiles]:
+def get_tile_files(source: List[str], scale: int = 0) -> List[TileFiles]:
     """Transform a list of file names (local) or dictionaries (Argo Workflows) to a list of `TileFiles`
-    When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
+    Local input does not support re-tiling.
 
     Args:
         source: a list of file names or containing a stringify list of dictionary
@@ -27,8 +27,11 @@ def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileF
 
     Example:
     ```
-    >>> format_source(["[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]"])
+    >>> get_tile_files(["[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]"])
     [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
+    >>> get_tile_files(["s3://bucket/SN9457_CE16_10k_0501.tif", "s3://bucket/SN9457_CE16_10k_0502.tif"])
+    [TileFiles(output='CE16_10000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'),
+        TileFiles(output='outCE16_10000_1002', input=['s3://bucket/SN9457_CE16_10k_0502.tif'])])]
     ```
     """
     if source[0].startswith("[{"):
@@ -38,7 +41,7 @@ def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileF
             )
             return source_json
         except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", msg=e)
+            raise Exception(e) from e
     else:
         source_dev: List[TileFiles] = []
         for s in source:
@@ -49,9 +52,10 @@ def get_tile_files(source: List[str], scale: Optional[str] = None) -> List[TileF
                 tile_name = get_tile_name(origin, scale)
                 tf = TileFiles(tile_name, [s])
             except TileIndexException as tie:
-                get_log().error("get_tile_name_failed", path=s, error=tie)
+                raise Exception(tie) from tie
             source_dev.append(tf)
         return source_dev
+
 
 def is_argo() -> bool:
     return bool(environ.get("ARGO_TEMPLATE"))
