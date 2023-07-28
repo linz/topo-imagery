@@ -40,19 +40,16 @@ def main() -> None:
 
     arguments = parser.parse_args()
 
-    dev = arguments.dev
-    from_file = arguments.from_file
-
     if arguments.scale == "None":
         scale = 0
     else:
         scale = int(arguments.scale)
 
     # FIXME: `source` has to be a list to be parsed in `get_tile_files()`
-    if from_file:
+    if arguments.from_file:
         source = [json.dumps(json.loads(read(arguments.from_file)))]
     else:
-        source = dev
+        source = arguments.dev
 
     tile_files: List[TileFiles] = get_tile_files(source, scale)
     start_datetime = format_date(arguments.start_datetime)
