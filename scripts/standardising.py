@@ -172,7 +172,7 @@ def standardising(
         vrt_add_alpha = True
 
         for file in source_tiffs:
-            gdal_data = gdal_info(file, False)
+            gdal_data = gdal_info(file)
             bands = gdal_data["bands"]
             if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
                 len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
@@ -209,7 +209,7 @@ def standardising(
             run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
             input_file = target_vrt
 
-        transformed_image_gdalinfo = gdal_info(input_file, False)
+        transformed_image_gdalinfo = gdal_info(input_file)
         command = get_gdal_command(preset, epsg=target_epsg)
         command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
 
