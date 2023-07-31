@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 from typing import List
 
 from linz_logger import get_log
@@ -31,25 +32,29 @@ def main() -> None:
     parser.add_argument(
         "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
     )
-    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=True)
+    parser.add_argument("--scale", dest="scale", help="Tile grid scale to align output tile to", required=False)
     parser.add_argument("--target", dest="target", help="Target output", required=True)
 
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--from-file", dest="from_file", help="The path to a json file containing the input tiffs")
-    group.add_argument("--dev", dest="dev", nargs="+", help="Developer mode - path to local files separated by spaces")
+    parser.add_argument(
+        "--from-file", dest="from_file", help="The path to a json file containing the input tiffs", required=False
+    )
+    parser.add_argument("localfiles", nargs="*", help="Path to local files separated by spaces")
 
     arguments = parser.parse_args()
-
-    if arguments.scale == "None":
-        scale = 0
-    else:
-        scale = int(arguments.scale)
 
     # FIXME: `source` has to be a list to be parsed in `get_tile_files()`
     if arguments.from_file:
         source = [json.dumps(json.loads(read(arguments.from_file)))]
+    elif arguments.localfiles:
+        if arguments.scale == "None" or int(arguments.scale) == 0:
+            get_log().error("scale_required_for_local_standardising")
+            sys.exit(1)
+        else:
+            scale = int(arguments.scale)
+        source = arguments.localfiles
     else:
-        source = arguments.dev
+        get_log().error("no_files_provided_for_processing")
+        sys.exit(1)
 
     tile_files: List[TileFiles] = get_tile_files(source, scale)
     start_datetime = format_date(arguments.start_datetime)

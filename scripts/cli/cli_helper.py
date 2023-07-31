@@ -46,8 +46,7 @@ def get_tile_files(source: List[str], scale: int = 0) -> List[TileFiles]:
         source_dev: List[TileFiles] = []
         for s in source:
             gdalinfo: GdalInfo = gdal_info(s, False)
-            if scale > 0:
-                origin = get_origin(gdalinfo)
+            origin = get_origin(gdalinfo)
             try:
                 tile_name = get_tile_name(origin, scale)
                 tf = TileFiles(tile_name, [s])

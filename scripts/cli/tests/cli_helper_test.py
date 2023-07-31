@@ -2,6 +2,7 @@ from typing import List
 
 from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list
 
+
 def test_parse_list() -> None:
     str_list = "Auckland Council; Toitū Te Whenua Land Information New Zealand;Nelson Council;"
     list_parsed = parse_list(str_list)
