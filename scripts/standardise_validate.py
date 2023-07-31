@@ -53,7 +53,7 @@ def main() -> None:
             scale = int(arguments.scale)
         source = arguments.localfiles
     else:
-        get_log().error("no_files_provided_for_processing")
+        get_log().error("no_input_files_provided_for_processing")
         sys.exit(1)
 
     tile_files: List[TileFiles] = get_tile_files(source, scale)
