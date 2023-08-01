@@ -74,56 +74,52 @@ def run_standardising(
 
     return standardized_tiffs
 
-    # def download_tiffs(files: List[str], target: str) -> List[str]:
-    """Download a tiff file and some of its sidecar files if they exist to the target dir.
+
+def download_tiff_and_sidecar(target: str, file: str) -> str:
+    """
+    Download a tiff file and some of its sidecar files if they exist to the target dir.
 
     Args:
-        files: links source filename to target tilename
-        target: target folder to write too
+        target (str): target folder to write to
+        s3_file (str): source file
 
     Returns:
-        linked downloaded filename to target tilename
-
-    Example:
-    ```
-    >>> download_tiff_file(("s3://elevation/SN9457_CE16_10k_0502.tif", "CE16_5000_1003"), "/tmp/")
-    ("/tmp/123456.tif", "CE16_5000_1003")
-    ```
+        downloaded file path
     """
-
-
-def download_one_file(destination: str, s3_file: str) -> None:
-    """
-    Download a single file from S3
-    Args:
-        destination (str): Path to store the images
-        s3_file (str): S3 object name
-    """
-    get_log().info("Download File Called", path=s3_file, target_path=destination)
-    write(destination, read(s3_file))
+    download_path = os.path.join(target, f"{ulid.ULID()}.tiff")
+    get_log().info("Download File Called", path=file, target_path=download_path)
+    write(download_path, read(file))
     # for ext in [".prj", ".tfw"]:
     #     try:
-    #         write(destination.replace(".tiff", ext), read(s3_file.replace(".tif", ext)))
+    #         write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
     #         get_log().info(
-    #             "download_tiff_sidecar", path=s3_file.replace(".tif", ext), target_path=destination.replace(".tiff", ext)
+    #             "download_tiff_sidecar", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
     #         )
     #     except:  # pylint: disable-msg=bare-except
     #         pass
+    return download_path
 
 
-def download_tiffs_multithreaded(inputs: List[str], destination: str, concurrency: int = 10) -> List[str]:
+def download_files_multithreaded(inputs: List[str], target: str, concurrency: int = 10) -> List[str]:
+    """
+    Download list of files to target destination using multithreading.
+
+    Args:
+        inputs (list): list of files to download
+        target (str): target folder to write to
+
+
+    Returns:
+        list of downloaded file paths
+    """
     downloaded_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        download_path = os.path.join(destination, f"{str(ulid.ULID())}.tiff")
-        futuress = {
-            executor.submit(download_one_file, os.path.join(destination, input.split("/")[-1]), input): input
-            for input in inputs
-        }
+        futuress = {executor.submit(download_tiff_and_sidecar, target, input): input for input in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Download", error=future.exception())
             else:
-                downloaded_tiffs.append(download_path)
+                downloaded_tiffs.append(future.result())
     return downloaded_tiffs
 
 
@@ -183,8 +179,8 @@ def standardising(
     tmp_path = tempfile.mkdtemp()
     # with tempfile.TemporaryDirectory() as tmp_path:
     standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+    source_tiffs = download_files_multithreaded(files.input, tmp_path)
 
-    source_tiffs = download_tiffs_multithreaded(files.input, tmp_path)
     vrt_add_alpha = True
 
         for file in source_tiffs:
