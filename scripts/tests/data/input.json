@@ -1,0 +1,8 @@
+[
+    {
+      "output": "BQ31_500_055080",
+      "input": [
+        "./tests/data/input.tif"
+      ]
+    }
+]
