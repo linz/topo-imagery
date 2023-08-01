@@ -176,12 +176,12 @@ def standardising(
         return tiff
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
-    tmp_path = tempfile.mkdtemp()
-    # with tempfile.TemporaryDirectory() as tmp_path:
-    standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-    source_tiffs = download_files_multithreaded(files.input, tmp_path)
+    # tmp_path = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as tmp_path:
+        standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+        source_tiffs = download_files_multithreaded(files.input, tmp_path)
 
-    vrt_add_alpha = True
+        vrt_add_alpha = True
 
         for file in source_tiffs:
             gdal_data = gdal_info(file)
@@ -191,35 +191,35 @@ def standardising(
             ):
                 vrt_add_alpha = False
 
-    # Start from base VRT
-    input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
-    target_vrt = os.path.join(tmp_path, "output.vrt")
+        # Start from base VRT
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
+        target_vrt = os.path.join(tmp_path, "output.vrt")
 
-    # Apply cutline
-    if cutline:
-        input_cutline_path = cutline
-        if is_s3(cutline):
-            if not cutline.endswith((".fgb", ".geojson")):
-                raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
-            input_cutline_path = os.path.join(tmp_path, "cutline" + os.path.splitext(cutline)[1])
-            # Ensure the input cutline is a easy spot for GDAL to read
-            write(input_cutline_path, read(cutline))
+        # Apply cutline
+        if cutline:
+            input_cutline_path = cutline
+            if is_s3(cutline):
+                if not cutline.endswith((".fgb", ".geojson")):
+                    raise Exception(f"Only .fgb or .geojson cutlines are support cutline:{cutline}")
+                input_cutline_path = os.path.join(tmp_path, "cutline" + os.path.splitext(cutline)[1])
+                # Ensure the input cutline is a easy spot for GDAL to read
+                write(input_cutline_path, read(cutline))
 
-        target_vrt = os.path.join(tmp_path, "cutline.vrt")
-        run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
-        input_file = target_vrt
-    elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
-        target_vrt = os.path.join(tmp_path, "target.vrt")
-        # add alpha band to all imagery for consistency allowing GDAL to run correctly (TDE-804)
-        run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
-        input_file = target_vrt
+            target_vrt = os.path.join(tmp_path, "cutline.vrt")
+            run_gdal(get_cutline_command(input_cutline_path), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
+        elif tiff.get_tiff_type() == FileTiffType.IMAGERY:
+            target_vrt = os.path.join(tmp_path, "target.vrt")
+            # add alpha band to all imagery for consistency allowing GDAL to run correctly (TDE-804)
+            run_gdal(get_alpha_command(), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
 
-    # Reproject tiff if needed
-    if source_epsg != target_epsg:
-        target_vrt = os.path.join(tmp_path, "reproject.vrt")
-        get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
-        run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
-        input_file = target_vrt
+        # Reproject tiff if needed
+        if source_epsg != target_epsg:
+            target_vrt = os.path.join(tmp_path, "reproject.vrt")
+            get_log().info("Reprojecting Tiff", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+            run_gdal(get_transform_srs_command(source_epsg, target_epsg), input_file=input_file, output_file=target_vrt)
+            input_file = target_vrt
 
         transformed_image_gdalinfo = gdal_info(input_file)
         command = get_gdal_command(preset, epsg=target_epsg)
@@ -233,8 +233,8 @@ def standardising(
         max_x = min_x + output_bounds.size.width
         command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
-    # Need GDAL to write to temporary location so no broken files end up in the done folder.
-    run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+        # Need GDAL to write to temporary location so no broken files end up in the done folder.
+        run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
-    write(standardized_file_path, read(standardized_working_path))
-    return tiff
+        write(standardized_file_path, read(standardized_working_path))
+        return tiff
