@@ -1,6 +1,6 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
