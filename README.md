@@ -44,7 +44,7 @@ docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py 
 To use an AWS test data (input located in an AWS S3 bucket), log into the AWS account and add the following arguments to the `docker run` command:
 
 ```
-${HOME}/.aws/credentials:/root/.aws/credentials:ro -v -e AWS_PROFILE=your-profile
+-v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE=your-profile
 ```
 
 ### In the cloud
