@@ -41,6 +41,12 @@ The input can be passed through a `json` file containing a list of one or severa
 docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --from-file ./tests/data/aerial.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/ --source-epsg 2193 --target-epsg 2193
 ```
 
+To use an AWS test data (input located in an AWS S3 bucket), log into the AWS account and add the following arguments to the `docker run` command:
+
+```
+${HOME}/.aws/credentials:/root/.aws/credentials:ro -v -e AWS_PROFILE=your-profile
+```
+
 ### In the cloud
 
 This package is used to be run in a [Kubernetes](https://kubernetes.io/) cluster using a workflow system. More information can be found in the [linz/topo-workflows](https://github.com/linz/topo-workflows) repository.
