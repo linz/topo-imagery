@@ -20,11 +20,11 @@ The Docker container is available [in GitHub Packages](https://github.com/linz/t
 
 ### Usage
 
-The scripts have been implemented to be run inside the Docker container only.
+The scripts have been implemented to be run inside the Docker container only. This is mainly because of the `GDAL` dependency.
 
 #### Local
 
-- Build the Docker image:
+- Build the `Docker` image:
 
 ```bash
 docker build . -t topo-imagery
@@ -33,17 +33,12 @@ docker build . -t topo-imagery
 - Running `standardising_validate.py` script
 
 This script takes a file (or list of files) in input that need to be standardised to a [COG](https://www.cogeo.org/) with a creation of a [STAC](https://stacspec.org/) Item file containing the metadata.
+The input can be passed through a `json` file containing a list of one or several input imagery files to standardised with their corresponding output tile name. Some test data are available in `/scripts/tests/data/` along with the expected output.
 
-1. Example with local files. In this example the source file is in a `/tmp/` directory in your machine, the output will be created in `/tmp/output/`:
-
-```bash
-docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --source /tmp/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
-```
-
-2. Example using a source file on AWS, after logging into AWS with [AWS CLI](https://aws.amazon.com/cli/):
+- Example of local execution. This example uses the test data available on this repo and create the output will be created in a `~/tmp/` on the local machine (volume share with `Docker`):
 
 ```bash
-docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --source s3://bucket/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --from-file ./tests/data/aerial.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/ --source-epsg 2193 --target-epsg 2193
 ```
 
 ### In the cloud
