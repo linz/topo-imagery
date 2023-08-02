@@ -89,14 +89,14 @@ def download_tiff_and_sidecar(target: str, file: str) -> str:
     download_path = os.path.join(target, f"{ulid.ULID()}.tiff")
     get_log().info("Download File Called", path=file, target_path=download_path)
     write(download_path, read(file))
-    # for ext in [".prj", ".tfw"]:
-    #     try:
-    #         write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
-    #         get_log().info(
-    #             "download_tiff_sidecar", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
-    #         )
-    #     except:  # pylint: disable-msg=bare-except
-    #         pass
+    for ext in [".prj", ".tfw"]:
+        try:
+            write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
+            get_log().info(
+                "download_tiff_sidecar", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
+            )
+        except:  # pylint: disable-msg=bare-except
+            pass
     return download_path
 
 
@@ -176,7 +176,6 @@ def standardising(
         return tiff
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
-    # tmp_path = tempfile.mkdtemp()
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         source_tiffs = download_files_multithreaded(files.input, tmp_path)
