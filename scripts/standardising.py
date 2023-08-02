@@ -180,6 +180,9 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         source_tiffs = download_files_multithreaded(files.input, tmp_path)
+        if len(source_tiffs) != len(files.input):
+            get_log().error("Missing Files", missing_file_count=len(files.input) - len(source_tiffs))
+            raise Exception("Not all source files were downloaded")
 
         vrt_add_alpha = True
 
