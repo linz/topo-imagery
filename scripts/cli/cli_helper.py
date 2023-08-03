@@ -18,14 +18,14 @@ def format_source(source: str) -> List[TileFiles]:
     """Transform a list of dictionaries (Argo Workflows) to a list of `TileFiles`
 
     Args:
-        input: file contents string
+        source: file contents string
 
     Returns:
         a list of `TileFiles` namedtuple
 
     Example:
     ```
-    >>> format_source([{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}])
+    >>> format_source("[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]")
     [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
     ```
     """

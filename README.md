@@ -32,18 +32,40 @@ docker build . -t topo-imagery
 
 - Running `standardising_validate.py` script
 
-This script takes a file (or list of files) in input that need to be standardised to a [COG](https://www.cogeo.org/) with a creation of a [STAC](https://stacspec.org/) Item file containing the metadata.
+This script takes a file path to a json file containing a list of tile names and the source files for each tile.
+The files are standardised to a [COG](https://www.cogeo.org/) with creation of a [STAC](https://stacspec.org/) Item file containing the metadata.
+Where there are multiple input files for each output tile name then retiling will occur.
+
+Example source file:
+
+```json
+[
+  {
+    "output": "AX30_10000_0305",
+    "input": [
+      "/tmp/source/DEM_AX30_2016_1000_2949.tif",
+      "/tmp/source/DEM_AX30_2016_1000_2950.tif",
+      "/tmp/source/DEM_AX30_2016_1000_3049.tif",
+      "/tmp/source/DEM_AX30_2016_1000_3050.tif"
+    ]
+  },
+  {
+    "output": "AX30_10000_0405",
+    "input": ["/tmp/source/DEM_AX30_2016_1000_3150.tif"]
+  }
+]
+```
 
 1. Example with local files. In this example the source file is in a `/tmp/` directory in your machine, the output will be created in `/tmp/output/`:
 
 ```bash
-docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --source /tmp/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --from-file /tmp/file_list.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
 ```
 
 2. Example using a source file on AWS, after logging into AWS with [AWS CLI](https://aws.amazon.com/cli/):
 
 ```bash
-docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --source s3://bucket/file_to_standardise.tiff --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
+docker run -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -v ${HOME}/tmp/:/tmp/:rw -e AWS_PROFILE topo-imagery python standardise_validate.py --preset webp --from-file s3://bucket/file_list.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/output/ --source-epsg 2193 --target-epsg 2193'
 ```
 
 ### In the cloud
