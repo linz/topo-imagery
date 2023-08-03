@@ -213,7 +213,7 @@ def standardising(
         command = get_gdal_command(preset, epsg=target_epsg)
         command.extend(get_gdal_band_offset(input_file, transformed_image_gdalinfo, preset))
 
-        # Specify the extent to get the right boundaries in case of the tiff got no data on its egges
+        # Specify the extent to get the right boundaries in case of the tiff got no data on its edges
         output_bounds: Bounds = get_bounds_from_name(files.output)
         min_x = output_bounds.point.x
         max_y = output_bounds.point.y
