@@ -25,7 +25,7 @@ def format_source(source: str) -> List[TileFiles]:
 
     Example:
     ```
-    >>> format_input([{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}])
+    >>> format_source([{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}])
     [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
     ```
     """
