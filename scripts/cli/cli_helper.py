@@ -18,7 +18,7 @@ def format_source(source: str) -> List[TileFiles]:
     """Transform a list of dictionaries (Argo Workflows) to a list of `TileFiles`
 
     Args:
-        input: file contents bytes
+        input: file contents string
 
     Returns:
         a list of `TileFiles` namedtuple

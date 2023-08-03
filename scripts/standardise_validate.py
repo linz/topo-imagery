@@ -38,7 +38,6 @@ def main() -> None:
     arguments = parser.parse_args()
 
     source = json.dumps(json.loads(read(arguments.from_file)))
-    print(type(source))
     tile_files: List[TileFiles] = format_source(source)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
