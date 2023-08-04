@@ -1,6 +1,6 @@
 [
   {
-    "output": "BQ31_500_055080",
-    "input": ["./tests/data/input.tif"]
+    "output": "BG35_1000_4829",
+    "input": ["./tests/data/input_aerial.tif"]
   }
 ]
