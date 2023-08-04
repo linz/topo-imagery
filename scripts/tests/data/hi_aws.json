@@ -1,0 +1,6 @@
+[
+  {
+    "output": "BQ31_5000_0608",
+    "input": ["s3://linz-imagery-staging/test/sample-tests/input_hi.tif"]
+  }
+]
