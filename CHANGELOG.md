@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.0.0](https://github.com/linz/topo-imagery/compare/v2.2.1...v3.0.0) (2023-07-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* standardise_validate should allow 1 output from multiple inputs TDE-784 ([#557](https://github.com/linz/topo-imagery/issues/557))
+
+### Features
+
+* standardise_validate allows passing a json file as input TDE-823 ([#564](https://github.com/linz/topo-imagery/issues/564)) ([ebd3e8e](https://github.com/linz/topo-imagery/commit/ebd3e8e00098d145371d8be240e9a97a7cffe2c1))
+* standardise_validate should allow 1 output from multiple inputs TDE-784 ([#557](https://github.com/linz/topo-imagery/issues/557)) ([d0ddbbb](https://github.com/linz/topo-imagery/commit/d0ddbbba3d161f3e9249f45eaadd072d8b3810b8))
+
+
+### Bug Fixes
+
+* AREA_OR_POINT should be forced to AREA for DEMs TDE-787 ([#537](https://github.com/linz/topo-imagery/issues/537)) ([3b92a21](https://github.com/linz/topo-imagery/commit/3b92a21d070b9aabb77c6bbd27b7a9b646e97897))
+
+
+### Reverts
+
+* "revert: "chore: upgrade gdal from 3.6.1 to 3.7.0 ([#479](https://github.com/linz/topo-imagery/issues/479))" ([#536](https://github.com/linz/topo-imagery/issues/536))" ([#544](https://github.com/linz/topo-imagery/issues/544)) ([ca824f9](https://github.com/linz/topo-imagery/commit/ca824f91b57f4f245c9813928d4845f63fd9c1c6))
+
 ## [2.2.1](https://github.com/linz/topo-imagery/compare/v2.2.0...v2.2.1) (2023-07-12)
 
 

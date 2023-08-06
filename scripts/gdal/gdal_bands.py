@@ -33,7 +33,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
         list of band mappings eg "-b 1 -b 1 -b 1"
     """
     if info is None:
-        info = gdal_info(file, False)
+        info = gdal_info(file)
 
     bands = info["bands"]
 
@@ -96,7 +96,7 @@ def get_gdal_band_type(file: str, info: Optional[GdalInfo] = None) -> str:
         band type
     """
     if info is None:
-        info = gdal_info(file, False)
+        info = gdal_info(file)
 
     bands = info["bands"]
     return bands[0]["type"]

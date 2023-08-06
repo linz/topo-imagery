@@ -1,0 +1,13 @@
+[
+  {
+    "output": "BK39_10000_0102",
+    "input": [
+      "s3://linz-elevation-staging/test/sample-tests/input_dem_01.tif",
+      "s3://linz-elevation-staging/test/sample-tests/input_dem_02.tif"
+    ]
+  },
+  {
+    "output": "BK39_10000_0101",
+    "input": ["s3://linz-elevation-staging/test/sample-tests/input_dem_03.tif"]
+  }
+]

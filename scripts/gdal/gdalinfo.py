@@ -77,22 +77,17 @@ class GdalInfo(TypedDict):
     bands: List[GdalInfoBand]
 
 
-def gdal_info(path: str, stats: bool = True) -> GdalInfo:
+def gdal_info(path: str) -> GdalInfo:
     """run gdalinfo on the provided file
 
     Args:
         path: path to file to gdalinfo
-        stats: Optionally add "-stats" to gdalinfo. Defaults to True.
 
     Returns:
         GdalInfo output
     """
     # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
     gdalinfo_command = ["gdalinfo", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
-
-    # Stats takes a while to generate only generate if needed
-    if stats:
-        gdalinfo_command.append("-stats")
 
     try:
         gdalinfo_process = run_gdal(gdalinfo_command, path)
