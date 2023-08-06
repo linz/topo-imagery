@@ -87,13 +87,13 @@ def download_tiff_and_sidecar(target: str, file: str) -> str:
         downloaded file path
     """
     download_path = os.path.join(target, f"{ulid.ULID()}.tiff")
-    get_log().info("Download File Called", path=file, target_path=download_path)
+    get_log().info("Download File", path=file, target_path=download_path)
     write(download_path, read(file))
     for ext in [".prj", ".tfw"]:
         try:
             write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
             get_log().info(
-                "download_tiff_sidecar", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
+                "Download tiff sidecars", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
             )
         except:  # pylint: disable-msg=bare-except
             pass
