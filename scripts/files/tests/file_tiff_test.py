@@ -111,9 +111,9 @@ def test_check_band_count_invalid_3_DEM() -> None:
     assert file_tiff.get_errors()
 
 
-def test_check_color_interpretation_valid() -> None:
+def test_check_color_interpretation_valid_rgb() -> None:
     """
-    tests check_color_interpretation with the correct color interpretation
+    tests check_color_interpretation with the correct RGB color interpretation
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Red")
@@ -125,6 +125,19 @@ def test_check_color_interpretation_valid() -> None:
 
     assert not file_tiff.get_errors()
 
+def test_check_color_interpretation_valid_greyscale() -> None:
+    """
+    tests check_color_interpretation with the correct greyscale color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Gray")
+    add_band(gdalinfo, color_interpretation="Gray")
+    add_band(gdalinfo, color_interpretation="Gray")
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert not file_tiff.get_errors()
 
 def test_check_color_interpretation_invalid() -> None:
     """
