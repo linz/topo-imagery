@@ -107,7 +107,7 @@ def main() -> None:
                     errors=file.get_errors(),
                 )
             else:
-                get_log().info("non_visual_qa_passed", path=file.get_path_original())
+                get_log().info("non_visual_qa_passed", path=file.get_path_standardised())
 
             # Create STAC and save in target
             item = create_item(
