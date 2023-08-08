@@ -125,6 +125,7 @@ def test_check_color_interpretation_valid_rgb() -> None:
 
     assert not file_tiff.get_errors()
 
+
 def test_check_color_interpretation_valid_greyscale() -> None:
     """
     tests check_color_interpretation with the correct greyscale color interpretation
@@ -138,6 +139,7 @@ def test_check_color_interpretation_valid_greyscale() -> None:
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert not file_tiff.get_errors()
+
 
 def test_check_color_interpretation_invalid() -> None:
     """
