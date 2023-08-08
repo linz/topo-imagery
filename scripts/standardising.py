@@ -1,17 +1,15 @@
 import os
 import tempfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
 
-import ulid
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.fs import exists, read, write
+from scripts.files.fs import download_files_parallel_multithreaded, exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -75,54 +73,6 @@ def run_standardising(
     return standardized_tiffs
 
 
-def download_tiff_and_sidecar(target: str, file: str) -> str:
-    """
-    Download a tiff file and some of its sidecar files if they exist to the target dir.
-
-    Args:
-        target (str): target folder to write to
-        s3_file (str): source file
-
-    Returns:
-        downloaded file path
-    """
-    download_path = os.path.join(target, f"{ulid.ULID()}.tiff")
-    get_log().info("Download File", path=file, target_path=download_path)
-    write(download_path, read(file))
-    for ext in [".prj", ".tfw"]:
-        try:
-            write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
-            get_log().info(
-                "Download tiff sidecars", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
-            )
-        except:  # pylint: disable-msg=bare-except
-            pass
-    return download_path
-
-
-def download_files_multithreaded(inputs: List[str], target: str, concurrency: int = 10) -> List[str]:
-    """
-    Download list of files to target destination using multithreading.
-
-    Args:
-        inputs (list): list of files to download
-        target (str): target folder to write to
-
-
-    Returns:
-        list of downloaded file paths
-    """
-    downloaded_tiffs: List[str] = []
-    with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {executor.submit(download_tiff_and_sidecar, target, input): input for input in inputs}
-        for future in as_completed(futuress):
-            if future.exception():
-                get_log().warn("Failed Download", error=future.exception())
-            else:
-                downloaded_tiffs.append(future.result())
-    return downloaded_tiffs
-
-
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     """Create a VRT from a list of tiffs files
 
@@ -178,7 +128,7 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-        source_tiffs = download_files_multithreaded(files.input, tmp_path)
+        source_tiffs = download_files_parallel_multithreaded(files.input, tmp_path)
         if len(source_tiffs) != len(files.input):
             get_log().error("Missing Files", missing_file_count=len(files.input) - len(source_tiffs))
             raise Exception("Not all source files were downloaded")
