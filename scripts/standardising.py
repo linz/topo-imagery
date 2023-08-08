@@ -9,7 +9,7 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.fs import download_files_parallel_multithreaded, exists, read, write
+from scripts.files.fs import download_tiffs_parallel_multithreaded, exists, read, write
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -128,7 +128,7 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-        source_tiffs = download_files_parallel_multithreaded(files.input, tmp_path)
+        source_tiffs = download_tiffs_parallel_multithreaded(files.input, tmp_path)
         if len(source_tiffs) != len(files.input):
             get_log().error("Missing Files", missing_file_count=len(files.input) - len(source_tiffs))
             raise Exception("Not all source files were downloaded")

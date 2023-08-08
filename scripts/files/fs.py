@@ -76,12 +76,12 @@ def _download_tiff_and_sidecar(target: str, file: str) -> str:
     return download_path
 
 
-def download_files_parallel_multithreaded(inputs: List[str], target: str, concurrency: int = 10) -> List[str]:
+def download_tiffs_parallel_multithreaded(inputs: List[str], target: str, concurrency: int = 10) -> List[str]:
     """
-    Download list of files to target destination using multithreading.
+    Download list of tiffs to target destination using multithreading.
 
     Args:
-        inputs (list): list of files to download
+        inputs (list): list of tiffs to download
         target (str): target folder to write to
 
 
