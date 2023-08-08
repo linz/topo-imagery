@@ -67,7 +67,7 @@ def _download_tiff_and_sidecar(target: str, file: str) -> str:
     write(download_path, read(file))
     for ext in [".prj", ".tfw"]:
         try:
-            fs_local.write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
+            write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
             get_log().info(
                 "Download tiff sidecars", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
             )
