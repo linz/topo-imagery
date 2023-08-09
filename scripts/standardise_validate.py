@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 from typing import List
 
 from linz_logger import get_log
@@ -37,8 +38,17 @@ def main() -> None:
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
 
-    source = json.dumps(json.loads(read(arguments.from_file)))
-    tile_files: List[TileFiles] = format_source(source)
+    try:
+        source = json.dumps(json.loads(read(arguments.from_file)))
+    except Exception as e:
+        get_log().error("An error occurred while getting JSON input file", error=str(e))
+        sys.exit(1)
+
+    try:
+        tile_files: List[TileFiles] = format_source(source)
+    except Exception as e:
+        get_log().error("An error occurred while getting tile_files", error=str(e))
+        sys.exit(1)
     start_datetime = format_date(arguments.start_datetime)
     end_datetime = format_date(arguments.end_datetime)
     concurrency: int = 1
