@@ -146,7 +146,9 @@ def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alph
     Returns:
         The GDAL command to build the VRT.
     """
-    gdal_command = ["gdalbuildvrt", "-strict"]
+    # `-allow_projection_difference` is passed to workaround different coordinate system descriptions within the same EPSG
+    # Having the same EPSG code for all images is already checked by `linz/argo-tasks` `tile-index-validate`
+    gdal_command = ["gdalbuildvrt", "-strict", "-allow_projection_difference"]
     if add_alpha:
         gdal_command.append("-addalpha")
     gdal_command.append(output)
