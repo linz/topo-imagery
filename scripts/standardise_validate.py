@@ -6,7 +6,7 @@ from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import TileFiles, format_date, format_source, is_argo, valid_date
+from scripts.cli.cli_helper import InputParameterError, TileFiles, format_date, format_source, is_argo, valid_date
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.stac.imagery.create_stac import create_item
@@ -38,15 +38,11 @@ def main() -> None:
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
 
-    try:
-        source = json.dumps(json.loads(read(arguments.from_file)))
-    except Exception as e:
-        get_log().error("An error occurred while getting JSON input file", error=str(e))
-        sys.exit(1)
+    source = json.dumps(json.loads(read(arguments.from_file)))
 
     try:
         tile_files: List[TileFiles] = format_source(source)
-    except Exception as e:
+    except InputParameterError as e:
         get_log().error("An error occurred while getting tile_files", error=str(e))
         sys.exit(1)
     start_datetime = format_date(arguments.start_datetime)

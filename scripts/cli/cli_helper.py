@@ -8,9 +8,9 @@ from dateutil import parser, tz
 from linz_logger import get_log
 
 
-
 class InputParameterError(Exception):
     pass
+
 
 class TileFiles(NamedTuple):
     output: str
@@ -48,6 +48,7 @@ def format_source(source: str) -> List[TileFiles]:
 
 def is_argo() -> bool:
     return bool(environ.get("ARGO_TEMPLATE"))
+
 
 def format_date(date: datetime) -> str:
     """Parse the CLI argument '--date' and format it to UTC.
