@@ -7,8 +7,6 @@ from typing import List, NamedTuple, Optional
 from dateutil import parser, tz
 from linz_logger import get_log
 
-from scripts.files.fs import read
-
 
 class InputParameterError(Exception):
     pass
@@ -36,16 +34,13 @@ def format_source(source: str) -> List[TileFiles]:
     """
     try:
         source_json: List[TileFiles] = json.loads(
-            read(source), object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+            source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
         )
     except KeyError as e:
         get_log().error("KeyError", error=str(e))
         raise InputParameterError("An error occurred while formatting the input file") from e
     except json.JSONDecodeError as e:
         get_log().error("Decoding Json Failed", error=str(e))
-        raise InputParameterError("An error occurred while formatting the input file") from e
-    except FileNotFoundError as e:
-        get_log().error("FileNotFound:", error=str(e))
         raise InputParameterError("An error occurred while formatting the input file") from e
 
     return source_json
