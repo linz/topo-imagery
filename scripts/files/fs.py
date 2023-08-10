@@ -96,4 +96,8 @@ def download_tiffs_parallel_multithreaded(inputs: List[str], target: str, concur
                 get_log().warn("Failed Download", error=future.exception())
             else:
                 downloaded_tiffs.append(future.result())
+
+    if len(inputs) != len(downloaded_tiffs):
+        get_log().error("Missing Files", missing_file_count=len(inputs) - len(downloaded_tiffs))
+        raise Exception("Not all source files were downloaded")
     return downloaded_tiffs
