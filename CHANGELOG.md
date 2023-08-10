@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.0.1](https://github.com/linz/topo-imagery/compare/v3.0.0...v3.0.1) (2023-08-10)
+
+
+### Bug Fixes
+
+* gdalbuildvrt fails when coordinate system description is different TDE-818 ([#596](https://github.com/linz/topo-imagery/issues/596)) ([5758400](https://github.com/linz/topo-imagery/commit/575840018ced624ba8e4b179c7068b59461f975b))
+* non-visual QA greyscale TDE-832 ([#593](https://github.com/linz/topo-imagery/issues/593)) ([afe25f3](https://github.com/linz/topo-imagery/commit/afe25f38c61ea671fa1942c1a1cdab9be3dba6f0))
+* standardised path is not logged when non_visual_qa_passed ([#591](https://github.com/linz/topo-imagery/issues/591)) ([0c19104](https://github.com/linz/topo-imagery/commit/0c1910493a2952f21abe19d7d8df5ae5d43bcccf))
+* stats are not written when retiling TDE-829 ([#599](https://github.com/linz/topo-imagery/issues/599)) ([c4bf5f2](https://github.com/linz/topo-imagery/commit/c4bf5f2fc78e66177b459b1e9482bc830b45a59a))
+
+
+### Documentation
+
+* comment to explain why extent is specified ([#584](https://github.com/linz/topo-imagery/issues/584)) ([1971bc2](https://github.com/linz/topo-imagery/commit/1971bc2a5d1cd85c7f26b6b424b01249686888b4))
+
 ## [3.0.0](https://github.com/linz/topo-imagery/compare/v2.2.1...v3.0.0) (2023-07-25)
 
 
