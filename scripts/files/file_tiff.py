@@ -298,7 +298,6 @@ class FileTiff:
             n += 1
         if missing_bands:
             missing_bands.sort()
-            print(missing_bands)
             self.add_error(
                 error_type=FileTiffErrorType.COLOR,
                 error_message="unexpected color interpretation bands",
