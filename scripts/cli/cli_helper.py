@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 from datetime import datetime
 from os import environ
 from typing import List, NamedTuple, Optional
@@ -8,7 +7,9 @@ from typing import List, NamedTuple, Optional
 from dateutil import parser, tz
 from linz_logger import get_log
 
-from scripts.files.files_helper import get_file_name_from_path
+
+class InputParameterError(Exception):
+    pass
 
 
 class TileFiles(NamedTuple):
@@ -16,38 +17,31 @@ class TileFiles(NamedTuple):
     input: List[str]
 
 
-def format_source(source: List[str]) -> List[TileFiles]:
-    """Transform a list of file names (local) or dictionaries (Argo Workflows) to a list of `TileFiles`
-    When using locally `--source /path/to/BX24_500_031020.tif`, the file name must have the correct tilename.
+def format_source(source: str) -> List[TileFiles]:
+    """Transform a JSON string representing a list of input file paths and output tile name created
+    by `argo-tasks` (see examples) to a list of `TileFiles`
 
     Args:
-        source: a list of file names or containing a stringify list of dictionary
+        source: JSON string containing representing a list of input file paths and output tile name
 
     Returns:
         a list of `TileFiles` namedtuple
 
     Example:
     ```
-    >>> format_source(["[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]"])
+    >>> format_source("[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]")
     [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
-    >>> format_source(["s3://bucket/SN9457_CE16_10k_0501.tif", "s3://bucket/SN9457_CE16_10k_0502.tif"])
-    [TileFiles(output='output', input=['s3://bucket/SN9457_CE16_10k_0501.tif', 's3://bucket/SN9457_CE16_10k_0502.tif'])])]
     ```
     """
-    if source[0].startswith("[{"):
-        try:
-            source_json: List[TileFiles] = json.loads(
-                source[0], object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
-            )
-            return source_json
-        except json.JSONDecodeError as e:
-            get_log().debug("Decoding Json Failed", msg=e)
+    try:
+        source_json: List[TileFiles] = json.loads(
+            source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+        )
+    except (json.decoder.JSONDecodeError, KeyError) as e:
+        get_log().error(type(e).__name__, error=str(e))
+        raise InputParameterError("An error occurred while parsing the input file") from e
 
-    local_tile_file: List[TileFiles] = []
-    for s in source:
-        local_tile_file.append(TileFiles(output=os.path.splitext(get_file_name_from_path(s))[0], input=[s]))
-
-    return local_tile_file
+    return source_json
 
 
 def is_argo() -> bool:

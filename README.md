@@ -43,13 +43,13 @@ docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py 
 
 To use an AWS test data (input located in an AWS S3 bucket), log into the AWS account and add the following arguments to the `docker run` command:
 
-```
+```bash
 -v ${HOME}/.aws/credentials:/root/.aws/credentials:ro -e AWS_PROFILE=your-profile
 ```
 
 ### In the cloud
 
-This package is used to be run in a [Kubernetes](https://kubernetes.io/) cluster using a workflow system. More information can be found in the [linz/topo-workflows](https://github.com/linz/topo-workflows) repository.
+This package is designed to be run in a [Kubernetes](https://kubernetes.io/) cluster using a workflow system. More information can be found in the [linz/topo-workflows](https://github.com/linz/topo-workflows) repository.
 
 ## Versioning
 
