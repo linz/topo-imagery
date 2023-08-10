@@ -36,12 +36,9 @@ def format_source(source: str) -> List[TileFiles]:
         source_json: List[TileFiles] = json.loads(
             source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
         )
-    except KeyError as e:
-        get_log().error("KeyError", error=str(e))
-        raise InputParameterError("An error occurred while formatting the input file") from e
-    except json.JSONDecodeError as e:
-        get_log().error("Decoding Json Failed", error=str(e))
-        raise InputParameterError("An error occurred while formatting the input file") from e
+        except (json.decoder.JSONDecodeError, KeyError) as e:
+        get_log().error(type(e).__name__, error=str(e))
+        raise InputParameterError("An error occurred while parsing the input file") from e
 
     return source_json
 
