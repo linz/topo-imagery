@@ -199,8 +199,8 @@ class FileTiff:
         return False
 
     def check_no_data(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if there is no "noDataValue" or the "noDataValue" is not equal to 255
-        or -9999 for DEM in the "bands".
+        """Add a Non Visual QA error if there is no "noDataValue" and no alpha band for non-DEMs,
+        or the "noDataValue" is not equal to 255, or -9999 for DEM in the "bands".
 
         Args:
             gdalinfo: `gdalinfo` output
@@ -240,7 +240,7 @@ class FileTiff:
         return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if there is not exactly 3 or 4 bands found.
+        """Add a Non Visual QA error if there is not exactly 3 or 4 bands found, or 1 band if DEM.
 
         Args:
             gdalinfo: `gdalinfo` output
@@ -272,7 +272,7 @@ class FileTiff:
             self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
     def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if the colors don't match RGB.
+        """Add a Non Visual QA error if the colors don't match RGB or greyscale.
 
         Args:
             gdalinfo: `gdalinfo` output
@@ -280,6 +280,7 @@ class FileTiff:
         bands = gdalinfo["bands"]
         missing_bands = []
         band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
+        band_greyscale_ints = {1: "Gray", 2: "Gray", 3: "Gray"}
         optional_colour_ints = {4: "Alpha"}
         if self._tiff_type == "DEM":
             band_colour_ints = {1: "Gray"}
@@ -287,7 +288,7 @@ class FileTiff:
         for band in bands:
             colour_int = band["colorInterpretation"]
             if n in band_colour_ints:
-                if colour_int != band_colour_ints[n]:
+                if colour_int not in (band_colour_ints[n], band_greyscale_ints[n]):
                     missing_bands.append(f"band {n} {colour_int}")
             elif n in optional_colour_ints:
                 if colour_int != optional_colour_ints[n]:
