@@ -38,10 +38,10 @@ def main() -> None:
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
 
-    file_source = json.dumps(json.loads(read(arguments.from_file)))
+    source = json.dumps(json.loads(read(arguments.from_file)))
 
     try:
-        tile_files: List[TileFiles] = get_tile_files(file_source)
+        tile_files: List[TileFiles] = get_tile_files(source)
     except InputParameterError as e:
         get_log().error("An error occurred while getting tile_files", error=str(e))
         sys.exit(1)

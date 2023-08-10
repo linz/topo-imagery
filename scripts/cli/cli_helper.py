@@ -17,7 +17,7 @@ class TileFiles(NamedTuple):
     input: List[str]
 
 
-def get_tile_files(file_source: str) -> List[TileFiles]:
+def get_tile_files(source: str) -> List[TileFiles]:
     """Transform a JSON string representing a list of input file paths and output tile name created
     by `argo-tasks` (see examples) to a list of `TileFiles`
 
@@ -35,7 +35,7 @@ def get_tile_files(file_source: str) -> List[TileFiles]:
     """
     try:
         source_json: List[TileFiles] = json.loads(
-            file_source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+            source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
         )
     except (json.decoder.JSONDecodeError, KeyError) as e:
         get_log().error(type(e).__name__, error=str(e))
