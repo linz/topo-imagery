@@ -18,7 +18,8 @@ class TileFiles(NamedTuple):
 
 
 def format_source(source: str) -> List[TileFiles]:
-    """Transform a JSON string representing a list of input file paths and output tile name created by `argo-tasks` (see examples) to a list of `TileFiles`
+    """Transform a JSON string representing a list of input file paths and output tile name created
+    by `argo-tasks` (see examples) to a list of `TileFiles`
 
     Args:
         source: JSON string containing representing a list of input file paths and output tile name
@@ -36,7 +37,7 @@ def format_source(source: str) -> List[TileFiles]:
         source_json: List[TileFiles] = json.loads(
             source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
         )
-        except (json.decoder.JSONDecodeError, KeyError) as e:
+    except (json.decoder.JSONDecodeError, KeyError) as e:
         get_log().error(type(e).__name__, error=str(e))
         raise InputParameterError("An error occurred while parsing the input file") from e
 
