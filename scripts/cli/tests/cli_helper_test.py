@@ -1,16 +1,16 @@
 from typing import List
 
-from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, format_source, parse_list
+from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list
 
 
-def test_format_source_tiles() -> None:
-    input_source = '[{"output": "tile_name","input": ["file_a.tiff", "file_b.tiff"]}, \
+def test_get_tile_files() -> None:
+    file_source = '[{"output": "tile_name","input": ["file_a.tiff", "file_b.tiff"]}, \
     {"output": "tile_name2","input": ["file_a.tiff", "file_b.tiff"]}]'
     expected_output_filename = "tile_name"
     expected_output_filename_b = "tile_name2"
     expected_input_filenames = ["file_a.tiff", "file_b.tiff"]
 
-    source: List[TileFiles] = format_source(input_source)
+    source: List[TileFiles] = get_tile_files(file_source)
     assert expected_output_filename == source[0].output
     assert expected_input_filenames == source[0].input
     assert expected_output_filename_b == source[1].output
