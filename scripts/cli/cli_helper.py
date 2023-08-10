@@ -21,7 +21,7 @@ def format_source(source: str) -> List[TileFiles]:
     """Transform a list of dictionaries (Argo Workflows) to a list of `TileFiles`
 
     Args:
-        source: file contents string
+        source: JSON string containing representing a list of input file paths and output tile name
 
     Returns:
         a list of `TileFiles` namedtuple
