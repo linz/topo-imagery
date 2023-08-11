@@ -9,7 +9,8 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.fs import download_tiffs_parallel_multithreaded, exists, read, write
+from scripts.files.files_helper import is_tiff
+from scripts.files.fs import exists, find_sidecars, read, write, write_all
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -128,7 +129,9 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-        source_tiffs = download_tiffs_parallel_multithreaded(files.input, tmp_path)
+        sidecars = find_sidecars(files.input, [".prj", ".tfw"])
+        source_files = write_all(files.input + sidecars, tmp_path)
+        source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True
 

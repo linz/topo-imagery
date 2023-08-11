@@ -1,8 +1,7 @@
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List
+from typing import List, Optional
 
-import ulid
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
@@ -51,46 +50,35 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def _download_tiff_and_sidecar(target: str, file: str) -> str:
-    """
-    Download a tiff file and some of its sidecar files if they exist to the target dir.
+def _read_write_file(target: str, file: str) -> str:
+    """write a file to a specificed target dir.
 
     Args:
-        target (str): target folder to write to
-        s3_file (str): source file
+        target: target directory path
+        file: file to read-write
 
     Returns:
-        downloaded file path
+        written file path
     """
-    download_path = os.path.join(target, f"{ulid.ULID()}.tiff")
+    download_path = os.path.join(target, f"{file.split('/')[-1]}")
     get_log().info("Download File", path=file, target_path=download_path)
     write(download_path, read(file))
-    for ext in [".prj", ".tfw"]:
-        try:
-            write(f"{target.split('.')[0]}{ext}", read(f"{file.split('.')[0]}{ext}"))
-            get_log().info(
-                "Download tiff sidecars", path=f"{file.split('.')[0]}{ext}", target_path=f"{target.split('.')[0]}{ext}"
-            )
-        except:  # pylint: disable-msg=bare-except
-            pass
     return download_path
 
 
-def download_tiffs_parallel_multithreaded(inputs: List[str], target: str, concurrency: int = 10) -> List[str]:
-    """
-    Download list of tiffs to target destination using multithreading.
+def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -> List[str]:
+    """Writes list of files to target destination using multithreading.
 
     Args:
-        inputs (list): list of tiffs to download
-        target (str): target folder to write to
-
+        inputs: list of files to read
+        target: target folder to write to
 
     Returns:
-        list of downloaded file paths
+        list of written file paths
     """
     downloaded_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {executor.submit(_download_tiff_and_sidecar, target, input): input for input in inputs}
+        futuress = {executor.submit(_read_write_file, target, input): input for input in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Download", error=future.exception())
@@ -101,3 +89,23 @@ def download_tiffs_parallel_multithreaded(inputs: List[str], target: str, concur
         get_log().error("Missing Files", missing_file_count=len(inputs) - len(downloaded_tiffs))
         raise Exception("Not all source files were downloaded")
     return downloaded_tiffs
+
+
+def find_sidecars(inputs: List[str], extensions: List[str]) -> List[str]:
+    """Searches for sidecar files.
+     A sidecar files is a file with the same name as the input file but with a different extension.
+
+    Args:
+        inputs: list of input files to search for extensions
+        extensions: the sidecar file extensions
+
+    Returns:
+        list of existing sidecar files
+    """
+    sidecars = []
+    for file in inputs:
+        for extension in extensions:
+            sidecar = f"{file.split('.')[0]}{extension}"
+            if exists(sidecar):
+                sidecars.append(sidecar)
+    return sidecars
