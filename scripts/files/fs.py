@@ -61,7 +61,7 @@ def _read_write_file(target: str, file: str) -> str:
         written file path
     """
     download_path = os.path.join(target, f"{file.split('/')[-1]}")
-    get_log().info("Download File", path=file, target_path=download_path)
+    get_log().info("Read-Write File", path=file, target_path=download_path)
     write(download_path, read(file))
     return download_path
 
@@ -76,19 +76,19 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     Returns:
         list of written file paths
     """
-    downloaded_tiffs: List[str] = []
+    written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         futuress = {executor.submit(_read_write_file, target, input): input for input in inputs}
         for future in as_completed(futuress):
             if future.exception():
-                get_log().warn("Failed Download", error=future.exception())
+                get_log().warn("Failed Read-Write", error=future.exception())
             else:
-                downloaded_tiffs.append(future.result())
+                written_tiffs.append(future.result())
 
-    if len(inputs) != len(downloaded_tiffs):
-        get_log().error("Missing Files", missing_file_count=len(inputs) - len(downloaded_tiffs))
-        raise Exception("Not all source files were downloaded")
-    return downloaded_tiffs
+    if len(inputs) != len(written_tiffs):
+        get_log().error("Missing Files", missing_file_count=len(inputs) - len(written_tiffs))
+        raise Exception("Not all source files were written")
+    return written_tiffs
 
 
 def find_sidecars(inputs: List[str], extensions: List[str]) -> List[str]:
