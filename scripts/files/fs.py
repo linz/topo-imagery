@@ -78,7 +78,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {executor.submit(_read_write_file, target, input): input for input in inputs}
+        futuress = {executor.submit(write, os.path.join(target, f"{input.split('/')[-1]}"), read(input)): input for input in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
