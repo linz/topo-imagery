@@ -8,7 +8,7 @@ from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 
 
-def write(destination: str, source: bytes) -> None:
+def write(destination: str, source: bytes) -> str:
     """Write a file from its source to a destination path.
 
     Args:
@@ -19,6 +19,7 @@ def write(destination: str, source: bytes) -> None:
         fs_s3.write(destination, source)
     else:
         fs_local.write(destination, source)
+    return destination
 
 
 def read(path: str) -> bytes:
@@ -50,22 +51,6 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def _read_write_file(target: str, file: str) -> str:
-    """write a file to a specificed target dir.
-
-    Args:
-        target: target directory path
-        file: file to read-write
-
-    Returns:
-        written file path
-    """
-    download_path = os.path.join(target, f"{file.split('/')[-1]}")
-    get_log().info("Read-Write File", path=file, target_path=download_path)
-    write(download_path, read(file))
-    return download_path
-
-
 def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
@@ -78,7 +63,9 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {executor.submit(write, os.path.join(target, f"{input.split('/')[-1]}"), read(input)): input for input in inputs}
+        futuress = {
+            executor.submit(write, os.path.join(target, f"{input.split('/')[-1]}"), read(input)): input for input in inputs
+        }
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
@@ -86,7 +73,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
                 written_tiffs.append(future.result())
 
     if len(inputs) != len(written_tiffs):
-        get_log().error("Missing Files", missing_file_count=len(inputs) - len(written_tiffs))
+        get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
         raise Exception("Not all source files were written")
     return written_tiffs
 
