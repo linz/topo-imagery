@@ -96,7 +96,7 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
             return path
         return None
 
-    sidecars = []
+    sidecars: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         for extension in extensions:
             futuress = {executor.submit(_validate_path, f"{os.path.splitext(input)[0]}{extension}"): input for input in inputs}
@@ -104,7 +104,7 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
                 if future.exception():
                     get_log().warn("Find sidecar failed", error=future.exception())
                 else:
-                    if future.result():
-                        sidecars.append(future.result())
-
+                    result = future.result()
+                    if result:
+                        sidecars.append(result)
     return sidecars
