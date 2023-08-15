@@ -64,7 +64,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         futuress = {
-            executor.submit(write, os.path.join(target, f"{input.split('/')[-1]}"), read(input)): input for input in inputs
+            executor.submit(write, os.path.join(target, f"{os.path.basename(input)}"), read(input)): input for input in inputs
         }
         for future in as_completed(futuress):
             if future.exception():
@@ -78,7 +78,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     return written_tiffs
 
 
-def find_sidecars(inputs: List[str], extensions: List[str]) -> List[str]:
+def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optional[int] = 10) -> List[str]:
     """Searches for sidecar files.
      A sidecar files is a file with the same name as the input file but with a different extension.
 
@@ -89,10 +89,22 @@ def find_sidecars(inputs: List[str], extensions: List[str]) -> List[str]:
     Returns:
         list of existing sidecar files
     """
+
+    def _validate_path(path: str) -> Optional[str]:
+        """Helper inner function to re-return the path if it exists rather than a boolean."""
+        if exists(path):
+            return path
+        return None
+
     sidecars = []
-    for file in inputs:
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
         for extension in extensions:
-            sidecar = f"{file.split('.')[0]}{extension}"
-            if exists(sidecar):
-                sidecars.append(sidecar)
+            futuress = {executor.submit(_validate_path, f"{os.path.splitext(input)[0]}{extension}"): input for input in inputs}
+            for future in as_completed(futuress):
+                if future.exception():
+                    get_log().warn("Find sidecar failed", error=future.exception())
+                else:
+                    if future.result():
+                        sidecars.append(future.result())
+
     return sidecars
