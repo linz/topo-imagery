@@ -13,7 +13,6 @@ BASE_COG = [
     # Output to a COG
     "-of",
     "COG",
-    "-stats",
     # Tile the image int 512x512px images
     "-co",
     "blocksize=512",
