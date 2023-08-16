@@ -179,9 +179,9 @@ def standardising(
                 len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
             ):
                 vrt_add_alpha = False
-
+        vrt_add_alpha = False
         # Start from base VRT
-        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=False)
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
         target_vrt = os.path.join(tmp_path, "output.vrt")
 
         # Apply cutline
