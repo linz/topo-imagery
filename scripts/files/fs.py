@@ -51,7 +51,7 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -> List[str]:
+def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
     Args:
@@ -78,7 +78,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 10) -
     return written_tiffs
 
 
-def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optional[int] = 10) -> List[str]:
+def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optional[int] = 4) -> List[str]:
     """Searches for sidecar files.
      A sidecar files is a file with the same name as the input file but with a different extension.
 
