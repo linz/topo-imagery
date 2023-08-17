@@ -35,6 +35,9 @@ authors = [
     "Megan Davidson <mdavidson@linz.govt.nz>"
 ]
 
+[tool.poetry.scripts]
+endtest = "scripts.tests.run_docker_tests:main"
+
 [tool.poetry.dependencies]
 python = "^3.10.6"
 boto3 = "^1.28.24"
