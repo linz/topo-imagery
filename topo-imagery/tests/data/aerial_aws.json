@@ -1,0 +1,6 @@
+[
+  {
+    "output": "BG35_1000_4829",
+    "input": ["s3://linz-imagery-staging/test/sample-tests/input_aerial.tif"]
+  }
+]

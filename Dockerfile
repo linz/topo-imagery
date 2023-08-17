@@ -17,9 +17,9 @@ RUN poetry config virtualenvs.create false \
     && poetry install --only main --no-interaction --no-ansi
 
 # Copy Python scripts
-COPY ./scripts/ /app/scripts/
+COPY ./topo-imagery/ /app/topo-imagery/
 
 ENV PYTHONPATH="/app"
 ENV GTIFF_SRS_SOURCE="EPSG"
 
-WORKDIR /app/scripts
+WORKDIR /app/topo-imagery

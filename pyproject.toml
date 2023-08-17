@@ -36,7 +36,7 @@ authors = [
 ]
 
 [tool.poetry.scripts]
-endtest = "scripts.tests.run_docker_tests:main"
+endtest = "topo-imagery.tests.run_docker_tests:toto"
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
