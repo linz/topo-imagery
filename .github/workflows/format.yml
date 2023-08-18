@@ -22,31 +22,6 @@ jobs:
         run: |
           poetry run pytest .
 
-      - name: Build containers
+      - name: E2E Tests
         run: |
-          docker build . --tag topo-imagery --label "github_run_id=${GITHUB_RUN_ID}"
-
-      - name: End to end test - Aerial Imagery
-        run: |
-          # Standardising test 
-          docker run  -v ${HOME}/tmp/:/tmp/ topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
-          cmp --silent ${HOME}/tmp/BG35_1000_4829.tiff ./scripts/tests/data/output/BG35_1000_4829.tiff
-
-      - name: End to end test - Elevation
-        run: |
-          # Standardising test
-          docker run  -v ${HOME}/tmp/:/tmp/ topo-imagery python3 standardise_validate.py --from-file ./tests/data/elevation.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
-          cmp --silent ${HOME}/tmp/BK39_10000_0102.tiff ./scripts/tests/data/output/BK39_10000_0102.tiff
-          cmp --silent ${HOME}/tmp/BK39_10000_0101.tiff ./scripts/tests/data/output/BK39_10000_0101.tiff
-
-      - name: End to end test - Historical Aerial Imagery
-        run: |
-          # Standardising test 
-          docker run  -v ${HOME}/tmp/:/tmp/ topo-imagery python3 standardise_validate.py --from-file ./tests/data/historical.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
-          cmp --silent ${HOME}/tmp/BQ31_5000_0608.tiff ./scripts/tests/data/output/BQ31_5000_0608.tiff
-
-      - name: End to end test - Cutline (Aerial Imagery)
-        run: |
-          # Standardising test 
-          docker run  -v ${HOME}/tmp/:/tmp/ topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/cutline/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --cutline ./tests/data/cutline.fgb
-          cmp --silent ${HOME}/tmp/cutline/BG35_1000_4829.tiff ./scripts/tests/data/output/BG35_1000_4829_cut.tiff
+          poetry run e2e --all

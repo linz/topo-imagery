@@ -27,6 +27,10 @@ ignore_missing_imports = true
 name = "topo-imagery"
 version = "3.0.1"
 description = "A collection of scripts for processing imagery"
+packages = [
+    { include = "scripts" },
+    { include = "tests" },
+]
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
     "Daniel Silk <dsilk@linz.govt.nz>",
@@ -36,7 +40,7 @@ authors = [
 ]
 
 [tool.poetry.scripts]
-endtest = "topo-imagery.tests.run_docker_tests:toto"
+e2e = "tests.run_docker_tests:main"
 
 [tool.poetry.dependencies]
 python = "^3.10.6"
