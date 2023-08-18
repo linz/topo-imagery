@@ -24,4 +24,4 @@ jobs:
 
       - name: E2E Tests
         run: |
-          poetry run e2e --all
+          poetry run e2e --type all
