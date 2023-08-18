@@ -105,6 +105,7 @@ def main() -> None:
         with tempfile.TemporaryDirectory() as tmp_path:
             # Parse the input JSON file in order to test the output
             source = json.dumps(json.loads(read(os.path.join(test_data_dir, arg.file))))
+            # pylint: disable-msg=duplicate-code
             try:
                 tile_files: List[TileFiles] = get_tile_files(source)
             except InputParameterError as e:
