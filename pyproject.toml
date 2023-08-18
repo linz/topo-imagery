@@ -28,8 +28,7 @@ name = "topo-imagery"
 version = "3.0.1"
 description = "A collection of scripts for processing imagery"
 packages = [
-    { include = "scripts" },
-    { include = "tests" },
+    { include = "scripts" }
 ]
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
@@ -40,7 +39,7 @@ authors = [
 ]
 
 [tool.poetry.scripts]
-e2e = "tests.run_docker_tests:main"
+e2e = "scripts.tests.run_docker_tests:main"
 
 [tool.poetry.dependencies]
 python = "^3.10.6"

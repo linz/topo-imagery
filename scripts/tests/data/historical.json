@@ -1,6 +1,6 @@
 [
   {
     "output": "BQ31_5000_0608",
-    "input": ["./tests/data/input_hi.tif"]
+    "input": ["tests/data/input_hi.tif"]
   }
 ]
