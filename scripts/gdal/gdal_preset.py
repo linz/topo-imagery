@@ -198,3 +198,39 @@ def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
         "-r",
         "bilinear",
     ]
+
+
+def get_thumbnail_command(
+    format_: str, input_: str, output: str, xsize: str, ysize: str, extra_args: Optional[List[str]] = None
+) -> List[str]:
+    """Get a `gdal_translate` command to create thumbnails.
+
+    Args:
+        format_: output format
+        input_: input file path
+        output: target output file path
+        xsize: sets the x size of the output file in [%]
+        ysize: sets the y size of the output file in [%]
+        extra_args: List of extra arguments to add to the gdal command
+
+    Returns:
+        a list of arguments to run `gdal_translate`
+    """
+    if not extra_args:
+        extra_args = []
+    return [
+        "gdal_translate",
+        "-of",
+        format_,
+        "-b",
+        "1",
+        "-b",
+        "2",
+        "-b",
+        "3",
+        input_,
+        output,
+        "-outsize",
+        xsize,
+        ysize,
+    ] + extra_args

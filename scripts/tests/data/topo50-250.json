@@ -1,0 +1,10 @@
+[
+  {
+    "output": "AT24_GeoTifv1-05",
+    "input": ["./tests/data/AT24_GeoTifv1-05.tif"]
+  },
+  {
+    "output": "AT24_TIFFv1-05",
+    "input": ["./tests/data/AT24_TIFFv1-05.tif"]
+  }
+]

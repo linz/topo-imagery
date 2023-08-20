@@ -1,6 +1,6 @@
 import os
-from typing import Optional
-from gdal.gdalinfo import GdalInfo, gdal_info
+
+from scripts.gdal.gdalinfo import gdal_info
 
 
 def get_file_name_from_path(path: str) -> str:
@@ -53,7 +53,7 @@ def is_GTiff(path: str) -> bool:
     gdal_data = gdal_info(path)
     if gdal_data["cornerCoordinates"]["upperLeft"] == [0, 0]:
         return False
-    elif gdal_data["driverShortName"] == "GTiff":
+    if gdal_data["driverShortName"] == "GTiff":
         return True
     return False
 

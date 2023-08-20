@@ -12,7 +12,7 @@ def test_get_tile_files() -> None:
 
     source: List[TileFiles] = get_tile_files(file_source)
     assert expected_output_filename == source[0].output
-    assert expected_input_filenames == source[0].input
+    assert expected_input_filenames == source[0].inputs
     assert expected_output_filename_b == source[1].output
 
 
