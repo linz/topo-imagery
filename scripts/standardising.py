@@ -4,13 +4,13 @@ from functools import partial
 from multiprocessing import Pool
 from typing import List, Optional
 
-import ulid
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.fs import exists, read, write
+from scripts.files.files_helper import is_tiff
+from scripts.files.fs import exists, find_sidecars, read, write, write_all
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -74,44 +74,6 @@ def run_standardising(
     return standardized_tiffs
 
 
-def download_tiffs(files: List[str], target: str) -> List[str]:
-    """Download a tiff file and some of its sidecar files if they exist to the target dir.
-
-    Args:
-        files: links source filename to target tilename
-        target: target folder to write too
-
-    Returns:
-        linked downloaded filename to target tilename
-
-    Example:
-    ```
-    >>> download_tiff_file(("s3://elevation/SN9457_CE16_10k_0502.tif", "CE16_5000_1003"), "/tmp/")
-    ("/tmp/123456.tif", "CE16_5000_1003")
-    ```
-    """
-    downloaded_files: List[str] = []
-    for file in files:
-        target_file_path = os.path.join(target, str(ulid.ULID()))
-        input_file_path = target_file_path + ".tiff"
-        get_log().info("download_tiff", path=file, target_path=input_file_path)
-
-        write(input_file_path, read(file))
-        downloaded_files.append(input_file_path)
-
-        base_file_path = os.path.splitext(file)[0]
-        # Attempt to download sidecar files too
-        for ext in [".prj", ".tfw"]:
-            try:
-                write(target_file_path + ext, read(base_file_path + ext))
-                get_log().info("download_tiff_sidecar", path=base_file_path + ext, target_path=target_file_path + ext)
-
-            except:  # pylint: disable-msg=bare-except
-                pass
-
-    return downloaded_files
-
-
 def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
     """Create a VRT from a list of tiffs files
 
@@ -168,8 +130,10 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+        sidecars = find_sidecars(files.input, [".prj", ".tfw"])
+        source_files = write_all(files.input + sidecars, tmp_path)
+        source_tiffs = [file for file in source_files if is_tiff(file)]
 
-        source_tiffs = download_tiffs(files.input, tmp_path)
         vrt_add_alpha = True
 
         for file in source_tiffs:
