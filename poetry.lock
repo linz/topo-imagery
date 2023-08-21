@@ -1379,13 +1379,13 @@ test = ["covdefaults (>=2.2.2)", "coverage (>=7.1)", "coverage-enable-subprocess
 
 [[package]]
 name = "vulture"
-version = "2.7"
+version = "2.9"
 description = "Find dead code"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "vulture-2.7-py2.py3-none-any.whl", hash = "sha256:bccc51064ed76db15a6b58277cea8885936af047f53d2655fb5de575e93d0bca"},
-    {file = "vulture-2.7.tar.gz", hash = "sha256:67fb80a014ed9fdb599dd44bb96cb54311032a104106fc2e706ef7a6dad88032"},
+    {file = "vulture-2.9-py2.py3-none-any.whl", hash = "sha256:08247d2fc3fe75e710ccd9bd244942e6fab34e77beb564486dad80d58a2aac58"},
+    {file = "vulture-2.9.tar.gz", hash = "sha256:0f4d86ba515e67db2860539894edb4e387b25696f831234826dd72c636f0331f"},
 ]
 
 [package.dependencies]
@@ -1506,4 +1506,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "f1d4e5b4f359b8a7395ecb60a9f1533892842a446bcdf17eca96d4ac5fc7f0d2"
+content-hash = "0a142827b0fb9c44e5eba0026e877d232c54a84125fa17b2f64fd1bd9f5788de"
