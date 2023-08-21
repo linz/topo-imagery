@@ -33,12 +33,14 @@ def main() -> None:
                 sys.exit(1)
 
             file = tile.inputs[0]
+            #TODO check file does not exist in `target`
             if not is_tiff(file):
                 get_log().debug("Not Tiff File Skipped", file=file)
                 continue
 
             basename = get_file_name_from_path(file)
             tmp_target = os.path.join(tmp_path, f"{basename}-thumbnail.jpg")
+            #TODO don't gdal to target but copy the file over once processed
             target = os.path.join(arguments.target, f"{basename}-thumbnail.jpg")
             if is_s3(file):
                 file = get_vfs_path(file)
