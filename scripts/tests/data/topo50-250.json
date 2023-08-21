@@ -1,10 +1,10 @@
 [
   {
-    "output": "AT24_GeoTifv1-05",
-    "input": ["./tests/data/AT24_GeoTifv1-05.tif"]
+    "output": "CB07_GeoTifv1-02",
+    "input": ["./tests/data/CB07_GeoTifv1-02.tif"]
   },
   {
-    "output": "AT24_TIFFv1-05",
-    "input": ["./tests/data/AT24_TIFFv1-05.tif"]
+    "output": "CB07_TIFFv1-02",
+    "input": ["./tests/data/CB07_TIFFv1-02.tif"]
   }
 ]
