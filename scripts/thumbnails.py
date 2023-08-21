@@ -1,12 +1,11 @@
 import argparse
+import json
 import os
-import sys
 import tempfile
 from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, load_input_files
 from scripts.files.files_helper import get_file_name_from_path, is_GTiff, is_tiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal.gdal_helper import run_gdal
@@ -14,13 +13,12 @@ from scripts.gdal.gdal_preset import get_thumbnail_command
 from scripts.logging.time_helper import time_in_ms
 
 
-def thumbnails(tile_files: List[TileFiles], target: str) -> int:
-    """Generate a thumbnail `jpg` file for each tile from its input tiff.
-    Requires the tile to have only one input tiff.
+def thumbnails(tiff_list: List[str], target: str) -> int:
+    """Generate a thumbnail `jpg` file for each tiff in `tiff_list`.
     GeoTIFF and TIFF (not georeferenced) thumbnails are generated differently.
 
     Args:
-        tile_files: list of tiles
+        tiff_list: list of tiffs
         target: output directory
 
     Returns:
@@ -31,13 +29,7 @@ def thumbnails(tile_files: List[TileFiles], target: str) -> int:
     count = 0
 
     with tempfile.TemporaryDirectory() as tmp_path:
-        for tile in tile_files:
-            # Verify 1 input for 1 output
-            if len(tile.inputs) > 1:
-                get_log().error("thumbnails_too_many_input_files", output=tile.output, count=len(tile.inputs))
-                continue
-
-            file = tile.inputs[0]
+        for file in tiff_list:
             if not is_tiff(file):
                 get_log().debug("thumbnails_skip_not_tiff", file=file)
                 continue
@@ -87,13 +79,10 @@ def main() -> None:
     arguments = parser.parse_args()
     from_file = arguments.from_file
 
-    try:
-        tile_files = load_input_files(from_file)
-    except InputParameterError as e:
-        get_log().error("thumbnails_input_error", error=str(e))
-        sys.exit(1)
-
-    thumbnails(tile_files, arguments.target)
+    source = json.loads(read(from_file))
+    # FIXME: multi processed that
+    for tiff_list in source:
+        thumbnails(tiff_list, arguments.target)
 
 
 if __name__ == "__main__":
