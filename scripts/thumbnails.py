@@ -19,7 +19,6 @@ def main() -> None:
     )
     parser.add_argument("--target", dest="target", required=True, help="Output location path")
     arguments = parser.parse_args()
-    print(arguments.source)
 
     with tempfile.TemporaryDirectory() as tmp_path:
         try:
