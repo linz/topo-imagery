@@ -15,6 +15,17 @@ from scripts.logging.time_helper import time_in_ms
 
 
 def thumbnails(tile_files: List[TileFiles], target: str) -> int:
+    """Generate a thumbnail `jpg` file for each tile from its input tiff.
+    Requires the tile to have only one input tiff.
+    GeoTIFF and TIFF (not georeferenced) thumbnails are generated differently.
+
+    Args:
+        tile_files: list of tiles
+        target: output directory
+
+    Returns:
+        The number of thumbnails generated.
+    """
     start_time = time_in_ms()
     get_log().info("thumbnails_start")
     count = 0
@@ -44,6 +55,8 @@ def thumbnails(tile_files: List[TileFiles], target: str) -> int:
             write(source_tiff, read(file))
 
             # Generate thumbnail
+            # For both GeoTIFF and TIFF (not georeferences) this is done in 2 steps.
+            # Why? because it hasn't been found another way to get the same visual aspect.
             if is_GTiff(source_tiff):
                 get_log().info("thumbnail_generate_geotiff", path=target_thumbnail)
                 run_gdal(get_thumbnail_command("jpeg", source_tiff, transitional_jpg, "50%", "50%"))
