@@ -75,7 +75,7 @@ def main() -> None:
     from_file = arguments.from_file
     source = json.loads(read(from_file))
 
-    concurrency = 1
+    concurrency = 25
     thumbnail_list = []
 
     for tiff_list in source:
