@@ -43,7 +43,7 @@ def thumbnails(path: str, target: str) -> str | None:
         write(source_tiff, read(path))
 
         # Generate thumbnail
-        # For both GeoTIFF and TIFF (not georeferences) this is done in 2 steps.
+        # For both GeoTIFF and TIFF (not georeferenced) this is done in 2 steps.
         # Why? because it hasn't been found another way to get the same visual aspect.
         if is_GTiff(source_tiff):
             get_log().info("thumbnail_generate_geotiff", path=target_thumbnail)
