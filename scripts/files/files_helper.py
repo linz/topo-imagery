@@ -43,7 +43,8 @@ def is_tiff(path: str) -> bool:
 
 
 def is_GTiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
-    """Verifies if a file is a GTiff
+    """Verifies if a file is a GTiff based on the presence of the
+    `coordinateSystem`.
 
     Args:
         path: a path to a file
