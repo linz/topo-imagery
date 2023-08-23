@@ -9,6 +9,7 @@ from linz_logger import get_log
 
 from scripts.files.files_helper import get_file_name_from_path, is_GTiff, is_tiff
 from scripts.files.fs import exists, read, write
+from scripts.gdal import gdalinfo
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_thumbnail_command
 from scripts.logging.time_helper import time_in_ms
@@ -45,18 +46,25 @@ def thumbnails(path: str, target: str) -> str | None:
         # Generate thumbnail
         # For both GeoTIFF and TIFF (not georeferences) this is done in 2 steps.
         # Why? because it hasn't been found another way to get the same visual aspect.
-        if is_GTiff(source_tiff):
+        gdalinfo_data = gdalinfo.gdal_info(source_tiff)
+        if is_GTiff(source_tiff, gdalinfo_data):
             get_log().info("thumbnail_generate_geotiff", path=target_thumbnail)
-            run_gdal(get_thumbnail_command("jpeg", source_tiff, transitional_jpg, "50%", "50%"))
-            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%"))
+            run_gdal(get_thumbnail_command("jpeg", source_tiff, transitional_jpg, "50%", "50%", None, gdalinfo_data))
+            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%", None, gdalinfo_data))
         else:
             get_log().info("thumbnail_generate_tiff", path=target_thumbnail)
             run_gdal(
                 get_thumbnail_command(
-                    "jpeg", source_tiff, transitional_jpg, "50%", "50%", ["-srcwin", "1280", "730", "7140", "9950"]
+                    "jpeg",
+                    source_tiff,
+                    transitional_jpg,
+                    "50%",
+                    "50%",
+                    ["-srcwin", "1280", "730", "7140", "9950"],
+                    gdalinfo_data,
                 )
             )
-            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%"))
+            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%", None, gdalinfo_data))
 
         # Upload to target
         write(target_thumbnail, read(tmp_thumbnail))

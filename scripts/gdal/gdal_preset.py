@@ -2,6 +2,9 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
+from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdalinfo import GdalInfo
+
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
 """ Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA. 
 Useful for imagery that does not have a alpha band.
@@ -201,36 +204,41 @@ def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
 
 
 def get_thumbnail_command(
-    format_: str, input_: str, output: str, xsize: str, ysize: str, extra_args: Optional[List[str]] = None
+    format_: str,
+    input_: str,
+    output: str,
+    xsize: str,
+    ysize: str,
+    extra_args: Optional[List[str]] = None,
+    gdalinfo_data: Optional[GdalInfo] = None,
 ) -> List[str]:
     """Get a `gdal_translate` command to create thumbnails.
 
     Args:
-        format_: output format
-        input_: input file path
-        output: target output file path
-        xsize: sets the x size of the output file in [%]
-        ysize: sets the y size of the output file in [%]
-        extra_args: List of extra arguments to add to the gdal command
+        format_: output format.
+        input_: input file path.
+        output: target output file path.
+        xsize: sets the x size of the output file in [%].
+        ysize: sets the y size of the output file in [%].
+        extra_args: List of extra arguments to add to the gdal command.
+        gdalinfo_data: gdalinfo of the `input_` file. Defaults to None.
 
     Returns:
-        a list of arguments to run `gdal_translate`
+        a list of arguments to run `gdal_translate`.
     """
     if not extra_args:
         extra_args = []
-    return [
+    command = [
         "gdal_translate",
         "-of",
         format_,
-        "-b",
-        "1",
-        "-b",
-        "2",
-        "-b",
-        "3",
         input_,
         output,
         "-outsize",
         xsize,
         ysize,
-    ] + extra_args
+    ]
+    command.extend(get_gdal_band_offset(input_, gdalinfo_data, None))
+    command.extend(extra_args)
+
+    return command

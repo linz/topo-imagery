@@ -1,6 +1,7 @@
 import os
+from typing import Optional
 
-from scripts.gdal.gdalinfo import gdal_info
+from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
 
 def get_file_name_from_path(path: str) -> str:
@@ -41,19 +42,21 @@ def is_tiff(path: str) -> bool:
     return path.lower().endswith((".tiff", ".tif"))
 
 
-def is_GTiff(path: str) -> bool:
+def is_GTiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
     """Verifies if a file is a GTiff
 
     Args:
         path: a path to a file
+        gdalinfo_data: gdalinfo of the file. Defaults to None.
 
-        Returns:
+    Returns:
         True if the file is a GTiff
     """
-    gdal_data = gdal_info(path)
-    if gdal_data["cornerCoordinates"]["upperLeft"] == [0, 0]:
+    if not gdalinfo_data:
+        gdalinfo_data = gdal_info(path)
+    if gdalinfo_data["cornerCoordinates"]["upperLeft"] == [0, 0]:
         return False
-    if gdal_data["driverShortName"] == "GTiff":
+    if gdalinfo_data["driverShortName"] == "GTiff":
         return True
     return False
 
