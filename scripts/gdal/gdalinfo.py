@@ -75,6 +75,8 @@ class GdalInfo(TypedDict):
     extent: Dict[Any, Any]
     wgs84Extent: Optional[Dict[str, List[float]]]
     bands: List[GdalInfoBand]
+    """Coordinate system description"""
+    coordinateSystem: Dict[Any, Any]
 
 
 def gdal_info(path: str) -> GdalInfo:
