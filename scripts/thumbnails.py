@@ -60,6 +60,9 @@ def thumbnails(path: str, target: str) -> str | None:
                     transitional_jpg,
                     "50%",
                     "50%",
+                    # `-srcwin` select a window of the source image.
+                    # This window size has been determined to remove white borders of the original file.
+                    # https://gdal.org/programs/gdal_translate.html#cmdoption-gdal_translate-srcwin
                     ["-srcwin", "1280", "730", "7140", "9950"],
                     gdalinfo_data,
                 )
