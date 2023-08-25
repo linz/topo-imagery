@@ -102,7 +102,10 @@ def main() -> None:
             p.join()
             thumbnail_list.extend(thumbnail_list_current)
 
-    get_log().info("thumbnails_end", count=sum(f is not None for f in thumbnail_list), duration=time_in_ms() - start_time)
+    count = sum(f is not None for f in thumbnail_list)
+    # store count value
+    write("/tmp/thumbnails/count", str(count).encode())
+    get_log().info("thumbnails_end", count=count, duration=time_in_ms() - start_time)
 
 
 if __name__ == "__main__":
