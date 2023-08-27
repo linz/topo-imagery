@@ -16,7 +16,7 @@ from scripts.logging.time_helper import time_in_ms
 
 
 def thumbnails(path: str, target: str) -> str | None:
-    """Generate a thumbnail `jpg` file from the TIFF.
+    """Generate a thumbnail `jpg` file from the TIFF (currently specific to Topo50-250).
     GeoTIFF and TIFF (not georeferenced) thumbnails are generated differently.
 
     Args:
