@@ -1,4 +1,4 @@
-name: Format and Test
+name: Format and Tests
 on: [push]
 
 jobs:
