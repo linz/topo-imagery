@@ -119,7 +119,7 @@ def standardising(
     """
     standardized_file_name = files.output + ".tiff"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
-    tiff = FileTiff(files.input, preset)
+    tiff = FileTiff(files.inputs, preset)
     tiff.set_path_standardised(standardized_file_path)
 
     # Already proccessed can skip processing
@@ -130,8 +130,8 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-        sidecars = find_sidecars(files.input, [".prj", ".tfw"])
-        source_files = write_all(files.input + sidecars, tmp_path)
+        sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
+        source_files = write_all(files.inputs + sidecars, tmp_path)
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True

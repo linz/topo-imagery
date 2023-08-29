@@ -7,6 +7,8 @@ from typing import List, NamedTuple, Optional
 from dateutil import parser, tz
 from linz_logger import get_log
 
+from scripts.files.fs import read
+
 
 class InputParameterError(Exception):
     pass
@@ -14,7 +16,7 @@ class InputParameterError(Exception):
 
 class TileFiles(NamedTuple):
     output: str
-    input: List[str]
+    inputs: List[str]
 
 
 def get_tile_files(source: str) -> List[TileFiles]:
@@ -35,13 +37,31 @@ def get_tile_files(source: str) -> List[TileFiles]:
     """
     try:
         source_json: List[TileFiles] = json.loads(
-            source, object_hook=lambda d: TileFiles(input=d["input"], output=d["output"])
+            source, object_hook=lambda d: TileFiles(inputs=d["input"], output=d["output"])
         )
     except (json.decoder.JSONDecodeError, KeyError) as e:
         get_log().error(type(e).__name__, error=str(e))
         raise InputParameterError("An error occurred while parsing the input file") from e
 
     return source_json
+
+
+def load_input_files(path: str) -> List[TileFiles]:
+    """Load the TileFiles from a JSON input file containing a list of output and input files.
+    Args:
+        path: path to a JSON file listing output name and input files
+
+    Returns:
+        a list of `TileFiles` namedtuple
+    """
+    source = json.dumps(json.loads(read(path)))
+
+    try:
+        tile_files: List[TileFiles] = get_tile_files(source)
+        return tile_files
+    except InputParameterError as e:
+        get_log().error("An error occurred while getting tile_files", error=str(e))
+        raise e
 
 
 def is_argo() -> bool:
