@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.0](https://github.com/linz/topo-imagery/compare/v3.0.1...v3.1.0) (2023-08-29)
+
+
+### Features
+
+* download files using multithreading TDE-822 ([#580](https://github.com/linz/topo-imagery/issues/580)) ([8ab269d](https://github.com/linz/topo-imagery/commit/8ab269de0a06f735039029e53318552341a487ad))
+* thumbnails creation TDE-839 ([#616](https://github.com/linz/topo-imagery/issues/616)) ([8e2028f](https://github.com/linz/topo-imagery/commit/8e2028f1ea340b9712ac6d00ed8b56980589def5))
+
 ## [3.0.1](https://github.com/linz/topo-imagery/compare/v3.0.0...v3.0.1) (2023-08-10)
 
 
