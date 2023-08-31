@@ -27,10 +27,10 @@ BASE_COG = [
     # this significantly reduces the size of tiffs which are very sparse
     "-co",
     "sparse_ok=true",
-    # Force everything into big tiff
-    # this converts all offsets from 32bit to 64bit to support TIFFs > 4GB in size
+    # Do not create BIGTIFF
+    # An error will be raise by GDAL if it fails creating a tiff > 4GB in size
     "-co",
-    "bigtiff=yes",
+    "bigtiff=no",
 ]
 
 DEM_LERC = [
