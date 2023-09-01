@@ -8,7 +8,7 @@ def test_preset_webp() -> None:
     assert "COG" in gdal_command
     assert "blocksize=512" in gdal_command
     assert "num_threads=all_cpus" in gdal_command
-    assert "bigtiff=yes" in gdal_command
+    assert "bigtiff=no" in gdal_command
 
     # Webp lossless
     assert "compress=webp" in gdal_command
@@ -29,7 +29,7 @@ def test_preset_lzw() -> None:
     assert "COG" in gdal_command
     assert "blocksize=512" in gdal_command
     assert "num_threads=all_cpus" in gdal_command
-    assert "bigtiff=yes" in gdal_command
+    assert "bigtiff=no" in gdal_command
 
     # LZW compression
     assert "compress=lzw" in gdal_command
@@ -49,7 +49,7 @@ def test_preset_dem_lerc() -> None:
     assert "COG" in gdal_command
     assert "blocksize=512" in gdal_command
     assert "num_threads=all_cpus" in gdal_command
-    assert "bigtiff=yes" in gdal_command
+    assert "bigtiff=no" in gdal_command
 
     # LERC compression
     assert "compress=lerc" in gdal_command
