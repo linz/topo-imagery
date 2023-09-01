@@ -105,7 +105,7 @@ def main() -> None:
             item = create_item(
                 file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
             )
-            write(stac_item_path, json.dumps(item.stac).encode("utf-8"))
+            write(stac_item_path, json.dumps(item.stac, indent=2).encode("utf-8"))
             get_log().info("stac_saved", path=stac_item_path)
 
 
