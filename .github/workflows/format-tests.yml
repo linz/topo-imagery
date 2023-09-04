@@ -61,4 +61,4 @@ jobs:
       - name: End to end test - Translate Ascii Files (Elevation)
         run: |
           docker run  -v ${HOME}/tmp/:/tmp/ topo-imagery python3 translate_ascii.py --from-file ./tests/data/elevation_ascii.json --target /tmp/
-          cmp --silent ${HOME}/tmp/elevation_ascii.asc ./scripts/tests/data/output/elevation_ascii.tif
+          cmp --silent ${HOME}/tmp/elevation_ascii.tiff ./scripts/tests/data/output/elevation_ascii.tiff
