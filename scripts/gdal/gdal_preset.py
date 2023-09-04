@@ -244,3 +244,23 @@ def get_thumbnail_command(
     command.extend(extra_args)
 
     return command
+
+
+def get_ascii_translate_command() -> List[str]:
+    """Get a `translate` command to transform the ascii files to tiff.
+
+    Args:
+
+    Returns:
+        a list of arguments to run `gdal_translate`
+    """
+    return [
+        "gdal_translate",
+        "-of",
+        "GTiff",
+        # Ensure all CPUs are used for gdal translate
+        "-co",
+        "num_threads=all_cpus",
+        "-co",
+        "COMPRESS=lzw",
+    ]
