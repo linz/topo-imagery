@@ -8,6 +8,7 @@ from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 class ContentType(str, Enum):
     TIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
     JSON = "application/json"
+    JPEG = "image/jpeg"
 
 
 def get_file_name_from_path(path: str) -> str:

@@ -7,6 +7,7 @@ from typing import List
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, format_date, is_argo, load_input_files, valid_date
+from scripts.files.files_helper import ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.stac.imagery.create_stac import create_item
@@ -105,7 +106,7 @@ def main() -> None:
             item = create_item(
                 file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
             )
-            write(stac_item_path, json.dumps(item.stac).encode("utf-8"))
+            write(stac_item_path, json.dumps(item.stac).encode("utf-8"), content_type=ContentType.JSON.value)
             get_log().info("stac_saved", path=stac_item_path)
 
 

@@ -9,7 +9,7 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.files_helper import is_tiff
+from scripts.files.files_helper import ContentType, is_tiff
 from scripts.files.fs import exists, find_sidecars, read, write, write_all
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
@@ -195,5 +195,5 @@ def standardising(
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
-        write(standardized_file_path, read(standardized_working_path))
+        write(standardized_file_path, read(standardized_working_path), content_type=ContentType.TIFF.value)
         return tiff

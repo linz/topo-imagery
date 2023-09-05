@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import ulid
 
+from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -177,4 +178,4 @@ class ImageryCollection:
         Args:
             destination: path of the destination
         """
-        write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"))
+        write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"), content_type=ContentType.JSON.value)

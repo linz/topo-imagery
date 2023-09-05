@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.files.files_helper import get_file_name_from_path, is_GTiff, is_tiff
+from scripts.files.files_helper import ContentType, get_file_name_from_path, is_GTiff, is_tiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal import gdalinfo
 from scripts.gdal.gdal_helper import run_gdal
@@ -70,7 +70,7 @@ def thumbnails(path: str, target: str) -> str | None:
             run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%", None, gdalinfo_data))
 
         # Upload to target
-        write(target_thumbnail, read(tmp_thumbnail))
+        write(target_thumbnail, read(tmp_thumbnail), content_type=ContentType.JPEG.value)
     return target_thumbnail
 
 
