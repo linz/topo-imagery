@@ -11,12 +11,13 @@ from scripts.files.files_helper import is_json
 from scripts.logging.time_helper import time_in_ms
 
 
-def write(destination: str, source: bytes) -> None:
+def write(destination: str, source: bytes, content_type: Optional[str] = None) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
     Args:
         destination: The AWS S3 path to the file to write.
         source: The source file in bytes.
+        content_type: A standard MIME type describing the format of the contents.
     """
     start_time = time_in_ms()
     if source is None:
@@ -28,7 +29,10 @@ def write(destination: str, source: bytes) -> None:
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
-        s3_object.put(Body=source)
+        if content_type:
+            s3_object.put(Body=source, ContentType=content_type)
+        else:
+            s3_object.put(Body=source)
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except botocore.exceptions.ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")

@@ -1,7 +1,13 @@
 import os
+from enum import Enum
 from typing import Optional
 
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+
+
+class ContentType(str, Enum):
+    TIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
+    JSON = "application/json"
 
 
 def get_file_name_from_path(path: str) -> str:

@@ -7,6 +7,7 @@ from moto import mock_s3
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture
 
+from scripts.files.files_helper import ContentType
 from scripts.files.fs_s3 import exists, read, write
 
 
@@ -20,6 +21,19 @@ def test_write() -> None:
 
     resp = client.get_object(Bucket="testbucket", Key="test.file")
     assert resp["Body"].read() == b"test content"
+    assert resp["ContentType"] == "binary/octet-stream"
+
+
+@mock_s3  # type: ignore
+def test_write_content_type() -> None:
+    s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
+    client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="testbucket")
+
+    write("s3://testbucket/test.tiff", b"test content", ContentType.TIFF.value)
+    resp = client.get_object(Bucket="testbucket", Key="test.tiff")
+    assert resp["Body"].read() == b"test content"
+    assert resp["ContentType"] == ContentType.TIFF.value
 
 
 @mock_s3  # type: ignore

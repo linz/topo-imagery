@@ -8,15 +8,16 @@ from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 
 
-def write(destination: str, source: bytes) -> str:
+def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
     """Write a file from its source to a destination path.
 
     Args:
         destination: A path to where the file will be written.
         source: The source file in bytes.
+        content_type: A standard MIME type describing the format of the contents.
     """
     if is_s3(destination):
-        fs_s3.write(destination, source)
+        fs_s3.write(destination, source, content_type)
     else:
         fs_local.write(destination, source)
     return destination
