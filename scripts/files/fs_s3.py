@@ -17,7 +17,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     Args:
         destination: The AWS S3 path to the file to write.
         source: The source file in bytes.
-        content_type: A standard MIME type describing the format of the contents.
+        content_type: A standard Media Type describing the format of the contents.
     """
     start_time = time_in_ms()
     if source is None:

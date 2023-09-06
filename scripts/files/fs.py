@@ -14,7 +14,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     Args:
         destination: A path to where the file will be written.
         source: The source file in bytes.
-        content_type: A standard MIME type describing the format of the contents.
+        content_type: A standard Media Type describing the format of the contents.
     """
     if is_s3(destination):
         fs_s3.write(destination, source, content_type)
