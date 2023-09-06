@@ -30,10 +30,10 @@ def test_write_content_type() -> None:
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
 
-    write("s3://testbucket/test.tiff", b"test content", ContentType.TIFF.value)
+    write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
     resp = client.get_object(Bucket="testbucket", Key="test.tiff")
     assert resp["Body"].read() == b"test content"
-    assert resp["ContentType"] == ContentType.TIFF.value
+    assert resp["ContentType"] == ContentType.GEOTIFF.value
 
 
 @mock_s3  # type: ignore

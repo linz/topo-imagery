@@ -6,7 +6,7 @@ from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
 
 class ContentType(str, Enum):
-    TIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
+    GEOTIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
     JSON = "application/json"
     # https://www.iana.org/assignments/media-types/application/geo+json
     GEOJSON = "application/geo+json"

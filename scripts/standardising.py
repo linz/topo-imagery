@@ -195,5 +195,5 @@ def standardising(
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
-        write(standardized_file_path, read(standardized_working_path), content_type=ContentType.TIFF.value)
+        write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
         return tiff
