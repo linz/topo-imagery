@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0](https://github.com/linz/topo-imagery/compare/v3.1.0...v3.2.0) (2023-09-08)
+
+
+### Features
+
+* provide content type to S3 objects TDE-859 ([#642](https://github.com/linz/topo-imagery/issues/642)) ([bbbd653](https://github.com/linz/topo-imagery/commit/bbbd653de36bd8105ec11a9a01314adad60f8f05))
+
+
+### Bug Fixes
+
+* gdal should not create bigtiff TDE-805 ([#632](https://github.com/linz/topo-imagery/issues/632)) ([b33825f](https://github.com/linz/topo-imagery/commit/b33825fdaecebe64500bac74c96adf3e07a1f302))
+* re-standardising TileByteCounts error TDE-850 ([#644](https://github.com/linz/topo-imagery/issues/644)) ([c762202](https://github.com/linz/topo-imagery/commit/c762202d49b09e1b8c538b0aa3fd7c6fed485e3c))
+* storing count is not used TDE-842 ([#633](https://github.com/linz/topo-imagery/issues/633)) ([8cfc405](https://github.com/linz/topo-imagery/commit/8cfc405a712d54273f90ec223cc7c7ffc22bce68))
+
 ## [3.1.0](https://github.com/linz/topo-imagery/compare/v3.0.1...v3.1.0) (2023-08-29)
 
 
