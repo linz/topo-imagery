@@ -1,7 +1,16 @@
 import os
+from enum import Enum
 from typing import Optional
 
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+
+
+class ContentType(str, Enum):
+    GEOTIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
+    JSON = "application/json"
+    # https://www.iana.org/assignments/media-types/application/geo+json
+    GEOJSON = "application/geo+json"
+    JPEG = "image/jpeg"
 
 
 def get_file_name_from_path(path: str) -> str:
