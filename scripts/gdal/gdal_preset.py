@@ -77,7 +77,7 @@ WEBP_OVERVIEWS = [
     "-co",
     "overview_quality=90",
     "-co",
-    "OVERVIEWS=IGNORE_EXISTING"
+    "OVERVIEWS=IGNORE_EXISTING",
 ]
 
 
