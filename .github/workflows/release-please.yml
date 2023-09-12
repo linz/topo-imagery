@@ -65,7 +65,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         if: ${{env.AWS_CI_ROLE != ''}}
         with:
           aws-region: ap-southeast-2
