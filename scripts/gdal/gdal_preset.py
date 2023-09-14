@@ -76,6 +76,8 @@ WEBP_OVERVIEWS = [
     # Reduce quality of overviews to 90%
     "-co",
     "overview_quality=90",
+    "-co",
+    "OVERVIEWS=IGNORE_EXISTING",
 ]
 
 
