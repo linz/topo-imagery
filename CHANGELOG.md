@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/linz/topo-imagery/compare/v3.2.0...v3.2.1) (2023-09-14)
+
+
+### Bug Fixes
+
+* recreate webp overviews TDE-869 ([#650](https://github.com/linz/topo-imagery/issues/650)) ([c1f265a](https://github.com/linz/topo-imagery/commit/c1f265a451ed495874bc7cc70c5cca7182a896ad))
+
 ## [3.2.0](https://github.com/linz/topo-imagery/compare/v3.1.0...v3.2.0) (2023-09-08)
 
 
