@@ -12,12 +12,12 @@ WORKDIR /app
 # Add Poetry config
 COPY poetry.lock pyproject.toml /app/
 
+# Copy Python scripts
+COPY ./scripts/ /app/scripts/
+
 # Install Python dependencies
 RUN poetry config virtualenvs.create false \
     && poetry install --only main --no-interaction --no-ansi
-
-# Copy Python scripts
-COPY ./scripts/ /app/scripts/
 
 ENV PYTHONPATH="/app"
 ENV GTIFF_SRS_SOURCE="EPSG"
