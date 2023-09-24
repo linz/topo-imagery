@@ -2,14 +2,13 @@ import argparse
 import json
 import os
 import tempfile
+from functools import partial
+from multiprocessing import Pool
 
 from scripts.cli.cli_helper import is_argo
 from scripts.files.fs import find_sidecars, read, write_all
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_ascii_translate_command
-
-from functools import partial
-from multiprocessing import Pool
 
 
 def main() -> None:
