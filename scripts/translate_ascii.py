@@ -6,6 +6,7 @@ from functools import partial
 from multiprocessing import Pool
 
 from scripts.cli.cli_helper import is_argo
+from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import find_sidecars, read, write_all
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_ascii_translate_command
@@ -58,7 +59,7 @@ def main() -> None:
 def translate_ascii(file: str, tmp_path: str) -> str:
     # translate from ascii to geotiff using GDAL
     filename = os.path.splitext(os.path.basename(file))[0]
-    tiff = os.path.join(tmp_path, f"{filename}.tiff")
+    filename = get_file_name_from_path(file)
     run_gdal(get_ascii_translate_command(), input_file=file, output_file=tiff)
     return tiff
 
