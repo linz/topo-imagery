@@ -37,17 +37,17 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory() as tmp_path:
         with Pool(concurrency) as p:
-            ascii_tiffs = p.map(
+            tiffs = p.map(
                 partial(
                     translate_ascii,
-                    tmp_path=tmp_path,
+                    target_dir_path=tmp_path,
                 ),
                 asc_files,
             )
         p.close()
         p.join()
 
-        write_all(inputs=ascii_tiffs, target=arguments.target)
+        write_all(inputs=tiffs, target=arguments.target)
 
         # copy any sidecar files to target
         sidecars = []
@@ -55,11 +55,17 @@ def main() -> None:
             sidecars += find_sidecars(ls, [".prj", ".tfw"])
         write_all(inputs=sidecars, target=arguments.target)
 
+def translate_ascii(file: str, target_dir_path: str) -> str:
+    """Translates from ascii to geotiff using GDAL
+    Args:
+        file: the local file path to translate
+        target_dir_path: the directory path to write the translated file
 
-def translate_ascii(file: str, tmp_path: str) -> str:
-    # translate from ascii to geotiff using GDAL
-    filename = os.path.splitext(os.path.basename(file))[0]
+    Returns:
+        full path to translated file
+    """
     filename = get_file_name_from_path(file)
+    tiff = os.path.join(target_dir_path, f"{filename}.tiff")
     run_gdal(get_ascii_translate_command(), input_file=file, output_file=tiff)
     return tiff
 
