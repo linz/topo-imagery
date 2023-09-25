@@ -12,7 +12,7 @@ from scripts.gdal.gdal_preset import get_ascii_translate_command
 
 
 def main() -> None:
-    """Translates ascii files in a given path to tiffs and writes to target,
+    """Translates ascii files in a given path to tiffs and writes to target along with their sidecar (`.prj`, `.tfw`) files.
 
     Arguments:
     --from-file - file listing the source data
