@@ -5,11 +5,14 @@ import tempfile
 from functools import partial
 from multiprocessing import Pool
 
+from linz_logger import get_log
+
 from scripts.cli.cli_helper import is_argo
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import find_sidecars, read, write_all
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_ascii_translate_command
+from scripts.logging.time_helper import time_in_ms
 
 
 def main() -> None:
@@ -35,6 +38,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
+    start_time = time_in_ms()
     with tempfile.TemporaryDirectory() as tmp_path:
         with Pool(concurrency) as p:
             tiffs = p.map(
@@ -48,12 +52,16 @@ def main() -> None:
         p.join()
 
         write_all(inputs=tiffs, target=arguments.target)
+        get_log().info("ascii file translation complete", duration=time_in_ms() - start_time, count=len(tiffs))
 
         # copy any sidecar files to target
         sidecars = []
+        start_time = time_in_ms()
         for ls in asc_files:
             sidecars += find_sidecars(ls, [".prj", ".tfw"])
         write_all(inputs=sidecars, target=arguments.target)
+        get_log().info("sidecar files copied", duration=time_in_ms() - start_time, count=len(sidecars))
+
 
 def translate_ascii(file: str, target_dir_path: str) -> str:
     """Translates from ascii to geotiff using GDAL
