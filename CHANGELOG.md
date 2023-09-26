@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/linz/topo-imagery/compare/v3.2.1...v3.3.0) (2023-09-26)
+
+
+### Features
+
+* script to convert ascii files TDE-814 ([#595](https://github.com/linz/topo-imagery/issues/595)) ([5875d53](https://github.com/linz/topo-imagery/commit/5875d53c2b68f9d661a42f012deb7bbdb639ffe3))
+
 ## [3.2.1](https://github.com/linz/topo-imagery/compare/v3.2.0...v3.2.1) (2023-09-14)
 
 
