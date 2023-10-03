@@ -89,10 +89,10 @@ jobs:
             tags.push('ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version_major_minor }}');
             tags.push('ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}');
             if ("${{ steps.login-ecr.outputs.registry }}") {
-            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-latest');
-            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-${{ steps.version.outputs.version_major }}');
-            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-${{ steps.version.outputs.version_major_minor }}');
-            tags.push('${{ steps.login-ecr.outputs.registry }}/eks:${{ github.event.repository.name }}-${{ steps.version.outputs.version }}');
+            tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest');
+            tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ steps.version.outputs.version_major }}');
+            tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ steps.version.outputs.version_major_minor }}');
+            tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ steps.version.outputs.version }}');
             }
             return tags.join(', ')
 
