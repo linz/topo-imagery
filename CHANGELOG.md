@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.3.1](https://github.com/linz/topo-imagery/compare/v3.3.0...v3.3.1) (2023-10-04)
+
+
+### Bug Fixes
+
+* typo in readme ([#682](https://github.com/linz/topo-imagery/issues/682)) ([544d271](https://github.com/linz/topo-imagery/commit/544d271cf48120574ac43edc40d5ef91e34b49c7))
+* upgrade gdal to 3.7.2 for webp fix ([#677](https://github.com/linz/topo-imagery/issues/677)) ([bdb4802](https://github.com/linz/topo-imagery/commit/bdb48021c7e3b66d85840a23c688b4737298e949))
+
 ## [3.3.0](https://github.com/linz/topo-imagery/compare/v3.2.1...v3.3.0) (2023-09-26)
 
 
