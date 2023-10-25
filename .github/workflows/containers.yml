@@ -17,7 +17,7 @@ jobs:
       AWS_CI_ROLE: ${{ secrets.AWS_CI_ROLE }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
 
