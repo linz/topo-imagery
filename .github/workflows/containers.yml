@@ -79,7 +79,7 @@ jobs:
             return tags.join(', ')
 
       - name: Build and push container
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v5.0.0
         with:
           context: .
           tags: ${{ steps.tags.outputs.result }}
