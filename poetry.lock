@@ -739,13 +739,13 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.28.55"
-description = "Type annotations for boto3.S3 1.28.55 service generated with mypy-boto3-builder 7.19.0"
+version = "1.29.0"
+description = "Type annotations for boto3.S3 1.29.0 service generated with mypy-boto3-builder 7.20.3"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.28.55.tar.gz", hash = "sha256:b008809f448e74075012d4fc54b0176de0b4f49bc38e39de30ca0e764eb75056"},
-    {file = "mypy_boto3_s3-1.28.55-py3-none-any.whl", hash = "sha256:11a3db97398973d4ae28489b94c010778a0a5c65f99e00268456c3fea67eca79"},
+    {file = "mypy-boto3-s3-1.29.0.tar.gz", hash = "sha256:3c8473974e304aa512abbf6a47454d9834674e89db414545e2f0cb4fcdd227c9"},
+    {file = "mypy_boto3_s3-1.29.0-py3-none-any.whl", hash = "sha256:f5040429b0c3814c6ec9c1a59256976186acb7376fd3b56c4e7e5d03272bb1a8"},
 ]
 
 [package.dependencies]
@@ -1391,4 +1391,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "86b657da05531f0060c67a9095e2787898ecf226aa7b217fac07cc0f03e6622e"
+content-hash = "ec60db0714388e870dac042ed2fca41a1783ef2fcf40f6329a832bc131c928c5"
