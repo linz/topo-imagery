@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/linz/topo-imagery/compare/v3.3.1...v3.4.0) (2023-11-16)
+
+
+### Features
+
+* lint GitHub Actions workflows TDE-919 ([#720](https://github.com/linz/topo-imagery/issues/720)) ([1d32588](https://github.com/linz/topo-imagery/commit/1d325881607c69022dec6c93e178f85e9e05705e))
+
 ## [3.3.1](https://github.com/linz/topo-imagery/compare/v3.3.0...v3.3.1) (2023-10-04)
 
 
