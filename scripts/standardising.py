@@ -186,12 +186,6 @@ def standardising(
         max_x = min_x + output_bounds.size.width
         command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
-        # Workaround https://github.com/OSGeo/gdal/issues/8169
-        if len(source_tiffs) > 1:
-            no_stats_file_path = os.path.join(tmp_path, files.output + "_no_stats.tiff")
-            run_gdal(command, input_file=input_file, output_file=no_stats_file_path)
-            input_file = no_stats_file_path
-
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
