@@ -34,8 +34,8 @@ jobs:
       - name: End to end test - Elevation
         run: |
           docker run  -v "${HOME}/tmp/:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
-          cmp --silent "${HOME}/tmp/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
-          cmp --silent "${HOME}/tmp/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
+          cmp "${HOME}/tmp/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
+          cmp "${HOME}/tmp/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
 
       - name: End to end test - Historical Aerial Imagery
         run: |
