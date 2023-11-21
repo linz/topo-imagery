@@ -38,7 +38,10 @@ DEM_LERC = [
     "compress=lerc",
     "-co",
     # Set Max Z Error to 1mm
-    "max_z_error=0.001",
+    "MAX_Z_ERROR=0.001",
+    "-co",
+    # Set MAX Z ERROR OVERVIEW to 10cm
+    "MAX_Z_ERROR_OVERVIEW=0.1",
     # Force all DEMS to AREA to be consistent
     # input tiffs vary between AREA or POINT
     "-mo",
