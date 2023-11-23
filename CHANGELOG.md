@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.4.0](https://github.com/linz/topo-imagery/compare/v3.3.1...v3.4.0) (2023-11-23)
+
+
+### Features
+
+* force LERC overview max Z error threshold to 0.1 (10cm) TDE-873 ([#740](https://github.com/linz/topo-imagery/issues/740)) ([0924c13](https://github.com/linz/topo-imagery/commit/0924c132fd01221cb0467cba2126dbc8ba80b269))
+* lint GitHub Actions workflows TDE-919 ([#720](https://github.com/linz/topo-imagery/issues/720)) ([1d32588](https://github.com/linz/topo-imagery/commit/1d325881607c69022dec6c93e178f85e9e05705e))
+* Pin actions to hashes ([#729](https://github.com/linz/topo-imagery/issues/729)) ([e2343d5](https://github.com/linz/topo-imagery/commit/e2343d5f1959e71d3634f134cd7d61c1447ab261))
+
 ## [3.3.1](https://github.com/linz/topo-imagery/compare/v3.3.0...v3.3.1) (2023-10-04)
 
 
