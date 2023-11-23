@@ -39,6 +39,9 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
+    "-co",
+    # Set MAX Z ERROR OVERVIEW to 10cm
+    "max_z_error_overview=0.1",
     # Force all DEMS to AREA to be consistent
     # input tiffs vary between AREA or POINT
     "-mo",
@@ -77,7 +80,7 @@ WEBP_OVERVIEWS = [
     "-co",
     "overview_quality=90",
     "-co",
-    "OVERVIEWS=IGNORE_EXISTING",
+    "overviews=ignore_existing",
 ]
 
 
