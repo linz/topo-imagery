@@ -11,7 +11,7 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs_s3 import exists, read, write
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_write() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -24,7 +24,7 @@ def test_write() -> None:
     assert resp["ContentType"] == "binary/octet-stream"
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_write_content_type() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -36,7 +36,7 @@ def test_write_content_type() -> None:
     assert resp["ContentType"] == ContentType.GEOTIFF.value
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_read() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -48,7 +48,7 @@ def test_read() -> None:
     assert content == b"test content"
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_read_bucket_not_found(capsys: CaptureFixture[str]) -> None:
     with pytest.raises(botocore.exceptions.ClientError):
         read("s3://testbucket/test.file")
@@ -58,7 +58,7 @@ def test_read_bucket_not_found(capsys: CaptureFixture[str]) -> None:
     assert logs["msg"] == "s3_bucket_not_found"
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_read_key_not_found(capsys: CaptureFixture[str]) -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
@@ -70,7 +70,7 @@ def test_read_key_not_found(capsys: CaptureFixture[str]) -> None:
     assert logs["msg"] == "s3_key_not_found"
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_exists() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -82,7 +82,7 @@ def test_exists() -> None:
     assert file_exists is True
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_directory_exists() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -94,7 +94,7 @@ def test_directory_exists() -> None:
     assert directory_exists is True
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_exists_bucket_not_exists(capsys: CaptureFixture[str]) -> None:
     file_exists = exists("s3://testbucket/test.file")
 
@@ -103,7 +103,7 @@ def test_exists_bucket_not_exists(capsys: CaptureFixture[str]) -> None:
     assert file_exists is False
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_exists_object_not_exists() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
@@ -115,7 +115,7 @@ def test_exists_object_not_exists() -> None:
     assert file_exists is False
 
 
-@mock_s3  # type: ignore
+@mock_s3
 def test_exists_object_starting_with_not_exists() -> None:
     s3 = boto3.resource("s3", region_name=DEFAULT_REGION_NAME)
     client = boto3.client("s3", region_name=DEFAULT_REGION_NAME)
