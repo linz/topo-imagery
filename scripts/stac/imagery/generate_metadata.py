@@ -1,6 +1,6 @@
+import string
 from datetime import datetime
 from typing import Optional
-import string
 
 
 class SubtypeParameterError(Exception):

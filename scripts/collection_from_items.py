@@ -10,8 +10,8 @@ from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.imagery.generate_metadata import generate_description, generate_title
+from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 def main() -> None:

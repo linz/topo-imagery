@@ -1,5 +1,6 @@
-from scripts.stac.imagery.generate_metadata import generate_title, generate_description
 from datetime import datetime
+
+from scripts.stac.imagery.generate_metadata import generate_description, generate_title
 
 
 def test_generate_imagery_title() -> None:
