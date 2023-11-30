@@ -4,7 +4,7 @@ from typing import Optional
 
 
 class SubtypeParameterError(Exception):
-    def __init__(self, subtype):
+    def __init__(self, subtype: str) -> None:
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {subtype}"
 
 
@@ -14,7 +14,7 @@ def generate_title(
     gsd: str,
     start_date: datetime,
     end_date: datetime,
-    lifecycle: str,
+    lifecycle: Optional[str] = None,
     location: Optional[str] = None,
     event: Optional[str] = None,
     historic_survey_number: Optional[str] = None,
@@ -40,6 +40,7 @@ def generate_title(
     Returns:
         Dataset Title
     """
+    # pylint: disable-msg=too-many-arguments
     date = _format_date_for_metadata(start_date, end_date)
     name = _format_name_for_title(_region_map(region), location)
     preview = _format_preview(lifecycle)
@@ -126,10 +127,11 @@ def _format_name_for_title(region: str, location: Optional[str]) -> str:
     return region
 
 
-def _format_preview(lifecycle: str) -> Optional[str]:
+def _format_preview(lifecycle: Optional[str]) -> Optional[str]:
     """lifeycle is only added to a dataset title if the status is preview."""
-    if _is_preview(lifecycle):
+    if lifecycle and _is_preview(lifecycle):
         return "- preview"
+    return None
 
 
 def _is_preview(lifecycle: str) -> bool:
@@ -142,11 +144,13 @@ def _is_preview(lifecycle: str) -> bool:
 def _format_location_for_elevation_description(location: Optional[str]) -> Optional[str]:
     if location:
         return f"- {location}"
+    return None
 
 
 def _format_event_for_elevation_title(event: Optional[str]) -> Optional[str]:
     if event:
         return f"- {event}"
+    return None
 
 
 def _region_map(region: str) -> str:

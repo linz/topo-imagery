@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from scripts.stac.imagery.generate_metadata import generate_description, generate_title
+from scripts.stac.imagery.generate_metadata import generate_title
 
 
 def test_generate_imagery_title() -> None:
@@ -75,5 +75,7 @@ def test_generate_title_event_satellite_imagery() -> None:
 
 def test_generate_dsm_title_preview() -> None:
     title = "Auckland LiDAR 0.3m DSM (2023) - preview"
-    generated_title = generate_title("DSM", "Auckland", "0.3m", datetime(2023, 1, 1), datetime(2023, 2, 2), preview=True)
+    generated_title = generate_title(
+        "DSM", "Auckland", "0.3m", datetime(2023, 1, 1), datetime(2023, 2, 2), lifecycle="preview"
+    )
     assert generated_title == title

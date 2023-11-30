@@ -14,6 +14,7 @@ from scripts.stac.imagery.generate_metadata import generate_description, generat
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+# pylint: disable-msg=too-many-locals
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
