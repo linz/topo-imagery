@@ -6,19 +6,34 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single
+from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.imagery.generate_metadata import generate_description, generate_title
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
-    parser.add_argument("--title", dest="title", help="Collection title", required=True)
-    parser.add_argument("--description", dest="description", help="Collection description", required=True)
+    parser.add_argument("--subtype", dest="subtype", help="Dataset subtype description", required=True)
+    parser.add_argument("--region", dest="region", help="Region of Dataset", required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", required=True)
+    parser.add_argument("--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", required=False)
+    parser.add_argument(
+        "--start-datetime", dest="start_datetime", help="Start datetime in format YYYY-MM-DD", type=valid_date, required=True
+    )
+    parser.add_argument(
+        "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
+    )
+    parser.add_argument("--event", dest="dest", help="Event name if applicable", required=False)
+    parser.add_argument(
+        "--historic-survey-number", dest="historic_survey_number", help="Historic Survey Number if Applicable", required=False
+    )
+    parser.add_argument("--lifecycle", dest="lifecycle", help="Designating dataset status", required=True)
     parser.add_argument(
         "--producer",
         dest="producer",
@@ -44,8 +59,29 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
+    title = generate_title(
+        arguments.subtype,
+        arguments.region,
+        arguments.gsd,
+        arguments.start_datetime,
+        arguments.end_datetime,
+        arguments.lifecycle,
+        arguments.location,
+        arguments.event,
+        arguments.historic_survey_number,
+    )
+    description = generate_description(
+        arguments.subtype,
+        arguments.region,
+        arguments.start_datetime,
+        arguments.end_datetime,
+        arguments.location,
+        arguments.event,
+        arguments.historic_survey_number,
+    )
+
     collection = ImageryCollection(
-        title=arguments.title, description=arguments.description, collection_id=arguments.collection_id, providers=providers
+        title=title, description=description, collection_id=arguments.collection_id, providers=providers
     )
 
     if not uri.startswith("s3://"):
