@@ -39,7 +39,7 @@ def test_generate_description_historic_imagery() -> None:
 
 def test_generate_description_event() -> None:
     description = "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, \
-        published as a record of the Cyclone Gabrielle event."
+published as a record of the Cyclone Gabrielle event."
     generated_description = generate_description(
         "Rural Aerial Photos", "Hawke's Bay", datetime(2023, 1, 1), datetime(2023, 2, 2), event="Cyclone Gabrielle"
     )
