@@ -157,6 +157,7 @@ def test_default_provider_missing() -> None:
     ]
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
+
 def test_capture_data_asset_present() -> None:
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
