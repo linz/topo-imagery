@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from scripts.stac.imagery.generate_metadata import generate_title
+import pytest
+
+from scripts.stac.imagery.generate_metadata import EmptyParameterError, generate_title
 
 
 def test_generate_imagery_title() -> None:
@@ -77,5 +79,19 @@ def test_generate_dsm_title_preview() -> None:
     title = "Auckland LiDAR 0.3m DSM (2023) - preview"
     generated_title = generate_title(
         "DSM", "Auckland", "0.3m", datetime(2023, 1, 1), datetime(2023, 2, 2), lifecycle="preview"
+    )
+    assert generated_title == title
+
+
+def test_generate_imagery_title_empty_required_str() -> None:
+    with pytest.raises(EmptyParameterError) as param_error:
+        generate_title("Rural Aerial Photos", "", "0.3m", datetime(2023, 1, 1), datetime(2023, 2, 2))
+        assert str(param_error.value) == "Invalid Empty Parameter: Region"
+
+
+def test_generate_imagery_title_empty_optional_str() -> None:
+    title = "Auckland 0.3m Rural Aerial Photos (2023)"
+    generated_title = generate_title(
+        "Rural Aerial Photos", "Auckland", "0.3m", datetime(2023, 1, 1), datetime(2023, 2, 2), location="", event=""
     )
     assert generated_title == title
