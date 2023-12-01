@@ -156,3 +156,13 @@ def test_default_provider_missing() -> None:
         "providers"
     ]
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+def test_capture_data_asset_present() -> None:
+    title = "Test Urban Imagery"
+    description = "Test Urban Imagery Description"
+    collection = ImageryCollection(title, description)
+
+    assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
+    assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
+    assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
+    assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]

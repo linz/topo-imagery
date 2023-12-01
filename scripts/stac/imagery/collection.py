@@ -9,6 +9,8 @@ from scripts.files.fs import write
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 
+CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
+
 
 class ImageryCollection:
     stac: Dict[str, Any]
@@ -28,6 +30,14 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
+            "assets": {
+                "capture_area": {
+                    "href": f"./{CAPTURE_AREA_FILE_NAME}",
+                    "title": "Capture area",
+                    "type": ContentType.GEOJSON,
+                    "roles": ["metadata"],
+                }
+            },
         }
 
         # If the providers passed has already a LINZ provider: add its default roles to it

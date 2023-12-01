@@ -41,6 +41,7 @@ boto3 = "^1.28.70"
 linz-logger = "^0.11.0"
 py-multihash = "^2.0.1"
 shapely = "^2.0.1"
+geojson = "^3.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.11.0"

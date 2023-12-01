@@ -69,23 +69,3 @@ def is_GTiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
     if gdalinfo_data["driverShortName"] == "GTiff":
         return True
     return False
-
-
-def is_json(path: str) -> bool:
-    """Verify if file is a JSON.
-
-    Args:
-        path: a path to a file
-
-    Returns:
-        True if the file is a JSON
-
-    Examples:
-        ```
-        >>> is_tiff("/a/path/to/file.json")
-        True
-        >>> is_tiff("/a/path/to/file.csv")
-        False
-        ```
-    """
-    return path.lower().endswith(".json")

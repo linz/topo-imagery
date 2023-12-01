@@ -101,7 +101,7 @@ def standardising(
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> FileTiff:
-    """Apply transformations using GDAL to the source file.
+    """Apply transformations using GDAL to the source file and create a footprint sidecar file.
 
     Args:
         file: path to the file to standardise
@@ -118,7 +118,9 @@ def standardising(
         a FileTiff wrapper
     """
     standardized_file_name = files.output + ".tiff"
+    footprint_file_name = files.output + "_footprint.geojson"
     standardized_file_path = os.path.join(target_output, standardized_file_name)
+    footprint_file_path = os.path.join(target_output, footprint_file_name)
     tiff = FileTiff(files.inputs, preset)
     tiff.set_path_standardised(standardized_file_path)
 
@@ -130,6 +132,7 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+        footprint_tmp_path = os.path.join(tmp_path, footprint_file_name)
         sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
         source_files = write_all(files.inputs + sidecars, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
@@ -186,8 +189,27 @@ def standardising(
         max_x = min_x + output_bounds.size.width
         command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
+        # Workaround https://github.com/OSGeo/gdal/issues/8169
+        if len(source_tiffs) > 1:
+            no_stats_file_path = os.path.join(tmp_path, files.output + "_no_stats.tiff")
+            run_gdal(command, input_file=input_file, output_file=no_stats_file_path)
+            input_file = no_stats_file_path
+
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
+        # Create footprint GeoJSON
+        run_gdal(
+            ["gdal_footprint", "-t_cs", "georef", "-t_srs", "+proj=longlat +ellps=WGS84"],
+            standardized_working_path,
+            footprint_tmp_path,
+        )
+
+        # Save both tiff and footprint into target
         write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
+        write(
+            footprint_file_path,
+            read(footprint_tmp_path),
+            content_type=ContentType.GEOJSON,
+        )
         return tiff

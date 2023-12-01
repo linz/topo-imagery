@@ -3,17 +3,23 @@ import json
 import os
 from typing import List
 
+import geojson
+import shapely.geometry
+import shapely.ops
 from boto3 import client
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import coalesce_multi_single
-from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
+from scripts.files.files_helper import ContentType
+from scripts.files.fs import write
+from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection import CAPTURE_AREA_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 def main() -> None:
+    # pylint: disable-msg=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
@@ -54,28 +60,40 @@ def main() -> None:
 
     s3_client = client("s3")
 
-    files_to_read = list_json_in_uri(uri, s3_client)
+    files_to_read = list_files_in_uri(uri, (".json", "_footprint.geojson"), s3_client)
 
     start_time = time_in_ms()
+    polygons = []
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
     ):
-        item_stac = json.loads(result["Body"].read().decode("utf-8"))
+        content = json.loads(result["Body"].read().decode("utf-8"))
 
-        if not arguments.collection_id == item_stac.get("collection"):
-            get_log().trace(
-                "skipping: item.collection != collection.id",
-                file=key,
-                action="collection_from_items",
-                reason="skip",
-            )
-            continue
+        if key.endswith(".json"):
+            if not arguments.collection_id == content.get("collection"):
+                get_log().trace(
+                    "skipping: item.collection != collection.id",
+                    file=key,
+                    action="collection_from_items",
+                    reason="skip",
+                )
+                continue
+            collection.add_item(content)
+            get_log().info("item added to collection", item=content["id"], file=key)
+        elif key.endswith("_footprint.geojson"):
+            get_log().debug(f"adding geometry from {key}")
+            geom = shapely.geometry.shape(content["features"][0]["geometry"])
+            polygons.append(geom)
 
-        collection.add_item(item_stac)
-        get_log().info("item added to collection", item=item_stac["id"], file=key)
+    capture_area = geojson.Feature(geometry=shapely.ops.unary_union(polygons), properties={})
+    write(
+        os.path.join(uri, CAPTURE_AREA_FILE_NAME),
+        json.dumps(capture_area).encode("utf-8"),
+        content_type=ContentType.GEOJSON.value,
+    )
 
     get_log().info(
-        "Matching items added to collection",
+        "Matching items added to collection and capture-area created",
         item_count=len(files_to_read),
         item_match_count=[dictionary["rel"] for dictionary in collection.stac["links"]].count("item"),
         duration=time_in_ms() - start_time,
