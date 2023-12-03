@@ -20,8 +20,49 @@ def main() -> None:
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
-    parser.add_argument("--subtype", dest="subtype", help="Dataset subtype description", required=True)
-    parser.add_argument("--region", dest="region", help="Region of Dataset", required=True)
+    parser.add_argument(
+        "--subtype",
+        dest="subtype",
+        help="Dataset subtype description",
+        required=True,
+        choices=[
+            "Aerial Photos",
+            "Urban Aerial Photos",
+            "Rural Aerial Photos",
+            "Scanned Aerial Imagery",
+            "DEM",
+            "DSM",
+            "Satellite Imagery",
+        ],
+    )
+    parser.add_argument(
+        "--region",
+        dest="region",
+        help="Region of Dataset",
+        required=True,
+        choices=[
+            "antarctica",
+            "auckland",
+            "bay-of-plenty",
+            "canterbury",
+            "gisborne",
+            "global",
+            "hawkes-bay",
+            "manawatu-whanganui",
+            "marlborough",
+            "nelson",
+            "new-zealand",
+            "northland",
+            "otago",
+            "pacific-islands",
+            "southland",
+            "taranaki",
+            "tasman",
+            "waikato",
+            "wellington",
+            "west-coast",
+        ],
+    )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", required=True)
     parser.add_argument("--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", required=False)
     parser.add_argument(
@@ -34,7 +75,13 @@ def main() -> None:
     parser.add_argument(
         "--historic-survey-number", dest="historic_survey_number", help="Historic Survey Number if Applicable", required=False
     )
-    parser.add_argument("--lifecycle", dest="lifecycle", help="Designating dataset status", required=True)
+    parser.add_argument(
+        "--lifecycle",
+        dest="lifecycle",
+        help="Designating dataset status",
+        required=True,
+        choices=["under development", "preview", "ongoing", "completed", "deprecated"],
+    )
     parser.add_argument(
         "--producer",
         dest="producer",
