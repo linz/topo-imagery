@@ -17,8 +17,8 @@ def generate_title(
     subtype: str,
     region: str,
     gsd: str,
-    start_date: datetime,
-    end_date: datetime,
+    start_datetime: datetime,
+    end_datetime: datetime,
     lifecycle: str = "completed",
     location: Optional[str] = None,
     event: Optional[str] = None,
@@ -49,7 +49,7 @@ def generate_title(
 
     _validate_no_empty_strings({"region": region, "subtype": subtype, "gsd": gsd})
 
-    date = _format_date_for_metadata(start_date, end_date)
+    date = _format_date_for_metadata(start_datetime, end_datetime)
     name = _format_name_for_title(_region_map(region), location)
     preview = _is_preview(lifecycle)
 

@@ -66,10 +66,14 @@ def main() -> None:
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", required=True)
     parser.add_argument("--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", required=False)
     parser.add_argument(
-        "--start-datetime", dest="start_datetime", help="Start datetime in format YYYY-MM-DD", type=valid_date, required=True
+        "--start-date",
+        dest="start_date",
+        help="Start datetime in format YYYY-MM-DD (Inclusive)",
+        type=valid_date,
+        required=True,
     )
     parser.add_argument(
-        "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
+        "--end-date", dest="end_date", help="End datetime in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
     )
     parser.add_argument("--event", dest="dest", help="Event name if applicable", required=False)
     parser.add_argument(
@@ -111,8 +115,8 @@ def main() -> None:
         arguments.subtype,
         arguments.region,
         arguments.gsd,
-        arguments.start_datetime,
-        arguments.end_datetime,
+        arguments.start_date,
+        arguments.end_date,
         arguments.lifecycle,
         arguments.location,
         arguments.event,
@@ -121,8 +125,8 @@ def main() -> None:
     description = generate_description(
         arguments.subtype,
         arguments.region,
-        arguments.start_datetime,
-        arguments.end_datetime,
+        arguments.start_date,
+        arguments.end_date,
         arguments.location,
         arguments.event,
         arguments.historic_survey_number,
