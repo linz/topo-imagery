@@ -1,11 +1,25 @@
 import string
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 
 class SubtypeParameterError(Exception):
     def __init__(self, subtype: str) -> None:
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {subtype}"
+
+
+class ImagerySubtypes(str, Enum):
+    SATELLIE = "Satellite Imagery"
+    URBAN = "Urban Aerial Photos"
+    RURAL = "Rural Aerial Photos"
+    AERIAL = "Aerial Photos"
+    HISTORICAL = "Scanned Aerial Photos"
+
+
+class ElevationSubtypes(str, Enum):
+    DEM = "DEM"
+    DSM = "DSM"
 
 
 def generate_title(
@@ -49,9 +63,9 @@ def generate_title(
     if historic_survey_number:
         return " ".join(f"{name} {gsd} {historic_survey_number} ({date}) {preview or ''}".split())
 
-    if subtype in ["Satellite Imagery", "Urban Aerial Photos", "Rural Aerial Photos"]:
+    if subtype in [ImagerySubtypes.SATELLIE, ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         return " ".join(f"{name} {gsd} {event or ''} {subtype} ({date}) {preview or ''}".split())
-    if subtype in ["DEM", "DSM"]:
+    if subtype in [ElevationSubtypes.DEM, ElevationSubtypes.DSM]:
         return " ".join(
             f"{name} {_format_event_for_elevation_title(event) or ''} LiDAR {gsd} {subtype} ({date}) {preview or ''}".split()
         )
@@ -98,13 +112,13 @@ def generate_description(
     if historic_survey_number:
         desc = f"Scanned aerial imagery within the {region} region captured in {date}."
 
-    if subtype == "Satellite Imagery":
+    if subtype == ImagerySubtypes.SATELLIE:
         desc = f"Satellite imagery within the {region} region captured in {date}."
-    if subtype in ["Urban Aerial Photos", "Rural Aerial Photos"]:
+    elif subtype in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         desc = f"Orthophotography within the {region} region captured in the {date} flying season."
-    if subtype == "DEM":
+    elif subtype == ElevationSubtypes.DEM:
         desc = " ".join(f"Digital Elevation Model within the {region} {location_txt or ''} region in {date}.".split())
-    if subtype == "DSM":
+    elif subtype == ElevationSubtypes.DSM:
         desc = " ".join(f"Digital Surface Model within the {region} {location_txt or ''} region in {date}.".split())
 
     if not desc:

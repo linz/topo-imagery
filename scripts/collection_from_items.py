@@ -10,7 +10,7 @@ from scripts.cli.cli_helper import coalesce_multi_single, nullable_str, valid_da
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.generate_metadata import generate_description, generate_title
+from scripts.stac.imagery.generate_metadata import ElevationSubtypes, ImagerySubtypes, generate_description, generate_title
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
@@ -26,13 +26,13 @@ def main() -> None:
         help="Dataset subtype description",
         required=True,
         choices=[
-            "Aerial Photos",
-            "Urban Aerial Photos",
-            "Rural Aerial Photos",
-            "Scanned Aerial Imagery",
-            "DEM",
-            "DSM",
-            "Satellite Imagery",
+            ImagerySubtypes.AERIAL,
+            ImagerySubtypes.HISTORICAL,
+            ImagerySubtypes.SATELLIE,
+            ImagerySubtypes.URBAN,
+            ImagerySubtypes.RURAL,
+            ElevationSubtypes.DEM,
+            ElevationSubtypes.DSM,
         ],
     )
     parser.add_argument(
