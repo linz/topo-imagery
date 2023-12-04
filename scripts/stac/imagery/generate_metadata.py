@@ -1,16 +1,11 @@
 import string
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 class SubtypeParameterError(Exception):
     def __init__(self, subtype: str) -> None:
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {subtype}"
-
-
-class EmptyParameterError(Exception):
-    def __init__(self, parameters: List[str]) -> None:
-        self.message = f"Invalid Empty Parameters: {parameters}"
 
 
 def generate_title(
@@ -46,8 +41,6 @@ def generate_title(
         Dataset Title
     """
     # pylint: disable-msg=too-many-arguments
-
-    _validate_no_empty_strings({"region": region, "subtype": subtype, "gsd": gsd})
 
     date = _format_date_for_metadata(start_datetime, end_datetime)
     name = _format_name_for_title(_region_map(region), location)
@@ -97,8 +90,6 @@ def generate_description(
     Returns:
         Dataset Description
     """
-    _validate_no_empty_strings({"region": region, "subtype": subtype})
-
     date = _format_date_for_metadata(start_date, end_date)
     location_txt = _format_location_for_elevation_description(location)  # TODO: rename
     region = _region_map(region)
@@ -118,7 +109,7 @@ def generate_description(
 
     if not desc:
         raise SubtypeParameterError(subtype)
-    if event and event != "":
+    if event:
         desc = desc.replace(".", f", published as a record of the {event} event.")
 
     return desc
@@ -131,7 +122,7 @@ def _format_date_for_metadata(start_date: datetime, end_date: datetime) -> str:
 
 
 def _format_name_for_title(region: str, location: Optional[str]) -> str:
-    if location and location != "":
+    if location:
         return location
     return region
 
@@ -144,13 +135,13 @@ def _is_preview(lifecycle: str) -> Optional[str]:
 
 
 def _format_location_for_elevation_description(location: Optional[str]) -> Optional[str]:
-    if location and location != "":
+    if location:
         return f"- {location}"
     return None
 
 
 def _format_event_for_elevation_title(event: Optional[str]) -> Optional[str]:
-    if event and event != "":
+    if event:
         return f"- {event}"
     return None
 
@@ -162,15 +153,3 @@ def _region_map(region: str) -> str:
     if region == "manawatu-whanganui":
         return "Manawatū-Whanganui"
     return string.capwords(region.replace("-", " "))
-
-
-def _validate_no_empty_strings(parameters: Dict[str, str]) -> None:
-    """Validates string parameters are not empty.
-    The argo cli and UI allow empty string inputs.
-    We don't want this and should an exception."""
-    empty_parameters: List[str] = []
-    for key in parameters:
-        if parameters[key] == "":
-            empty_parameters.append(key)
-    if len(empty_parameters) > 0:
-        raise EmptyParameterError(empty_parameters)
