@@ -107,12 +107,10 @@ def generate_description(
     date = _format_date_for_metadata(start_date, end_date)
     location_txt = _format_location_for_elevation_description(location)  # TODO: rename
     region = _region_map(region)
-    desc = None
 
     if historic_survey_number:
         desc = f"Scanned aerial imagery within the {region} region captured in {date}."
-
-    if subtype == ImagerySubtypes.SATELLIE:
+    elif subtype == ImagerySubtypes.SATELLIE:
         desc = f"Satellite imagery within the {region} region captured in {date}."
     elif subtype in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         desc = f"Orthophotography within the {region} region captured in the {date} flying season."
@@ -120,9 +118,9 @@ def generate_description(
         desc = " ".join(f"Digital Elevation Model within the {region} {location_txt or ''} region in {date}.".split())
     elif subtype == ElevationSubtypes.DSM:
         desc = " ".join(f"Digital Surface Model within the {region} {location_txt or ''} region in {date}.".split())
-
-    if not desc:
+    else:
         raise SubtypeParameterError(subtype)
+
     if event:
         desc = desc.replace(".", f", published as a record of the {event} event.")
 
