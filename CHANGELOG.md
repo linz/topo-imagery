@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.5.0](https://github.com/linz/topo-imagery/compare/v3.4.0...v3.5.0) (2023-12-04)
+
+
+### Features
+
+* Dependabot for Docker TDE-963 ([#746](https://github.com/linz/topo-imagery/issues/746)) ([250b82c](https://github.com/linz/topo-imagery/commit/250b82c196c1f3db601e9712d6834d6da28e6952))
+* Pin Docker image TDE-958 ([#744](https://github.com/linz/topo-imagery/issues/744)) ([de8a129](https://github.com/linz/topo-imagery/commit/de8a129d60bb7fc16f7872542ee93bc3ce3c9570))
+
 ## [3.4.0](https://github.com/linz/topo-imagery/compare/v3.3.1...v3.4.0) (2023-11-23)
 
 
