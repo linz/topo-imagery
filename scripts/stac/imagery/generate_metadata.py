@@ -19,7 +19,7 @@ def generate_title(
     gsd: str,
     start_datetime: datetime,
     end_datetime: datetime,
-    lifecycle: str = "completed",
+    lifecycle: str,
     location: Optional[str] = None,
     event: Optional[str] = None,
     historic_survey_number: Optional[str] = None,
