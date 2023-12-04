@@ -109,22 +109,22 @@ def generate_description(
     region = _region_map(region)
 
     if historic_survey_number:
-        desc = f"Scanned aerial imagery within the {region} region captured in {date}."
+        desc = f"Scanned aerial imagery within the {region} region captured in {date}"
     elif subtype == ImagerySubtypes.SATELLIE:
-        desc = f"Satellite imagery within the {region} region captured in {date}."
+        desc = f"Satellite imagery within the {region} region captured in {date}"
     elif subtype in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
-        desc = f"Orthophotography within the {region} region captured in the {date} flying season."
+        desc = f"Orthophotography within the {region} region captured in the {date} flying season"
     elif subtype == ElevationSubtypes.DEM:
-        desc = " ".join(f"Digital Elevation Model within the {region} {location_txt or ''} region in {date}.".split())
+        desc = " ".join(f"Digital Elevation Model within the {region} {location_txt or ''} region in {date}".split())
     elif subtype == ElevationSubtypes.DSM:
-        desc = " ".join(f"Digital Surface Model within the {region} {location_txt or ''} region in {date}.".split())
+        desc = " ".join(f"Digital Surface Model within the {region} {location_txt or ''} region in {date}".split())
     else:
         raise SubtypeParameterError(subtype)
 
     if event:
-        desc = desc.replace(".", f", published as a record of the {event} event.")
+        desc = desc + f", published as a record of the {event} event"
 
-    return desc
+    return desc + "."
 
 
 def _format_date_for_metadata(start_date: datetime, end_date: datetime) -> str:
