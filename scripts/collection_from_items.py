@@ -77,7 +77,10 @@ def main() -> None:
     )
     parser.add_argument("--event", dest="dest", help="Event name if applicable", required=False)
     parser.add_argument(
-        "--historic-survey-number", dest="historic_survey_number", help="Historic Survey Number if Applicable", required=False
+        "--historic-survey-number",
+        dest="historic_survey_number",
+        help="Historic Survey Number if Applicable. E.g.- SCN8844",
+        required=False,
     )
     parser.add_argument(
         "--lifecycle",
