@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/linz/topo-imagery/compare/v3.4.0...v3.5.0) (2023-12-04)
+
+
+### Features
+
+* Pin Docker image TDE-958 ([#744](https://github.com/linz/topo-imagery/issues/744)) ([de8a129](https://github.com/linz/topo-imagery/commit/de8a129d60bb7fc16f7872542ee93bc3ce3c9570))
+
 ## [3.4.0](https://github.com/linz/topo-imagery/compare/v3.3.1...v3.4.0) (2023-11-23)
 
 
