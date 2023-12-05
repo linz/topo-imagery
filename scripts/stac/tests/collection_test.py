@@ -40,7 +40,7 @@ def test_stac_created_on_init() -> None:
     assert collection.stac["linz:geographic_desc"] == "South Island"
     assert collection.stac["linz:event_name"] == "Forest assessment"
     assert collection.stac["linz:lifecycle"] == "under development"
-    assert collection.stac["stac_extensions"] == StacExtensions.linz.value
+    assert collection.stac["stac_extensions"] == [StacExtensions.linz.value]
 
 
 def test_id_parsed_on_init() -> None:
