@@ -19,6 +19,10 @@ def main() -> None:
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument("--title", dest="title", help="Collection title", required=True)
     parser.add_argument("--description", dest="description", help="Collection description", required=True)
+    parser.add_argument("--region", help="Collection region", required=True)
+    parser.add_argument("--geographic_desc", help="Collection geographic description", required=True)
+    parser.add_argument("--event_name", help="Collection event name", required=True)
+    parser.add_argument("--lifecycle", help="Collection lifecycle", required=True)
     parser.add_argument(
         "--producer",
         dest="producer",
@@ -45,7 +49,14 @@ def main() -> None:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
     collection = ImageryCollection(
-        title=arguments.title, description=arguments.description, collection_id=arguments.collection_id, providers=providers
+        title=arguments.title,
+        description=arguments.description,
+        region=arguments.region,
+        geographic_desc=arguments.geographic_desc,
+        event_name=arguments.event_name,
+        lifecycle=arguments.lifecycle,
+        collection_id=arguments.collection_id,
+        providers=providers,
     )
 
     if not uri.startswith("s3://"):

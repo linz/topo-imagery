@@ -37,7 +37,11 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     title = "Collection"
     description = "Collection Description"
     ulid = "fake_ulid"
-    collection = ImageryCollection(title=title, description=description, collection_id=ulid)
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(title, description, region, geographic_desc, event_name, lifecycle, ulid)
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)

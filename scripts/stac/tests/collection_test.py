@@ -10,30 +10,48 @@ from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 @pytest.fixture(name="setup_collection", autouse=True)
 def setup() -> Generator[ImageryCollection, None, None]:
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
-    collection = ImageryCollection(title, description)
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(title, description, region, geographic_desc, event_name, lifecycle)
     yield collection
 
 
-def test_title_description_id_created_on_init() -> None:
+def test_stac_created_on_init() -> None:
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
-    collection = ImageryCollection(title, description)
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(title, description, region, geographic_desc, event_name, lifecycle)
     assert collection.stac["title"] == "Test Urban Imagery"
     assert collection.stac["description"] == "Test Urban Imagery Description"
     assert collection.stac["id"]
+    assert collection.stac["linz:region"] == "new-zealand"
+    assert collection.stac["linz:geographic_desc"] == "South Island"
+    assert collection.stac["linz:event_name"] == "Forest assessment"
+    assert collection.stac["linz:lifecycle"] == "under development"
+    assert collection.stac["stac_extensions"] == StacExtensions.linz.value
 
 
 def test_id_parsed_on_init() -> None:
     title = "Test"
     description = "Test"
     id_ = "Parsed-Ulid"
-    collection = ImageryCollection(title, description, id_)
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(title, description, region, geographic_desc, event_name, lifecycle, id_)
     assert collection.stac["id"] == "Parsed-Ulid"
 
 
@@ -135,7 +153,13 @@ def test_default_provider_present() -> None:
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
-    collection = ImageryCollection(title, description, providers=[producer, licensor])
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(
+        title, description, region, geographic_desc, event_name, lifecycle, providers=[producer, licensor]
+    )
 
     assert {
         "name": "Toitū Te Whenua Land Information New Zealand",
@@ -150,7 +174,11 @@ def test_default_provider_missing() -> None:
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
-    collection = ImageryCollection(title, description, providers=[producer])
+    region = "new-zealand"
+    geographic_desc = "South Island"
+    event_name = "Forest assessment"
+    lifecycle = "under development"
+    collection = ImageryCollection(title, description, region, geographic_desc, event_name, lifecycle, providers=[producer])
 
     assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
         "providers"

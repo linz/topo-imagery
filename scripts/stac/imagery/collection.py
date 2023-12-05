@@ -8,13 +8,22 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 class ImageryCollection:
     stac: Dict[str, Any]
 
     def __init__(
-        self, title: str, description: str, collection_id: Optional[str] = None, providers: Optional[List[Provider]] = None
+        self,
+        title: str,
+        description: str,
+        region: str,
+        geographic_desc: str,
+        event_name: str,
+        lifecycle: str,
+        collection_id: Optional[str] = None,
+        providers: Optional[List[Provider]] = None,
     ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
@@ -25,9 +34,14 @@ class ImageryCollection:
             "id": collection_id,
             "title": title,
             "description": description,
+            "linz:region": region,
+            "linz:geographic_desc": geographic_desc,
+            "linz:event_name": event_name,
+            "linz:lifecycle": lifecycle,
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
+            "stac_extensions": [StacExtensions.linz.value],
         }
 
         # If the providers passed has already a LINZ provider: add its default roles to it
