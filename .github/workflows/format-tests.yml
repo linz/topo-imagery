@@ -62,3 +62,9 @@ jobs:
         run: |
           docker run  -v "${HOME}/tmp/:/tmp/" topo-imagery python3 translate_ascii.py --from-file ./tests/data/elevation_ascii.json --target /tmp/
           cmp --silent "${HOME}/tmp/elevation_ascii.tiff" ./scripts/tests/data/output/elevation_ascii.tiff
+
+      - name: End to end test - Remove empty files
+        run: |
+          docker run  -v "${HOME}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01
+          empty_target_directory="$(find "${HOME}/tmp-empty" -maxdepth 0 -type d -empty)"
+          [[ -n "$empty_target_directory" ]]
