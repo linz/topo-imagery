@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from tempfile import TemporaryDirectory
 from typing import List
 
 import geojson
@@ -11,7 +12,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import coalesce_multi_single
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import write
+from scripts.files.fs import read, write
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import CAPTURE_AREA_FILE_NAME, ImageryCollection
@@ -86,11 +87,22 @@ def main() -> None:
             polygons.append(geom)
 
     capture_area = geojson.Feature(geometry=shapely.ops.unary_union(polygons), properties={})
-    write(
-        os.path.join(uri, CAPTURE_AREA_FILE_NAME),
-        json.dumps(capture_area).encode("utf-8"),
-        content_type=ContentType.GEOJSON.value,
-    )
+    with TemporaryDirectory() as tmp_path:
+        tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
+        write(
+            tmp_capture_area_path,
+            json.dumps(capture_area).encode("utf-8"),
+            content_type=ContentType.GEOJSON.value,
+        )
+
+        collection.add_capture_area(tmp_capture_area_path)
+
+        # Save `capture-area.geojson` in target
+        write(
+            os.path.join(uri, CAPTURE_AREA_FILE_NAME),
+            read(tmp_capture_area_path),
+            content_type=ContentType.GEOJSON.value,
+        )
 
     get_log().info(
         "Matching items added to collection and capture-area created",

@@ -10,6 +10,7 @@ from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 @pytest.fixture(name="setup_collection", autouse=True)
@@ -162,8 +163,17 @@ def test_capture_data_asset_present() -> None:
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
     collection = ImageryCollection(title, description)
+    target = mkdtemp()
+    path = os.path.join(target, "capture-area.geojson")
+    with open(path, "wb") as file:
+        file.write(b"test")
+
+    collection.add_capture_area(path)
+    rmtree(target)
 
     assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
     assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
     assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
     assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
+    assert StacExtensions.file.value in collection.stac["stac_extensions"]
+    assert "file:checksum" in collection.stac["assets"]["capture_area"]

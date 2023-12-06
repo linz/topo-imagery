@@ -7,7 +7,9 @@ import ulid
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 
@@ -30,14 +32,6 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
-            "assets": {
-                "capture_area": {
-                    "href": f"./{CAPTURE_AREA_FILE_NAME}",
-                    "title": "Capture area",
-                    "type": ContentType.GEOJSON,
-                    "roles": ["metadata"],
-                }
-            },
         }
 
         # If the providers passed has already a LINZ provider: add its default roles to it
@@ -56,6 +50,32 @@ class ImageryCollection:
             )
 
         self.add_providers(providers)
+
+    def add_capture_area(self, path: str) -> None:
+        """Add the capture area of the Collection. The `path` of the capture-area.geojson is only used to get its checksum.
+        The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
+
+        Args:
+            path: of the capture-area-geojson file
+        """
+        if not self.stac.get("asset"):
+            self.stac["assets"] = {}
+
+        if not self.stac.get("stac_extensions"):
+            self.stac["stac_extensions"] = []
+
+        if StacExtensions.file.value not in self.stac["stac_extensions"]:
+            self.stac["stac_extensions"].append(StacExtensions.file.value)
+
+        file_checksum = checksum.multihash_as_hex(path)
+        capture_area = {
+            "href": f"./{CAPTURE_AREA_FILE_NAME}",
+            "title": "Capture area",
+            "type": ContentType.GEOJSON,
+            "roles": ["metadata"],
+            "file:checksum": file_checksum,
+        }
+        self.stac["assets"]["capture_area"] = capture_area
 
     def add_item(self, item: Dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
