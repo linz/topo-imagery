@@ -194,7 +194,7 @@ def standardising(
 
         # Create footprint GeoJSON
         run_gdal(
-            ["gdal_footprint", "-t_cs", "georef", "-t_srs", "+proj=longlat +ellps=WGS84"],
+            ["gdal_footprint", "-t_srs", "EPSG:4326"],
             standardized_working_path,
             footprint_tmp_path,
         )
