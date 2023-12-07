@@ -17,7 +17,6 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 # pylint: disable-msg=too-many-locals
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
