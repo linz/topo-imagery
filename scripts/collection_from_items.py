@@ -54,7 +54,7 @@ def main() -> None:
             "west-coast",
         ],
     )
-    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=nullable_str, required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
         "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=nullable_str, required=False
     )
