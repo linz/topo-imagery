@@ -24,15 +24,7 @@ def main() -> None:
         dest="subtype",
         help="Dataset subtype description",
         required=True,
-        choices=[
-            ImagerySubtypes.AERIAL,
-            ImagerySubtypes.HISTORICAL,
-            ImagerySubtypes.SATELLIE,
-            ImagerySubtypes.URBAN,
-            ImagerySubtypes.RURAL,
-            ElevationSubtypes.DEM,
-            ElevationSubtypes.DSM,
-        ],
+        choices=[list(ImagerySubtypes), list(ElevationSubtypes)],
     )
     parser.add_argument(
         "--region",
