@@ -101,12 +101,6 @@ def valid_date(s: str) -> datetime:
         raise argparse.ArgumentTypeError(msg) from e
 
 
-def nullable_str(s: str) -> Optional[str]:
-    if s == "":
-        return None
-    return s
-
-
 def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
     """Transform a string representing a list to a list of strings
     example: "foo; bar; foo bar" -> ["foo", "bar", "foo bar"]

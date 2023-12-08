@@ -6,7 +6,7 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, nullable_str, valid_date
+from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
@@ -56,7 +56,7 @@ def main() -> None:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
-        "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=nullable_str, required=False
+        "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
     )
     parser.add_argument(
         "--start-date",
@@ -68,12 +68,12 @@ def main() -> None:
     parser.add_argument(
         "--end-date", dest="end_date", help="End datetime in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
     )
-    parser.add_argument("--event", dest="dest", help="Event name if applicable", type=nullable_str, required=False)
+    parser.add_argument("--event", dest="dest", help="Event name if applicable", type=str, required=False)
     parser.add_argument(
         "--historic-survey-number",
         dest="historic_survey_number",
         help="Historic Survey Number if Applicable. E.g.- SCN8844",
-        type=nullable_str,
+        type=str,
         required=False,
     )
     parser.add_argument(
