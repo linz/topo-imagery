@@ -46,12 +46,12 @@ def main() -> None:
     parser.add_argument(
         "--start-date",
         dest="start_date",
-        help="Start datetime in format YYYY-MM-DD (Inclusive)",
+        help="Start date in format YYYY-MM-DD (Inclusive)",
         type=valid_date,
         required=True,
     )
     parser.add_argument(
-        "--end-date", dest="end_date", help="End datetime in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
+        "--end-date", dest="end_date", help="End date in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
     )
     parser.add_argument("--event", dest="dest", help="Event name if applicable", type=str, required=False)
     parser.add_argument(
