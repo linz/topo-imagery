@@ -10,7 +10,13 @@ from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.generate_metadata import ElevationSubtypes, ImagerySubtypes, generate_description, generate_title
+from scripts.stac.imagery.generate_metadata import (
+    HUMAN_READABLE_REGIONS,
+    ElevationSubtypes,
+    ImagerySubtypes,
+    generate_description,
+    generate_title,
+)
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
@@ -31,28 +37,7 @@ def main() -> None:
         dest="region",
         help="Region of Dataset",
         required=True,
-        choices=[
-            "antarctica",
-            "auckland",
-            "bay-of-plenty",
-            "canterbury",
-            "gisborne",
-            "global",
-            "hawkes-bay",
-            "manawatu-whanganui",
-            "marlborough",
-            "nelson",
-            "new-zealand",
-            "northland",
-            "otago",
-            "pacific-islands",
-            "southland",
-            "taranaki",
-            "tasman",
-            "waikato",
-            "wellington",
-            "west-coast",
-        ],
+        choices=HUMAN_READABLE_REGIONS.keys(),
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
