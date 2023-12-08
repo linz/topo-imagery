@@ -10,7 +10,7 @@ class SubtypeParameterError(Exception):
 
 
 class ImagerySubtypes(str, Enum):
-    SATELLIE = "Satellite Imagery"
+    SATELLITE = "Satellite Imagery"
     URBAN = "Urban Aerial Photos"
     RURAL = "Rural Aerial Photos"
     AERIAL = "Aerial Photos"
@@ -63,7 +63,7 @@ def generate_title(
     if historic_survey_number:
         return " ".join(f"{name} {gsd} {historic_survey_number} ({date}) {preview or ''}".split())
 
-    if subtype in [ImagerySubtypes.SATELLIE, ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
+    if subtype in [ImagerySubtypes.SATELLITE, ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         return " ".join(f"{name} {gsd} {event or ''} {subtype} ({date}) {preview or ''}".split())
     if subtype in [ElevationSubtypes.DEM, ElevationSubtypes.DSM]:
         return " ".join(
@@ -110,7 +110,7 @@ def generate_description(
 
     if historic_survey_number:
         desc = f"Scanned aerial imagery within the {region} region captured in {date}"
-    elif subtype == ImagerySubtypes.SATELLIE:
+    elif subtype == ImagerySubtypes.SATELLITE:
         desc = f"Satellite imagery within the {region} region captured in {date}"
     elif subtype in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         desc = f"Orthophotography within the {region} region captured in the {date} flying season"
