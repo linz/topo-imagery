@@ -53,7 +53,7 @@ def main() -> None:
     parser.add_argument(
         "--end-date", dest="end_date", help="End date in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
     )
-    parser.add_argument("--event", dest="dest", help="Event name if applicable", type=str, required=False)
+    parser.add_argument("--event", dest="event", help="Event name if applicable", type=str, required=False)
     parser.add_argument(
         "--historic-survey-number",
         dest="historic_survey_number",
