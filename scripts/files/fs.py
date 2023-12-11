@@ -66,7 +66,8 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         futuress = {
-            executor.submit(write, os.path.join(target, f"{os.path.basename(input)}"), read(input)): input for input in inputs
+            executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
+            for input_ in inputs
         }
         for future in as_completed(futuress):
             if future.exception():
@@ -102,7 +103,9 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
     sidecars: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         for extension in extensions:
-            futuress = {executor.submit(_validate_path, f"{os.path.splitext(input)[0]}{extension}"): input for input in inputs}
+            futuress = {
+                executor.submit(_validate_path, f"{os.path.splitext(input_)[0]}{extension}"): input_ for input_ in inputs
+            }
             for future in as_completed(futuress):
                 if future.exception():
                     get_log().warn("Find sidecar failed", error=future.exception())
