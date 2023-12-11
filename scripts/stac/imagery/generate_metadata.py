@@ -4,8 +4,8 @@ from typing import Optional
 
 
 class SubtypeParameterError(Exception):
-    def __init__(self, subtype: str) -> None:
-        self.message = f"Unrecognised/Unimplemented Subtype Parameter: {subtype}"
+    def __init__(self, category: str) -> None:
+        self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
 
 
 class ImagerySubtypes(str, Enum):
@@ -46,7 +46,7 @@ HUMAN_READABLE_REGIONS = {
 
 
 def generate_title(
-    subtype: str,
+    category: str,
     region: str,
     gsd: str,
     start_datetime: datetime,
@@ -65,7 +65,7 @@ def generate_title(
     [Location Name / Region if no Location Name specified] [GSD] [Survey Number] ([Year(s)]) [?- Preview]
 
     Args:
-        subtype: Dataset subtype description - used to determine if the dataset is imagery, elevation, ect.
+        category: Dataset category description - used to determine if the dataset is imagery, elevation, ect.
         region: Region of Dataset
         gsd: Dataset Ground Sample Distance
         start_date: Dataset capture start date
@@ -86,18 +86,18 @@ def generate_title(
     if historic_survey_number:
         return " ".join(f"{name} {gsd} {historic_survey_number} ({date}) {preview or ''}".split())
 
-    if subtype in [ImagerySubtypes.SATELLITE, ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
-        return " ".join(f"{name} {gsd} {event or ''} {subtype} ({date}) {preview or ''}".split())
-    if subtype in [ElevationSubtypes.DEM, ElevationSubtypes.DSM]:
+    if category in [ImagerySubtypes.SATELLITE, ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
+        return " ".join(f"{name} {gsd} {event or ''} {category} ({date}) {preview or ''}".split())
+    if category in [ElevationSubtypes.DEM, ElevationSubtypes.DSM]:
         return " ".join(
-            f"{name} {_format_event_for_elevation_title(event) or ''} LiDAR {gsd} {subtype} ({date}) {preview or ''}".split()
+            f"{name} {_format_event_for_elevation_title(event) or ''} LiDAR {gsd} {category} ({date}) {preview or ''}".split()
         )
 
-    raise SubtypeParameterError(subtype)
+    raise SubtypeParameterError(category)
 
 
 def generate_description(
-    subtype: str,
+    category: str,
     region: str,
     start_date: datetime,
     end_date: datetime,
@@ -116,7 +116,7 @@ def generate_description(
     Scanned aerial imagery within the [Region] region captured in [Year(s)].
 
     Args:
-        subtype: Dataset subtype description - used to determine if the dataset is imagery, elevation, ect.
+        category: Dataset category description - used to determine if the dataset is imagery, elevation, ect.
         region: Region of Dataset
         start_date: Dataset capture start date
         end_date: Dataset capture end date
@@ -133,16 +133,16 @@ def generate_description(
 
     if historic_survey_number:
         desc = f"Scanned aerial imagery within the {region} region captured in {date}"
-    elif subtype == ImagerySubtypes.SATELLITE:
+    elif category == ImagerySubtypes.SATELLITE:
         desc = f"Satellite imagery within the {region} region captured in {date}"
-    elif subtype in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
+    elif category in [ImagerySubtypes.URBAN, ImagerySubtypes.RURAL]:
         desc = f"Orthophotography within the {region} region captured in the {date} flying season"
-    elif subtype == ElevationSubtypes.DEM:
+    elif category == ElevationSubtypes.DEM:
         desc = " ".join(f"Digital Elevation Model within the {region} {location_txt or ''} region in {date}".split())
-    elif subtype == ElevationSubtypes.DSM:
+    elif category == ElevationSubtypes.DSM:
         desc = " ".join(f"Digital Surface Model within the {region} {location_txt or ''} region in {date}".split())
     else:
-        raise SubtypeParameterError(subtype)
+        raise SubtypeParameterError(category)
 
     if event:
         desc = desc + f", published as a record of the {event} event"

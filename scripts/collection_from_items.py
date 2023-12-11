@@ -26,9 +26,9 @@ def main() -> None:
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
-        "--subtype",
-        dest="subtype",
-        help="Dataset subtype description",
+        "--category",
+        dest="category",
+        help="Dataset category description",
         required=True,
         choices=[type.value for type in ImagerySubtypes] + [type.value for type in ElevationSubtypes],
     )
@@ -94,7 +94,7 @@ def main() -> None:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
     title = generate_title(
-        arguments.subtype,
+        arguments.category,
         arguments.region,
         arguments.gsd,
         arguments.start_date,
@@ -105,7 +105,7 @@ def main() -> None:
         arguments.historic_survey_number,
     )
     description = generate_description(
-        arguments.subtype,
+        arguments.category,
         arguments.region,
         arguments.start_date,
         arguments.end_date,
