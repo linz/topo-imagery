@@ -58,6 +58,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
     Args:
         inputs: list of files to read
         target: target folder to write to
+        concurrency: max thread pool workers
 
     Returns:
         list of written file paths
@@ -86,6 +87,7 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
     Args:
         inputs: list of input files to search for extensions
         extensions: the sidecar file extensions
+        concurrency: max thread pool workers
 
     Returns:
         list of existing sidecar files
