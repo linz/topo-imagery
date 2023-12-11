@@ -64,7 +64,7 @@ def is_GTiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
     """
     if not gdalinfo_data:
         gdalinfo_data = gdal_info(path)
-    if not "coordinateSystem" in gdalinfo_data:
+    if "coordinateSystem" not in gdalinfo_data:
         return False
     if gdalinfo_data["driverShortName"] == "GTiff":
         return True
