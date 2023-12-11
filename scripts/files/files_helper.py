@@ -51,7 +51,7 @@ def is_tiff(path: str) -> bool:
     return path.lower().endswith((".tiff", ".tif"))
 
 
-def is_GTiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
+def is_geotiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
     """Verifies if a file is a GTiff based on the presence of the
     `coordinateSystem`.
 
