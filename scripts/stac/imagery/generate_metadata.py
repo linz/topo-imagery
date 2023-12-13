@@ -46,15 +46,7 @@ HUMAN_READABLE_REGIONS = {
 
 
 def generate_title(
-    category: str,
-    region: str,
-    gsd: str,
-    start_datetime: datetime,
-    end_datetime: datetime,
-    lifecycle: str,
-    location: Optional[str] = None,
-    event: Optional[str] = None,
-    historic_survey_number: Optional[str] = None,
+    category: str, region: str, gsd: str, start_datetime: datetime, end_datetime: datetime, lifecycle: str, **kwargs: str
 ) -> str:
     """Generates the title for imagery and elevation datasets.
     Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
@@ -71,13 +63,17 @@ def generate_title(
         start_date: Dataset capture start date
         end_date: Dataset capture end date
         lifecycle: Dataset status
+    Kwargs:
         location: Optional location of dataset, e.g.- Hutt City
         event: Optional details of capture event, e.g. - Cyclone Gabreille
         historic_survey_number: Optional historic imagery survey number, e.g.- SNC88445
     Returns:
         Dataset Title
     """
-    # pylint: disable-msg=too-many-arguments
+    # format kwargs
+    location = kwargs.get("location")
+    historic_survey_number = kwargs.get("historic_survey_number")
+    event = kwargs.get("event")
 
     date = _format_date_for_metadata(start_datetime, end_datetime)
     name = _format_name_for_title(HUMAN_READABLE_REGIONS[region], location)
@@ -96,15 +92,7 @@ def generate_title(
     raise SubtypeParameterError(category)
 
 
-def generate_description(
-    category: str,
-    region: str,
-    start_date: datetime,
-    end_date: datetime,
-    location: Optional[str] = None,
-    event: Optional[str] = None,
-    historic_survey_number: Optional[str] = None,
-) -> str:
+def generate_description(category: str, region: str, start_date: datetime, end_date: datetime, **kwargs: str) -> str:
     """Generates the descriptions for imagery and elevation datasets.
     Urban Aerial Photos / Rural Aerial Photos:
     Orthophotography within the [Region] region captured in the [Year(s)] flying season.
@@ -120,6 +108,7 @@ def generate_description(
         region: Region of Dataset
         start_date: Dataset capture start date
         end_date: Dataset capture end date
+    Kwargs:
         location: Optional location of dataset, e.g.- Hutt City
         event: Optional details of capture event, e.g. - Cyclone Gabreille
         historic_survey_number: Optional historic imagery survey number, e.g.- SNC88445
@@ -127,8 +116,13 @@ def generate_description(
     Returns:
         Dataset Description
     """
+    # format kwargs
+    location = kwargs.get("location")
+    historic_survey_number = kwargs.get("historic_survey_number")
+    event = kwargs.get("event")
+
     date = _format_date_for_metadata(start_date, end_date)
-    location_txt = _format_location_for_elevation_description(location)  # TODO: rename
+    location_txt = _format_location_for_elevation_description(location)
     region = HUMAN_READABLE_REGIONS[region]
 
     if historic_survey_number:

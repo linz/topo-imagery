@@ -100,18 +100,18 @@ def main() -> None:
         arguments.start_date,
         arguments.end_date,
         arguments.lifecycle,
-        arguments.location,
-        arguments.event,
-        arguments.historic_survey_number,
+        location=arguments.location,
+        event=arguments.event,
+        historic_survey_number=arguments.historic_survey_number,
     )
     description = generate_description(
         arguments.category,
         arguments.region,
         arguments.start_date,
         arguments.end_date,
-        arguments.location,
-        arguments.event,
-        arguments.historic_survey_number,
+        location=arguments.location,
+        event=arguments.event,
+        historic_survey_number=arguments.historic_survey_number,
     )
 
     collection = ImageryCollection(

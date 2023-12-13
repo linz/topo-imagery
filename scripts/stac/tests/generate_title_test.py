@@ -118,7 +118,7 @@ def test_generate_imagery_title_empty_optional_str() -> None:
         datetime(2023, 1, 1),
         datetime(2023, 2, 2),
         "completed",
-        location=None,
-        event=None,
+        location="",
+        event="",
     )
     assert generated_title == title
