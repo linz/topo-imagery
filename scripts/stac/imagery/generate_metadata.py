@@ -46,7 +46,7 @@ HUMAN_READABLE_REGIONS = {
 
 
 def generate_title(
-    category: str, region: str, gsd: str, start_datetime: datetime, end_datetime: datetime, lifecycle: str, **kwargs: str
+    *, category: str, region: str, gsd: str, start_datetime: datetime, end_datetime: datetime, lifecycle: str, **kwargs: str
 ) -> str:
     """Generates the title for imagery and elevation datasets.
     Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
@@ -92,7 +92,7 @@ def generate_title(
     raise SubtypeParameterError(category)
 
 
-def generate_description(category: str, region: str, start_date: datetime, end_date: datetime, **kwargs: str) -> str:
+def generate_description(*, category: str, region: str, start_date: datetime, end_date: datetime, **kwargs: str) -> str:
     """Generates the descriptions for imagery and elevation datasets.
     Urban Aerial Photos / Rural Aerial Photos:
     Orthophotography within the [Region] region captured in the [Year(s)] flying season.

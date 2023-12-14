@@ -94,21 +94,21 @@ def main() -> None:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
     title = generate_title(
-        arguments.category,
-        arguments.region,
-        arguments.gsd,
-        arguments.start_date,
-        arguments.end_date,
-        arguments.lifecycle,
+        category=arguments.category,
+        region=arguments.region,
+        gsd=arguments.gsd,
+        start_datetime=arguments.start_date,
+        end_datetime=arguments.end_date,
+        lifecycle=arguments.lifecycle,
         location=arguments.location,
         event=arguments.event,
         historic_survey_number=arguments.historic_survey_number,
     )
     description = generate_description(
-        arguments.category,
-        arguments.region,
-        arguments.start_date,
-        arguments.end_date,
+        category=arguments.category,
+        region=arguments.region,
+        start_date=arguments.start_date,
+        end_date=arguments.end_date,
         location=arguments.location,
         event=arguments.event,
         historic_survey_number=arguments.historic_survey_number,
