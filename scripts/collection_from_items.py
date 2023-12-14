@@ -12,8 +12,8 @@ from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.generate_metadata import (
     HUMAN_READABLE_REGIONS,
-    ElevationSubtypes,
-    ImagerySubtypes,
+    ElevationCategories,
+    ImageryCategories,
     generate_description,
     generate_title,
 )
@@ -30,7 +30,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=[type.value for type in ImagerySubtypes] + [type.value for type in ElevationSubtypes],
+        choices=[type.value for type in ImageryCategories] + [type.value for type in ElevationCategories],
     )
     parser.add_argument(
         "--region",
