@@ -104,7 +104,7 @@ def standardising(
     """Apply transformations using GDAL to the source file.
 
     Args:
-        file: path to the file to standardise
+        files: paths to the files to standardise
         preset: gdal preset to use. See `gdal.gdal_preset.py`
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection

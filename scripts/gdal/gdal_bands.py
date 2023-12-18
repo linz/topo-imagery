@@ -28,6 +28,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
     Args:
         file: file to check
         info: optional precomputed gdalinfo
+        preset: "dem_lerc" preset used to differentiate single band elevation tiffs from single band historical imagery
 
     Returns:
         list of band mappings eg "-b 1 -b 1 -b 1"

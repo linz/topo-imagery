@@ -90,7 +90,6 @@ def get_gdal_command(preset: str, epsg: str) -> List[str]:
     Args:
         preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
         epsg: the EPSG code of the file
-        convert_from: Defaults to None.
 
     Returns:
         a list of arguments to run `gdal_translate`
