@@ -1,4 +1,4 @@
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.0@sha256:3ca7c26ef3aff8c8d134bbaa62e13d1a4c97c8a7b2853f1db0ff34c2f939a4de
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.8.2@sha256:ffd2429df4e8f1309844c39b52c2749a32549d70e72715e33177b1eb4eebb43d
 
 RUN apt-get update
 # Install pip
