@@ -1,166 +1,134 @@
 from datetime import datetime
+from typing import Generator, Tuple
 
-from scripts.stac.imagery.generate_metadata import generate_title
+import pytest
+
+from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-def test_generate_imagery_title() -> None:
+@pytest.fixture(name="metadata", autouse=True)
+def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, None]:
+    metadata_auck: CollectionMetadata = {
+        "category": "Rural Aerial Photos",
+        "region": "auckland",
+        "gsd": "0.3m",
+        "start_datetime": datetime(2023, 1, 1),
+        "end_datetime": datetime(2023, 2, 2),
+        "lifecycle": "completed",
+        "location": None,
+        "event": None,
+        "historic_survey_number": None,
+    }
+    metadata_hb: CollectionMetadata = {
+        "category": "Rural Aerial Photos",
+        "region": "hawkes-bay",
+        "gsd": "0.3m",
+        "start_datetime": datetime(2023, 1, 1),
+        "end_datetime": datetime(2023, 2, 2),
+        "lifecycle": "completed",
+        "location": None,
+        "event": None,
+        "historic_survey_number": None,
+    }
+    yield (metadata_auck, metadata_hb)
+
+
+def test_generate_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
-    generated_title = generate_title(
-        category="Rural Aerial Photos",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-    )
-    assert generated_title == title
+    collection = ImageryCollection(metadata_auck)
+    assert collection.stac["title"] == title
 
 
-def test_generate_dem_title() -> None:
+def test_generate_dem_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "DEM"
+    collection = ImageryCollection(metadata_auck)
     title = "Auckland LiDAR 0.3m DEM (2023)"
-    generated_title = generate_title(
-        category="DEM",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title
 
 
-def test_generate_dsm_title() -> None:
+def test_generate_dsm_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "DSM"
+    collection = ImageryCollection(metadata_auck)
     title = "Auckland LiDAR 0.3m DSM (2023)"
-    generated_title = generate_title(
-        category="DSM",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title
 
 
-def test_generate_satellite_imagery_title() -> None:
-    title = "Auckland 0.5m Satellite Imagery (2023)"
-    generated_title = generate_title(
-        category="Satellite Imagery",
-        region="auckland",
-        gsd="0.5m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-    )
-    assert generated_title == title
+def test_generate_satellite_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "Satellite Imagery"
+    collection = ImageryCollection(metadata_auck)
+    title = "Auckland 0.3m Satellite Imagery (2023)"
+    assert collection.stac["title"] == title
 
 
-def test_generate_historic_imagery_title() -> None:
-    title = "Auckland 0.3m SNC8844 (2000)"
-    generated_title = generate_title(
-        category="Aerial Photos",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2000, 1, 1),
-        end_datetime=datetime(2000, 2, 2),
-        lifecycle="completed",
-        historic_survey_number="SNC8844",
-    )
-    assert generated_title == title
+def test_generate_historic_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    title = "Auckland 0.3m SNC8844 (2023)"
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "Aerial Photos"
+    metadata_auck["historic_survey_number"] = "SNC8844"
+    collection = ImageryCollection(metadata_auck)
+    assert collection.stac["title"] == title
 
 
-def test_generate_title_long_date() -> None:
-    title = "Auckland 0.3m Urban Aerial Photos (2023 - 2024)"
-    generated_title = generate_title(
-        category="Urban Aerial Photos",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2024, 2, 2),
-        lifecycle="completed",
-    )
-    assert generated_title == title
+def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["end_datetime"] = datetime(2024, 1, 1)
+    collection = ImageryCollection(metadata_auck)
+    title = "Auckland 0.3m Rural Aerial Photos (2023 - 2024)"
+    assert collection.stac["title"] == title
 
 
-def test_generate_title_location() -> None:
-    title = "Banks Penninsula 0.3m Rural Aerial Photos (2023)"
-    generated_title = generate_title(
-        category="Rural Aerial Photos",
-        region="canterbury",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-        location="Banks Penninsula",
-    )
-    assert generated_title == title
+def test_generate_title_location(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["location"] = "Ponsonby"
+    collection = ImageryCollection(metadata_auck)
+    title = "Ponsonby 0.3m Rural Aerial Photos (2023)"
+    assert collection.stac["title"] == title
 
 
-def test_generate_title_event_imagery() -> None:
+def test_generate_title_event_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    _, metadata_hb = metadata
+    metadata_hb["event"] = "Cyclone Gabrielle"
+    collection = ImageryCollection(metadata_hb)
     title = "Hawke's Bay 0.3m Cyclone Gabrielle Rural Aerial Photos (2023)"
-    generated_title = generate_title(
-        category="Rural Aerial Photos",
-        region="hawkes-bay",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-        event="Cyclone Gabrielle",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title
 
 
-def test_generate_title_event_elevation() -> None:
+def test_generate_title_event_elevation(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    _, metadata_hb = metadata
+    metadata_hb["category"] = "DSM"
+    metadata_hb["event"] = "Cyclone Gabrielle"
+    collection = ImageryCollection(metadata_hb)
     title = "Hawke's Bay - Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
-    generated_title = generate_title(
-        category="DSM",
-        region="hawkes-bay",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-        event="Cyclone Gabrielle",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title
 
 
-def test_generate_title_event_satellite_imagery() -> None:
-    title = "Hawke's Bay 0.5m Cyclone Gabrielle Satellite Imagery (2023)"
-    generated_title = generate_title(
-        category="Satellite Imagery",
-        region="hawkes-bay",
-        gsd="0.5m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-        event="Cyclone Gabrielle",
-    )
-    assert generated_title == title
+def test_generate_title_event_satellite_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    _, metadata_hb = metadata
+    metadata_hb["category"] = "Satellite Imagery"
+    metadata_hb["event"] = "Cyclone Gabrielle"
+    collection = ImageryCollection(metadata_hb)
+    title = "Hawke's Bay 0.3m Cyclone Gabrielle Satellite Imagery (2023)"
+    assert collection.stac["title"] == title
 
 
-def test_generate_dsm_title_preview() -> None:
+def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "DSM"
+    metadata_auck["lifecycle"] = "preview"
+    collection = ImageryCollection(metadata_auck)
     title = "Auckland LiDAR 0.3m DSM (2023) - preview"
-    generated_title = generate_title(
-        category="DSM",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="preview",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title
 
 
-def test_generate_imagery_title_empty_optional_str() -> None:
+def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["location"] = ""
+    metadata_auck["event"] = ""
+    collection = ImageryCollection(metadata_auck)
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
-    generated_title = generate_title(
-        category="Rural Aerial Photos",
-        region="auckland",
-        gsd="0.3m",
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
-        lifecycle="completed",
-        location="",
-        event="",
-    )
-    assert generated_title == title
+    assert collection.stac["title"] == title

@@ -10,12 +10,11 @@ from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.generate_metadata import (
+from scripts.stac.imagery.metadata_constants import (
     HUMAN_READABLE_REGIONS,
+    CollectionMetadata,
     ElevationCategories,
     ImageryCategories,
-    generate_description,
-    generate_title,
 )
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
@@ -93,30 +92,19 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
-    title = generate_title(
-        category=arguments.category,
-        region=arguments.region,
-        gsd=arguments.gsd,
-        start_datetime=arguments.start_date,
-        end_datetime=arguments.end_date,
-        lifecycle=arguments.lifecycle,
-        location=arguments.location,
-        event=arguments.event,
-        historic_survey_number=arguments.historic_survey_number,
-    )
-    description = generate_description(
-        category=arguments.category,
-        region=arguments.region,
-        start_date=arguments.start_date,
-        end_date=arguments.end_date,
-        location=arguments.location,
-        event=arguments.event,
-        historic_survey_number=arguments.historic_survey_number,
-    )
+    metadata: CollectionMetadata = {
+        "category": arguments.category,
+        "region": arguments.region,
+        "gsd": arguments.gsd,
+        "start_datetime": arguments.start_date,
+        "end_datetime": arguments.end_date,
+        "lifecycle": arguments.lifecyle,
+        "location": arguments.location,
+        "event": arguments.event,
+        "historic_survey_number": arguments.historic_survey_number,
+    }
 
-    collection = ImageryCollection(
-        title=title, description=description, collection_id=arguments.collection_id, providers=providers
-    )
+    collection = ImageryCollection(metadata=metadata, collection_id=arguments.collection_id, providers=providers)
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
