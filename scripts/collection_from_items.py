@@ -12,7 +12,7 @@ from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.metadata_constants import (
     HUMAN_READABLE_REGIONS,
-    CollectionMetadata,
+    CollectionTitleMetadata,
     ElevationCategories,
     ImageryCategories,
 )
@@ -92,7 +92,7 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
-    metadata: CollectionMetadata = {
+    title_metadata: CollectionTitleMetadata = {
         "category": arguments.category,
         "region": arguments.region,
         "gsd": arguments.gsd,
@@ -104,7 +104,7 @@ def main() -> None:
         "historic_survey_number": arguments.historic_survey_number,
     }
 
-    collection = ImageryCollection(metadata=metadata, collection_id=arguments.collection_id, providers=providers)
+    collection = ImageryCollection(title_metadata=title_metadata, collection_id=arguments.collection_id, providers=providers)
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"

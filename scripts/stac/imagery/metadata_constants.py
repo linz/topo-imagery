@@ -1,10 +1,9 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
-class CollectionMetadata(TypedDict):
+class CollectionTitleMetadata(TypedDict):
     """
     region: Region of Dataset
     gsd: Dataset Ground Sample Distance

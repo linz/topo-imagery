@@ -10,13 +10,13 @@ import pytest
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.metadata_constants import CollectionTitleMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 @pytest.fixture(name="metadata", autouse=True)
-def setup() -> Generator[CollectionMetadata, None, None]:
-    metadata: CollectionMetadata = {
+def setup() -> Generator[CollectionTitleMetadata, None, None]:
+    metadata: CollectionTitleMetadata = {
         "category": "Urban Aerial Photos",
         "region": "auckland",
         "gsd": "0.3m",
@@ -30,27 +30,27 @@ def setup() -> Generator[CollectionMetadata, None, None]:
     yield metadata
 
 
-def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> None:
+def test_title_description_id_created_on_init(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     assert collection.stac["title"] == "Auckland 0.3m Urban Aerial Photos (2022)"
     assert collection.stac["description"] == "Orthophotography within the Auckland region captured in the 2022 flying season."
     assert collection.stac["id"]
 
 
-def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
+def test_id_parsed_on_init(metadata: CollectionTitleMetadata) -> None:
     id_ = "Parsed-Ulid"
     collection = ImageryCollection(metadata, id_)
     assert collection.stac["id"] == "Parsed-Ulid"
 
 
-def test_bbox_updated_from_none(metadata: CollectionMetadata) -> None:
+def test_bbox_updated_from_none(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
     collection.update_spatial_extent(bbox)
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
 
-def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
+def test_bbox_updated_from_existing(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     # init bbox
     bbox = [174.889641, -41.217532, 174.902344, -41.203521]
@@ -62,7 +62,7 @@ def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["spatial"]["bbox"] == [[174.889641, -41.217532, 174.922965, -41.203521]]
 
 
-def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
+def test_interval_updated_from_none(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
@@ -70,7 +70,7 @@ def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
 
 
-def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
+def test_interval_updated_from_existing(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     # init interval
     start_datetime = "2021-01-27T00:00:00Z"
@@ -84,7 +84,7 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
+def test_add_item(mocker, metadata: CollectionTitleMetadata) -> None:  # type: ignore
     collection = ImageryCollection(metadata)
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
@@ -106,7 +106,7 @@ def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
 
-def test_write_collection(metadata: CollectionMetadata) -> None:
+def test_write_collection(metadata: CollectionTitleMetadata) -> None:
     target = mkdtemp()
     collectionObj = ImageryCollection(metadata)
     collection_target = os.path.join(target, "collection.json")
@@ -117,7 +117,7 @@ def test_write_collection(metadata: CollectionMetadata) -> None:
     assert collection["title"] == collectionObj.stac["title"]
 
 
-def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
+def test_write_collection_special_chars(metadata: CollectionTitleMetadata) -> None:
     target = mkdtemp()
     title = "Manawatū-Whanganui"
     collectionObj = ImageryCollection(metadata)
@@ -130,7 +130,7 @@ def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
     assert collection["title"] == title
 
 
-def test_add_providers(metadata: CollectionMetadata) -> None:
+def test_add_providers(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection.add_providers([producer])
