@@ -130,29 +130,35 @@ def test_add_providers(setup_collection: ImageryCollection) -> None:
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_default_provider_present() -> None:
+def test_default_provider_roles_are_kept() -> None:
+    # given we are adding a non default role to the default provider
     licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
     collection = ImageryCollection(title, description, providers=[producer, licensor])
 
+    # then it adds the non default role to the existing default role list
     assert {
         "name": "Toitū Te Whenua Land Information New Zealand",
         "roles": ["licensor", "host", "processor"],
     } in collection.stac["providers"]
+    # then it does not duplicate the default provider
     assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
         "providers"
     ]
 
 
-def test_default_provider_missing() -> None:
+def test_default_provider_is_present() -> None:
+    # given adding a provider
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     title = "Test Urban Imagery"
     description = "Test Urban Imagery Description"
     collection = ImageryCollection(title, description, providers=[producer])
 
+    # then the default provider is still present
     assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
         "providers"
     ]
+    # then the new provider is added
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
