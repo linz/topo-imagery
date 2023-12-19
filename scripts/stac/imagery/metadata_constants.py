@@ -11,9 +11,9 @@ class CollectionTitleMetadata(TypedDict):
     end_date: Dataset capture end date
     lifecycle: Dataset status
     Optional:
-        location: Optional location of dataset, e.g.- Hutt City
-        event: Optional details of capture event, e.g. - Cyclone Gabreille
-        historic_survey_number: Optional historic imagery survey number, e.g.- SNC88445
+        location: Optional location of dataset, e.g. Hutt City
+        event: Optional details of capture event, e.g. Cyclone Gabrielle
+        historic_survey_number: Optional historic imagery survey number, e.g. SNC88445
     """
 
     category: str
