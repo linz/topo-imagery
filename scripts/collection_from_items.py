@@ -98,7 +98,7 @@ def main() -> None:
         "gsd": arguments.gsd,
         "start_datetime": arguments.start_date,
         "end_datetime": arguments.end_date,
-        "lifecycle": arguments.lifecyle,
+        "lifecycle": arguments.lifecycle,
         "location": arguments.location,
         "event": arguments.event,
         "historic_survey_number": arguments.historic_survey_number,
