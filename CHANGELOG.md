@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/linz/topo-imagery/compare/v3.5.0...v3.5.1) (2023-12-19)
+
+
+### Bug Fixes
+
+* typo in prod ([#788](https://github.com/linz/topo-imagery/issues/788)) ([275a665](https://github.com/linz/topo-imagery/commit/275a6658f2144f2a4cf2a690a2ea2b701aafc44b))
+
 ## [3.5.0](https://github.com/linz/topo-imagery/compare/v3.4.0...v3.5.0) (2023-12-19)
 
 
