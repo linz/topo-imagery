@@ -138,7 +138,7 @@ def test_add_providers(metadata: CollectionTitleMetadata) -> None:
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_default_provider_roles_are_kept() -> None:
+def test_default_provider_roles_are_kept(metadata: CollectionTitleMetadata) -> None:
     # given we are adding a non default role to the default provider
     licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
@@ -155,7 +155,7 @@ def test_default_provider_roles_are_kept() -> None:
     ]
 
 
-def test_default_provider_is_present() -> None:
+def test_default_provider_is_present(metadata: CollectionTitleMetadata) -> None:
     # given adding a provider
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection = ImageryCollection(metadata, providers=[producer])
