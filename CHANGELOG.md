@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.5.0](https://github.com/linz/topo-imagery/compare/v3.4.0...v3.5.0) (2023-12-19)
+
+
+### Features
+
+* Dependabot for Docker TDE-963 ([#746](https://github.com/linz/topo-imagery/issues/746)) ([250b82c](https://github.com/linz/topo-imagery/commit/250b82c196c1f3db601e9712d6834d6da28e6952))
+* Pin Docker image TDE-958 ([#744](https://github.com/linz/topo-imagery/issues/744)) ([de8a129](https://github.com/linz/topo-imagery/commit/de8a129d60bb7fc16f7872542ee93bc3ce3c9570))
+* title and description by arguments TDE-960 ([#757](https://github.com/linz/topo-imagery/issues/757)) ([dd3e282](https://github.com/linz/topo-imagery/commit/dd3e282660cc0e652667adf54fe3e5ad3b0b0bea))
+
+
+### Documentation
+
+* add explaination about collection provider tests ([#764](https://github.com/linz/topo-imagery/issues/764)) ([4e84901](https://github.com/linz/topo-imagery/commit/4e84901abe30ca0294ae570caef7fba511fe0ce5))
+
 ## [3.4.0](https://github.com/linz/topo-imagery/compare/v3.3.1...v3.4.0) (2023-11-23)
 
 
