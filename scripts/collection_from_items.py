@@ -6,23 +6,67 @@ from typing import List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single
+from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.metadata_constants import (
+    HUMAN_READABLE_REGIONS,
+    CollectionMetadata,
+    ElevationCategories,
+    ImageryCategories,
+)
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+# pylint: disable-msg=too-many-locals
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
-    parser.add_argument("--title", dest="title", help="Collection title", required=True)
-    parser.add_argument("--description", dest="description", help="Collection description", required=True)
-    parser.add_argument("--region", help="Collection region", required=True)
-    parser.add_argument("--geographic_desc", help="Collection geographic description", required=True)
-    parser.add_argument("--event_name", help="Collection event name", required=True)
-    parser.add_argument("--lifecycle", help="Collection lifecycle", required=True)
+    parser.add_argument(
+        "--category",
+        dest="category",
+        help="Dataset category description",
+        required=True,
+        choices=[type.value for type in ImageryCategories] + [type.value for type in ElevationCategories],
+    )
+    parser.add_argument(
+        "--region",
+        dest="region",
+        help="Region of Dataset",
+        required=True,
+        choices=HUMAN_READABLE_REGIONS.keys(),
+    )
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
+    parser.add_argument(
+        "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
+    )
+    parser.add_argument(
+        "--start-date",
+        dest="start_date",
+        help="Start date in format YYYY-MM-DD (Inclusive)",
+        type=valid_date,
+        required=True,
+    )
+    parser.add_argument(
+        "--end-date", dest="end_date", help="End date in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
+    )
+    parser.add_argument("--event", dest="event", help="Event name if applicable", type=str, required=False)
+    parser.add_argument(
+        "--historic-survey-number",
+        dest="historic_survey_number",
+        help="Historic Survey Number if Applicable. E.g.- SCN8844",
+        type=str,
+        required=False,
+    )
+    parser.add_argument(
+        "--lifecycle",
+        dest="lifecycle",
+        help="Designating dataset status",
+        required=True,
+        choices=["under development", "preview", "ongoing", "completed", "deprecated"],
+    )
     parser.add_argument(
         "--producer",
         dest="producer",
@@ -48,13 +92,20 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
+    collection_metadata: CollectionMetadata = {
+        "category": arguments.category,
+        "region": arguments.region,
+        "gsd": arguments.gsd,
+        "start_datetime": arguments.start_date,
+        "end_datetime": arguments.end_date,
+        "lifecycle": arguments.lifecycle,
+        "location": arguments.location,
+        "event": arguments.event,
+        "historic_survey_number": arguments.historic_survey_number,
+    }
+
     collection = ImageryCollection(
-        title=arguments.title,
-        description=arguments.description,
-        region=arguments.region,
-        geographic_desc=arguments.geographic_desc,
-        event_name=arguments.event_name,
-        lifecycle=arguments.lifecycle,
+        metadata=collection_metadata,
         collection_id=arguments.collection_id,
         providers=providers,
     )

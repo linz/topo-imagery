@@ -4,9 +4,9 @@ from time import sleep
 from typing import Any, Dict, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
-import boto3
-import botocore
+from boto3 import Session
 from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials, ReadOnlyCredentials
+from botocore.session import Session as BotocoreSession
 from linz_logger import get_log
 
 from scripts.aws.aws_credential_source import CredentialSource
@@ -14,8 +14,8 @@ from scripts.aws.aws_credential_source import CredentialSource
 S3Path = NamedTuple("S3Path", [("bucket", str), ("key", str)])
 
 aws_profile = environ.get("AWS_PROFILE")
-session = boto3.Session(profile_name=aws_profile)
-sessions: Dict[str, boto3.Session] = {}
+session = Session(profile_name=aws_profile)
+sessions: Dict[str, Session] = {}
 
 bucket_roles: List[CredentialSource] = []
 
@@ -40,14 +40,14 @@ def _init_roles() -> None:
     get_log().debug("bucket_config_loaded", config=bucket_config_path, prefix_count=len(bucket_roles))
 
 
-def _get_client_creator(local_session: boto3.Session) -> Any:
+def _get_client_creator(local_session: Session) -> Any:
     def client_creator(service_name: str, **kwargs: Any) -> Any:
         return local_session.client(service_name, **kwargs)
 
     return client_creator
 
 
-def get_session(prefix: str) -> boto3.Session:
+def get_session(prefix: str) -> Session:
     """Get an AWS session to deal with an object on `s3`.
 
     Args:
@@ -78,14 +78,14 @@ def get_session(prefix: str) -> boto3.Session:
         role_arn=cfg.roleArn,
         extra_args=extra_args,
     )
-    botocore_session = botocore.session.Session()
+    botocore_session = BotocoreSession()
 
     # pylint:disable=protected-access
     botocore_session._credentials = DeferredRefreshableCredentials(
         method="assume-role", refresh_using=fetcher.fetch_credentials
     )
 
-    current_session = boto3.Session(botocore_session=botocore_session)
+    current_session = Session(botocore_session=botocore_session)
     sessions[cfg.roleArn] = current_session
 
     get_log().info("role_assume", prefix=prefix, bucket=cfg.bucket, role_arn=cfg.roleArn)
