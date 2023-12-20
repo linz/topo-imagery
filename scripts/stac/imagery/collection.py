@@ -41,7 +41,6 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
-            "stac_extensions": [StacExtensions.linz.value],
         }
 
         # If the providers passed has already a LINZ provider: add its default roles to it
