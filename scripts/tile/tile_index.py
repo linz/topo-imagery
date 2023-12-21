@@ -44,7 +44,7 @@ def get_bounds_from_name(tile_name: str) -> Bounds:
     """
     name_parts = tile_name.split("_")
     map_sheet = name_parts[0]
-    # should be in [10_000, 5_000, 2_000, 1_000, 500]
+    # should be in [50_000, 10_000, 5_000, 2_000, 1_000, 500]
     grid_size = int(name_parts[1])
 
     x = int(name_parts[2][-2:])
@@ -104,7 +104,7 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
     """Get the tile offset from its coordinate and the grid size
 
     Args:
-        grid_size: a size from in [10_000, 5_000, 2_000, 1_000, 500]
+        grid_size: a size from in [50_000, 10_000, 5_000, 2_000, 1_000, 500]
         x: upper left cooridinate x
         y: upper left cooridinate y
 
