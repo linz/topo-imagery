@@ -213,7 +213,7 @@ class ImageryCollection:
         if self.title_metadata["start_datetime"].year == self.title_metadata["end_datetime"].year:
             date = str(self.title_metadata["start_datetime"].year)
         else:
-            date = f"{self.title_metadata['start_datetime'].year} - {self.title_metadata['end_datetime'].year}"
+            date = f"{self.title_metadata['start_datetime'].year}-{self.title_metadata['end_datetime'].year}"
 
         # determine dataset name
         if location:
@@ -223,7 +223,7 @@ class ImageryCollection:
 
         # determine if dataset is preview
         if self.title_metadata.get("lifecycle") == "preview":
-            preview = "- preview"
+            preview = "- Preview"
         else:
             preview = None
 
@@ -268,7 +268,7 @@ class ImageryCollection:
         if self.title_metadata["start_datetime"].year == self.title_metadata["end_datetime"].year:
             date = str(self.title_metadata["start_datetime"].year)
         else:
-            date = f"{self.title_metadata['start_datetime'].year} - {self.title_metadata['end_datetime'].year}"
+            date = f"{self.title_metadata['start_datetime'].year}-{self.title_metadata['end_datetime'].year}"
 
         # format location for metadata description
         if location:
