@@ -105,8 +105,8 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
 
     Args:
         grid_size: a size from in [50_000, 10_000, 5_000, 2_000, 1_000, 500]
-        x: upper left cooridinate x
-        y: upper left cooridinate y
+        x: upper left coordinate x
+        y: upper left coordinate y
 
     Returns:
         a `Bounds` object
