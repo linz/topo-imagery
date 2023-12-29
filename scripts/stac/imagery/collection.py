@@ -41,7 +41,17 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
+            "linz:lifecycle": metadata["lifecycle"],
+            "linz:geospatial_category": metadata["category"],
+            "linz:region": metadata["region"],
+            "linz:security_classification": "unclassified",
         }
+
+        # Optional metadata
+        if metadata.get("event"):
+            self.stac["linz:event_name"] = metadata["event"]
+        if metadata.get("geographic_description"):
+            self.stac["linz:geographic_description"] = metadata["geographic_description"]
 
         # If the providers passed has already a LINZ provider: add its default roles to it
         has_linz = False
@@ -235,7 +245,7 @@ class ImageryCollection:
             return " ".join(
                 f"{name} {self.metadata['gsd']} {event or ''} {self.metadata['category']} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
-        if self.metadata["category"] in [ElevationCategories.DEM, ElevationCategories.DSM]:
+        if self.metadata["category"] in [ElevationCategories.DEM.name, ElevationCategories.DSM.name]:
             return " ".join(
                 f"{name} {self._elevation_title_event(event) or ''} LiDAR {self.metadata['gsd']} {self.metadata['category']} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
@@ -283,9 +293,9 @@ class ImageryCollection:
             desc = f"Satellite imagery within the {region} region captured in {date}"
         elif self.metadata["category"] in [ImageryCategories.URBAN, ImageryCategories.RURAL]:
             desc = f"Orthophotography within the {region} region captured in the {date} flying season"
-        elif self.metadata["category"] == ElevationCategories.DEM:
+        elif self.metadata["category"] == ElevationCategories.DEM.name:
             desc = " ".join(f"Digital Elevation Model within the {region} {location or ''} region in {date}".split())
-        elif self.metadata["category"] == ElevationCategories.DSM:
+        elif self.metadata["category"] == ElevationCategories.DSM.name:
             desc = " ".join(f"Digital Surface Model within the {region} {location or ''} region in {date}".split())
         else:
             raise SubtypeParameterError(self.metadata["category"])

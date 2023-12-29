@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Optional, TypedDict
@@ -25,24 +26,44 @@ class CollectionMetadata(TypedDict):
     location: Optional[str]
     event: Optional[str]
     historic_survey_number: Optional[str]
+    geographic_description: Optional[str]
 
 
 class SubtypeParameterError(Exception):
     def __init__(self, category: str) -> None:
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
 
+@dataclass
+class Category():
+    id: str
+    name: str
 
+class ElevationCategories(Enum):
+    DEM = ("dem", "DEM")
+    DSM = ("dsm", "DSM")
+    def __init__(self, _id: str, name: str) -> None:
+        self.id = _id
+        self.name = name
+             
 class ImageryCategories(str, Enum):
-    SATELLITE = "Satellite Imagery"
-    URBAN = "Urban Aerial Photos"
-    RURAL = "Rural Aerial Photos"
     AERIAL = "Aerial Photos"
     HISTORICAL = "Scanned Aerial Photos"
+    RURAL = "Rural Aerial Photos"
+    SATELLITE = "Satellite Imagery"
+    URBAN = "Urban Aerial Photos"
 
+ELEVATION_CATEGORIES_IDS = {
+    ElevationCategories.DEM.value: "dem",
+    ElevationCategories.DSM.value: "dsm"
+}
 
-class ElevationCategories(str, Enum):
-    DEM = "DEM"
-    DSM = "DSM"
+IMAGERY_CATEGORIES_IDS = {
+    ImageryCategories.AERIAL.value:"aerial-photos",
+    ImageryCategories.HISTORICAL.value:"scanned-aerial-photos",
+    ImageryCategories.RURAL.value:"rural-aerial-photos",
+    ImageryCategories.SATELLITE.value: "satellite-imagery",
+    ImageryCategories.URBAN.value: "urban-aerial-photos"
+}
 
 
 HUMAN_READABLE_REGIONS = {

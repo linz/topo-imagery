@@ -29,7 +29,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=[type.value for type in ImageryCategories] + [type.value for type in ElevationCategories],
+        choices=[type.value for type in ImageryCategories] + [type.name for type in ElevationCategories],
     )
     parser.add_argument(
         "--region",
