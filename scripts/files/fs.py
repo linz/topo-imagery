@@ -23,7 +23,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     return destination
 
 
-def read(path: str) -> bytes:
+def read(path: str, needs_credentials: bool = False) -> bytes:
     """Read a file from its path.
 
     Args:
@@ -33,12 +33,12 @@ def read(path: str) -> bytes:
         bytes: The bytes content of the file.
     """
     if is_s3(path):
-        return fs_s3.read(path)
+        return fs_s3.read(path, needs_credentials)
 
     return fs_local.read(path)
 
 
-def exists(path: str) -> bool:
+def exists(path: str, needs_credentials: bool = False) -> bool:
     """Check if path (file or directory) exists.
 
     Args:
@@ -48,7 +48,7 @@ def exists(path: str) -> bool:
         bool: True if the path exists
     """
     if is_s3(path):
-        return fs_s3.exists(path)
+        return fs_s3.exists(path, needs_credentials)
     return fs_local.exists(path)
 
 
@@ -96,7 +96,7 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
 
     def _validate_path(path: str) -> Optional[str]:
         """Helper inner function to re-return the path if it exists rather than a boolean."""
-        if exists(path):
+        if exists(path, True):
             return path
         return None
 

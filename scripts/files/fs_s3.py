@@ -85,7 +85,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
 
     Args:
         path: path to the s3 object/key
-        needs_credentials: if acces to object needs credentials. Defaults to False.
+        needs_credentials: if access to object needs credentials. Defaults to False.
 
     Raises:
         ce: ClientError
