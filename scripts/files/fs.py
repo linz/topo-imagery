@@ -52,7 +52,7 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str]] = [], concurrency: Optional[int] = 4) -> List[str]:
+def write_all(inputs: List[str], target: str, optional_inputs: List[str] = [], concurrency: Optional[int] = 4) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
     Args:
@@ -79,51 +79,19 @@ def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str
     if len(inputs) != len(written_tiffs):
         get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
         raise Exception("Not all mandatory source files were written")
-    
+
     # get sidecar files
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         try:
             futuress = {
-                executor.submit(write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)): optional_input_ for optional_input_ in optional_inputs
+                executor.submit(
+                    write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)
+                ): optional_input_
+                for optional_input_ in optional_inputs
             }
         except:
-                get_log().warn("Failed Read-Write", error=future.exception())
+            get_log().warn("Failed Read-Write", error=future.exception())
         for future in as_completed(futuress):
             written_tiffs.append(future.result())
 
     return written_tiffs
-
-
-def find_sidecars(destination: str, inputs: List[str], extensions: List[str], concurrency: Optional[int] = 4):
-    """Searches for sidecar files.
-     A sidecar files is a file with the same name as the input file but with a different extension.
-
-    Args:
-        inputs: list of input files to search for extensions
-        extensions: the sidecar file extensions
-        concurrency: max thread pool workers
-
-    Returns:
-        list of existing sidecar files
-    """
-
-    def _validate_path(path: str) -> Optional[str]:
-        """Helper inner function to re-return the path if it exists rather than a boolean."""
-        if exists(path):
-            return path
-        return None
-
-    sidecars: List[str] = []
-    with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        for extension in extensions:
-            futuress = {
-                executor.submit(_validate_path, f"{os.path.splitext(input_)[0]}{extension}"): input_ for input_ in inputs
-            }
-            for future in as_completed(futuress):
-                if future.exception():
-                    get_log().warn("Find sidecar failed", error=future.exception())
-                else:
-                    result = future.result()
-                    if result:
-                        sidecars.append(result)
-    return

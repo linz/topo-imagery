@@ -11,7 +11,7 @@ from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import ContentType, is_tiff
-from scripts.files.fs import exists, find_sidecars, read, write, write_all
+from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
