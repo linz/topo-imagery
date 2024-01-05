@@ -136,7 +136,11 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
-        source_files = write_all(files.inputs + sidecars, f"{tmp_path}/source/")
+        sidecars = List[str] = []
+        for extension in [".prj", ".tfw"]:
+            for input in files.inputs:
+                sidecars.append(f"{os.path.splitext(input)[0]}{extension}")
+        source_files = write_all(files.inputs, f"{tmp_path}/source/", optional_inputs=sidecars)
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True

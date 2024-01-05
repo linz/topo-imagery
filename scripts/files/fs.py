@@ -52,12 +52,13 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> List[str]:
+def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str]], concurrency: Optional[int] = 4) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
     Args:
         inputs: list of files to read
         target: target folder to write to
+        optional_inputs: list of optional files to read, e.g. sidecar files
         concurrency: max thread pool workers
 
     Returns:
@@ -77,11 +78,25 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
 
     if len(inputs) != len(written_tiffs):
         get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
-        raise Exception("Not all source files were written")
+        raise Exception("Not all mandatory source files were written")
+    
+    # get sidecar files
+    with ThreadPoolExecutor(max_workers=concurrency) as executor:
+        futuress = {
+            executor.submit(write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)): optional_input_
+            for optional_input_ in optional_inputs
+        }
+        for future in as_completed(futuress):
+            if future.exception():
+                get_log().warn("Failed Read-Write", error=future.exception())
+            else:
+                written_tiffs.append(future.result())
+
+
     return written_tiffs
 
 
-def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optional[int] = 4) -> List[str]:
+def find_sidecars(destination: str, inputs: List[str], extensions: List[str], concurrency: Optional[int] = 4):
     """Searches for sidecar files.
      A sidecar files is a file with the same name as the input file but with a different extension.
 
@@ -113,4 +128,4 @@ def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optiona
                     result = future.result()
                     if result:
                         sidecars.append(result)
-    return sidecars
+    return
