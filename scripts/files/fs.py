@@ -52,7 +52,7 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str]], concurrency: Optional[int] = 4) -> List[str]:
+def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str]] = [], concurrency: Optional[int] = 4) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
     Args:
