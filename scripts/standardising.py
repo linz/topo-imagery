@@ -135,8 +135,8 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
-        sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
-        sidecars = List[str] = []
+#        sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
+        sidecars: List[str] = []
         for extension in [".prj", ".tfw"]:
             for input in files.inputs:
                 sidecars.append(f"{os.path.splitext(input)[0]}{extension}")

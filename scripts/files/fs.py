@@ -82,16 +82,14 @@ def write_all(inputs: List[str], target: str, optional_inputs: Optional[List[str
     
     # get sidecar files
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {
-            executor.submit(write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)): optional_input_
-            for optional_input_ in optional_inputs
-        }
-        for future in as_completed(futuress):
-            if future.exception():
+        try:
+            futuress = {
+                executor.submit(write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)): optional_input_ for optional_input_ in optional_inputs
+            }
+        except:
                 get_log().warn("Failed Read-Write", error=future.exception())
-            else:
-                written_tiffs.append(future.result())
-
+        for future in as_completed(futuress):
+            written_tiffs.append(future.result())
 
     return written_tiffs
 
