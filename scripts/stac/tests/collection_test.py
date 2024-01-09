@@ -36,8 +36,7 @@ def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> N
     assert collection.stac["title"] == "Auckland 0.3m Forest assessment Urban Aerial Photos (2022)"
     assert (
         collection.stac["description"]
-        == "Orthophotography within the Auckland region captured in the 2022 flying season, \
-            published as a record of the Forest assessment event."
+        == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest assessment event."  # pylint: disable=line-too-long
     )
     assert collection.stac["id"]
     assert collection.stac["linz:region"] == "auckland"
