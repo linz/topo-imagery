@@ -17,7 +17,7 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
         "location": None,
-        "event_name": "Forest assessment",
+        "event_name": None,
         "historic_survey_number": None,
         "geographic_description": None,
     }
@@ -29,7 +29,7 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
         "location": None,
-        "event_name": "Forest assessment",
+        "event_name": None,
         "historic_survey_number": None,
         "geographic_description": None,
     }
@@ -38,7 +38,7 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
 
 def test_generate_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    title = "Auckland 0.3m Forest assessment Rural Aerial Photos (2023)"
+    title = "Auckland 0.3m Rural Aerial Photos (2023)"
     collection = ImageryCollection(metadata_auck)
     assert collection.stac["title"] == title
 
@@ -47,7 +47,7 @@ def test_generate_dem_title(metadata: Tuple[CollectionMetadata, CollectionMetada
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dem"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland - Forest assessment LiDAR 0.3m DEM (2023)"
+    title = "Auckland LiDAR 0.3m DEM (2023)"
     assert collection.stac["title"] == title
 
 
@@ -55,7 +55,7 @@ def test_generate_dsm_title(metadata: Tuple[CollectionMetadata, CollectionMetada
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dsm"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland - Forest assessment LiDAR 0.3m DSM (2023)"
+    title = "Auckland LiDAR 0.3m DSM (2023)"
     assert collection.stac["title"] == title
 
 
@@ -63,7 +63,7 @@ def test_generate_satellite_imagery_title(metadata: Tuple[CollectionMetadata, Co
     metadata_auck, _ = metadata
     metadata_auck["category"] = "satellite-imagery"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland 0.3m Forest assessment Satellite Imagery (2023)"
+    title = "Auckland 0.3m Satellite Imagery (2023)"
     assert collection.stac["title"] == title
 
 
@@ -80,7 +80,7 @@ def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, Collection
     metadata_auck, _ = metadata
     metadata_auck["end_datetime"] = datetime(2024, 1, 1)
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland 0.3m Forest assessment Rural Aerial Photos (2023-2024)"
+    title = "Auckland 0.3m Rural Aerial Photos (2023-2024)"
     assert collection.stac["title"] == title
 
 
@@ -88,7 +88,7 @@ def test_generate_title_location(metadata: Tuple[CollectionMetadata, CollectionM
     metadata_auck, _ = metadata
     metadata_auck["location"] = "Ponsonby"
     collection = ImageryCollection(metadata_auck)
-    title = "Ponsonby 0.3m Forest assessment Rural Aerial Photos (2023)"
+    title = "Ponsonby 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
 
@@ -123,7 +123,7 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
     metadata_auck["category"] = "dsm"
     metadata_auck["lifecycle"] = "preview"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland - Forest assessment LiDAR 0.3m DSM (2023) - Preview"
+    title = "Auckland LiDAR 0.3m DSM (2023) - Preview"
     assert collection.stac["title"] == title
 
 
@@ -133,4 +133,11 @@ def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMet
     metadata_auck["event_name"] = ""
     collection = ImageryCollection(metadata_auck)
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
+    assert collection.stac["title"] == title
+
+def test_generate_imagery_title_with_event(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["event_name"] = "Forest assessment"
+    collection = ImageryCollection(metadata_auck)
+    title = "Auckland 0.3m Forest assessment Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
