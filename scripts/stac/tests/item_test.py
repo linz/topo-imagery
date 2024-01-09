@@ -38,15 +38,16 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
 
 def test_imagery_add_collection(mocker) -> None:  # type: ignore
     metadata: CollectionMetadata = {
-        "category": "Urban Aerial Photos",
+        "category": "urban-aerial-photos",
         "region": "auckland",
         "gsd": "0.3m",
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
         "location": None,
-        "event": None,
+        "event_name": None,
         "historic_survey_number": None,
+        "geographic_description": None,
     }
     ulid = "fake_ulid"
     collection = ImageryCollection(metadata=metadata, collection_id=ulid)

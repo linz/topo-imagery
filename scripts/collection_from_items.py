@@ -10,12 +10,7 @@ from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_json_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.metadata_constants import (
-    HUMAN_READABLE_REGIONS,
-    CollectionMetadata,
-    ElevationCategories,
-    ImageryCategories,
-)
+from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
@@ -29,7 +24,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=[type.value for type in ImageryCategories] + [type.name for type in ElevationCategories],
+        choices=DATA_CATEGORIES.keys(),
     )
     parser.add_argument(
         "--region",
@@ -41,6 +36,13 @@ def main() -> None:
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
         "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
+    )
+    parser.add_argument(
+        "--geographic-desc",
+        dest="geographic_description",
+        help="Optional Location Name, e.g.- South Island",
+        type=str,
+        required=False,
     )
     parser.add_argument(
         "--start-date",
@@ -100,8 +102,9 @@ def main() -> None:
         "end_datetime": arguments.end_date,
         "lifecycle": arguments.lifecycle,
         "location": arguments.location,
-        "event": arguments.event,
+        "event_name": arguments.event,
         "historic_survey_number": arguments.historic_survey_number,
+        "geographic_description": arguments.geographic_description,
     }
 
     collection = ImageryCollection(

@@ -12,35 +12,39 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
-from scripts.stac.util.stac_extensions import StacExtensions
 
 
 @pytest.fixture(name="metadata", autouse=True)
 def setup() -> Generator[CollectionMetadata, None, None]:
     metadata: CollectionMetadata = {
-        "category": "Urban Aerial Photos",
+        "category": "urban-aerial-photos",
         "region": "auckland",
         "gsd": "0.3m",
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
         "location": None,
-        "event": None,
+        "event_name": "Forest assessment",
         "historic_survey_number": None,
+        "geographic_description": "North Island",
     }
     yield metadata
 
 
 def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert collection.stac["title"] == "Auckland 0.3m Urban Aerial Photos (2022)"
-    assert collection.stac["description"] == "Orthophotography within the Auckland region captured in the 2022 flying season."
+    assert collection.stac["title"] == "Auckland 0.3m Forest assessment Urban Aerial Photos (2022)"
+    assert (
+        collection.stac["description"]
+        == "Orthophotography within the Auckland region captured in the 2022 flying season, \
+            published as a record of the Forest assessment event."
+    )
     assert collection.stac["id"]
-    assert collection.stac["linz:region"] == "new-zealand"
-    assert collection.stac["linz:geographic_desc"] == "South Island"
+    assert collection.stac["linz:region"] == "auckland"
+    assert collection.stac["linz:geographic_description"] == "North Island"
     assert collection.stac["linz:event_name"] == "Forest assessment"
-    assert collection.stac["linz:lifecycle"] == "under development"
-    assert collection.stac["stac_extensions"] == [StacExtensions.linz.value]
+    assert collection.stac["linz:lifecycle"] == "completed"
+    assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
 
 
 def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
@@ -172,3 +176,13 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
     ]
     # then the new provider is added
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+
+def test_event_name_is_present(metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(metadata)
+    assert "Forest assessment" == collection.stac["linz:event_name"]
+
+
+def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(metadata)
+    assert "North Island" == collection.stac["linz:geographic_description"]

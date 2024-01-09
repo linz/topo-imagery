@@ -1,6 +1,4 @@
-from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 from typing import Optional, TypedDict
 
 
@@ -15,6 +13,7 @@ class CollectionMetadata(TypedDict):
         location: Optional location of dataset, e.g. Hutt City
         event: Optional details of capture event, e.g. Cyclone Gabrielle
         historic_survey_number: Optional historic imagery survey number, e.g. SNC88445
+        geographic_description: Optional location name, e.g. South Island
     """
 
     category: str
@@ -24,7 +23,7 @@ class CollectionMetadata(TypedDict):
     end_datetime: datetime
     lifecycle: str
     location: Optional[str]
-    event: Optional[str]
+    event_name: Optional[str]
     historic_survey_number: Optional[str]
     geographic_description: Optional[str]
 
@@ -33,36 +32,23 @@ class SubtypeParameterError(Exception):
     def __init__(self, category: str) -> None:
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
 
-@dataclass
-class Category():
-    id: str
-    name: str
 
-class ElevationCategories(Enum):
-    DEM = ("dem", "DEM")
-    DSM = ("dsm", "DSM")
-    def __init__(self, _id: str, name: str) -> None:
-        self.id = _id
-        self.name = name
-             
-class ImageryCategories(str, Enum):
-    AERIAL = "Aerial Photos"
-    HISTORICAL = "Scanned Aerial Photos"
-    RURAL = "Rural Aerial Photos"
-    SATELLITE = "Satellite Imagery"
-    URBAN = "Urban Aerial Photos"
+AERIAL_PHOTOS = "aerial-photos"
+SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
+RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
+SATELLITE_IMAGERY = "satellite-imagery"
+URBAN_AERIAL_PHOTOS = "urban-aerial-photos"
+DEM = "dem"
+DSM = "dsm"
 
-ELEVATION_CATEGORIES_IDS = {
-    ElevationCategories.DEM.value: "dem",
-    ElevationCategories.DSM.value: "dsm"
-}
-
-IMAGERY_CATEGORIES_IDS = {
-    ImageryCategories.AERIAL.value:"aerial-photos",
-    ImageryCategories.HISTORICAL.value:"scanned-aerial-photos",
-    ImageryCategories.RURAL.value:"rural-aerial-photos",
-    ImageryCategories.SATELLITE.value: "satellite-imagery",
-    ImageryCategories.URBAN.value: "urban-aerial-photos"
+DATA_CATEGORIES = {
+    AERIAL_PHOTOS: "Aerial Photos",
+    SCANNED_AERIAL_PHOTOS: "Scanned Aerial Photos",
+    RURAL_AERIAL_PHOTOS: "Rural Aerial Photos",
+    SATELLITE_IMAGERY: "Satellite Imagery",
+    URBAN_AERIAL_PHOTOS: "Urban Aerial Photos",
+    DEM: "DEM",
+    DSM: "DSM",
 }
 
 
