@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/linz/topo-imagery/compare/v3.5.2...v3.6.0) (2024-01-09)
+
+
+### Features
+
+* Remove empty TIFFs after standardising TDE-964 ([#767](https://github.com/linz/topo-imagery/issues/767)) ([70d79b3](https://github.com/linz/topo-imagery/commit/70d79b3d55678fd0a6fc6145005094eab27962b2))
+
 ## [3.5.2](https://github.com/linz/topo-imagery/compare/v3.5.1...v3.5.2) (2023-12-21)
 
 
