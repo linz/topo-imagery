@@ -135,6 +135,7 @@ def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMet
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
+
 def test_generate_imagery_title_with_event(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["event_name"] = "Forest assessment"
