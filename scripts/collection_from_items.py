@@ -38,7 +38,7 @@ def main() -> None:
         "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
     )
     parser.add_argument(
-        "--geographic-desc",
+        "--geographic-description",
         dest="geographic_description",
         help="Optional Location Name, e.g.- South Island",
         type=str,
