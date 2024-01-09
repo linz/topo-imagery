@@ -35,12 +35,12 @@ def main() -> None:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
-        "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
+        "--location", dest="location", help="Optional Location of dataset, e.g. Hutt City", type=str, required=False
     )
     parser.add_argument(
         "--geographic-description",
         dest="geographic_description",
-        help="Optional Location Name, e.g.- South Island",
+        help="Optional Location Name, e.g. South Island",
         type=str,
         required=False,
     )
@@ -58,7 +58,7 @@ def main() -> None:
     parser.add_argument(
         "--historic-survey-number",
         dest="historic_survey_number",
-        help="Historic Survey Number if Applicable. E.g.- SCN8844",
+        help="Historic Survey Number if Applicable. E.g. SCN8844",
         type=str,
         required=False,
     )
