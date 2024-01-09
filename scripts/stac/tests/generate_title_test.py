@@ -80,7 +80,7 @@ def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, Collection
     metadata_auck, _ = metadata
     metadata_auck["end_datetime"] = datetime(2024, 1, 1)
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland 0.3m Rural Aerial Photos (2023 - 2024)"
+    title = "Auckland 0.3m Rural Aerial Photos (2023-2024)"
     assert collection.stac["title"] == title
 
 
@@ -123,7 +123,7 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
     metadata_auck["category"] = "dsm"
     metadata_auck["lifecycle"] = "preview"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland LiDAR 0.3m DSM (2023) - preview"
+    title = "Auckland LiDAR 0.3m DSM (2023) - Preview"
     assert collection.stac["title"] == title
 
 

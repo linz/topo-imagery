@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from typing import List, Optional
 
 from linz_logger import get_log
+from tifffile import TiffFile
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
@@ -55,17 +56,21 @@ def run_standardising(
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(todo))
 
     with Pool(concurrency) as p:
-        standardized_tiffs = p.map(
-            partial(
-                standardising,
-                preset=preset,
-                source_epsg=source_epsg,
-                target_epsg=target_epsg,
-                target_output=target_output,
-                cutline=cutline,
-            ),
-            todo,
-        )
+        standardized_tiffs = [
+            entry
+            for entry in p.map(
+                partial(
+                    standardising,
+                    preset=preset,
+                    source_epsg=source_epsg,
+                    target_epsg=target_epsg,
+                    target_output=target_output,
+                    cutline=cutline,
+                ),
+                todo,
+            )
+            if entry is not None
+        ]
         p.close()
         p.join()
 
@@ -100,7 +105,7 @@ def standardising(
     target_epsg: str,
     cutline: Optional[str],
     target_output: str = "/tmp/",
-) -> FileTiff:
+) -> Optional[FileTiff]:
     """Apply transformations using GDAL to the source file.
 
     Args:
@@ -189,5 +194,10 @@ def standardising(
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
-        write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
-        return tiff
+        with TiffFile(standardized_working_path) as file_handle:
+            if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
+                write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
+                return tiff
+
+        get_log().info("Skipping empty output image", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+        return None

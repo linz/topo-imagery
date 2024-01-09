@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.2](https://github.com/linz/topo-imagery/compare/v3.5.1...v3.5.2) (2023-12-21)
+
+
+### Bug Fixes
+
+* minor changes to be consistent with current data ([#790](https://github.com/linz/topo-imagery/issues/790)) ([4892b6b](https://github.com/linz/topo-imagery/commit/4892b6b30dfc5cb7cc3a00a5eef52b6fde8447ee))
+
 ## [3.5.1](https://github.com/linz/topo-imagery/compare/v3.5.0...v3.5.1) (2023-12-19)
 
 
