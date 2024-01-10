@@ -51,10 +51,10 @@ class ImageryCollection:
         }
 
         # Optional metadata
-        if metadata.get("event_name"):
-            self.stac["linz:event_name"] = metadata["event_name"]
-        if metadata.get("geographic_description"):
-            self.stac["linz:geographic_description"] = metadata["geographic_description"]
+        if event_name := metadata.get("event_name"):
+            self.stac["linz:event_name"] = event_name
+        if geographic_description := metadata.get("geographic_description"):
+            self.stac["linz:geographic_description"] = geographic_description
 
         # If the providers passed has already a LINZ provider: add its default roles to it
         has_linz = False
