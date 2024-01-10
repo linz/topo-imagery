@@ -2,8 +2,8 @@ from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Generator, List, Optional, Tuple, Union
 
-import boto3
-import botocore
+from boto3 import client, resource
+from botocore.exceptions import ClientError
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
@@ -24,7 +24,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
         raise Exception("The 'source' is None.")
     s3_path = parse_path(destination)
     key = s3_path.key
-    s3 = boto3.resource("s3")
+    s3 = resource("s3")
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
@@ -33,7 +33,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
         else:
             s3_object.put(Body=source)
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
-    except botocore.exceptions.ClientError as ce:
+    except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
         raise ce
 
@@ -54,7 +54,7 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
     start_time = time_in_ms()
     s3_path = parse_path(path)
     key = s3_path.key
-    s3 = boto3.resource("s3")
+    s3 = resource("s3")
 
     try:
         if needs_credentials:
@@ -94,7 +94,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
         True if the S3 Object exists
     """
     s3_path, key = parse_path(path)
-    s3 = boto3.resource("s3")
+    s3 = resource("s3")
 
     try:
         if needs_credentials:
@@ -167,7 +167,7 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[boto3.client]) -> List[str]:
+def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[client]) -> List[str]:
     """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
@@ -179,7 +179,7 @@ def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[b
         a list of file path
     """
     if not s3_client:
-        s3_client = boto3.client("s3")
+        s3_client = client("s3")
     files = []
     paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = paginator.paginate(Bucket=bucket_name_from_path(uri), Prefix=prefix_from_path(uri))
@@ -195,7 +195,7 @@ def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[b
     return files
 
 
-def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
+def _get_object(bucket: str, file_name: str, s3_client: client) -> Any:
     """Get the object from `s3`
 
     Args:
@@ -211,7 +211,7 @@ def _get_object(bucket: str, file_name: str, s3_client: boto3.client) -> Any:
 
 
 def get_object_parallel_multithreading(
-    bucket: str, files_to_read: List[str], s3_client: Optional[boto3.client], concurrency: int
+    bucket: str, files_to_read: List[str], s3_client: Optional[client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
     """Get s3 objects in parallel
 
@@ -225,7 +225,7 @@ def get_object_parallel_multithreading(
         the object when got
     """
     if not s3_client:
-        s3_client = boto3.client("s3")
+        s3_client = client("s3")
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         future_to_key = {executor.submit(_get_object, bucket, key, s3_client): key for key in files_to_read}
 

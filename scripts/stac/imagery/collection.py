@@ -6,6 +6,13 @@ import ulid
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
+from scripts.stac.imagery.metadata_constants import (
+    HUMAN_READABLE_REGIONS,
+    CollectionTitleMetadata,
+    ElevationCategories,
+    ImageryCategories,
+    SubtypeParameterError,
+)
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -18,17 +25,22 @@ class ImageryCollection:
     stac: Dict[str, Any]
 
     def __init__(
-        self, title: str, description: str, collection_id: Optional[str] = None, providers: Optional[List[Provider]] = None
+        self,
+        title_metadata: CollectionTitleMetadata,
+        collection_id: Optional[str] = None,
+        providers: Optional[List[Provider]] = None,
     ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
+
+        self.title_metadata = title_metadata
 
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
             "id": collection_id,
-            "title": title,
-            "description": description,
+            "title": self._title(),
+            "description": self._description(),
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
@@ -209,3 +221,105 @@ class ImageryCollection:
             destination: path of the destination
         """
         write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"), content_type=ContentType.JSON.value)
+
+    def _title(self) -> str:
+        """Generates the title for imagery and elevation datasets.
+        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
+          [Location / Region if no Location specified] [GSD] [?Event Name] [Data Sub-Type] ([Year(s)]) [?- Preview]
+        DEM / DSM:
+          [Location / Region if no Location specified] [?- Event Name] LiDAR [GSD] [Data Sub-Type] ([Year(s)]) [?- Preview]
+        If Historic Survey Number:
+          [Location / Region if no Location specified] [GSD] [Survey Number] ([Year(s)]) [?- Preview]
+
+        Returns:
+            Dataset Title
+        """
+        # format optional metadata
+        location = self.title_metadata.get("location")
+        historic_survey_number = self.title_metadata.get("historic_survey_number")
+        event = self.title_metadata.get("event")
+
+        # format date for metadata
+        if self.title_metadata["start_datetime"].year == self.title_metadata["end_datetime"].year:
+            date = str(self.title_metadata["start_datetime"].year)
+        else:
+            date = f"{self.title_metadata['start_datetime'].year}-{self.title_metadata['end_datetime'].year}"
+
+        # determine dataset name
+        if location:
+            name = location
+        else:
+            name = HUMAN_READABLE_REGIONS[self.title_metadata["region"]]
+
+        # determine if dataset is preview
+        if self.title_metadata.get("lifecycle") == "preview":
+            preview = "- Preview"
+        else:
+            preview = None
+
+        if historic_survey_number:
+            return " ".join(f"{name} {self.title_metadata['gsd']} {historic_survey_number} ({date}) {preview or ''}".split())
+
+        if self.title_metadata["category"] in [ImageryCategories.SATELLITE, ImageryCategories.URBAN, ImageryCategories.RURAL]:
+            return " ".join(
+                f"{name} {self.title_metadata['gsd']} {event or ''} {self.title_metadata['category']} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+            )
+        if self.title_metadata["category"] in [ElevationCategories.DEM, ElevationCategories.DSM]:
+            return " ".join(
+                f"{name} {self._elevation_title_event(event) or ''} LiDAR {self.title_metadata['gsd']} {self.title_metadata['category']} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+            )
+        raise SubtypeParameterError(self.title_metadata["category"])
+
+    def _elevation_title_event(self, event: Optional[str]) -> Optional[str]:
+        if event:
+            return f"- {event}"
+        return None
+
+    def _description(self) -> str:
+        """Generates the descriptions for imagery and elevation datasets.
+        Urban Aerial Photos / Rural Aerial Photos:
+          Orthophotography within the [Region] region captured in the [Year(s)] flying season.
+        DEM / DSM:
+          [Digital Surface Model / Digital Elevation Model] within the [region] [?- location] region in [year(s)].
+        Satellite Imagery:
+          Satellite imagery within the [Region] region captured in [Year(s)].
+        Historical Imagery:
+          Scanned aerial imagery within the [Region] region captured in [Year(s)].
+
+        Returns:
+            Dataset Description
+        """
+        # format optional metadata
+        location = self.title_metadata.get("location")
+        historic_survey_number = self.title_metadata.get("historic_survey_number")
+        event = self.title_metadata.get("event")
+
+        # format date for metadata
+        if self.title_metadata["start_datetime"].year == self.title_metadata["end_datetime"].year:
+            date = str(self.title_metadata["start_datetime"].year)
+        else:
+            date = f"{self.title_metadata['start_datetime'].year}-{self.title_metadata['end_datetime'].year}"
+
+        # format location for metadata description
+        if location:
+            location = f"- {location}"
+
+        region = HUMAN_READABLE_REGIONS[self.title_metadata["region"]]
+
+        if historic_survey_number:
+            desc = f"Scanned aerial imagery within the {region} region captured in {date}"
+        elif self.title_metadata["category"] == ImageryCategories.SATELLITE:
+            desc = f"Satellite imagery within the {region} region captured in {date}"
+        elif self.title_metadata["category"] in [ImageryCategories.URBAN, ImageryCategories.RURAL]:
+            desc = f"Orthophotography within the {region} region captured in the {date} flying season"
+        elif self.title_metadata["category"] == ElevationCategories.DEM:
+            desc = " ".join(f"Digital Elevation Model within the {region} {location or ''} region in {date}".split())
+        elif self.title_metadata["category"] == ElevationCategories.DSM:
+            desc = " ".join(f"Digital Surface Model within the {region} {location or ''} region in {date}".split())
+        else:
+            raise SubtypeParameterError(self.title_metadata["category"])
+
+        if event:
+            desc = desc + f", published as a record of the {event} event"
+
+        return desc + "."

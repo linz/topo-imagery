@@ -1,0 +1,6 @@
+[
+  {
+    "output": "BQ30_5000_1234",
+    "input": ["./tests/data/empty.tiff"]
+  }
+]
