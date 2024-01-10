@@ -24,7 +24,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=DATA_CATEGORIES.keys(),
+        choices=list(DATA_CATEGORIES.keys()) + list(DATA_CATEGORIES.values()),
     )
     parser.add_argument(
         "--region",
@@ -94,8 +94,17 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
+    # category can also be passed as human readable name (e.g. "Aerial Photos")
+    # Get the corresponding identifier to simplify the process
+    category = arguments.category
+    if not DATA_CATEGORIES.get(category):
+        for key, value in DATA_CATEGORIES.items():
+            if value == category:
+                category = key
+                break
+
     collection_metadata: CollectionMetadata = {
-        "category": arguments.category,
+        "category": category,
         "region": arguments.region,
         "gsd": arguments.gsd,
         "start_datetime": arguments.start_date,
