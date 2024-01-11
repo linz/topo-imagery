@@ -5,10 +5,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
       - name: Use Python "3.10.6"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4
         with:
           python-version: "3.10.6"
       - name: Install
@@ -62,6 +62,12 @@ jobs:
         run: |
           docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 translate_ascii.py --from-file ./tests/data/elevation_ascii.json --target /tmp/
           cmp --silent "${{ runner.temp }}/elevation_ascii.tiff" ./scripts/tests/data/output/elevation_ascii.tiff
+
+      - name: End to end test - Remove empty files
+        run: |
+          docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01
+          empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
+          [[ -n "$empty_target_directory" ]]
 
       - uses: actions/upload-artifact@v3.1.3
         with:

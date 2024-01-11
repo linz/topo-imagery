@@ -39,6 +39,9 @@ DEM_LERC = [
     "-co",
     # Set Max Z Error to 1mm
     "max_z_error=0.001",
+    "-co",
+    # Set MAX Z ERROR OVERVIEW to 10cm
+    "max_z_error_overview=0.1",
     # Force all DEMS to AREA to be consistent
     # input tiffs vary between AREA or POINT
     "-mo",
@@ -77,7 +80,7 @@ WEBP_OVERVIEWS = [
     "-co",
     "overview_quality=90",
     "-co",
-    "OVERVIEWS=IGNORE_EXISTING",
+    "overviews=ignore_existing",
 ]
 
 
@@ -87,7 +90,6 @@ def get_gdal_command(preset: str, epsg: str) -> List[str]:
     Args:
         preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
         epsg: the EPSG code of the file
-        convert_from: Defaults to None.
 
     Returns:
         a list of arguments to run `gdal_translate`

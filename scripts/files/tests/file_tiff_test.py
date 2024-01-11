@@ -66,7 +66,7 @@ def test_check_band_count_invalid_4() -> None:
     assert file_tiff.get_errors()
 
 
-def test_check_band_count_valid_1_DEM() -> None:
+def test_check_band_count_valid_1_dem() -> None:
     """
     tests check_band_count when the input layer has a valid band count
     which is 1 bands and a DEM preset
@@ -80,7 +80,7 @@ def test_check_band_count_valid_1_DEM() -> None:
     assert not file_tiff.get_errors()
 
 
-def test_check_band_count_invalid_alpha_DEM() -> None:
+def test_check_band_count_invalid_alpha_dem() -> None:
     """
     tests check_band_count when the input layer has a valid band count
     which is 2 bands where the second band is Alpha and DEM preset
@@ -95,7 +95,7 @@ def test_check_band_count_invalid_alpha_DEM() -> None:
     assert file_tiff.get_errors()
 
 
-def test_check_band_count_invalid_3_DEM() -> None:
+def test_check_band_count_invalid_3_dem() -> None:
     """
     tests check_band_count when the input layer has an invalid band count
     which is 3 bands where the preset is DEM.
@@ -157,7 +157,7 @@ def test_check_color_interpretation_invalid() -> None:
     assert file_tiff.get_errors()
 
 
-def test_check_color_interpretation_valid_DEM() -> None:
+def test_check_color_interpretation_valid_dem() -> None:
     """
     tests check_color_interpretation with the correct color interpretation
     """
@@ -170,7 +170,7 @@ def test_check_color_interpretation_valid_DEM() -> None:
     assert not file_tiff.get_errors()
 
 
-def test_check_color_interpretation_invalid_DEM() -> None:
+def test_check_color_interpretation_invalid_dem() -> None:
     """
     tests check_color_interpretation with the incorrect color interpretation
     """

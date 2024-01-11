@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from typing import List, Optional
 
 from linz_logger import get_log
+from tifffile import TiffFile
 
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
@@ -55,17 +56,21 @@ def run_standardising(
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(todo))
 
     with Pool(concurrency) as p:
-        standardized_tiffs = p.map(
-            partial(
-                standardising,
-                preset=preset,
-                source_epsg=source_epsg,
-                target_epsg=target_epsg,
-                target_output=target_output,
-                cutline=cutline,
-            ),
-            todo,
-        )
+        standardized_tiffs = [
+            entry
+            for entry in p.map(
+                partial(
+                    standardising,
+                    preset=preset,
+                    source_epsg=source_epsg,
+                    target_epsg=target_epsg,
+                    target_output=target_output,
+                    cutline=cutline,
+                ),
+                todo,
+            )
+            if entry is not None
+        ]
         p.close()
         p.join()
 
@@ -100,11 +105,11 @@ def standardising(
     target_epsg: str,
     cutline: Optional[str],
     target_output: str = "/tmp/",
-) -> FileTiff:
+) -> Optional[FileTiff]:
     """Apply transformations using GDAL to the source file.
 
     Args:
-        file: path to the file to standardise
+        files: paths to the files to standardise
         preset: gdal preset to use. See `gdal.gdal_preset.py`
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
@@ -186,14 +191,13 @@ def standardising(
         max_x = min_x + output_bounds.size.width
         command.extend(["-co", f"TARGET_SRS=EPSG:{target_epsg}", "-co", f"EXTENT={min_x},{min_y},{max_x},{max_y}"])
 
-        # Workaround https://github.com/OSGeo/gdal/issues/8169
-        if len(source_tiffs) > 1:
-            no_stats_file_path = os.path.join(tmp_path, files.output + "_no_stats.tiff")
-            run_gdal(command, input_file=input_file, output_file=no_stats_file_path)
-            input_file = no_stats_file_path
-
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
-        write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
-        return tiff
+        with TiffFile(standardized_working_path) as file_handle:
+            if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
+                write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
+                return tiff
+
+        get_log().info("Skipping empty output image", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
+        return None
