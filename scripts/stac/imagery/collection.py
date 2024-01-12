@@ -1,11 +1,16 @@
 import json
+import os
 from datetime import datetime
+from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
+import geojson
+import shapely.geometry
+import shapely.ops
 import ulid
 
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import write
+from scripts.files.fs import read, write
 from scripts.stac.imagery.metadata_constants import (
     HUMAN_READABLE_REGIONS,
     CollectionTitleMetadata,
@@ -63,13 +68,40 @@ class ImageryCollection:
 
         self.add_providers(providers)
 
-    def add_capture_area(self, path: str) -> None:
-        """Add the capture area of the Collection. The `path` of the capture-area.geojson is only used to get its checksum.
+    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str) -> None:
+        """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
-            path: of the capture-area-geojson file
+            target: path of the capture-area-geojson file
         """
+
+        capture_area = geojson.Feature(geometry=shapely.ops.unary_union(polygons), properties={})
+        with TemporaryDirectory() as tmp_path:
+            tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
+            write(
+                tmp_capture_area_path,
+                json.dumps(capture_area).encode("utf-8"),
+                content_type=ContentType.GEOJSON.value,
+            )
+
+            file_checksum = checksum.multihash_as_hex(tmp_capture_area_path)
+            capture_area = {
+                "href": f"./{CAPTURE_AREA_FILE_NAME}",
+                "title": "Capture area",
+                "type": ContentType.GEOJSON,
+                "roles": ["metadata"],
+                "file:checksum": file_checksum,
+            }
+            self.stac["assets"]["capture_area"] = capture_area
+
+            # Save `capture-area.geojson` in target
+            write(
+                os.path.join(target, CAPTURE_AREA_FILE_NAME),
+                read(tmp_capture_area_path),
+                content_type=ContentType.GEOJSON.value,
+            )
+
         if not self.stac.get("asset"):
             self.stac["assets"] = {}
 
@@ -78,16 +110,6 @@ class ImageryCollection:
 
         if StacExtensions.file.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
-
-        file_checksum = checksum.multihash_as_hex(path)
-        capture_area = {
-            "href": f"./{CAPTURE_AREA_FILE_NAME}",
-            "title": "Capture area",
-            "type": ContentType.GEOJSON,
-            "roles": ["metadata"],
-            "file:checksum": file_checksum,
-        }
-        self.stac["assets"]["capture_area"] = capture_area
 
     def add_item(self, item: Dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
