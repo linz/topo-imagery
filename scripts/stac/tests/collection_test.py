@@ -23,24 +23,23 @@ def setup() -> Generator[CollectionMetadata, None, None]:
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
-        "location": None,
         "event_name": "Forest assessment",
         "historic_survey_number": None,
-        "geographic_description": "North Island",
+        "geographic_description": "Auckland North",
     }
     yield metadata
 
 
 def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert collection.stac["title"] == "Auckland 0.3m Forest assessment Urban Aerial Photos (2022)"
+    assert collection.stac["title"] == "Auckland North 0.3m Forest assessment Urban Aerial Photos (2022)"
     assert (
         collection.stac["description"]
         == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest assessment event."  # pylint: disable=line-too-long
     )
     assert collection.stac["id"]
     assert collection.stac["linz:region"] == "auckland"
-    assert collection.stac["linz:geographic_description"] == "North Island"
+    assert collection.stac["linz:geographic_description"] == "Auckland North"
     assert collection.stac["linz:event_name"] == "Forest assessment"
     assert collection.stac["linz:lifecycle"] == "completed"
     assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
@@ -184,4 +183,4 @@ def test_event_name_is_present(metadata: CollectionMetadata) -> None:
 
 def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert "North Island" == collection.stac["linz:geographic_description"]
+    assert "Auckland North" == collection.stac["linz:geographic_description"]

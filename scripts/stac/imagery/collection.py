@@ -209,17 +209,20 @@ class ImageryCollection:
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
         Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
-          [Location / Region if no Location specified] [GSD] [?Event Name] [Data Sub-Type] ([Year(s)]) [?- Preview]
+          [geographic_description / Region if no geographic_description specified] [GSD] [?Event Name] [Data Sub-Type]
+          ([Year(s)]) [?- Preview]
         DEM / DSM:
-          [Location / Region if no Location specified] [?- Event Name] LiDAR [GSD] [Data Sub-Type] ([Year(s)]) [?- Preview]
+          [geographic_description / Region if no geographic_description specified] [?- Event Name] LiDAR [GSD]
+          [Data Sub-Type] ([Year(s)]) [?- Preview]
         If Historic Survey Number:
-          [Location / Region if no Location specified] [GSD] [Survey Number] ([Year(s)]) [?- Preview]
+          [geographic_description / Region if no geographic_description specified] [GSD] [Survey Number] ([Year(s)])
+          [?- Preview]
 
         Returns:
             Dataset Title
         """
         # format optional metadata
-        location = self.metadata.get("location")
+        geographic_description = self.metadata.get("geographic_description")
         historic_survey_number = self.metadata.get("historic_survey_number")
         event = self.metadata.get("event_name")
 
@@ -230,8 +233,8 @@ class ImageryCollection:
             date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
 
         # determine dataset name
-        if location:
-            name = location
+        if geographic_description:
+            name = geographic_description
         else:
             name = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
@@ -268,7 +271,8 @@ class ImageryCollection:
         Urban Aerial Photos / Rural Aerial Photos:
           Orthophotography within the [Region] region captured in the [Year(s)] flying season.
         DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [region] [?- location] region in [year(s)].
+          [Digital Surface Model / Digital Elevation Model] within the [region]
+          [?- geographic_description] region in [year(s)].
         Satellite Imagery:
           Satellite imagery within the [Region] region captured in [Year(s)].
         Historical Imagery:
@@ -278,7 +282,7 @@ class ImageryCollection:
             Dataset Description
         """
         # format optional metadata
-        location = self.metadata.get("location")
+        geographic_description = self.metadata.get("geographic_description")
         historic_survey_number = self.metadata.get("historic_survey_number")
         event = self.metadata.get("event_name")
 
@@ -288,9 +292,9 @@ class ImageryCollection:
         else:
             date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
 
-        # format location for metadata description
-        if location:
-            location = f"- {location}"
+        # format geographic_description for metadata description
+        if geographic_description:
+            geographic_description = f"- {geographic_description}"
 
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
@@ -301,9 +305,13 @@ class ImageryCollection:
         elif self.metadata["category"] in [URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS]:
             desc = f"Orthophotography within the {region} region captured in the {date} flying season"
         elif self.metadata["category"] == DEM:
-            desc = " ".join(f"Digital Elevation Model within the {region} {location or ''} region in {date}".split())
+            desc = " ".join(
+                f"Digital Elevation Model within the {region} {geographic_description or ''} region in {date}".split()
+            )
         elif self.metadata["category"] == DSM:
-            desc = " ".join(f"Digital Surface Model within the {region} {location or ''} region in {date}".split())
+            desc = " ".join(
+                f"Digital Surface Model within the {region} {geographic_description or ''} region in {date}".split()
+            )
         else:
             raise SubtypeParameterError(self.metadata["category"])
 

@@ -10,10 +10,9 @@ class CollectionMetadata(TypedDict):
     end_date: Dataset capture end date
     lifecycle: Dataset status
     Optional:
-        location: Optional location of dataset, e.g. Hutt City
+        geographic_description: Optional geographic_description of dataset, e.g. Hutt City
         event: Optional details of capture event, e.g. Cyclone Gabrielle
         historic_survey_number: Optional historic imagery survey number, e.g. SNC88445
-        geographic_description: Optional location name, e.g. South Island
     """
 
     category: str
@@ -22,10 +21,9 @@ class CollectionMetadata(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
-    location: Optional[str]
+    geographic_description: Optional[str]
     event_name: Optional[str]
     historic_survey_number: Optional[str]
-    geographic_description: Optional[str]
 
 
 class SubtypeParameterError(Exception):

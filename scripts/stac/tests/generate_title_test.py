@@ -16,7 +16,6 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
-        "location": None,
         "event_name": None,
         "historic_survey_number": None,
         "geographic_description": None,
@@ -28,7 +27,6 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
-        "location": None,
         "event_name": None,
         "historic_survey_number": None,
         "geographic_description": None,
@@ -84,9 +82,9 @@ def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, Collection
     assert collection.stac["title"] == title
 
 
-def test_generate_title_location(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+def test_generate_title_geographic_description(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    metadata_auck["location"] = "Ponsonby"
+    metadata_auck["geographic_description"] = "Ponsonby"
     collection = ImageryCollection(metadata_auck)
     title = "Ponsonby 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
@@ -129,7 +127,7 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
 
 def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    metadata_auck["location"] = ""
+    metadata_auck["geographic_description"] = ""
     metadata_auck["event_name"] = ""
     collection = ImageryCollection(metadata_auck)
     title = "Auckland 0.3m Rural Aerial Photos (2023)"

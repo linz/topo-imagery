@@ -44,7 +44,6 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
-        "location": None,
         "event_name": None,
         "historic_survey_number": None,
         "geographic_description": None,

@@ -16,10 +16,9 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
-        "location": None,
+        "geographic_description": None,
         "event_name": None,
         "historic_survey_number": None,
-        "geographic_description": None,
     }
     metadata_hb: CollectionMetadata = {
         "category": "rural-aerial-photos",
@@ -28,10 +27,9 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
-        "location": None,
+        "geographic_description": None,
         "event_name": None,
         "historic_survey_number": None,
-        "geographic_description": None,
     }
     yield (metadata_auck, metadata_hb)
 
@@ -51,10 +49,12 @@ def test_generate_description_elevation(metadata: Tuple[CollectionMetadata, Coll
     assert collection.stac["description"] == description
 
 
-def test_generate_description_elevation_location_input(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+def test_generate_description_elevation_geographic_description_input(
+    metadata: Tuple[CollectionMetadata, CollectionMetadata]
+) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dem"
-    metadata_auck["location"] = "Central"
+    metadata_auck["geographic_description"] = "Central"
     collection = ImageryCollection(metadata_auck)
     description = "Digital Elevation Model within the Auckland - Central region in 2023."
     assert collection.stac["description"] == description

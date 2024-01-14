@@ -38,13 +38,6 @@ def main() -> None:
         "--location", dest="location", help="Optional Location of dataset, e.g. Hutt City", type=str, required=False
     )
     parser.add_argument(
-        "--geographic-description",
-        dest="geographic_description",
-        help="Optional Location Name, e.g. South Island",
-        type=str,
-        required=False,
-    )
-    parser.add_argument(
         "--start-date",
         dest="start_date",
         help="Start date in format YYYY-MM-DD (Inclusive)",
@@ -110,10 +103,9 @@ def main() -> None:
         "start_datetime": arguments.start_date,
         "end_datetime": arguments.end_date,
         "lifecycle": arguments.lifecycle,
-        "location": arguments.location,
+        "geographic_description": arguments.location,
         "event_name": arguments.event,
         "historic_survey_number": arguments.historic_survey_number,
-        "geographic_description": arguments.geographic_description,
     }
 
     collection = ImageryCollection(
