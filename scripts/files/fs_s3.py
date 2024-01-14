@@ -176,7 +176,7 @@ def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[c
         s3_client: an s3 client
 
     Returns:
-        a list of file path
+        a list of file paths
     """
     if not s3_client:
         s3_client = client("s3")
