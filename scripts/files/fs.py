@@ -102,7 +102,5 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
             }
             for future in as_completed(futuress):
                 get_log().info("wrote_sidecar_file", path=future.result())
-        except resource("s3").meta.client.exceptions.NoSuchKey:
-            pass
-        except FileNotFoundError:
+        except (resource("s3").meta.client.exceptions.NoSuchKey, FileNotFoundError):
             pass
