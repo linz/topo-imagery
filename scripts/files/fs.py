@@ -2,11 +2,11 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Optional
 
+from boto3 import resource
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
-from boto3 import client, resource
 
 
 def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
@@ -83,7 +83,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
     return written_tiffs
 
 
-def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4):
+def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> None:
     """Writes list of files to target destination using multithreading.
 
     Args:
@@ -100,6 +100,7 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
                 executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
                 for input_ in inputs
             }
-        except resource("s3").meta.client.exceptions.NoSuchKey as nsk:
-            print(nsk)
+            for future in as_completed(futuress):
+                get_log().info("wrote_sidecar_file", path=future.result())
+        except resource("s3").meta.client.exceptions.NoSuchKey:
             pass
