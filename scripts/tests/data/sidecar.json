@@ -1,6 +1,0 @@
-[
-  {
-    "output": "BQ28_500_039097",
-    "input": ["s3://linz-topographic-upload/afage/sidecar_example/BQ28_500_039097.tif"]
-  }
-]
