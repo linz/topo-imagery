@@ -6,6 +6,7 @@ from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
+from boto3 import client, resource
 
 
 def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
@@ -52,13 +53,12 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, optional_inputs: List[str] = [], concurrency: Optional[int] = 4) -> List[str]:
+def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> List[str]:
     """Writes list of files to target destination using multithreading.
 
     Args:
         inputs: list of files to read
         target: target folder to write to
-        optional_inputs: list of optional files to read, e.g. sidecar files
         concurrency: max thread pool workers
 
     Returns:
@@ -80,18 +80,26 @@ def write_all(inputs: List[str], target: str, optional_inputs: List[str] = [], c
         get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
         raise Exception("Not all mandatory source files were written")
 
-    # get sidecar files
+    return written_tiffs
+
+
+def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4):
+    """Writes list of files to target destination using multithreading.
+
+    Args:
+        inputs: list of files to read
+        target: target folder to write to
+        concurrency: max thread pool workers
+
+    Returns:
+        list of written file paths
+    """
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         try:
             futuress = {
-                executor.submit(
-                    write, os.path.join(target, f"{os.path.basename(optional_input_)}"), read(optional_input_)
-                ): optional_input_
-                for optional_input_ in optional_inputs
+                executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
+                for input_ in inputs
             }
-        except:
-            get_log().warn("Failed Read-Write", error=future.exception())
-        for future in as_completed(futuress):
-            written_tiffs.append(future.result())
-
-    return written_tiffs
+        except resource("s3").meta.client.exceptions.NoSuchKey as nsk:
+            print(nsk)
+            pass

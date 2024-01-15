@@ -11,7 +11,7 @@ from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import ContentType, is_tiff
-from scripts.files.fs import exists, read, write, write_all
+from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -137,9 +137,11 @@ def standardising(
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         sidecars: List[str] = []
         for extension in [".prj", ".tfw"]:
-            for input in files.inputs:
-                sidecars.append(f"{os.path.splitext(input)[0]}{extension}")
-        source_files = write_all(files.inputs, f"{tmp_path}/source/", optional_inputs=sidecars)
+            for i in files.inputs:
+                sidecars.append(f"{os.path.splitext(i)[0]}{extension}")
+        source_files = write_all(files.inputs, f"{tmp_path}/source/")
+        write_sidecars(sidecars, f"{tmp_path}/source/")
+        source_tiffs = []
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True
