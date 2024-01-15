@@ -73,6 +73,7 @@ class ImageryCollection:
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
+            polygons: list of geometries
             target: path of the capture-area-geojson file
         """
 
@@ -93,7 +94,7 @@ class ImageryCollection:
                 "roles": ["metadata"],
                 "file:checksum": file_checksum,
             }
-            self.stac["assets"]["capture_area"] = capture_area
+            self.stac.setdefault("assets", {})["capture_area"] = capture_area
 
             # Save `capture-area.geojson` in target
             write(
@@ -101,9 +102,6 @@ class ImageryCollection:
                 read(tmp_capture_area_path),
                 content_type=ContentType.GEOJSON.value,
             )
-
-        if not self.stac.get("asset"):
-            self.stac["assets"] = {}
 
         if not self.stac.get("stac_extensions"):
             self.stac["stac_extensions"] = []

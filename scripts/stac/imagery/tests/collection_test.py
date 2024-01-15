@@ -6,12 +6,14 @@ from tempfile import mkdtemp
 from typing import Generator
 
 import pytest
+import shapely.geometry
 
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionTitleMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util import checksum
 from scripts.stac.util.stac_extensions import StacExtensions
 
 
@@ -87,8 +89,8 @@ def test_interval_updated_from_existing(metadata: CollectionTitleMetadata) -> No
 
 def test_add_item(mocker, metadata: CollectionTitleMetadata) -> None:  # type: ignore
     collection = ImageryCollection(metadata)
-    checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
-    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
+    checksum_expected = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
+    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum_expected)
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
     geometry = {
         "type": "Polygon",
@@ -169,15 +171,57 @@ def test_default_provider_is_present(metadata: CollectionTitleMetadata) -> None:
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_capture_data_asset_present(metadata: CollectionTitleMetadata) -> None:
+# pylint: disable=line-too-long
+def test_capture_data(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     target = mkdtemp()
-    path = os.path.join(target, "capture-area.geojson")
+    path = os.path.join(target, "capture-area_expected.geojson")
     with open(path, "wb") as file:
-        file.write(b"test")
+        file.write(
+            b'{"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[178.254654, -38.415027], [178.254185, -38.408566], [178.25966, -38.408319], [178.265134, -38.408073], [178.265604, -38.414534], [178.260129, -38.414781], [178.254654, -38.415027]]]}, "properties": {}}'
+        )
 
-    collection.add_capture_area(path)
-    rmtree(target)
+    checksum_expected = checksum.multihash_as_hex(path)
+
+    polygons = []
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.25418498567294, -38.40856551170436],
+                            [178.25465423474975, -38.41502700730107],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.259659571653, -38.40831927359251],
+                            [178.25418498567294, -38.40856551170436],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+
+    collection.add_capture_area(polygons, target)
 
     assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
     assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
@@ -185,3 +229,5 @@ def test_capture_data_asset_present(metadata: CollectionTitleMetadata) -> None:
     assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
     assert StacExtensions.file.value in collection.stac["stac_extensions"]
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
+    assert collection.stac["assets"]["capture_area"]["file:checksum"] == checksum_expected
+    rmtree(target)

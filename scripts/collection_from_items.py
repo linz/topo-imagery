@@ -21,6 +21,7 @@ from scripts.stac.imagery.metadata_constants import (
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+# pylint: disable=too-many-locals
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
@@ -135,8 +136,7 @@ def main() -> None:
             get_log().info("item added to collection", item=content["id"], file=key)
         elif key.endswith("_footprint.geojson"):
             get_log().debug(f"adding geometry from {key}")
-            geom = shapely.geometry.shape(content["features"][0]["geometry"])
-            polygons.append(geom)
+            polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
 
     if polygons:
         collection.add_capture_area(polygons, uri)
