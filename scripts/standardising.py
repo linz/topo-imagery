@@ -141,7 +141,6 @@ def standardising(
                 sidecars.append(f"{os.path.splitext(i)[0]}{extension}")
         source_files = write_all(files.inputs, f"{tmp_path}/source/")
         write_sidecars(sidecars, f"{tmp_path}/source/")
-        source_tiffs = []
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True
