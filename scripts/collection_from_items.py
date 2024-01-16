@@ -35,7 +35,7 @@ def main() -> None:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
-        "--location", dest="location", help="Optional Location of dataset, e.g. Hutt City", type=str, required=False
+        "--geographic-description", dest="geographic_description", help="Optional Geographic Description of dataset, e.g. Hutt City", type=str, required=False
     )
     parser.add_argument(
         "--start-date",
@@ -103,7 +103,7 @@ def main() -> None:
         "start_datetime": arguments.start_date,
         "end_datetime": arguments.end_date,
         "lifecycle": arguments.lifecycle,
-        "geographic_description": arguments.location,
+        "geographic_description": arguments.geographic_description,
         "event_name": arguments.event,
         "historic_survey_number": arguments.historic_survey_number,
     }
