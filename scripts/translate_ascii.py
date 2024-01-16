@@ -9,7 +9,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import is_argo
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import read, write_all
+from scripts.files.fs import read, write_all, write_sidecars
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_ascii_translate_command
 from scripts.logging.time_helper import time_in_ms
@@ -55,13 +55,12 @@ def main() -> None:
         get_log().info("ascii file translation complete", duration=time_in_ms() - start_time, count=len(tiffs))
 
         # copy any sidecar files to target
-        # TODO: TDE-1007 update translate_ascii for new sidecar download method
-        # sidecars = []
-        # start_time = time_in_ms()
-        # for ls in asc_files:
-        #     sidecars += find_sidecars(ls, [".prj", ".tfw"])
-        # write_all(inputs=sidecars, target=arguments.target)
-        # get_log().info("sidecar files copied", duration=time_in_ms() - start_time, count=len(sidecars))
+        sidecars = []
+        for extension in [".prj", ".tfw"]:
+            for ls in asc_files:
+                sidecars.append(f"{os.path.splitext(ls)[0]}{extension}")
+        write_sidecars(sidecars, f"{tmp_path}/source/")
+        get_log().info("sidecar files copied", duration=time_in_ms() - start_time, count=len(sidecars))
 
 
 def translate_ascii(file: str, target_dir_path: str) -> str:
