@@ -1,5 +1,5 @@
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import List, Optional
 
 from boto3 import resource
@@ -34,9 +34,15 @@ def read(path: str) -> bytes:
         bytes: The bytes content of the file.
     """
     if is_s3(path):
-        return fs_s3.read(path)
+        try:
+            return fs_s3.read(path)
+        except resource("s3").meta.client.exceptions.NoSuchKey as error:
+            raise NoSuchFileError from error
 
-    return fs_local.read(path)
+    try:
+        return fs_local.read(path)
+    except FileNotFoundError as error:
+        raise NoSuchFileError from error
 
 
 def exists(path: str) -> bool:
@@ -66,10 +72,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {
-            executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
-            for input_ in inputs
-        }
+        futuress = {write_file(executor, input_, target): input_ for input_ in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
@@ -96,11 +99,16 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
     """
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         try:
-            futuress = {
-                executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
-                for input_ in inputs
-            }
-            for future in as_completed(futuress):
+            results = {write_file(executor, input_, target): input_ for input_ in inputs}
+            for future in as_completed(results):
                 get_log().info("wrote_sidecar_file", path=future.result())
-        except (resource("s3").meta.client.exceptions.NoSuchKey, FileNotFoundError):
-            pass
+        except NoSuchFileError:
+            get_log().info("No sidecar file found; skipping")
+
+
+def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
+    return executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
+
+
+class NoSuchFileError(Exception):
+    pass
