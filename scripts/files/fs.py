@@ -95,7 +95,7 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
         concurrency: max thread pool workers
 
     Returns:
-        list of written file paths
+
     """
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         try:
@@ -107,6 +107,16 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
 
 
 def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
+    """Read a file from a path and write it to a target path.
+
+    Args:
+        executor: A ThreadPoolExecutor instance.
+        input_: A path to a file to read.
+        target: A path to write the file to.
+
+    Returns:
+        Future[str]: The result of the execution.
+    """
     return executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
 
 

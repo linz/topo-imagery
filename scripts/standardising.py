@@ -137,8 +137,8 @@ def standardising(
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         sidecars: List[str] = []
         for extension in [".prj", ".tfw"]:
-            for i in files.inputs:
-                sidecars.append(f"{os.path.splitext(i)[0]}{extension}")
+            for file_input in files.inputs:
+                sidecars.append(f"{os.path.splitext(file_input)[0]}{extension}")
         source_files = write_all(files.inputs, f"{tmp_path}/source/")
         write_sidecars(sidecars, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
