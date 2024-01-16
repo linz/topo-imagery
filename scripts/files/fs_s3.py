@@ -1,6 +1,6 @@
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Generator, List, Optional, Tuple, Union
+from typing import Any, Generator, List, Optional, Union
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
@@ -167,12 +167,12 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[client]) -> List[str]:
+def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[client]) -> List[str]:
     """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
         uri: an s3 path
-        suffixes: a tuple of suffixes. example: (".json", "_meta.xml")
+        suffixes: a a list of suffixes. example: [".json", "_meta.xml"]
         s3_client: an s3 client
 
     Returns:
@@ -187,7 +187,7 @@ def list_files_in_uri(uri: str, suffixes: Tuple[str, ...], s3_client: Optional[c
     for response in response_iterator:
         for contents_data in response["Contents"]:
             key = contents_data["Key"]
-            if not key.lower().endswith(suffixes):
+            if not key.lower().endswith(tuple(suffixes)):
                 get_log().trace("skipping file not json", file=key, action="collection_from_items", reason="skip")
                 continue
             files.append(key)

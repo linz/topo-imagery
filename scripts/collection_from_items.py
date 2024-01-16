@@ -114,7 +114,7 @@ def main() -> None:
 
     s3_client = client("s3")
 
-    files_to_read = list_files_in_uri(uri, (".json", "_footprint.geojson"), s3_client)
+    files_to_read = list_files_in_uri(uri, [".json", "_footprint.geojson"], s3_client)
 
     start_time = time_in_ms()
     polygons = []
