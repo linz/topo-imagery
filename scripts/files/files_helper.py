@@ -4,6 +4,9 @@ from typing import Optional
 
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
+SUFFIX_JSON = ".json"
+SUFFIX_FOOTPRINT = "_footprint.geojson"
+
 
 class ContentType(str, Enum):
     GEOTIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
