@@ -5,11 +5,10 @@ from moto import mock_s3
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 
-from scripts.files.fs import read, write_all, write_sidecars, NoSuchFileError
+from scripts.files.fs import NoSuchFileError, read, write_all, write_sidecars
 
 
 def test_read_key_not_found_local() -> None:
-
     with raises(NoSuchFileError):
         read("test_dir/test.file")
 
@@ -26,15 +25,12 @@ def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     assert logs["msg"] == "s3_key_not_found"
 
 
-
 def test_write_all_key_not_found_local() -> None:
-
     with raises(NoSuchFileError):
         write_all("s3://testbucket/test.prj", "/tmp")
 
 
 def test_write_sidecars_key_not_found_local(capsys: CaptureFixture[str]) -> None:
-
     write_sidecars("s3://testbucket/test.prj", "/tmp")
 
     logs = json.loads(capsys.readouterr().out)
