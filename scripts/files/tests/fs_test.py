@@ -25,15 +25,15 @@ def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     assert logs["msg"] == "s3_key_not_found"
 
 
-def test_write_all_key_not_found_local() -> None:
+def test_write_all_file_not_found_local() -> None:
     with raises(NoSuchFileError):
-        write_all(["s3://testbucket/test.prj"], "/tmp")
+        write_all(["/test.prj"], "/tmp")
 
 
-def test_write_sidecars_key_not_found_local(capsys: CaptureFixture[str]) -> None:
-    write_sidecars(["s3://testbucket/test.prj"], "/tmp")
+def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> None:
+    write_sidecars(["/test.prj"], "/tmp")
 
-    logs = json.loads(capsys.readouterr().out)
+    logs = json.loads(capsys.readouterr().out.strip())
     assert logs["msg"] == "No sidecar file found; skipping"
 
 
@@ -52,6 +52,8 @@ def test_write_sidecars_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     s3.create_bucket(Bucket="testbucket")
 
     write_sidecars(["s3://testbucket/test.prj"], "/tmp")
-
-    logs = json.loads(capsys.readouterr().out)
-    assert logs["msg"] == "No sidecar file found; skipping"
+    
+    # capsys.readouterr().out json string format is not valid which implies 
+    # we can't parse it to find the actual `msg`
+    # '{"path": "s3://testbucket/test.prj", "error": "The specified file does not seem to exist: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.", "level": 50, "time": 1705527226267, "v": 1, "pid": 22302, "hostname": "paul-linz", "id": "01HMCNFK0B61H4KDS5C9Y0Q4MK", "msg": "s3_key_not_found"}\n{"level": 30, "time": 1705527226283, "v": 1, "pid": 22302, "hostname": "paul-linz", "id": "01HMCNFK0B61H4KDS5C9Y0Q4MK", "msg": "No sidecar file found; skipping"}'
+    assert "No sidecar file found; skipping" in capsys.readouterr().out
