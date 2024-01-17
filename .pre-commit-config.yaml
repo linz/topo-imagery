@@ -40,6 +40,7 @@ repos:
         language: system
         stages: [commit]
         types: [python]
+        require_serial: true
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: a99a3fbe79a9d346cabd02a5e167ad0edafe616b # v2.3.0
