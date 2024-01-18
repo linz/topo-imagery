@@ -86,6 +86,7 @@ class ImageryCollection:
                 content_type=ContentType.GEOJSON.value,
             )
 
+            file_stats = os.stat(tmp_capture_area_path)
             file_checksum = checksum.multihash_as_hex(tmp_capture_area_path)
             capture_area = {
                 "href": f"./{CAPTURE_AREA_FILE_NAME}",
@@ -93,6 +94,7 @@ class ImageryCollection:
                 "type": ContentType.GEOJSON,
                 "roles": ["metadata"],
                 "file:checksum": file_checksum,
+                "file:size": file_stats.st_size,
             }
             self.stac.setdefault("assets", {})["capture_area"] = capture_area
 

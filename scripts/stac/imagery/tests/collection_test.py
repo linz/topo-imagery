@@ -13,7 +13,6 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionTitleMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
-from scripts.stac.util import checksum
 from scripts.stac.util.stac_extensions import StacExtensions
 
 
@@ -181,8 +180,6 @@ def test_capture_data(metadata: CollectionTitleMetadata) -> None:
             b'{"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[178.254654, -38.415027], [178.254185, -38.408566], [178.25966, -38.408319], [178.265134, -38.408073], [178.265604, -38.414534], [178.260129, -38.414781], [178.254654, -38.415027]]]}, "properties": {}}'
         )
 
-    checksum_expected = checksum.multihash_as_hex(path)
-
     polygons = []
     polygons.append(
         shapely.geometry.shape(
@@ -229,5 +226,10 @@ def test_capture_data(metadata: CollectionTitleMetadata) -> None:
     assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
     assert StacExtensions.file.value in collection.stac["stac_extensions"]
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:checksum"] == checksum_expected
+    assert (
+        collection.stac["assets"]["capture_area"]["file:checksum"]
+        == "1220590ddcc9f50f173dc51f97fed93b07621d2678c9dcd4ef9f5bdc9e70f8ea25b8"
+    )
+    assert "file:size" in collection.stac["assets"]["capture_area"]
+    assert collection.stac["assets"]["capture_area"]["file:size"] == 270
     rmtree(target)
