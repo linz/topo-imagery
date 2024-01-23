@@ -171,14 +171,9 @@ def test_default_provider_is_present(metadata: CollectionTitleMetadata) -> None:
 
 
 # pylint: disable=line-too-long
-def test_capture_data(metadata: CollectionTitleMetadata) -> None:
+def test_capture_area_added(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     target = mkdtemp()
-    path = os.path.join(target, "capture-area_expected.geojson")
-    with open(path, "wb") as file:
-        file.write(
-            b'{"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[178.254654, -38.415027], [178.254185, -38.408566], [178.25966, -38.408319], [178.265134, -38.408073], [178.265604, -38.414534], [178.260129, -38.414781], [178.254654, -38.415027]]]}, "properties": {}}'
-        )
 
     polygons = []
     polygons.append(
@@ -228,8 +223,8 @@ def test_capture_data(metadata: CollectionTitleMetadata) -> None:
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
     assert (
         collection.stac["assets"]["capture_area"]["file:checksum"]
-        == "1220590ddcc9f50f173dc51f97fed93b07621d2678c9dcd4ef9f5bdc9e70f8ea25b8"
+        == "1220dd8a62b6abaf5f08cd7f350f23a9fea4f7a6c436878ee569774ea9bec1c9faa7"
     )
     assert "file:size" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:size"] == 270
+    assert collection.stac["assets"]["capture_area"]["file:size"] == 381
     rmtree(target)

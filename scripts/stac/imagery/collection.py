@@ -4,13 +4,13 @@ from datetime import datetime
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
-import geojson
 import shapely.geometry
 import shapely.ops
 import ulid
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read, write
+from scripts.stac.imagery.capture_aera import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
     HUMAN_READABLE_REGIONS,
     CollectionTitleMetadata,
@@ -77,7 +77,7 @@ class ImageryCollection:
             target: path of the capture-area-geojson file
         """
 
-        capture_area = geojson.Feature(geometry=shapely.ops.unary_union(polygons), properties={})
+        capture_area = generate_capture_area(polygons)
         with TemporaryDirectory() as tmp_path:
             tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
             write(
