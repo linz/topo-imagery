@@ -36,6 +36,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
     assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
 
 
+# pylint: disable=duplicate-code
 def test_imagery_add_collection(mocker) -> None:  # type: ignore
     metadata: CollectionTitleMetadata = {
         "category": "Urban Aerial Photos",
