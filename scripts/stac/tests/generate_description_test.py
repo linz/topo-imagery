@@ -70,7 +70,7 @@ def test_generate_description_satellite_imagery(metadata: Tuple[CollectionMetada
 
 def test_generate_description_historic_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    metadata_auck["category"] = "aerial-photos"
+    metadata_auck["category"] = "scanned-aerial-photos"
     metadata_auck["historic_survey_number"] = "SNC8844"
     collection = ImageryCollection(metadata_auck)
     description = "Scanned aerial imagery within the Auckland region captured in 2023."

@@ -4,7 +4,7 @@ from typing import Generator, Tuple
 import pytest
 
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.metadata_constants import CollectionMetadata, MissingMetadataError
 
 
 @pytest.fixture(name="metadata", autouse=True)
@@ -68,10 +68,20 @@ def test_generate_satellite_imagery_title(metadata: Tuple[CollectionMetadata, Co
 def test_generate_historic_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     title = "Auckland 0.3m SNC8844 (2023)"
     metadata_auck, _ = metadata
-    metadata_auck["category"] = "aerial-photos"
+    metadata_auck["category"] = "scanned-aerial-photos"
     metadata_auck["historic_survey_number"] = "SNC8844"
     collection = ImageryCollection(metadata_auck)
     assert collection.stac["title"] == title
+
+
+def test_generate_historic_imagery_title_missing_number(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    metadata_auck, _ = metadata
+    metadata_auck["category"] = "scanned-aerial-photos"
+    metadata_auck["historic_survey_number"] = None
+    with pytest.raises(MissingMetadataError) as excinfo:
+        ImageryCollection(metadata_auck)
+
+    assert "historic_survey_number" in str(excinfo.value)
 
 
 def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:

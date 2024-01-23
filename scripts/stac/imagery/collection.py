@@ -13,8 +13,10 @@ from scripts.stac.imagery.metadata_constants import (
     HUMAN_READABLE_REGIONS,
     RURAL_AERIAL_PHOTOS,
     SATELLITE_IMAGERY,
+    SCANNED_AERIAL_PHOTOS,
     URBAN_AERIAL_PHOTOS,
     CollectionMetadata,
+    MissingMetadataError,
     SubtypeParameterError,
 )
 from scripts.stac.imagery.provider import Provider, ProviderRole
@@ -244,7 +246,9 @@ class ImageryCollection:
         else:
             preview = None
 
-        if historic_survey_number:
+        if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
+            if not historic_survey_number:
+                raise MissingMetadataError("historic_survey_number")
             return " ".join(f"{name} {self.metadata['gsd']} {historic_survey_number} ({date}) {preview or ''}".split())
 
         if self.metadata["category"] in [
@@ -283,7 +287,6 @@ class ImageryCollection:
         """
         # format optional metadata
         geographic_description = self.metadata.get("geographic_description")
-        historic_survey_number = self.metadata.get("historic_survey_number")
         event = self.metadata.get("event_name")
 
         # format date for metadata
@@ -298,7 +301,7 @@ class ImageryCollection:
 
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
-        if historic_survey_number:
+        if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             desc = f"Scanned aerial imagery within the {region} region captured in {date}"
         elif self.metadata["category"] == SATELLITE_IMAGERY:
             desc = f"Satellite imagery within the {region} region captured in {date}"

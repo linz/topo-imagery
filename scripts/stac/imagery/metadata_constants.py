@@ -31,6 +31,11 @@ class SubtypeParameterError(Exception):
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
 
 
+class MissingMetadataError(Exception):
+    def __init__(self, metadata: str) -> None:
+        self.message = f"Missing metadata: {metadata}"
+
+
 AERIAL_PHOTOS = "aerial-photos"
 SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
 RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
