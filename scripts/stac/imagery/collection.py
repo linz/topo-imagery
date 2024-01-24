@@ -77,12 +77,12 @@ class ImageryCollection:
             target: path of the capture-area-geojson file
         """
 
-        capture_area = generate_capture_area(polygons)
+        capture_area_content = generate_capture_area(polygons)
         with TemporaryDirectory() as tmp_path:
             tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
             write(
                 tmp_capture_area_path,
-                json.dumps(capture_area).encode("utf-8"),
+                json.dumps(capture_area_content).encode("utf-8"),
                 content_type=ContentType.GEOJSON.value,
             )
 

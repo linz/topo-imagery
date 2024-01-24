@@ -32,20 +32,20 @@ def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
 
 
 def generate_capture_area(polygons: List[Polygon]) -> Dict[str, Any]:
-        """Generate the capture area from a list of polygons.
+    """Generate the capture area from a list of polygons.
 
-        Args:
-            polygons: list of polygons of the area
+    Args:
+        polygons: list of polygons of the area
 
-        Returns:
-            The capture-area document.
-        """
-        # Degree precision of 1mm (decimal places 8, https://en.wikipedia.org/wiki/Decimal_degrees)
-        # It allows to round the geometry as we've seen some tiffs geometry being slightly off by less than 1mm,
-        # due to rounding issue in their creation process (before delivery).
-        # If we don't apply this rounding, we could get a very small gap between tiffs
-        # which would result in a capture area not being a single polygon.
-        buffer_distance = 0.0000001
-        merged_polygons = merge_polygons(polygons, buffer_distance)
+    Returns:
+        The capture-area document.
+    """
+    # Degree precision of 1mm (decimal places 8, https://en.wikipedia.org/wiki/Decimal_degrees)
+    # It allows to round the geometry as we've seen some tiffs geometry being slightly off by less than 1mm,
+    # due to rounding issue in their creation process (before delivery).
+    # If we don't apply this rounding, we could get a very small gap between tiffs
+    # which would result in a capture area not being a single polygon.
+    buffer_distance = 0.0000001
+    merged_polygons = merge_polygons(polygons, buffer_distance)
 
-        return { "geometry": json.loads(to_geojson(merged_polygons)), "type": "Feature", "properties": {} }
+    return {"geometry": json.loads(to_geojson(merged_polygons)), "type": "Feature", "properties": {}}
