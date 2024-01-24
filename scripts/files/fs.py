@@ -1,7 +1,8 @@
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import List, Optional
 
+from boto3 import resource
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
@@ -33,9 +34,15 @@ def read(path: str) -> bytes:
         bytes: The bytes content of the file.
     """
     if is_s3(path):
-        return fs_s3.read(path)
+        try:
+            return fs_s3.read(path)
+        except resource("s3").meta.client.exceptions.NoSuchKey as error:
+            raise NoSuchFileError from error
 
-    return fs_local.read(path)
+    try:
+        return fs_local.read(path)
+    except FileNotFoundError as error:
+        raise NoSuchFileError from error
 
 
 def exists(path: str) -> bool:
@@ -65,10 +72,7 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {
-            executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_)): input_
-            for input_ in inputs
-        }
+        futuress = {write_file(executor, input_, target): input_ for input_ in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
@@ -77,40 +81,44 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
 
     if len(inputs) != len(written_tiffs):
         get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
-        raise Exception("Not all source files were written")
+        raise Exception("Not all mandatory source files were written")
+
     return written_tiffs
 
 
-def find_sidecars(inputs: List[str], extensions: List[str], concurrency: Optional[int] = 4) -> List[str]:
-    """Searches for sidecar files.
-     A sidecar files is a file with the same name as the input file but with a different extension.
+def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> None:
+    """Writes list of files to target destination using multithreading.
 
     Args:
-        inputs: list of input files to search for extensions
-        extensions: the sidecar file extensions
+        inputs: list of files to read
+        target: target folder to write to
         concurrency: max thread pool workers
 
     Returns:
-        list of existing sidecar files
+
     """
-
-    def _validate_path(path: str) -> Optional[str]:
-        """Helper inner function to re-return the path if it exists rather than a boolean."""
-        if exists(path):
-            return path
-        return None
-
-    sidecars: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        for extension in extensions:
-            futuress = {
-                executor.submit(_validate_path, f"{os.path.splitext(input_)[0]}{extension}"): input_ for input_ in inputs
-            }
-            for future in as_completed(futuress):
-                if future.exception():
-                    get_log().warn("Find sidecar failed", error=future.exception())
-                else:
-                    result = future.result()
-                    if result:
-                        sidecars.append(result)
-    return sidecars
+        try:
+            results = {write_file(executor, input_, target): input_ for input_ in inputs}
+            for future in as_completed(results):
+                get_log().info("wrote_sidecar_file", path=future.result())
+        except NoSuchFileError:
+            get_log().info("No sidecar file found; skipping")
+
+
+def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
+    """Read a file from a path and write it to a target path.
+
+    Args:
+        executor: A ThreadPoolExecutor instance.
+        input_: A path to a file to read.
+        target: A path to write the file to.
+
+    Returns:
+        Future[str]: The result of the execution.
+    """
+    return executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
+
+
+class NoSuchFileError(Exception):
+    pass
