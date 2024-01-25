@@ -7,6 +7,7 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.metadata_constants import CollectionTitleMetadata
 
 
+# pylint: disable=duplicate-code
 @pytest.fixture(name="metadata", autouse=True)
 def setup() -> Generator[Tuple[CollectionTitleMetadata, CollectionTitleMetadata], None, None]:
     metadata_auck: CollectionTitleMetadata = {

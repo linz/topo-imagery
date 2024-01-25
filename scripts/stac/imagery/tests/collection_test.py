@@ -16,6 +16,7 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.stac_extensions import StacExtensions
 
 
+# pylint: disable=duplicate-code
 @pytest.fixture(name="metadata", autouse=True)
 def setup() -> Generator[CollectionTitleMetadata, None, None]:
     metadata: CollectionTitleMetadata = {

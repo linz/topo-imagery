@@ -11,7 +11,7 @@ from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
-from scripts.files.fs import exists, find_sidecars, read, write, write_all
+from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
@@ -138,8 +138,13 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         footprint_tmp_path = os.path.join(tmp_path, footprint_file_name)
-        sidecars = find_sidecars(files.inputs, [".prj", ".tfw"])
-        source_files = write_all(files.inputs + sidecars, f"{tmp_path}/source/")
+        sidecars: List[str] = []
+        for extension in [".prj", ".tfw"]:
+            for file_input in files.inputs:
+                sidecars.append(f"{os.path.splitext(file_input)[0]}{extension}")
+        source_files = write_all(files.inputs, f"{tmp_path}/source/")
+        write_sidecars(sidecars, f"{tmp_path}/source/")
+
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True
