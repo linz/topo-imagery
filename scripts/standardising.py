@@ -214,7 +214,7 @@ def standardising(
                 write(
                     footprint_file_path,
                     read(footprint_tmp_path),
-                    content_type=ContentType.GEOJSON,
+                    content_type=ContentType.GEOJSON.value,
                 )
                 return tiff
 
