@@ -3,7 +3,7 @@ from datetime import datetime
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
-from scripts.stac.imagery.metadata_constants import CollectionTitleMetadata
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
 def test_imagery_stac_item(mocker) -> None:  # type: ignore
@@ -38,19 +38,19 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
 
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(mocker) -> None:  # type: ignore
-    metadata: CollectionTitleMetadata = {
-        "category": "Urban Aerial Photos",
+    metadata: CollectionMetadata = {
+        "category": "urban-aerial-photos",
         "region": "auckland",
         "gsd": "0.3m",
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
-        "location": None,
-        "event": None,
+        "event_name": None,
         "historic_survey_number": None,
+        "geographic_description": None,
     }
     ulid = "fake_ulid"
-    collection = ImageryCollection(title_metadata=metadata, collection_id=ulid)
+    collection = ImageryCollection(metadata=metadata, collection_id=ulid)
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)
