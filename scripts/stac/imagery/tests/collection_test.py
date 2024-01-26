@@ -171,7 +171,6 @@ def test_default_provider_is_present(metadata: CollectionTitleMetadata) -> None:
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-# pylint: disable=line-too-long
 def test_capture_area_added(metadata: CollectionTitleMetadata) -> None:
     collection = ImageryCollection(metadata)
     target = mkdtemp()
@@ -224,8 +223,8 @@ def test_capture_area_added(metadata: CollectionTitleMetadata) -> None:
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
     assert (
         collection.stac["assets"]["capture_area"]["file:checksum"]
-        == "1220dd8a62b6abaf5f08cd7f350f23a9fea4f7a6c436878ee569774ea9bec1c9faa7"
+        == "12209043a7059c39aa8a8bd22ad0e50476b1628a5b20df11c5a507900cab19f2741b"
     )
     assert "file:size" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:size"] == 381
+    assert collection.stac["assets"]["capture_area"]["file:size"] == 341
     rmtree(target)

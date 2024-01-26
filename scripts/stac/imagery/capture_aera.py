@@ -4,14 +4,30 @@ from typing import Any, Dict, List
 from shapely import BufferCapStyle, BufferJoinStyle, Geometry, to_geojson, union_all
 from shapely.geometry import Polygon
 
+DECIMAL_DEGREES_1M = 0.00001
+"""
+Degree precision of ~1m (decimal places 5, https://en.wikipedia.org/wiki/Decimal_degrees)
+"""
+
+
+def to_feature(geometry: Geometry) -> Dict[str, Any]:
+    """Transform a Geometry to a GeoJSON feature.
+
+    Args:
+        geometry: a Geometry
+
+    Returns:
+        a GeoJSON document.
+    """
+    return {"geometry": json.loads(to_geojson(geometry)), "type": "Feature", "properties": {}}
+
 
 def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
     """Merge a list of polygons by converting them to a single geometry that covers the same area.
     A buffer distance is used to buffer out the polygons before dissolving them together and then negative buffer them back in.
     The merged geometry is simplify (rounded) to the decimal used for the buffer.
 
-    Args
-    ----
+    Args:
         polygons: list of polygons to merge
         buffer_distance: decimal places to use to buffer the polygons
 
@@ -31,21 +47,22 @@ def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
     return union
 
 
-def generate_capture_area(polygons: List[Polygon]) -> Dict[str, Any]:
+def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]:
     """Generate the capture area from a list of polygons.
 
     Args:
         polygons: list of polygons of the area
+        gsd: Ground Sample Distance in meter
 
     Returns:
-        The capture-area document.
+        The capture-area geojson document.
     """
-    # Degree precision of 1mm (decimal places 8, https://en.wikipedia.org/wiki/Decimal_degrees)
-    # It allows to round the geometry as we've seen some tiffs geometry being slightly off by less than 1mm,
-    # due to rounding issue in their creation process (before delivery).
-    # If we don't apply this rounding, we could get a very small gap between tiffs
-    # which would result in a capture area not being a single polygon.
-    buffer_distance = 0.0000001
+    # It allows to round the geometry as we've seen some tiffs geometry being slightly off,
+    # sometimes due to rounding issue in their creation process (before delivery).
+    # If we don't apply this rounding, we could get a very small gaps between tiffs
+    # which would result in a capture area having gaps.
+    # We multiply the gsd (in meter) to the 1m degree of precision.
+    buffer_distance = DECIMAL_DEGREES_1M * gsd
     merged_polygons = merge_polygons(polygons, buffer_distance)
 
-    return {"geometry": json.loads(to_geojson(merged_polygons)), "type": "Feature", "properties": {}}
+    return to_feature(merged_polygons)
