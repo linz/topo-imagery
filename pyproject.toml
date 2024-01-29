@@ -44,7 +44,7 @@ shapely = "^2.0.1"
 tifffile = "^2023.12.9"
 
 [tool.poetry.dev-dependencies]
-black = "^23.11.0"
+black = "^24.1.1"
 isort = "^5.12.0"
 gitlint = "^0.19.1"
 mypy = "^1.6"
