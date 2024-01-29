@@ -90,6 +90,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
     Raises:
         ce: ClientError
         nsb: NoSuchBucket
+        nsk: NoSuchKey
 
     Returns:
         True if the S3 Object exists
@@ -111,8 +112,6 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
                 return True
             return False
 
-        # # load() fetch the metadata, not the data. Calls a `head` behind the scene.
-        # s3.Object(s3_path, key).load()
         s3_object = s3.Object(s3_path, key)
         s3_object.get()["ContentLength"]
         return True
