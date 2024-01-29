@@ -111,8 +111,11 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
                 return True
             return False
 
-        # load() fetch the metadata, not the data. Calls a `head` behind the scene.
-        s3.Object(s3_path, key).load()
+        # # load() fetch the metadata, not the data. Calls a `head` behind the scene.
+        # s3.Object(s3_path, key).load()
+        s3_object = s3.Object(s3_path, key)
+        file: bytes = s3_object.get()["ContentLength"].read()
+        print(file)
         return True
     except s3.meta.client.exceptions.NoSuchBucket as nsb:
         get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
