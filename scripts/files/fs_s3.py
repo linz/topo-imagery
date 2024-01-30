@@ -90,7 +90,6 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
     Raises:
         ce: ClientError
         nsb: NoSuchBucket
-        nsk: NoSuchKey
 
     Returns:
         True if the S3 Object exists
@@ -112,14 +111,11 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
                 return True
             return False
 
-        s3_object = s3.Object(s3_path, key)
-        s3_object.get()["ContentLength"]
+        # load() fetch the metadata, not the data. Calls a `head` behind the scene.
+        s3.Object(s3_path, key).load()
         return True
     except s3.meta.client.exceptions.NoSuchBucket as nsb:
         get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
-        return False
-    except s3.meta.client.exceptions.NoSuchKey as nsk:
-        get_log().error("s3_key_not_found", path=path, error=f"The specified file does not seem to exist: {nsk}")
         return False
     except s3.meta.client.exceptions.ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
@@ -127,6 +123,9 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
             return exists(path, True)
         # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
         # 404 for NoSuchKey - https://github.com/boto/boto3/issues/2442
+        if ce.response["Error"]["Code"] == "404":
+            get_log().debug("s3_key_not_found", path=path, info=f"The specified key does not seem to exist: {ce}")
+            return False
         get_log().error("s3_client_error", path=path, error=f"ClientError raised: {ce}")
         raise ce
 
