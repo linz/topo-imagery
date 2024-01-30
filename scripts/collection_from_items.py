@@ -24,7 +24,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=list(DATA_CATEGORIES.keys()) + list(DATA_CATEGORIES.values()),
+        choices=DATA_CATEGORIES.keys(),
     )
     parser.add_argument(
         "--region",
