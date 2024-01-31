@@ -75,7 +75,7 @@ def test_write_sidecars_one_found(capsys: CaptureFixture[str]) -> None:
     write(path, content)
     non_existing_path = os.path.join(target, "test.prj")
     # Write the sidecar files with one unexisting
-    write_sidecars([path_unexisting, path], os.path.join(target, "/tmp"))
+    write_sidecars([non_existing_path, path], os.path.join(target, "/tmp"))
     logs = capsys.readouterr().out
     # One has not been found
     assert "No sidecar file found; skipping" in logs
