@@ -236,6 +236,8 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
     assert "file:size" in collection.stac["assets"]["capture_area"]
     assert collection.stac["assets"]["capture_area"]["file:size"] == 341
     rmtree(target)
+
+
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
     assert "Forest assessment" == collection.stac["linz:event_name"]

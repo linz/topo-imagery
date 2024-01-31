@@ -93,7 +93,8 @@ class ImageryCollection:
             target: path of the capture-area-geojson file
         """
 
-        capture_area_content = generate_capture_area(polygons, float(self.title_metadata["gsd"].replace("m", "")))
+        # The GSD is currently alway in meters (e.g. `0.3m`)
+        capture_area_content = generate_capture_area(polygons, float(self.metadata["gsd"].replace("m", "")))
         with TemporaryDirectory() as tmp_path:
             tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
             write(
