@@ -98,12 +98,12 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
 
     """
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        try:
-            results = {write_file(executor, input_, target): input_ for input_ in inputs}
-            for future in as_completed(results):
+        results = {write_file(executor, input_, target): input_ for input_ in inputs}
+        for future in as_completed(results):
+            try:
                 get_log().info("wrote_sidecar_file", path=future.result())
-        except NoSuchFileError:
-            get_log().info("No sidecar file found; skipping")
+            except NoSuchFileError:
+                get_log().info("No sidecar file found; skipping")
 
 
 def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
@@ -117,7 +117,12 @@ def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future
     Returns:
         Future[str]: The result of the execution.
     """
-    return executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
+    future: Future[str] = Future()
+    try:
+        future = executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
+    except NoSuchFileError as nsfe:
+        future.set_exception(nsfe)
+    return future
 
 
 class NoSuchFileError(Exception):
