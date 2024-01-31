@@ -13,12 +13,7 @@ from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.metadata_constants import (
-    HUMAN_READABLE_REGIONS,
-    CollectionTitleMetadata,
-    ElevationCategories,
-    ImageryCategories,
-)
+from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
@@ -32,7 +27,7 @@ def main() -> None:
         dest="category",
         help="Dataset category description",
         required=True,
-        choices=[type.value for type in ImageryCategories] + [type.value for type in ElevationCategories],
+        choices=DATA_CATEGORIES.keys(),
     )
     parser.add_argument(
         "--region",
@@ -43,7 +38,11 @@ def main() -> None:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument(
-        "--location", dest="location", help="Optional Location of dataset, e.g.- Hutt City", type=str, required=False
+        "--geographic-description",
+        dest="geographic_description",
+        help="Optional Geographic Description of dataset, e.g. Hutt City",
+        type=str,
+        required=False,
     )
     parser.add_argument(
         "--start-date",
@@ -59,7 +58,7 @@ def main() -> None:
     parser.add_argument(
         "--historic-survey-number",
         dest="historic_survey_number",
-        help="Historic Survey Number if Applicable. E.g.- SCN8844",
+        help="Historic Survey Number if Applicable. E.g. SCN8844",
         type=str,
         required=False,
     )
@@ -95,19 +94,23 @@ def main() -> None:
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
 
-    title_metadata: CollectionTitleMetadata = {
+    collection_metadata: CollectionMetadata = {
         "category": arguments.category,
         "region": arguments.region,
         "gsd": arguments.gsd,
         "start_datetime": arguments.start_date,
         "end_datetime": arguments.end_date,
         "lifecycle": arguments.lifecycle,
-        "location": arguments.location,
-        "event": arguments.event,
+        "geographic_description": arguments.geographic_description,
+        "event_name": arguments.event,
         "historic_survey_number": arguments.historic_survey_number,
     }
 
-    collection = ImageryCollection(title_metadata=title_metadata, collection_id=arguments.collection_id, providers=providers)
+    collection = ImageryCollection(
+        metadata=collection_metadata,
+        collection_id=arguments.collection_id,
+        providers=providers,
+    )
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"

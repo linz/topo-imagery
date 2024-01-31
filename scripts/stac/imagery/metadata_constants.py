@@ -1,9 +1,8 @@
 from datetime import datetime
-from enum import Enum
 from typing import Optional, TypedDict
 
 
-class CollectionTitleMetadata(TypedDict):
+class CollectionMetadata(TypedDict):
     """
     region: Region of Dataset
     gsd: Dataset Ground Sample Distance
@@ -11,7 +10,7 @@ class CollectionTitleMetadata(TypedDict):
     end_date: Dataset capture end date
     lifecycle: Dataset status
     Optional:
-        location: Optional location of dataset, e.g. Hutt City
+        geographic_description: Optional geographic_description of dataset, e.g. Hutt City
         event: Optional details of capture event, e.g. Cyclone Gabrielle
         historic_survey_number: Optional historic imagery survey number, e.g. SNC88445
     """
@@ -22,8 +21,8 @@ class CollectionTitleMetadata(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
-    location: Optional[str]
-    event: Optional[str]
+    geographic_description: Optional[str]
+    event_name: Optional[str]
     historic_survey_number: Optional[str]
 
 
@@ -32,17 +31,28 @@ class SubtypeParameterError(Exception):
         self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
 
 
-class ImageryCategories(str, Enum):
-    SATELLITE = "Satellite Imagery"
-    URBAN = "Urban Aerial Photos"
-    RURAL = "Rural Aerial Photos"
-    AERIAL = "Aerial Photos"
-    HISTORICAL = "Scanned Aerial Photos"
+class MissingMetadataError(Exception):
+    def __init__(self, metadata: str) -> None:
+        self.message = f"Missing metadata: {metadata}"
 
 
-class ElevationCategories(str, Enum):
-    DEM = "DEM"
-    DSM = "DSM"
+AERIAL_PHOTOS = "aerial-photos"
+SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
+RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
+SATELLITE_IMAGERY = "satellite-imagery"
+URBAN_AERIAL_PHOTOS = "urban-aerial-photos"
+DEM = "dem"
+DSM = "dsm"
+
+DATA_CATEGORIES = {
+    AERIAL_PHOTOS: "Aerial Photos",
+    SCANNED_AERIAL_PHOTOS: "Scanned Aerial Photos",
+    RURAL_AERIAL_PHOTOS: "Rural Aerial Photos",
+    SATELLITE_IMAGERY: "Satellite Imagery",
+    URBAN_AERIAL_PHOTOS: "Urban Aerial Photos",
+    DEM: "DEM",
+    DSM: "DSM",
+}
 
 
 HUMAN_READABLE_REGIONS = {
