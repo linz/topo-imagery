@@ -32,8 +32,7 @@ def test_write_all_file_not_found_local(capsys: CaptureFixture[str]) -> None:
     # Raises an exception as all files are not writte·
     with raises(Exception):
         write_all(["/test.prj"], "/tmp")
-        logs = json.loads(capsys.readouterr().out.strip())
-        assert logs["error"] == NoSuchFileError()
+    assert '"error": "NoSuchFileError()"' in capsys.readouterr().out
 
 
 def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> None:
@@ -51,8 +50,7 @@ def test_write_all_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     # Raises an exception as all files are not written
     with raises(Exception):
         write_all(["s3://testbucket/test.tif"], "/tmp")
-        logs = json.loads(capsys.readouterr().out.strip())
-        assert logs["error"] == NoSuchFileError()
+    assert '"error": "NoSuchFileError()"' in capsys.readouterr().out
 
 
 @mock_s3  # type: ignore
