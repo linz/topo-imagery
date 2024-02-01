@@ -10,7 +10,7 @@ import ulid
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read, write
-from scripts.stac.imagery.capture_aera import generate_capture_area
+from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
