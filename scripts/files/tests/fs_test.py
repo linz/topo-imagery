@@ -1,4 +1,3 @@
-import json
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -24,33 +23,32 @@ def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     with raises(NoSuchFileError):
         read("s3://testbucket/test.file")
 
-    logs = json.loads(capsys.readouterr().out)
-    assert logs["msg"] == "s3_key_not_found"
+    assert "s3_key_not_found" in capsys.readouterr().out
 
 
-def test_write_all_file_not_found_local(capsys: CaptureFixture[str]) -> None:
+def test_write_all_file_not_found_local() -> None:
     # Raises an exception as all files are not writte·
-    with raises(Exception):
+    with raises(Exception) as e:
         write_all(["/test.prj"], "/tmp")
-    assert '"error": "NoSuchFileError()"' in capsys.readouterr().out
+
+    assert str(e.value) == "Not all mandatory source files were written"
 
 
 def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> None:
     write_sidecars(["/test.prj"], "/tmp")
-
-    logs = json.loads(capsys.readouterr().out.strip())
-    assert logs["msg"] == "No sidecar file found; skipping"
+    assert "No sidecar file found; skipping" in capsys.readouterr().out
 
 
 @mock_s3  # type: ignore
-def test_write_all_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
+def test_write_all_key_not_found_s3() -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
 
     # Raises an exception as all files are not written
-    with raises(Exception):
+    with raises(Exception) as e:
         write_all(["s3://testbucket/test.tif"], "/tmp")
-    assert '"error": "NoSuchFileError()"' in capsys.readouterr().out
+
+    assert str(e.value) == "Not all mandatory source files were written"
 
 
 @mock_s3  # type: ignore

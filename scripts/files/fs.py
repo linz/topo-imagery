@@ -17,6 +17,7 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
         source: The source file in bytes.
         content_type: A standard Media Type describing the format of the contents.
     """
+    get_log().debug("write", path=destination)
     if is_s3(destination):
         fs_s3.write(destination, source, content_type)
     else:
@@ -33,16 +34,35 @@ def read(path: str) -> bytes:
     Returns:
         bytes: The bytes content of the file.
     """
+    get_log().debug("read", path=path)
     if is_s3(path):
         try:
             return fs_s3.read(path)
-        except resource("s3").meta.client.exceptions.NoSuchKey as error:
-            raise NoSuchFileError from error
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
+        except resource("s3").meta.client.exceptions.ClientError as ce:
+            # Error Code can be found here:
+            # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
+            if ce.response["Error"]["Code"] == "NoSuchKey":
+                raise NoSuchFileError(path) from ce
 
     try:
         return fs_local.read(path)
     except FileNotFoundError as error:
-        raise NoSuchFileError from error
+        raise NoSuchFileError(path) from error
+
+
+def copy(source: str, target: str) -> str:
+    """Copy a `source` file to a `target`.
+
+    Args:
+        source: A path to a file to copy
+        target: A path of the copy to create
+
+    Returns:
+        The path of the file created
+    """
+    source_content = read(source)
+    return write(target, source_content)
 
 
 def exists(path: str) -> bool:
@@ -100,10 +120,11 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         results = {write_file(executor, input_, target): input_ for input_ in inputs}
         for future in as_completed(results):
-            try:
+            future_ex = future.exception()
+            if isinstance(future_ex, NoSuchFileError):
+                get_log().info("No sidecar file found; skipping", path=future_ex.path)
+            else:
                 get_log().info("wrote_sidecar_file", path=future.result())
-            except NoSuchFileError:
-                get_log().info("No sidecar file found; skipping")
 
 
 def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
@@ -117,13 +138,16 @@ def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future
     Returns:
         Future[str]: The result of the execution.
     """
-    future: Future[str] = Future()
     try:
-        future = executor.submit(write, os.path.join(target, f"{os.path.basename(input_)}"), read(input_))
+        get_log().info(f"Trying write from file: {input_}")
+        return executor.submit(copy, input_, os.path.join(target, f"{os.path.basename(input_)}"))
     except NoSuchFileError as nsfe:
+        future: Future[str] = Future()
         future.set_exception(nsfe)
-    return future
+        return future
 
 
 class NoSuchFileError(Exception):
-    pass
+    def __init__(self, path: str) -> None:
+        self.message = f"File not found: {path}"
+        self.path = path
