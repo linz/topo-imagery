@@ -211,22 +211,17 @@ class ImageryCollection:
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
         Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
-          [geographic_description / Region if no geographic_description specified] [GSD] [?Event Name] [Data Sub-Type]
-          ([Year(s)]) [?- Preview]
+          https://github.com/linz/imagery/blob/master/docs/naming.md
         DEM / DSM:
-          [geographic_description / Region if no geographic_description specified] [?- Event Name] LiDAR [GSD]
-          [Data Sub-Type] ([Year(s)]) [?- Preview]
+          https://github.com/linz/elevation/blob/master/docs/naming.md
         If Historic Survey Number:
-          [geographic_description / Region if no geographic_description specified] [GSD] [Survey Number] ([Year(s)])
-          [?- Preview]
-
+          [geographic_description / Region] [GSD] [Survey Number] ([Year(s)]) [?- Preview]
         Returns:
             Dataset Title
         """
         # format optional metadata
         geographic_description = self.metadata.get("geographic_description")
         historic_survey_number = self.metadata.get("historic_survey_number")
-        event = self.metadata.get("event_name")
 
         # format date for metadata
         if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
@@ -257,26 +252,20 @@ class ImageryCollection:
             RURAL_AERIAL_PHOTOS,
         ]:
             return " ".join(
-                f"{name} {self.metadata['gsd']} {event or ''} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                f"{name} {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
         if self.metadata["category"] in [DEM, DSM]:
             return " ".join(
-                f"{name} {self._elevation_title_event(event) or ''} LiDAR {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                f"{name} LiDAR {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
         raise SubtypeParameterError(self.metadata["category"])
-
-    def _elevation_title_event(self, event: Optional[str]) -> Optional[str]:
-        if event:
-            return f"- {event}"
-        return None
 
     def _description(self) -> str:
         """Generates the descriptions for imagery and elevation datasets.
         Urban Aerial Photos / Rural Aerial Photos:
           Orthophotography within the [Region] region captured in the [Year(s)] flying season.
         DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [region]
-          [?- geographic_description] region in [year(s)].
+          [Digital Surface Model / Digital Elevation Model] within the [Region] region in [year(s)].
         Satellite Imagery:
           Satellite imagery within the [Region] region captured in [Year(s)].
         Historical Imagery:
@@ -285,19 +274,11 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
-        # format optional metadata
-        geographic_description = self.metadata.get("geographic_description")
-        event = self.metadata.get("event_name")
-
         # format date for metadata
         if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
             date = str(self.metadata["start_datetime"].year)
         else:
             date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
-
-        # format geographic_description for metadata description
-        if geographic_description:
-            geographic_description = f"- {geographic_description}"
 
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
@@ -308,17 +289,13 @@ class ImageryCollection:
         elif self.metadata["category"] in [URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS]:
             desc = f"Orthophotography within the {region} region captured in the {date} flying season"
         elif self.metadata["category"] == DEM:
-            desc = " ".join(
-                f"Digital Elevation Model within the {region} {geographic_description or ''} region in {date}".split()
-            )
+            desc = f"Digital Elevation Model within the {region} region in {date}"
         elif self.metadata["category"] == DSM:
-            desc = " ".join(
-                f"Digital Surface Model within the {region} {geographic_description or ''} region in {date}".split()
-            )
+            desc = f"Digital Surface Model within the {region} region in {date}"
         else:
             raise SubtypeParameterError(self.metadata["category"])
 
-        if event:
-            desc = desc + f", published as a record of the {event} event"
+        if self.metadata.get("event_name"):
+            desc = desc + f", published as a record of the {self.metadata.get('event_name')} event"
 
         return desc + "."

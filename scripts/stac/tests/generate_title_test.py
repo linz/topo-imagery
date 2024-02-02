@@ -103,27 +103,30 @@ def test_generate_title_geographic_description(metadata: Tuple[CollectionMetadat
 
 def test_generate_title_event_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     _, metadata_hb = metadata
+    metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
     collection = ImageryCollection(metadata_hb)
-    title = "Hawke's Bay 0.3m Cyclone Gabrielle Rural Aerial Photos (2023)"
+    title = "Hawke's Bay Cyclone Gabrielle 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
 
 def test_generate_title_event_elevation(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     _, metadata_hb = metadata
     metadata_hb["category"] = "dsm"
+    metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
     collection = ImageryCollection(metadata_hb)
-    title = "Hawke's Bay - Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
+    title = "Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
     assert collection.stac["title"] == title
 
 
 def test_generate_title_event_satellite_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     _, metadata_hb = metadata
     metadata_hb["category"] = "satellite-imagery"
+    metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
     collection = ImageryCollection(metadata_hb)
-    title = "Hawke's Bay 0.3m Cyclone Gabrielle Satellite Imagery (2023)"
+    title = "Hawke's Bay Cyclone Gabrielle 0.3m Satellite Imagery (2023)"
     assert collection.stac["title"] == title
 
 
@@ -147,7 +150,8 @@ def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMet
 
 def test_generate_imagery_title_with_event(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    metadata_auck["event_name"] = "Forest assessment"
+    metadata_auck["geographic_description"] = "Auckland Forest Assessment"
+    metadata_auck["event_name"] = "Forest Assessment"
     collection = ImageryCollection(metadata_auck)
-    title = "Auckland 0.3m Forest assessment Rural Aerial Photos (2023)"
+    title = "Auckland Forest Assessment 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title

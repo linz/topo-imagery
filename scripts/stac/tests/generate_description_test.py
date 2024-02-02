@@ -57,7 +57,7 @@ def test_generate_description_elevation_geographic_description_input(
     metadata_auck["category"] = "dem"
     metadata_auck["geographic_description"] = "Central"
     collection = ImageryCollection(metadata_auck)
-    description = "Digital Elevation Model within the Auckland - Central region in 2023."
+    description = "Digital Elevation Model within the Auckland region in 2023."
     assert collection.stac["description"] == description
 
 
