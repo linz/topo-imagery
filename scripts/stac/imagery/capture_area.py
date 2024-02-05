@@ -39,12 +39,12 @@ def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
         # Buffer each polygon to round up to the `buffer_distance`
         buffered_poly = poly.buffer(buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
         buffered_polygons.append(buffered_poly)
-    union = union_all(buffered_polygons)
+    union_buffered = union_all(buffered_polygons)
     # Negative buffer back in the polygons
-    union = union.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
-    union = union.simplify(buffer_distance)
+    union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
+    union_simplified = union_unbuffered.simplify(buffer_distance)
 
-    return union
+    return union_simplified
 
 
 def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]:
