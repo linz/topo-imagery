@@ -1,7 +1,6 @@
 import json
 import os
 from datetime import datetime
-from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional
 
 import shapely.geometry
@@ -9,7 +8,7 @@ import shapely.ops
 import ulid
 
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import read, write
+from scripts.files.fs import write
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
@@ -94,33 +93,25 @@ class ImageryCollection:
         """
 
         # The GSD is currently alway in meters (e.g. `0.3m`)
-        capture_area_content = generate_capture_area(polygons, float(self.metadata["gsd"].replace("m", "")))
-        with TemporaryDirectory() as tmp_path:
-            tmp_capture_area_path = os.path.join(tmp_path, CAPTURE_AREA_FILE_NAME)
-            write(
-                tmp_capture_area_path,
-                json.dumps(capture_area_content).encode("utf-8"),
-                content_type=ContentType.GEOJSON.value,
-            )
+        capture_area_document = generate_capture_area(polygons, float(self.metadata["gsd"].replace("m", "")))
+        capture_area_content: bytes = json.dumps(capture_area_document).encode("utf-8")
+        file_checksum = checksum.multihash_as_hex(capture_area_content)
+        capture_area = {
+            "href": f"./{CAPTURE_AREA_FILE_NAME}",
+            "title": "Capture area",
+            "type": ContentType.GEOJSON,
+            "roles": ["metadata"],
+            "file:checksum": file_checksum,
+            "file:size": len(capture_area_content),
+        }
+        self.stac.setdefault("assets", {})["capture_area"] = capture_area
 
-            file_stats = os.stat(tmp_capture_area_path)
-            file_checksum = checksum.multihash_as_hex(tmp_capture_area_path)
-            capture_area = {
-                "href": f"./{CAPTURE_AREA_FILE_NAME}",
-                "title": "Capture area",
-                "type": ContentType.GEOJSON,
-                "roles": ["metadata"],
-                "file:checksum": file_checksum,
-                "file:size": file_stats.st_size,
-            }
-            self.stac.setdefault("assets", {})["capture_area"] = capture_area
-
-            # Save `capture-area.geojson` in target
-            write(
-                os.path.join(target, CAPTURE_AREA_FILE_NAME),
-                read(tmp_capture_area_path),
-                content_type=ContentType.GEOJSON.value,
-            )
+        # Save `capture-area.geojson` in target
+        write(
+            os.path.join(target, CAPTURE_AREA_FILE_NAME),
+            capture_area_content,
+            content_type=ContentType.GEOJSON.value,
+        )
 
         if not self.stac.get("stac_extensions"):
             self.stac["stac_extensions"] = []

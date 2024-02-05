@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 from datetime import datetime
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -97,8 +98,7 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
 
 def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
     collection = ImageryCollection(metadata)
-    checksum_expected = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
-    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum_expected)
+    mocker.patch("scripts.files.fs.read", return_value=b"")
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
     geometry = {
         "type": "Polygon",
@@ -181,7 +181,6 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
 
 def test_capture_area_added(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    target = mkdtemp()
 
     polygons = []
     polygons.append(
@@ -220,8 +219,8 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
             }
         )
     )
-
-    collection.add_capture_area(polygons, target)
+    with tempfile.TemporaryDirectory() as tmp_path:
+        collection.add_capture_area(polygons, tmp_path)
 
     assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
     assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
@@ -235,7 +234,6 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
     )
     assert "file:size" in collection.stac["assets"]["capture_area"]
     assert collection.stac["assets"]["capture_area"]["file:size"] == 341
-    rmtree(target)
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
