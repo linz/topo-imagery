@@ -13,7 +13,7 @@ from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
+from scripts.gdal.gdal_helper import EpsgCode, get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
     get_alpha_command,
     get_build_vrt_command,
@@ -206,7 +206,7 @@ def standardising(
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
                 # Create footprint GeoJSON
                 run_gdal(
-                    ["gdal_footprint", "-t_srs", "EPSG:4326"],
+                    ["gdal_footprint", "-t_srs", EpsgCode.EPSG_4326],
                     standardized_working_path,
                     footprint_tmp_path,
                 )
