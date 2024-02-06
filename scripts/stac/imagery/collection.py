@@ -113,8 +113,7 @@ class ImageryCollection:
             content_type=ContentType.GEOJSON.value,
         )
 
-        if not self.stac.get("stac_extensions"):
-            self.stac["stac_extensions"] = []
+        self.stac["stac_extensions"] = self.stac.get("stac_extensions", [])
 
         if StacExtensions.file.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
