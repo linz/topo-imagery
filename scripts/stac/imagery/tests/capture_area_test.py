@@ -41,14 +41,26 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     # The following polygon is off by 0.1 to the "right" from the previous one
     polygons.append(Polygon([(1.1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.1, 1.0)]))
-    expected_merged_polygon = Polygon([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
-    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
-
-    # Here, the allowed margin of error is 0.01 < 0.1
+    # We chose a margin of error of 0.01 (< 0.1),
+    # so the merged polygon won't be rounded enough to close the gap
     merged_polygons = merge_polygons(polygons, 0.01)
+    expected_merged_polygon = Polygon(
+        [
+            (1.0, 1.0),
+            (1.0, 0.15093536161009757),
+            (1.015018629811984, 0.1501862981198402),
+            (1.1, 1.0),
+            (1.9999999999999998, 1.0),
+            (1.9999999999999998, 0.0),
+            (0.0, 0.0),
+            (0.0, 1.0),
+            (1.0, 1.0),
+        ]
+    )
+    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert not merged_polygons.equals(expected_merged_polygon)
+    assert merged_polygons.equals(expected_merged_polygon)
 
 
 def test_generate_capture_area_rounded() -> None:
