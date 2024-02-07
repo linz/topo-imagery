@@ -138,8 +138,8 @@ def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future
     Returns:
         Future[str]: The result of the execution.
     """
+    get_log().info(f"Trying write from file: {input_}")
     try:
-        get_log().info(f"Trying write from file: {input_}")
         return executor.submit(copy, input_, os.path.join(target, f"{os.path.basename(input_)}"))
     except NoSuchFileError as nsfe:
         future: Future[str] = Future()
