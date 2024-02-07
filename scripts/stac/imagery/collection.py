@@ -222,27 +222,34 @@ class ImageryCollection:
         historic_survey_number = self.metadata.get("historic_survey_number")
 
         # format date for metadata
-        date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
-        if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
-            date = str(self.metadata["start_datetime"].year)
+        if (start_year := self.metadata["start_datetime"].year) == (end_year := self.metadata["end_datetime"].year):
+            date = str(start_year)
+        else:
+            date = f"{start_year}-{end_year}"
 
         # determine dataset name
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
-        imagery_name = region
-        elevation_description = None
         if geographic_description:
             imagery_name = geographic_description
             elevation_description = f"- {geographic_description}"
+        else:
+            imagery_name = region
+            elevation_description = None
 
         # determine if dataset is preview
-        preview = None
         if self.metadata.get("lifecycle") == "preview":
             preview = "- Preview"
+        else:
+            preview = None
 
         if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
-            return " ".join(f"{imagery_name} {self.metadata['gsd']} {historic_survey_number} ({date}) {preview or ''}".split())
+            return " ".join(
+                value
+                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", preview or None]
+                if value is not None
+            )
 
         if self.metadata["category"] in [
             SATELLITE_IMAGERY,
@@ -250,11 +257,29 @@ class ImageryCollection:
             RURAL_AERIAL_PHOTOS,
         ]:
             return " ".join(
-                f"{imagery_name} {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                value
+                for value in [
+                    imagery_name,
+                    self.metadata["gsd"],
+                    DATA_CATEGORIES[self.metadata["category"]],
+                    f"({date})",
+                    preview or None,
+                ]
+                if value is not None
             )
         if self.metadata["category"] in [DEM, DSM]:
             return " ".join(
-                f"{region} {elevation_description or ''} LiDAR {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                value
+                for value in [
+                    region,
+                    elevation_description or None,
+                    "LiDAR",
+                    self.metadata["gsd"],
+                    DATA_CATEGORIES[self.metadata["category"]],
+                    f"({date})",
+                    preview or None,
+                ]
+                if value is not None
             )
         raise SubtypeParameterError(self.metadata["category"])
 
@@ -271,9 +296,10 @@ class ImageryCollection:
             Dataset Description
         """
         # format date for metadata
-        date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
-        if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
-            date = str(self.metadata["start_datetime"].year)
+        if (start_year := self.metadata["start_datetime"].year) == (end_year := self.metadata["end_datetime"].year):
+            date = str(start_year)
+        else:
+            date = f"{start_year}-{end_year}"
 
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
@@ -290,7 +316,7 @@ class ImageryCollection:
         else:
             raise SubtypeParameterError(self.metadata["category"])
 
-        if self.metadata.get("event_name"):
-            desc = desc + f", published as a record of the {self.metadata.get('event_name')} event"
+        if event := self.metadata.get("event_name"):
+            desc = desc + f", published as a record of the {event} event"
 
         return desc + "."
