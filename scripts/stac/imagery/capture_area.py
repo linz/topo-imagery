@@ -49,6 +49,13 @@ def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
 
 def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]:
     """Generate the capture area from a list of polygons.
+    Providing the `gsd` allows to round the geometry as we've seen some tiffs geometry being slightly off,
+    sometimes due to rounding issue in their creation process (before delivery).
+    If we don't apply this rounding, we could get a very small gaps between tiffs
+    which would result in a capture area having gaps.
+    The `gsd` (in meter) is multiplied by the 1m degree of precision.
+    Note that all the polygons are buffered which means a gap bigger than the gsd,
+    but < gsd*2) will be closed.
 
     Args:
         polygons: list of polygons of the area
@@ -57,13 +64,6 @@ def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]
     Returns:
         The capture-area geojson document.
     """
-    # It allows to round the geometry as we've seen some tiffs geometry being slightly off,
-    # sometimes due to rounding issue in their creation process (before delivery).
-    # If we don't apply this rounding, we could get a very small gaps between tiffs
-    # which would result in a capture area having gaps.
-    # We multiply the gsd (in meter) to the 1m degree of precision.
-    # Note that all the polygons are buffered which means a gap bigger than the gsd,
-    # but < gsd*2) will be closed.
     buffer_distance = DECIMAL_DEGREES_1M * gsd
     merged_polygons = merge_polygons(polygons, buffer_distance)
 
