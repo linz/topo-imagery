@@ -116,7 +116,7 @@ def test_generate_title_event_elevation(metadata: Tuple[CollectionMetadata, Coll
     metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
     collection = ImageryCollection(metadata_hb)
-    title = "Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
+    title = "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
     assert collection.stac["title"] == title
 
 

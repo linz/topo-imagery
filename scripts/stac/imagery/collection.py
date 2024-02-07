@@ -210,12 +210,10 @@ class ImageryCollection:
 
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
-        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos:
+        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
         DEM / DSM:
           https://github.com/linz/elevation/blob/master/docs/naming.md
-        If Historic Survey Number:
-          [geographic_description / Region] [GSD] [Survey Number] ([Year(s)]) [?- Preview]
         Returns:
             Dataset Title
         """
@@ -224,27 +222,27 @@ class ImageryCollection:
         historic_survey_number = self.metadata.get("historic_survey_number")
 
         # format date for metadata
+        date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
         if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
             date = str(self.metadata["start_datetime"].year)
-        else:
-            date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
 
         # determine dataset name
+        region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
+        imagery_name = region
+        elevation_description = None
         if geographic_description:
-            name = geographic_description
-        else:
-            name = HUMAN_READABLE_REGIONS[self.metadata["region"]]
+            imagery_name = geographic_description
+            elevation_description = f"- {geographic_description}"
 
         # determine if dataset is preview
+        preview = None
         if self.metadata.get("lifecycle") == "preview":
             preview = "- Preview"
-        else:
-            preview = None
 
         if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
-            return " ".join(f"{name} {self.metadata['gsd']} {historic_survey_number} ({date}) {preview or ''}".split())
+            return " ".join(f"{imagery_name} {self.metadata['gsd']} {historic_survey_number} ({date}) {preview or ''}".split())
 
         if self.metadata["category"] in [
             SATELLITE_IMAGERY,
@@ -252,11 +250,11 @@ class ImageryCollection:
             RURAL_AERIAL_PHOTOS,
         ]:
             return " ".join(
-                f"{name} {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                f"{imagery_name} {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
         if self.metadata["category"] in [DEM, DSM]:
             return " ".join(
-                f"{name} LiDAR {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
+                f"{region} {elevation_description or ''} LiDAR {self.metadata['gsd']} {DATA_CATEGORIES[self.metadata['category']]} ({date}) {preview or ''}".split()  # pylint: disable=line-too-long
             )
         raise SubtypeParameterError(self.metadata["category"])
 
@@ -266,19 +264,16 @@ class ImageryCollection:
           Orthophotography within the [Region] region captured in the [Year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region in [year(s)].
-        Satellite Imagery:
-          Satellite imagery within the [Region] region captured in [Year(s)].
-        Historical Imagery:
-          Scanned aerial imagery within the [Region] region captured in [Year(s)].
+        Satellite Imagery / Scanned Aerial Photos:
+          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [Year(s)].
 
         Returns:
             Dataset Description
         """
         # format date for metadata
+        date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
         if self.metadata["start_datetime"].year == self.metadata["end_datetime"].year:
             date = str(self.metadata["start_datetime"].year)
-        else:
-            date = f"{self.metadata['start_datetime'].year}-{self.metadata['end_datetime'].year}"
 
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
