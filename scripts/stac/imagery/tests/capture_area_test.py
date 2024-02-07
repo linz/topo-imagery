@@ -11,9 +11,11 @@ def test_merge_polygons() -> None:
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     polygons.append(Polygon([(1.0, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.0, 1.0)]))
     expected_merged_polygon = Polygon([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
-    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
-
     merged_polygons = merge_polygons(polygons, 0)
+
+    print(f"Polygon A: {to_feature(polygons[0])}")
+    print(f"Polygon B: {to_feature(polygons[1])}")
+    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
     # Using `Polygon.equals()` as merge_polygons might return a different set of coordinates for the same geometry
@@ -27,10 +29,12 @@ def test_merge_polygons_with_rounding() -> None:
     # The following polygon is off by 0.1 to the "right" from the previous one
     polygons.append(Polygon([(1.1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.1, 1.0)]))
     expected_merged_polygon = Polygon([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
-    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
-
     # By giving a buffer distance of 0.1, we want to correct this margin of error and have the two polygons being merged
     merged_polygons = merge_polygons(polygons, 0.1)
+
+    print(f"Polygon A: {to_feature(polygons[0])}")
+    print(f"Polygon B: {to_feature(polygons[1])}")
+    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
     assert merged_polygons.equals(expected_merged_polygon)
@@ -57,6 +61,9 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
             (1.0, 1.0),
         ]
     )
+
+    print(f"Polygon A: {to_feature(polygons[0])}")
+    print(f"Polygon B: {to_feature(polygons[1])}")
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
@@ -64,93 +71,53 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
 
 
 def test_generate_capture_area_rounded() -> None:
-    polygons = []
-    polygons.append(
-        Polygon(
-            [
-                (178.254184985672936, -38.40856551170436),
-                (178.254654234749751, -38.41502700730107),
-                (178.260129304159022, -38.41478071250544),
-                (178.259657, -38.408319273592511),
-                (178.254184985672936, -38.40856551170436),
-            ]
-        )
-    )
-    polygons.append(
-        Polygon(
-            [
-                (178.259659571653003, -38.408319273592511),
-                (178.260129304159022, -38.41478071250544),
-                (178.265604306681723, -38.414534163261521),
-                (178.265134090769521, -38.408072781090567),
-                (178.259659571653003, -38.408319273592511),
-            ]
-        )
-    )
-    # There is a gap of ~0.2m between the top right corner of the first polygon and the top left corner of the second one
-    # This gap should not be visible but covered in the capture-area
-    expected_merged_polygon = Polygon(
-        [
-            (178.25965700000006, -38.40831927359251),
-            (178.26513409076952, -38.40807278109057),
-            (178.26560430668172, -38.41453416326152),
-            (178.25465423474975, -38.41502700730107),
-            (178.25418498567294, -38.40856551170436),
-            (178.25965700000006, -38.40831927359251),
-        ]
-    )
-    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
+    polygons_no_gap = []
+    polygons_no_gap.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]))
+    polygons_no_gap.append(Polygon([(1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
+    polygon_with_gap = []
+    polygon_with_gap.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]))
+    # The top left corner of the following polygon is off by 0.000001 (~0.11m) to the "right" from the previous one
+    polygon_with_gap.append(Polygon([(1.000001, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
 
     # Using GSD of 0.2m
-    capture_area = generate_capture_area(polygons, 0.2)
-    print(f"GeoJSON result: {capture_area}")
+    # Generate the capture area of the polygons that don't have a gap between each other
+    capture_area_expected = generate_capture_area(polygons_no_gap, 0.2)
+    # Generate the capture area of the polygons that have a gap between each other
+    capture_area_result = generate_capture_area(polygon_with_gap, 0.2)
 
-    assert capture_area == to_feature(expected_merged_polygon)
+    print(f"Polygon no gap A: {to_feature(polygons_no_gap[0])}")
+    print(f"Polygon no gap B: {to_feature(polygons_no_gap[1])}")
+    print(f"Polygon with gap A: {to_feature(polygon_with_gap[0])}")
+    print(f"Polygon with gap B: {to_feature(polygon_with_gap[1])}")
+    print(f"Capture area expected: {capture_area_expected}")
+    print(f"Capture area result: {capture_area_result}")
+
+    # This gap should not be visible but covered in the capture-area
+    # as the GSD is 0.2m * 2 > 0.1m
+    assert capture_area_expected == capture_area_result
 
 
 def test_generate_capture_area_not_rounded() -> None:
-    polygons = []
-    polygons.append(
-        Polygon(
-            [
-                (178.254184985672936, -38.40856551170436),
-                (178.254654234749751, -38.41502700730107),
-                (178.260129304159022, -38.41478071250544),
-                (178.259654, -38.408319273592511),
-                (178.254184985672936, -38.40856551170436),
-            ]
-        )
-    )
-    polygons.append(
-        Polygon(
-            [
-                (178.259659571653003, -38.408319273592511),
-                (178.260129304159022, -38.41478071250544),
-                (178.265604306681723, -38.414534163261521),
-                (178.265134090769521, -38.408072781090567),
-                (178.259659571653003, -38.408319273592511),
-            ]
-        )
-    )
-    # There is a gap of  > 0.4m between the top right corner of the first polygon and the top left corner of the second one.
-    # This gap should remain in the capture area as too big to be a rounding issue that we want to covered up.
-    expected_merged_polygon = Polygon(
-        [
-            (178.259654, -38.40831927359251),
-            (178.259787907001, -38.41013964879939),
-            (178.25979188779417, -38.410139357688166),
-            (178.259659571653, -38.40831927359251),
-            (178.26513409076952, -38.40807278109057),
-            (178.26560430668172, -38.41453416326152),
-            (178.25465423474975, -38.41502700730107),
-            (178.25418498567294, -38.40856551170436),
-            (178.259654, -38.40831927359251),
-        ]
-    )
-    print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
+    polygons_no_gap = []
+    polygons_no_gap.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]))
+    polygons_no_gap.append(Polygon([(1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
+    polygon_with_gap = []
+    polygon_with_gap.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]))
+    # The top left corner of the following polygon is off by 0.000004 (~0.44m) to the "right" from the previous one
+    polygon_with_gap.append(Polygon([(1.000004, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
 
     # Using GSD of 0.2m
-    capture_area = generate_capture_area(polygons, 0.2)
-    print(f"GeoJSON result: {capture_area}")
+    # Generate the capture area of the polygons that don't have a gap between each other
+    capture_area_expected = generate_capture_area(polygons_no_gap, 0.2)
+    # Generate the capture area of the polygons that have a gap between each other
+    capture_area_result = generate_capture_area(polygon_with_gap, 0.2)
 
-    assert capture_area == to_feature(expected_merged_polygon)
+    print(f"Polygon no gap A: {to_feature(polygons_no_gap[0])}")
+    print(f"Polygon no gap B: {to_feature(polygons_no_gap[1])}")
+    print(f"Polygon with gap A: {to_feature(polygon_with_gap[0])}")
+    print(f"Polygon with gap B: {to_feature(polygon_with_gap[1])}")
+    print(f"Capture area expected: {capture_area_expected}")
+    print(f"Capture area result: {capture_area_result}")
+    # This gap should not be covered in the capture-area
+    # as the GSD is 0.2m * 2 < 0.44m
+    assert capture_area_expected != capture_area_result

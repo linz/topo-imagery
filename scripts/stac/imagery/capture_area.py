@@ -62,6 +62,8 @@ def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]
     # If we don't apply this rounding, we could get a very small gaps between tiffs
     # which would result in a capture area having gaps.
     # We multiply the gsd (in meter) to the 1m degree of precision.
+    # Note that all the polygons are buffered which means a gap bigger than the gsd,
+    # but < gsd*2) will be closed.
     buffer_distance = DECIMAL_DEGREES_1M * gsd
     merged_polygons = merge_polygons(polygons, buffer_distance)
 
