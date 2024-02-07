@@ -92,7 +92,7 @@ class ImageryCollection:
             target: path of the capture-area-geojson file
         """
 
-        # The GSD is currently alway in meters (e.g. `0.3m`)
+        # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, float(self.metadata["gsd"].replace("m", "")))
         capture_area_content: bytes = json.dumps(capture_area_document).encode("utf-8")
         file_checksum = checksum.multihash_as_hex(capture_area_content)
