@@ -136,7 +136,7 @@ def test_list_files_in_uri() -> None:
     boto3_client.put_object(Bucket=bucket_name, Key="data/image.tiff", Body=b"")
     boto3_client.put_object(Bucket=bucket_name, Key="data/image_meta.xml", Body=b"")
 
-    files = list_files_in_uri("s3://testbucket/data/", [".json", "_meta.xml"], boto3_client)
+    files = list_files_in_uri(f"s3://{bucket_name}/data/", [".json", "_meta.xml"], boto3_client)
 
     assert len(files) == 2
     assert set(files) == {"data/collection.json", "data/image_meta.xml"}
