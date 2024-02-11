@@ -113,7 +113,7 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
     """Get the tile offset from its coordinate and the grid size
 
     Args:
-        grid_size: a size in [50_000, 10_000, 5_000, 2_000, 1_000, 500]
+        grid_size: a size in [10_000, 5_000, 2_000, 1_000, 500]
         x: upper left coordinate x
         y: upper left coordinate y
 
