@@ -45,9 +45,7 @@ def get_bounds_from_name(tile_name: str) -> Bounds:
     """
     # check for 50k imagery
     if re.match(r"^[A-Z]{2}\d{2}$", tile_name):
-        map_sheet = tile_name
-        grid_size = 50_000
-        origin = get_mapsheet_offset(map_sheet)
+        origin = get_mapsheet_offset(tile_name)
         return Bounds(
             Point(x=origin.x, y=origin.y),
             Size(SHEET_WIDTH, SHEET_HEIGHT),
