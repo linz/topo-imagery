@@ -198,6 +198,10 @@ def standardising(
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
 
+        # Update the `FileTiff.gdalinfo` as the system has local access to the TIFF
+        get_log().debug("Saving gdalinfo from local standardised TIFF in FileTiff object", path=standardized_working_path)
+        tiff.get_gdalinfo(standardized_working_path)
+
         with TiffFile(standardized_working_path) as file_handle:
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
                 write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
