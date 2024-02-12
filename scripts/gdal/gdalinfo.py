@@ -1,5 +1,4 @@
 import json
-import re
 from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from linz_logger import get_log
@@ -100,18 +99,6 @@ def gdal_info(path: str) -> GdalInfo:
     except GDALExecutionException as e:
         get_log().error("gdalinfo_failed", file=path, error=str(e))
         raise e
-
-
-def format_wkt(wkt: str) -> str:
-    """Remove newline, spaces, and replace double quotes by quotes in wkt output (gdalinfo).
-
-    Args:
-        wkt (str): The wkt output from gdalinfo.
-
-    Returns:
-        str: The wkt output formatted.
-    """
-    return re.sub(r"\s+", " ", (wkt.replace('"', "'").replace("\n", "")))
 
 
 def get_origin(gdalinfo: GdalInfo) -> Point:
