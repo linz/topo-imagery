@@ -1,8 +1,5 @@
 import os
 from enum import Enum
-from typing import Optional
-
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 
 
 class ContentType(str, Enum):
@@ -49,26 +46,6 @@ def is_tiff(path: str) -> bool:
         ```
     """
     return path.lower().endswith((".tiff", ".tif"))
-
-
-def is_geotiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
-    """Verifies if a file is a GTiff based on the presence of the
-    `coordinateSystem`.
-
-    Args:
-        path: a path to a file
-        gdalinfo_data: gdalinfo of the file. Defaults to None.
-
-    Returns:
-        True if the file is a GTiff
-    """
-    if not gdalinfo_data:
-        gdalinfo_data = gdal_info(path)
-    if "coordinateSystem" not in gdalinfo_data:
-        return False
-    if gdalinfo_data["driverShortName"] == "GTiff":
-        return True
-    return False
 
 
 def is_json(path: str) -> bool:

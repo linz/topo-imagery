@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/linz/topo-imagery/compare/v4.0.0...v4.0.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* handle 50k imagery filenames TDE-1014 ([#845](https://github.com/linz/topo-imagery/issues/845)) ([07a7af5](https://github.com/linz/topo-imagery/commit/07a7af50c915a39e0108e87b66eb8837fd8a6e77))
+
 ## [4.0.0](https://github.com/linz/topo-imagery/compare/v3.6.0...v4.0.0) (2024-02-08)
 
 

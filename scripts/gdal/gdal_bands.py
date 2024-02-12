@@ -2,7 +2,8 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
-from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand, gdal_info
+from scripts.gdal.gdal_helper import gdal_info
+from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
 def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
