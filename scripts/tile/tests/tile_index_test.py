@@ -10,6 +10,12 @@ def test_get_bounds_from_name() -> None:
     assert expected_bounds == bounds
 
 
+def test_get_bounds_from_50k_name() -> None:
+    expected_bounds = Bounds(Point(x=1180000, y=4758000), Size(width=24_000, height=36_000))
+    bounds = get_bounds_from_name("CK08")
+    assert expected_bounds == bounds
+
+
 @pytest.mark.dependency()
 def test_get_tile_offset() -> None:
     expected_bounds = Bounds(Point(x=8640, y=28440), Size(width=240, height=360))
