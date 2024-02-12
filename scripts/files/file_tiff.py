@@ -2,8 +2,8 @@ import json
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
+from scripts.gdal.gdalinfo import GdalInfo
 
 
 class FileTiffErrorType(str, Enum):

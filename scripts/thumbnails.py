@@ -7,10 +7,10 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.files.files_helper import ContentType, get_file_name_from_path, is_geotiff, is_tiff
+from scripts.files.files_helper import ContentType, get_file_name_from_path, is_tiff
 from scripts.files.fs import exists, read, write
-from scripts.gdal import gdalinfo
-from scripts.gdal.gdal_helper import run_gdal
+from scripts.gdal import gdal_helper
+from scripts.gdal.gdal_helper import is_geotiff, run_gdal
 from scripts.gdal.gdal_preset import get_thumbnail_command
 from scripts.logging.time_helper import time_in_ms
 
@@ -46,7 +46,7 @@ def thumbnails(path: str, target: str) -> str | None:
         # Generate thumbnail
         # For both GeoTIFF and TIFF (not georeferenced) this is done in 2 steps.
         # Why? because it hasn't been found another way to get the same visual aspect.
-        gdalinfo_data = gdalinfo.gdal_info(source_tiff)
+        gdalinfo_data = gdal_helper.gdal_info(source_tiff)
         if is_geotiff(source_tiff, gdalinfo_data):
             get_log().info("thumbnail_generate_geotiff", path=target_thumbnail)
             run_gdal(get_thumbnail_command("jpeg", source_tiff, transitional_jpg, "50%", "50%", None, gdalinfo_data))
