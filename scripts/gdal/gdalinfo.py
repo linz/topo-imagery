@@ -1,10 +1,6 @@
-import json
 import re
-from typing import Any, Dict, List, Optional, TypedDict, cast
+from typing import Any, Dict, List, Optional, TypedDict
 
-from linz_logger import get_log
-
-from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
 from scripts.tile.tile_index import Point
 
 
@@ -77,29 +73,6 @@ class GdalInfo(TypedDict):
     bands: List[GdalInfoBand]
     """Coordinate system description"""
     coordinateSystem: Dict[Any, Any]
-
-
-def gdal_info(path: str) -> GdalInfo:
-    """run gdalinfo on the provided file
-
-    Args:
-        path: path to file to gdalinfo
-
-    Returns:
-        GdalInfo output
-    """
-    # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
-    gdalinfo_command = ["gdalinfo", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
-
-    try:
-        gdalinfo_process = run_gdal(gdalinfo_command, path)
-        return cast(GdalInfo, json.loads(gdalinfo_process.stdout))
-    except json.JSONDecodeError as e:
-        get_log().error("load_gdalinfo_result_error", file=path, error=e)
-        raise e
-    except GDALExecutionException as e:
-        get_log().error("gdalinfo_failed", file=path, error=str(e))
-        raise e
 
 
 def format_wkt(wkt: str) -> str:

@@ -1,4 +1,5 @@
-from scripts.files.files_helper import is_geotiff, is_tiff
+from scripts.files.files_helper import is_tiff
+from scripts.gdal.gdal_helper import is_geotiff
 from scripts.gdal.tests.gdalinfo import fake_gdal_info
 
 

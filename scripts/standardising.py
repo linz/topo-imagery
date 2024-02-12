@@ -13,7 +13,7 @@ from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import get_gdal_version, run_gdal
+from scripts.gdal.gdal_helper import gdal_info, get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
     get_alpha_command,
     get_build_vrt_command,
@@ -21,7 +21,6 @@ from scripts.gdal.gdal_preset import (
     get_gdal_command,
     get_transform_srs_command,
 )
-from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
