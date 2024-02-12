@@ -1,4 +1,3 @@
-import re
 from typing import Any, Dict, List, Optional, TypedDict
 
 from scripts.tile.tile_index import Point
@@ -73,18 +72,6 @@ class GdalInfo(TypedDict):
     bands: List[GdalInfoBand]
     """Coordinate system description"""
     coordinateSystem: Dict[Any, Any]
-
-
-def format_wkt(wkt: str) -> str:
-    """Remove newline, spaces, and replace double quotes by quotes in wkt output (gdalinfo).
-
-    Args:
-        wkt (str): The wkt output from gdalinfo.
-
-    Returns:
-        str: The wkt output formatted.
-    """
-    return re.sub(r"\s+", " ", (wkt.replace('"', "'").replace("\n", "")))
 
 
 def get_origin(gdalinfo: GdalInfo) -> Point:
