@@ -1,14 +1,13 @@
 import argparse
 import json
-import os
 import tempfile
 from functools import partial
 from multiprocessing import Pool
+from os.path import basename, join, splitext
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import is_argo
-from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import read, write_all, write_sidecars
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_preset import get_ascii_translate_command
@@ -58,7 +57,7 @@ def main() -> None:
         sidecars = []
         for extension in [".prj", ".tfw"]:
             for ls in asc_files:
-                sidecars.append(f"{os.path.splitext(ls)[0]}{extension}")
+                sidecars.append(f"{splitext(ls)[0]}{extension}")
         write_sidecars(sidecars, f"{tmp_path}/source/")
         get_log().info("sidecar files copied", duration=time_in_ms() - start_time, count=len(sidecars))
 
@@ -72,8 +71,8 @@ def translate_ascii(file: str, target_dir_path: str) -> str:
     Returns:
         full path to translated file
     """
-    filename = get_file_name_from_path(file)
-    tiff = os.path.join(target_dir_path, f"{filename}.tiff")
+    filename = basename(file)
+    tiff = join(target_dir_path, f"{filename}.tiff")
     run_gdal(get_ascii_translate_command(), input_file=file, output_file=tiff)
     return tiff
 

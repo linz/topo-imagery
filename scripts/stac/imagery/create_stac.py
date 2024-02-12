@@ -1,8 +1,8 @@
+from os.path import basename
 from typing import Optional
 
 from linz_logger import get_log
 
-from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdalinfo import GdalInfo, gdal_info
 from scripts.stac.imagery.item import ImageryItem
@@ -27,7 +27,7 @@ def create_item(
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    id_ = get_file_name_from_path(file)
+    id_ = basename(file)
 
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(file)

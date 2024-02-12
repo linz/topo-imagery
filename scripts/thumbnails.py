@@ -1,13 +1,13 @@
 import argparse
 import json
-import os
 import tempfile
 from functools import partial
 from multiprocessing import Pool
+from os.path import basename, join
 
 from linz_logger import get_log
 
-from scripts.files.files_helper import ContentType, get_file_name_from_path, is_geotiff, is_tiff
+from scripts.files.files_helper import ContentType, is_geotiff, is_tiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal import gdalinfo
 from scripts.gdal.gdal_helper import run_gdal
@@ -31,15 +31,15 @@ def thumbnails(path: str, target: str) -> str | None:
             get_log().debug("thumbnails_skip_not_tiff", file=path)
             return None
 
-        basename = get_file_name_from_path(path)
-        target_thumbnail = os.path.join(target, f"{basename}-thumbnail.jpg")
+        filename = basename(path)
+        target_thumbnail = join(target, f"{filename}-thumbnail.jpg")
         # Verify the thumbnail has not been already generated
         if exists(target_thumbnail):
             get_log().info("thumbnails_already_exists", path=target_thumbnail)
             return None
-        transitional_jpg = os.path.join(tmp_path, f"{basename}.jpg")
-        tmp_thumbnail = os.path.join(tmp_path, f"{basename}-thumbnail.jpg")
-        source_tiff = os.path.join(tmp_path, f"{basename}.tiff")
+        transitional_jpg = join(tmp_path, f"{filename}.jpg")
+        tmp_thumbnail = join(tmp_path, f"{filename}-thumbnail.jpg")
+        source_tiff = join(tmp_path, f"{filename}.tiff")
         # Download source file
         write(source_tiff, read(path))
 

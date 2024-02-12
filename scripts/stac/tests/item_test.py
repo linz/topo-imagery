@@ -1,6 +1,6 @@
 from datetime import datetime
+from os.path import basename
 
-from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
@@ -17,7 +17,7 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
 
     path = "./test/BR34_5000_0302.tiff"
-    id_ = get_file_name_from_path(path)
+    id_ = basename(path)
     start_datetime = "2021-01-27 00:00:00Z"
     end_datetime = "2021-01-27 00:00:00Z"
 
@@ -53,7 +53,7 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
     collection = ImageryCollection(metadata=metadata, collection_id=ulid)
 
     path = "./test/BR34_5000_0302.tiff"
-    id_ = get_file_name_from_path(path)
+    id_ = basename(path)
     checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
     mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
     item = ImageryItem(id_, path)

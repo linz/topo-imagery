@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 from typing import Optional
 
@@ -11,24 +10,6 @@ class ContentType(str, Enum):
     # https://www.iana.org/assignments/media-types/application/geo+json
     GEOJSON = "application/geo+json"
     JPEG = "image/jpeg"
-
-
-def get_file_name_from_path(path: str) -> str:
-    """Get the file name from a path.
-
-    Args:
-        path: a path to a file
-
-    Returns:
-        the name of the file
-
-    Example:
-        ```
-        >>> get_file_name_from_path("/a/path/to/file.ext")
-        "file.ext"
-        ```
-    """
-    return os.path.splitext(os.path.basename(path))[0]
 
 
 def is_tiff(path: str) -> bool:
