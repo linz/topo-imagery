@@ -140,10 +140,8 @@ def bucket_name_from_path(path: str) -> str:
         the bucket name
 
     Example:
-        ```
         >>> bucket_name_from_path("s3://linz-imagery/wellingon/")
-        "linz-imagery"
-        ```
+        'linz-imagery'
     """
     path_parts = path.replace("s3://", "").split("/")
     return path_parts.pop(0)
@@ -159,10 +157,8 @@ def prefix_from_path(path: str) -> str:
         the prefix
 
     Example:
-        ```
         >>> prefix_from_path("s3://linz-imagery/wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff")
-        "wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff"
-        ```
+        'wellington/wellington_2021_0.075m/rgb/2193/BP31_500_097091.tiff'
     """
     bucket_name = bucket_name_from_path(path)
     return path.replace(f"s3://{bucket_name}/", "")
