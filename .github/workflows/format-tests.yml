@@ -24,7 +24,7 @@ jobs:
           poetry run pre-commit run --all-files
       - name: Unit Tests
         run: |
-          poetry run pytest .
+          poetry run pytest --doctest-modules .
 
       - name: Build containers
         run: |
