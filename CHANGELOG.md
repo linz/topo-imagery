@@ -1,5 +1,32 @@
 # Changelog
 
+## [4.0.1](https://github.com/linz/topo-imagery/compare/v4.0.0...v4.0.1) (2024-02-12)
+
+
+### Bug Fixes
+
+* handle 50k imagery filenames TDE-1014 ([#845](https://github.com/linz/topo-imagery/issues/845)) ([07a7af5](https://github.com/linz/topo-imagery/commit/07a7af50c915a39e0108e87b66eb8837fd8a6e77))
+
+## [4.0.0](https://github.com/linz/topo-imagery/compare/v3.6.0...v4.0.0) (2024-02-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* add new fields to the Collection TDE-985 ([#765](https://github.com/linz/topo-imagery/issues/765))
+
+### Features
+
+* accept only hyphen named categories TDE-985 ([#830](https://github.com/linz/topo-imagery/issues/830)) ([26682c8](https://github.com/linz/topo-imagery/commit/26682c83565fa400b61378caedc15b50cbe3aabc))
+* add new fields to the Collection TDE-985 ([#765](https://github.com/linz/topo-imagery/issues/765)) ([78016f6](https://github.com/linz/topo-imagery/commit/78016f6b6e01de1b3132e12ebeaf431da61537c2))
+
+
+### Bug Fixes
+
+* Disable duplicate code test ([#817](https://github.com/linz/topo-imagery/issues/817)) ([cde875d](https://github.com/linz/topo-imagery/commit/cde875dc730011165b73848338a700394eccdb4b))
+* NoSuchFileError is stopping multiprocessing sidecar files TDE-1007 ([#832](https://github.com/linz/topo-imagery/issues/832)) ([dea3189](https://github.com/linz/topo-imagery/commit/dea3189b9afbb198e02888ed6ef9ebb17687a000))
+* sidecars download permissions TDE-1007 ([#806](https://github.com/linz/topo-imagery/issues/806)) ([16b5b04](https://github.com/linz/topo-imagery/commit/16b5b0472d10f0ec9f0a3a6689af9e1edfcb7fda))
+* write_file was not handling exception correctly TDE-1007 ([#836](https://github.com/linz/topo-imagery/issues/836)) ([caa289b](https://github.com/linz/topo-imagery/commit/caa289b240989f860f66412c0d028752ec1a17d9))
+
 ## [3.6.0](https://github.com/linz/topo-imagery/compare/v3.5.2...v3.6.0) (2024-01-09)
 
 

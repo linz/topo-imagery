@@ -1,3 +1,4 @@
+import re
 from typing import NamedTuple, Union
 
 from scripts.tile.util import charcodeat
@@ -42,6 +43,14 @@ def get_bounds_from_name(tile_name: str) -> Bounds:
     Returns:
         a `Bounds` object
     """
+    # check for 50k imagery
+    if re.match(r"^[A-Z]{2}\d{2}$", tile_name):
+        origin = get_mapsheet_offset(tile_name)
+        return Bounds(
+            Point(x=origin.x, y=origin.y),
+            Size(SHEET_WIDTH, SHEET_HEIGHT),
+        )
+
     name_parts = tile_name.split("_")
     map_sheet = name_parts[0]
     # should be in [10_000, 5_000, 2_000, 1_000, 500]
@@ -104,9 +113,9 @@ def get_tile_offset(grid_size: int, x: int, y: int) -> Bounds:
     """Get the tile offset from its coordinate and the grid size
 
     Args:
-        grid_size: a size from in [10_000, 5_000, 2_000, 1_000, 500]
-        x: upper left cooridinate x
-        y: upper left cooridinate y
+        grid_size: a size in [10_000, 5_000, 2_000, 1_000, 500]
+        x: upper left coordinate x
+        y: upper left coordinate y
 
     Returns:
         a `Bounds` object

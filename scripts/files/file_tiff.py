@@ -2,8 +2,8 @@ import json
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from scripts.gdal.gdal_helper import GDALExecutionException, run_gdal
-from scripts.gdal.gdalinfo import GdalInfo, gdal_info
+from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
+from scripts.gdal.gdalinfo import GdalInfo
 
 
 class FileTiffErrorType(str, Enum):
@@ -106,9 +106,13 @@ class FileTiff:
         """
         self._path_standardised = path
 
-    def get_gdalinfo(self) -> Optional[GdalInfo]:
+    def get_gdalinfo(self, path: Optional[str] = None) -> Optional[GdalInfo]:
         """Get the `gdalinfo` output for the file.
-        Run gdalinfo if not already ran.
+        Run gdalinfo if not already ran or if different path is specified.
+        `path` is useful to specify a local file to avoid downloading from external source.
+
+        Args:
+            path: path to the file. Force the `gdalinfo` to be executed.
 
         Returns:
             the `gdalinfo` output
@@ -116,9 +120,13 @@ class FileTiff:
         # FIXME: Should not return None but not try running `gdalinfo` if there has already been an error
         if self.is_error_type(FileTiffErrorType.GDAL_INFO):
             return None
-        if not self._gdalinfo:
+        if path:
+            file_path = path
+        else:
+            file_path = self._path_standardised
+        if path or not self._gdalinfo:
             try:
-                self._gdalinfo = gdal_info(self._path_standardised)
+                self._gdalinfo = gdal_info(file_path)
             except json.JSONDecodeError as jde:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"parsing result issue: {str(jde)}")
             except GDALExecutionException as gee:

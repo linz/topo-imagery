@@ -27,24 +27,24 @@ def setup() -> Generator[CollectionMetadata, None, None]:
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
-        "event_name": "Forest assessment",
+        "event_name": "Forest Assessment",
         "historic_survey_number": None,
-        "geographic_description": "Auckland North",
+        "geographic_description": "Auckland North Forest Assessment",
     }
     yield metadata
 
 
 def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert collection.stac["title"] == "Auckland North 0.3m Forest assessment Urban Aerial Photos (2022)"
+    assert collection.stac["title"] == "Auckland North Forest Assessment 0.3m Urban Aerial Photos (2022)"
     assert (
         collection.stac["description"]
-        == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest assessment event."  # pylint: disable=line-too-long
+        == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
     )
     assert collection.stac["id"]
     assert collection.stac["linz:region"] == "auckland"
-    assert collection.stac["linz:geographic_description"] == "Auckland North"
-    assert collection.stac["linz:event_name"] == "Forest assessment"
+    assert collection.stac["linz:geographic_description"] == "Auckland North Forest Assessment"
+    assert collection.stac["linz:event_name"] == "Forest Assessment"
     assert collection.stac["linz:lifecycle"] == "completed"
     assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
 
@@ -238,9 +238,9 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert "Forest assessment" == collection.stac["linz:event_name"]
+    assert "Forest Assessment" == collection.stac["linz:event_name"]
 
 
 def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
-    assert "Auckland North" == collection.stac["linz:geographic_description"]
+    assert "Auckland North Forest Assessment" == collection.stac["linz:geographic_description"]

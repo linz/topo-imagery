@@ -4,6 +4,8 @@ from typing import Optional, TypedDict
 
 class CollectionMetadata(TypedDict):
     """
+    Used to generate dataset collection titles and descriptions.
+
     region: Region of Dataset
     gsd: Dataset Ground Sample Distance
     start_date: Dataset capture start date

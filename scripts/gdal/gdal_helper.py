@@ -1,11 +1,13 @@
+import json
 import os
 import subprocess
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, cast
 
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session_credentials, is_s3
+from scripts.gdal.gdalinfo import GdalInfo
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -131,3 +133,46 @@ def get_srs() -> bytes:
             f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"
         )
     return gdalsrsinfo_result.stdout
+
+
+def gdal_info(path: str) -> GdalInfo:
+    """run gdalinfo on the provided file
+
+    Args:
+        path: path to file to gdalinfo
+
+    Returns:
+        GdalInfo output
+    """
+    # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
+    gdalinfo_command = ["gdalinfo", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
+
+    try:
+        gdalinfo_process = run_gdal(gdalinfo_command, path)
+        return cast(GdalInfo, json.loads(gdalinfo_process.stdout))
+    except json.JSONDecodeError as e:
+        get_log().error("load_gdalinfo_result_error", file=path, error=e)
+        raise e
+    except GDALExecutionException as e:
+        get_log().error("gdalinfo_failed", file=path, error=str(e))
+        raise e
+
+
+def is_geotiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
+    """Verifies if a file is a GTiff based on the presence of the
+    `coordinateSystem`.
+
+    Args:
+        path: a path to a file
+        gdalinfo_data: gdalinfo of the file. Defaults to None.
+
+    Returns:
+        True if the file is a GTiff
+    """
+    if not gdalinfo_data:
+        gdalinfo_data = gdal_info(path)
+    if "coordinateSystem" not in gdalinfo_data:
+        return False
+    if gdalinfo_data["driverShortName"] == "GTiff":
+        return True
+    return False

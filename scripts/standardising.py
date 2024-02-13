@@ -13,7 +13,7 @@ from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import EpsgCode, get_gdal_version, run_gdal
+from scripts.gdal.gdal_helper import EpsgCode, gdal_info, get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
     get_alpha_command,
     get_build_vrt_command,
@@ -21,7 +21,6 @@ from scripts.gdal.gdal_preset import (
     get_gdal_command,
     get_transform_srs_command,
 )
-from scripts.gdal.gdalinfo import gdal_info
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
@@ -201,6 +200,10 @@ def standardising(
 
         # Need GDAL to write to temporary location so no broken files end up in the done folder.
         run_gdal(command, input_file=input_file, output_file=standardized_working_path)
+
+        # Update the `FileTiff.gdalinfo` as the system has local access to the TIFF
+        get_log().debug("Saving gdalinfo from local standardised TIFF in FileTiff object", path=standardized_working_path)
+        tiff.get_gdalinfo(standardized_working_path)
 
         with TiffFile(standardized_working_path) as file_handle:
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
