@@ -33,7 +33,7 @@ docker build . -t topo-imagery
 - Running `standardising_validate.py` script
 
 This script standardises TIFF files to [COGs](https://www.cogeo.org/) with a creation of a [STAC](https://stacspec.org/) Item file per TIFF containing the metadata.
-The input TIFF file paths have to passed through a `json` file in the following format:
+The input TIFF file paths have to be passed through a `json` file in the following format:
 
 ```json
 [
@@ -44,7 +44,7 @@ The input TIFF file paths have to passed through a `json` file in the following 
 ]
 ```
 
-where `output` is the desired output file name and input is the path to one or several TIFFs. If more than one TIFF, the system will try to retile them into one single output file.
+where `output` is the desired output [tile name](https://github.com/linz/topo-imagery/blob/6aa0fb565696cb99fb66ca92b8c678ef3523d11a/scripts/tile/tests/tile_index_data.py#L3-L514) and input is the path to one or several TIFFs. If more than one TIFF, the system will try to retile them into one single output file.
 
 Some test data are available in `/scripts/tests/data/` along with the expected output.
 
