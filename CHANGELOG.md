@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.1.0](https://github.com/linz/topo-imagery/compare/v4.0.1...v4.1.0) (2024-02-14)
+
+
+### Features
+
+* add capture-area.geojson to the STAC Collection TDE-965 ([#758](https://github.com/linz/topo-imagery/issues/758)) ([75df081](https://github.com/linz/topo-imagery/commit/75df081ac23e340cce1479a2e2de76b6c1e40e73))
+
+
+### Bug Fixes
+
+* gdal should try reading file before getting credentials TDE-929 ([#852](https://github.com/linz/topo-imagery/issues/852)) ([83c9a68](https://github.com/linz/topo-imagery/commit/83c9a680868649bf458636d2727889a3eaf27c41))
+
+
+### Documentation
+
+* clarify readme ([#854](https://github.com/linz/topo-imagery/issues/854)) ([f0f742d](https://github.com/linz/topo-imagery/commit/f0f742dedcdbaf91f7fa3eb696ccc319b48a3bbe))
+
 ## [4.0.1](https://github.com/linz/topo-imagery/compare/v4.0.0...v4.0.1) (2024-02-12)
 
 
