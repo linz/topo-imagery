@@ -23,10 +23,8 @@ def get_file_name_from_path(path: str) -> str:
         the name of the file
 
     Example:
-        ```
         >>> get_file_name_from_path("/a/path/to/file.ext")
-        "file.ext"
-        ```
+        'file'
     """
     return os.path.splitext(os.path.basename(path))[0]
 
@@ -38,15 +36,13 @@ def is_tiff(path: str) -> bool:
         path: a path to a file
 
     Returns:
-        True if the file is a TIFF
+        True if the file has a `.tiff` or `.tif` extension
 
     Examples:
-        ```
         >>> is_tiff("/a/path/to/file.tif")
         True
         >>> is_tiff("/a/path/to/file.jpg")
         False
-        ```
     """
     return path.lower().endswith((".tiff", ".tif"))
 
@@ -58,14 +54,12 @@ def is_json(path: str) -> bool:
         path: a path to a file
 
     Returns:
-        True if the file is a JSON
+        True if the file has a `.json` extension
 
     Examples:
-        ```
-        >>> is_tiff("/a/path/to/file.json")
+        >>> is_json("/a/path/to/file.json")
         True
-        >>> is_tiff("/a/path/to/file.csv")
+        >>> is_json("/a/path/to/file.csv")
         False
-        ```
     """
     return path.lower().endswith(".json")

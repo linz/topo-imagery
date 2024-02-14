@@ -26,14 +26,15 @@ def get_tile_files(source: str) -> List[TileFiles]:
     Args:
         source: JSON string containing representing a list of input file paths and output tile name
 
+    Raises:
+        InputParameterError: for any parsing error
+
     Returns:
         a list of `TileFiles` namedtuple
 
     Example:
-    ```
-    >>> get_tile_files("[{'output': 'CE16_5000_1001', 'input': ['s3://bucket/SN9457_CE16_10k_0501.tif']}]")
-    [TileFiles(output='CE16_5000_1001', input=['s3://bucket/SN9457_CE16_10k_0501.tif'])])]
-    ```
+        >>> get_tile_files('[{"output": "CE16_5000_1001", "input": ["s3://bucket/SN9457_CE16_10k_0501.tif"]}]')
+        [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'])]
     """
     try:
         source_json: List[TileFiles] = json.loads(

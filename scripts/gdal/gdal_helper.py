@@ -2,11 +2,15 @@ import json
 import os
 import subprocess
 from enum import Enum
+from shutil import rmtree
+from tempfile import mkdtemp
 from typing import List, Optional, cast
 
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import get_session_credentials, is_s3
+from scripts.aws.aws_helper import is_s3
+from scripts.files.files_helper import get_file_name_from_path
+from scripts.files.fs import copy
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.logging.time_helper import time_in_ms
 
@@ -85,15 +89,14 @@ def run_gdal(
     """
     gdal_env = os.environ.copy()
     temp_command = command.copy()
+    temp_dir = None
 
     if input_file:
         if is_s3(input_file):
-            # Set the credentials for GDAL to be able to read the input file
-            credentials = get_session_credentials(input_file)
-            gdal_env["AWS_ACCESS_KEY_ID"] = credentials.access_key
-            gdal_env["AWS_SECRET_ACCESS_KEY"] = credentials.secret_key
-            gdal_env["AWS_SESSION_TOKEN"] = credentials.token
-            input_file = get_vfs_path(input_file)
+            # Download the file from S3
+            temp_dir = mkdtemp()
+            input_file = copy(source=input_file, target=os.path.join(temp_dir, get_file_name_from_path(input_file)))
+
         temp_command.append(input_file)
 
     if output_file:
@@ -111,6 +114,9 @@ def run_gdal(
 
     if proc.stderr:
         get_log().warning("run_gdal_stderr", command=command_to_string(temp_command), stderr=proc.stderr.decode())
+
+    if temp_dir:
+        rmtree(temp_dir)
 
     get_log().trace("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
