@@ -1,17 +1,20 @@
 import json
 import os
+import tempfile
 from datetime import datetime
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import Generator
 
 import pytest
+import shapely.geometry
 
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util.stac_extensions import StacExtensions
 
 
 # pylint: disable=duplicate-code
@@ -95,8 +98,7 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
 
 def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
     collection = ImageryCollection(metadata)
-    checksum = "1220cdef68d62fb912110b810e62edc53de07f7a44fb2b310db700e9d9dd58baa6b4"
-    mocker.patch("scripts.stac.util.checksum.multihash_as_hex", return_value=checksum)
+    mocker.patch("scripts.files.fs.read", return_value=b"")
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
     geometry = {
         "type": "Polygon",
@@ -175,6 +177,63 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
     ]
     # then the new provider is added
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+
+def test_capture_area_added(metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(metadata)
+
+    polygons = []
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.25418498567294, -38.40856551170436],
+                            [178.25465423474975, -38.41502700730107],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.259659571653, -38.40831927359251],
+                            [178.25418498567294, -38.40856551170436],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    with tempfile.TemporaryDirectory() as tmp_path:
+        collection.add_capture_area(polygons, tmp_path)
+
+    assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
+    assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
+    assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
+    assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
+    assert StacExtensions.file.value in collection.stac["stac_extensions"]
+    assert "file:checksum" in collection.stac["assets"]["capture_area"]
+    assert (
+        collection.stac["assets"]["capture_area"]["file:checksum"]
+        == "12209043a7059c39aa8a8bd22ad0e50476b1628a5b20df11c5a507900cab19f2741b"
+    )
+    assert "file:size" in collection.stac["assets"]["capture_area"]
+    assert collection.stac["assets"]["capture_area"]["file:size"] == 341
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:

@@ -7,7 +7,6 @@ from botocore.exceptions import ClientError
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
-from scripts.files.files_helper import is_json
 from scripts.logging.time_helper import time_in_ms
 
 
@@ -164,15 +163,16 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_json_in_uri(uri: str, s3_client: Optional[client]) -> List[str]:
-    """Get the `JSON` files from a s3 path
+def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[client]) -> List[str]:
+    """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
         uri: an s3 path
+        suffixes: a a list of suffixes. example: [".json", "_meta.xml"]
         s3_client: an s3 client
 
     Returns:
-        a list of JSON files
+        a list of file paths
     """
     if not s3_client:
         s3_client = client("s3")
@@ -183,7 +183,7 @@ def list_json_in_uri(uri: str, s3_client: Optional[client]) -> List[str]:
     for response in response_iterator:
         for contents_data in response["Contents"]:
             key = contents_data["Key"]
-            if not is_json(key):
+            if not key.lower().endswith(tuple(suffixes)):
                 get_log().trace("skipping file not json", file=key, action="collection_from_items", reason="skip")
                 continue
             files.append(key)

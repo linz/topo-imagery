@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from enum import Enum
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import List, Optional, cast
@@ -16,6 +17,13 @@ from scripts.logging.time_helper import time_in_ms
 
 class GDALExecutionException(Exception):
     pass
+
+
+class EpsgCode(str, Enum):
+    EPSG_2193 = "EPSG:2193"
+    """ NZGD2000 / New Zealand Transverse Mercator 2000 (NZTM) """
+    EPSG_4326 = "EPSG:4326"
+    """ WGS84 - World Geodetic System 1984"""
 
 
 def get_vfs_path(path: str) -> str:
@@ -124,7 +132,7 @@ def get_srs() -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", "EPSG:2193"]
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", EpsgCode.EPSG_2193]
     gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
     if gdalsrsinfo_result.stderr:
         raise Exception(

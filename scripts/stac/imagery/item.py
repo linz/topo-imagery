@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict, Tuple
 
+from scripts.files import fs
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
@@ -10,6 +11,7 @@ class ImageryItem:
     stac: Dict[str, Any]
 
     def __init__(self, id_: str, file: str) -> None:
+        file_content = fs.read(file)
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -21,7 +23,7 @@ class ImageryItem:
                 "visual": {
                     "href": os.path.join(".", os.path.basename(file)),
                     "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-                    "file:checksum": checksum.multihash_as_hex(file),
+                    "file:checksum": checksum.multihash_as_hex(file_content),
                 }
             },
             "stac_extensions": [StacExtensions.file.value],

@@ -10,10 +10,10 @@ from tifffile import TiffFile
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.files_helper import ContentType, is_tiff
+from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import gdal_info, get_gdal_version, run_gdal
+from scripts.gdal.gdal_helper import EpsgCode, gdal_info, get_gdal_version, run_gdal
 from scripts.gdal.gdal_preset import (
     get_alpha_command,
     get_build_vrt_command,
@@ -105,7 +105,7 @@ def standardising(
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> Optional[FileTiff]:
-    """Apply transformations using GDAL to the source file.
+    """Apply transformations using GDAL to the source file and create a footprint sidecar file.
 
     Args:
         files: paths to the files to standardise
@@ -122,7 +122,9 @@ def standardising(
         a FileTiff wrapper
     """
     standardized_file_name = files.output + ".tiff"
+    footprint_file_name = files.output + SUFFIX_FOOTPRINT
     standardized_file_path = os.path.join(target_output, standardized_file_name)
+    footprint_file_path = os.path.join(target_output, footprint_file_name)
     tiff = FileTiff(files.inputs, preset)
     tiff.set_path_standardised(standardized_file_path)
 
@@ -134,12 +136,14 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
+        footprint_tmp_path = os.path.join(tmp_path, footprint_file_name)
         sidecars: List[str] = []
         for extension in [".prj", ".tfw"]:
             for file_input in files.inputs:
                 sidecars.append(f"{os.path.splitext(file_input)[0]}{extension}")
         source_files = write_all(files.inputs, f"{tmp_path}/source/")
         write_sidecars(sidecars, f"{tmp_path}/source/")
+
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         vrt_add_alpha = True
@@ -203,7 +207,18 @@ def standardising(
 
         with TiffFile(standardized_working_path) as file_handle:
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
+                # Create footprint GeoJSON
+                run_gdal(
+                    ["gdal_footprint", "-t_srs", EpsgCode.EPSG_4326],
+                    standardized_working_path,
+                    footprint_tmp_path,
+                )
                 write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
+                write(
+                    footprint_file_path,
+                    read(footprint_tmp_path),
+                    content_type=ContentType.GEOJSON.value,
+                )
                 return tiff
 
         get_log().info("Skipping empty output image", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
