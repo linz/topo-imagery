@@ -98,11 +98,6 @@ class FileTiff:
 
         Args:
             path: the path to the standardised file
-
-        Example:
-            ```
-            >>> file_tiff.set_path_standardised("/output/BY12_5000_0805.tiff")
-            ```
         """
         self._path_standardised = path
 
