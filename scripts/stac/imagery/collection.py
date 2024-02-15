@@ -83,7 +83,7 @@ class ImageryCollection:
 
         self.add_providers(providers)
 
-    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str) -> None:
+    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str, artifact_target: str = "tmp/") -> None:
         """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
@@ -112,6 +112,9 @@ class ImageryCollection:
             capture_area_content,
             content_type=ContentType.GEOJSON.value,
         )
+
+        # Save `capture-area.geojson` as artifact for Argo UI
+        write(os.path.join(artifact_target, CAPTURE_AREA_FILE_NAME), capture_area_content)
 
         self.stac["stac_extensions"] = self.stac.get("stac_extensions", [])
 

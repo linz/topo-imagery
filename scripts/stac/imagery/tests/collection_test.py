@@ -181,6 +181,7 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
 
 def test_capture_area_added(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata)
+    file_name = "capture-area.geojson"
 
     polygons = []
     polygons.append(
@@ -220,9 +221,14 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
         )
     )
     with tempfile.TemporaryDirectory() as tmp_path:
-        collection.add_capture_area(polygons, tmp_path)
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        file_target = os.path.join(tmp_path, file_name)
+        file_artifact = os.path.join(artifact_path, file_name)
+        assert os.path.isfile(file_target)
+        assert os.path.isfile(file_artifact)
 
-    assert collection.stac["assets"]["capture_area"]["href"] == "./capture-area.geojson"
+    assert collection.stac["assets"]["capture_area"]["href"] == f"./{file_name}"
     assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
     assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
     assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
