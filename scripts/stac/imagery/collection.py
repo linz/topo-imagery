@@ -89,7 +89,9 @@ class ImageryCollection:
 
         Args:
             polygons: list of geometries
-            target: path of the capture-area-geojson file
+            target: path where the capture-area.geojson file is saved
+            artifact_target: path where the capture-area.geojson artifact file is saved.
+            This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
 
         # The GSD is measured in meters (e.g., `0.3m`)
