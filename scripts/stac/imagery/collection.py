@@ -83,7 +83,7 @@ class ImageryCollection:
 
         self.add_providers(providers)
 
-    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str, artifact_target: str = "tmp/") -> None:
+    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
