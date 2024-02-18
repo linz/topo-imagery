@@ -89,8 +89,8 @@ class ImageryCollection:
 
         Args:
             polygons: list of geometries
-            target: path where the capture-area.geojson file will be saved
-            artifact_target: path where the capture-area.geojson artifact file will be saved.
+            target: location where the capture-area.geojson file will be saved
+            artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
 
