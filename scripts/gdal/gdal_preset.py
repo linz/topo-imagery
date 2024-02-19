@@ -31,6 +31,9 @@ BASE_COG = [
     # An error will be raise by GDAL if it fails creating a tiff > 4GB in size
     "-co",
     "bigtiff=no",
+    # Always ignore existing overviews
+    "-co",
+    "overviews=ignore_existing",
 ]
 
 DEM_LERC = [
@@ -79,8 +82,6 @@ WEBP_OVERVIEWS = [
     # Reduce quality of overviews to 90%
     "-co",
     "overview_quality=90",
-    "-co",
-    "overviews=ignore_existing",
 ]
 
 
