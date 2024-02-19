@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/linz/topo-imagery/compare/v4.1.0...v4.2.0) (2024-02-19)
+
+
+### Features
+
+* save a copy of capture-area.geojson as an artifact for Argo Workflows TDE-1045 ([#860](https://github.com/linz/topo-imagery/issues/860)) ([a303c05](https://github.com/linz/topo-imagery/commit/a303c05448445281c8168a0614ea150b891221b9))
+
 ## [4.1.0](https://github.com/linz/topo-imagery/compare/v4.0.1...v4.1.0) (2024-02-14)
 
 
