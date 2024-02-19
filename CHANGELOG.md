@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/linz/topo-imagery/compare/v4.2.0...v4.2.1) (2024-02-19)
+
+
+### Bug Fixes
+
+* always ignore existing overviews TDE-1046 ([#862](https://github.com/linz/topo-imagery/issues/862)) ([900907f](https://github.com/linz/topo-imagery/commit/900907f96066564eac4cc7830616f6ed31ee60d4))
+
 ## [4.2.0](https://github.com/linz/topo-imagery/compare/v4.1.0...v4.2.0) (2024-02-19)
 
 
