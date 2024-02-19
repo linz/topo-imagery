@@ -31,6 +31,7 @@ def test_preset_lzw() -> None:
     assert "blocksize=512" in gdal_command
     assert "num_threads=all_cpus" in gdal_command
     assert "bigtiff=no" in gdal_command
+    assert "overviews=ignore_existing" in gdal_command
 
     # LZW compression
     assert "compress=lzw" in gdal_command
@@ -40,7 +41,6 @@ def test_preset_lzw() -> None:
     assert "overview_compress=webp" in gdal_command
     assert "overview_resampling=lanczos" in gdal_command
     assert "overview_quality=90" in gdal_command
-    assert "overviews=ignore_existing" in gdal_command
 
     assert "EPSG:2193" in gdal_command
 
@@ -52,6 +52,7 @@ def test_preset_dem_lerc() -> None:
     assert "blocksize=512" in gdal_command
     assert "num_threads=all_cpus" in gdal_command
     assert "bigtiff=no" in gdal_command
+    assert "overviews=ignore_existing" in gdal_command
 
     # LERC compression
     assert "compress=lerc" in gdal_command
@@ -62,7 +63,6 @@ def test_preset_dem_lerc() -> None:
     assert "overview_compress=webp" not in gdal_command
     assert "overview_resampling=lanczos" not in gdal_command
     assert "overview_quality=90" not in gdal_command
-    assert "overviews=ignore_existing" not in gdal_command
 
     assert "EPSG:2193" in gdal_command
 
