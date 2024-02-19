@@ -83,13 +83,15 @@ class ImageryCollection:
 
         self.add_providers(providers)
 
-    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str) -> None:
+    def add_capture_area(self, polygons: List[shapely.geometry.shape], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
             polygons: list of geometries
-            target: path of the capture-area-geojson file
+            target: location where the capture-area.geojson file will be saved
+            artifact_target: location where the capture-area.geojson artifact file will be saved.
+            This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
 
         # The GSD is measured in meters (e.g., `0.3m`)
@@ -112,6 +114,9 @@ class ImageryCollection:
             capture_area_content,
             content_type=ContentType.GEOJSON.value,
         )
+
+        # Save `capture-area.geojson` as artifact for Argo UI
+        write(os.path.join(artifact_target, CAPTURE_AREA_FILE_NAME), capture_area_content)
 
         self.stac["stac_extensions"] = self.stac.get("stac_extensions", [])
 
