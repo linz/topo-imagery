@@ -31,7 +31,7 @@ BASE_COG = [
     # An error will be raise by GDAL if it fails creating a tiff > 4GB in size
     "-co",
     "bigtiff=no",
-    # Always ignore existing overviews
+    # Always ignore existing overviews so they are not created from already compressed overviews
     "-co",
     "overviews=ignore_existing",
 ]
@@ -63,7 +63,7 @@ COMPRESS_LZW = [
 ]
 
 COMPRESS_WEBP_LOSSLESS = [
-    # Comppress into webp
+    # Compress into webp
     "-co",
     "compress=webp",
     # Compress losslessly
