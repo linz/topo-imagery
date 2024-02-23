@@ -209,7 +209,7 @@ def standardising(
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
                 # Create footprint GeoJSON
                 run_gdal(
-                    ["gdal_footprint", "-t_srs", EpsgCode.EPSG_4326],
+                    ["gdal_footprint", "-t_srs", EpsgCode.EPSG_4326, "-max_points", "unlimited"],
                     standardized_working_path,
                     footprint_tmp_path,
                 )
