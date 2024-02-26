@@ -103,8 +103,8 @@ def test_generate_capture_area_not_rounded() -> None:
     polygons_no_gap.append(Polygon([(1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
     polygon_with_gap = []
     polygon_with_gap.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)]))
-    # The top left corner of the following polygon is off by 0.000004 (~0.44m) to the "right" from the previous one
-    polygon_with_gap.append(Polygon([(1.000004, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
+    # The top left corner of the following polygon is off by 0.000008 (~0.88m) to the "right" from the previous one
+    polygon_with_gap.append(Polygon([(1.000008, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0)]))
 
     # Using GSD of 0.2m
     # Generate the capture area of the polygons that don't have a gap between each other
@@ -119,5 +119,5 @@ def test_generate_capture_area_not_rounded() -> None:
     print(f"Capture area expected: {capture_area_expected}")
     print(f"Capture area result: {capture_area_result}")
     # This gap should not be covered in the capture-area
-    # as the GSD is 0.2m * 2 < 0.44m
+    # as the GSD is 0.2m * a buffer of 2 * 2 < 0.88m
     assert capture_area_expected != capture_area_result

@@ -236,10 +236,10 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
     assert (
         collection.stac["assets"]["capture_area"]["file:checksum"]
-        == "12209043a7059c39aa8a8bd22ad0e50476b1628a5b20df11c5a507900cab19f2741b"
+        == "1220b15694be7495af38e0f70af67cfdc4f19b8bc415a2eb77d780e7a32c6e5b42c2"
     )
     assert "file:size" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:size"] == 341
+    assert collection.stac["assets"]["capture_area"]["file:size"] == 339
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
