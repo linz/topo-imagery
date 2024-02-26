@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.2](https://github.com/linz/topo-imagery/compare/v4.2.1...v4.2.2) (2024-02-26)
+
+
+### Bug Fixes
+
+* allow unlimited footprint points and increase buffer size for simplifying capture area json ([#872](https://github.com/linz/topo-imagery/issues/872)) ([c733f1e](https://github.com/linz/topo-imagery/commit/c733f1e5dceb40244c8a35452f8bbd59bdd8f50c))
+
 ## [4.2.1](https://github.com/linz/topo-imagery/compare/v4.2.0...v4.2.1) (2024-02-19)
 
 
