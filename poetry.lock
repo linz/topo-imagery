@@ -964,16 +964,17 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 
 [[package]]
 name = "pytest-dependency"
-version = "0.5.1"
+version = "0.6.0"
 description = "Manage dependencies of tests"
 optional = false
-python-versions = "*"
+python-versions = ">=3.4"
 files = [
-    {file = "pytest-dependency-0.5.1.tar.gz", hash = "sha256:c2a892906192663f85030a6ab91304e508e546cddfe557d692d61ec57a1d946b"},
+    {file = "pytest-dependency-0.6.0.tar.gz", hash = "sha256:934b0e6a39d95995062c193f7eaeed8a8ffa06ff1bcef4b62b0dc74a708bacc1"},
 ]
 
 [package.dependencies]
-pytest = ">=3.6.0"
+pytest = ">=3.7.0"
+setuptools = "*"
 
 [[package]]
 name = "pytest-mock"
@@ -1408,4 +1409,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "3094394b0af9bcd26ae16eb23ef09a4a819682822245db488438a041f3c48f65"
+content-hash = "0229f20bb3b1d70b254f343ab94902913f7dcc3f4728829f98fa57552669073b"
