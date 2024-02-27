@@ -336,7 +336,7 @@ class ImageryCollection:
         Urban Aerial Photos / Rural Aerial Photos:
           Orthophotography within the [Region] region captured in the [Year(s)] flying season.
         DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [Region] region in [year(s)].
+          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
         Satellite Imagery / Scanned Aerial Photos:
           [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [Year(s)].
 
@@ -358,9 +358,9 @@ class ImageryCollection:
         elif self.metadata["category"] in [URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS]:
             desc = f"Orthophotography within the {region} region captured in the {date} flying season"
         elif self.metadata["category"] == DEM:
-            desc = f"Digital Elevation Model within the {region} region in {date}"
+            desc = f"Digital Elevation Model within the {region} region captured in {date}"
         elif self.metadata["category"] == DSM:
-            desc = f"Digital Surface Model within the {region} region in {date}"
+            desc = f"Digital Surface Model within the {region} region captured in {date}"
         else:
             raise SubtypeParameterError(self.metadata["category"])
 
