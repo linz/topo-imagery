@@ -334,11 +334,11 @@ class ImageryCollection:
     def _description(self) -> str:
         """Generates the descriptions for imagery and elevation datasets.
         Urban Aerial Photos / Rural Aerial Photos:
-          Orthophotography within the [Region] region captured in the [Year(s)] flying season.
+          Orthophotography within the [Region] region captured in the [year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
         Satellite Imagery / Scanned Aerial Photos:
-          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [Year(s)].
+          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
 
         Returns:
             Dataset Description
