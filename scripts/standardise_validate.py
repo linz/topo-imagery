@@ -77,7 +77,7 @@ def main() -> None:
                 # If the file is not valid (Non Visual QA errors)
                 # Logs the `vsis3` path to use `gdal` on the file directly from `s3`
                 # This is to help data analysts to verify the file.
-                original_path: List[str] = file.get_path_original()
+                original_path: List[str] = file.get_paths_original()
                 standardised_path = file.get_path_standardised()
                 env_argo_template = os.environ.get("ARGO_TEMPLATE")
                 if env_argo_template:

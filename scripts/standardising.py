@@ -139,9 +139,9 @@ def standardising(
         footprint_tmp_path = os.path.join(tmp_path, footprint_file_name)
         sidecars: List[str] = []
         for extension in [".prj", ".tfw"]:
-            for file_input in files.inputs:
+            for file_input in tiff.get_paths_original():
                 sidecars.append(f"{os.path.splitext(file_input)[0]}{extension}")
-        source_files = write_all(files.inputs, f"{tmp_path}/source/")
+        source_files = write_all(tiff.get_paths_original(), f"{tmp_path}/source/")
         write_sidecars(sidecars, f"{tmp_path}/source/")
 
         source_tiffs = [file for file in source_files if is_tiff(file)]
