@@ -1,6 +1,7 @@
 import json
 from enum import Enum
 from typing import Any, Dict, List, Optional
+from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
 from scripts.gdal.gdalinfo import GdalInfo
@@ -24,10 +25,17 @@ class FileTiff:
 
     def __init__(
         self,
-        path: List[str],
+        paths: List[str],
         preset: Optional[str] = None,
     ) -> None:
-        self._path_original = path
+        paths_orginal = []
+        for p in paths:
+            # paths can be URL containing percent-encoded (like `%20` for space) sequences
+            # which would make the process fail later TDE-1054
+            # FIXME: we should use URLs in the code base
+            paths_orginal.append(unquote(p))
+
+        self._paths_original = paths_orginal
         self._path_standardised = ""
         self._errors: List[Dict[str, Any]] = []
         self._gdalinfo: Optional[GdalInfo] = None
@@ -138,14 +146,14 @@ class FileTiff:
         """
         return self._errors
 
-    def get_path_original(self) -> List[str]:
+    def get_paths_original(self) -> List[str]:
         """Get the path(es) of the original (non standardised) file.
         It can be a list of path if the standardised file is a retiled image.
 
         Returns:
             a list of file path
         """
-        return self._path_original
+        return self._paths_original
 
     def get_path_standardised(self) -> str:
         """Get the path of the standardised file.
