@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.4](https://github.com/linz/topo-imagery/compare/v4.2.3...v4.2.4) (2024-02-27)
+
+
+### Bug Fixes
+
+* handle percent-encoded urls TDE-1054 ([#881](https://github.com/linz/topo-imagery/issues/881)) ([eacc453](https://github.com/linz/topo-imagery/commit/eacc4532407129cae02dfb209ac9293a3294584e))
+
 ## [4.2.3](https://github.com/linz/topo-imagery/compare/v4.2.2...v4.2.3) (2024-02-27)
 
 
