@@ -169,24 +169,10 @@ class ImageryCollection:
 
         bbox = self.stac["extent"]["spatial"]["bbox"][0]
 
-        min_x = min(bbox[0], bbox[2])
-        max_x = max(bbox[0], bbox[2])
-        min_y = min(bbox[1], bbox[3])
-        max_y = max(bbox[1], bbox[3])
-
-        item_min_x = min(item_bbox[0], item_bbox[2])
-        item_max_x = max(item_bbox[0], item_bbox[2])
-        item_min_y = min(item_bbox[1], item_bbox[3])
-        item_max_y = max(item_bbox[1], item_bbox[3])
-
-        if item_min_x < min_x:
-            min_x = item_min_x
-        if item_min_y < min_y:
-            min_y = item_min_y
-        if item_max_x > max_x:
-            max_x = item_max_x
-        if item_max_y > max_y:
-            max_y = item_max_y
+        min_x = min(bbox[0], bbox[2], item_bbox[0], item_bbox[2])
+        min_y = min(bbox[1], bbox[3], item_bbox[1], item_bbox[3])
+        max_x = max(bbox[0], bbox[2], item_bbox[0], item_bbox[2])
+        max_y = max(bbox[1], bbox[3], item_bbox[1], item_bbox[3])
 
         self.update_extent(bbox=[min_x, min_y, max_x, max_y])
 
@@ -213,13 +199,8 @@ class ImageryCollection:
         for date in interval:
             collection_datetimes.append(datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ"))
 
-        start_datetime = min(collection_datetimes[0], collection_datetimes[1])
-        end_datetime = max(collection_datetimes[0], collection_datetimes[1])
-
-        if item_start < start_datetime:
-            start_datetime = item_start
-        if item_end > end_datetime:
-            end_datetime = item_end
+        start_datetime = min(collection_datetimes[0], collection_datetimes[1], item_start)
+        end_datetime = max(collection_datetimes[0], collection_datetimes[1], item_end)
 
         self.update_extent(
             interval=[
