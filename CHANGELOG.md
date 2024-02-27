@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.3](https://github.com/linz/topo-imagery/compare/v4.2.2...v4.2.3) (2024-02-27)
+
+
+### Bug Fixes
+
+* update wording for release ([#878](https://github.com/linz/topo-imagery/issues/878)) ([dcc7972](https://github.com/linz/topo-imagery/commit/dcc7972195e685b5865c20b0bb15acac9ed51319))
+
 ## [4.2.2](https://github.com/linz/topo-imagery/compare/v4.2.1...v4.2.2) (2024-02-26)
 
 
