@@ -28,14 +28,14 @@ class FileTiff:
         paths: List[str],
         preset: Optional[str] = None,
     ) -> None:
-        paths_orginal = []
+        paths_original = []
         for p in paths:
             # paths can be URL containing percent-encoded (like `%20` for space) sequences
             # which would make the process fail later TDE-1054
             # FIXME: we should use URLs in the code base
-            paths_orginal.append(unquote(p))
+            paths_original.append(unquote(p))
 
-        self._paths_original = paths_orginal
+        self._paths_original = paths_original
         self._path_standardised = ""
         self._errors: List[Dict[str, Any]] = []
         self._gdalinfo: Optional[GdalInfo] = None
