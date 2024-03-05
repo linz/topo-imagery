@@ -28,6 +28,7 @@ def main() -> None:
         required=True,
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
@@ -57,6 +58,7 @@ def main() -> None:
         concurrency,
         arguments.source_epsg,
         arguments.target_epsg,
+        arguments.gsd,
         arguments.target,
     )
 
