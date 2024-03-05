@@ -213,12 +213,13 @@ def standardising(
                     standardized_working_path,
                     footprint_tmp_path,
                 )
-                write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
                 write(
                     footprint_file_path,
                     read(footprint_tmp_path),
                     content_type=ContentType.GEOJSON.value,
                 )
+                write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
+
                 return tiff
 
         get_log().info("Skipping empty output image", path=input_file, sourceEPSG=source_epsg, targetEPSG=target_epsg)
