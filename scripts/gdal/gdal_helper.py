@@ -150,7 +150,7 @@ def gdal_info(path: str) -> GdalInfo:
     Returns:
         GdalInfo output
     """
-    # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
+    # Set GDAL_PAM_ENABLED to NO to temporarily disable PAM support and prevent creation of auxiliary XML file.
     gdalinfo_command = ["gdalinfo", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
 
     try:
