@@ -71,13 +71,13 @@ def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]
         The capture-area geojson document.
     """
     start_time = time_in_ms()
-    get_log().debug("Generating capture-area started")
+    get_log().trace("Generating capture-area started")
 
     buffer_factor = gsd * 2
     buffer_distance = DECIMAL_DEGREES_1M * buffer_factor
     merged_polygons = merge_polygons(polygons, buffer_distance)
 
-    get_log().debug(
+    get_log().trace(
         "Generating capture-area ended",
         duration=time_in_ms() - start_time,
     )
