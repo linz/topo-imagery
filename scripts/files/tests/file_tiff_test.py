@@ -1,5 +1,5 @@
-from scripts.files.file_tiff import FileTiff
-from scripts.gdal.tests.gdalinfo import add_band, fake_gdal_info
+from scripts.files.file_tiff import FileTiff, FileTiffErrorType
+from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
 
 
 def test_check_band_count_valid_3() -> None:
@@ -315,3 +315,15 @@ def test_check_srs_invalid() -> None:
     file_tiff.check_srs(srs_tif)
 
     assert file_tiff.get_errors()
+
+
+def test_should_throw_when_encountering_non_integer_no_data_value() -> None:
+    gdalinfo = fake_gdal_info()
+    add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))], no_data_value="-9999.1")
+
+    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff.check_no_data(gdalinfo)
+
+    assert file_tiff.get_errors() == [
+        {"type": FileTiffErrorType.NO_DATA, "message": "noDataValue is not -9999", "current": "-9999.1"}
+    ]
