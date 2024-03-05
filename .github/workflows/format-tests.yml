@@ -32,23 +32,23 @@ jobs:
 
       - name: End to end test - Aerial Imagery
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 0.3m
           cmp --silent "${{ runner.temp }}/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
 
       - name: End to end test - Elevation
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 0.2m
           cmp --silent "${{ runner.temp }}/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
 
       - name: End to end test - Historical Aerial Imagery
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/hi.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/hi.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 0.2m
           cmp --silent "${{ runner.temp }}/BQ31_5000_0608.tiff" ./scripts/tests/data/output/BQ31_5000_0608.tiff
 
       - name: End to end test - Cutline (Aerial Imagery)
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/cutline/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --cutline ./tests/data/cutline_aerial.fgb
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/cutline/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --cutline ./tests/data/cutline_aerial.fgb --gsd 0.2m
           cmp --silent "${{ runner.temp }}/cutline/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829_cut.tiff
 
       - name: End to end test - Thumbnails (Topo50/Topo250)
@@ -59,7 +59,7 @@ jobs:
 
       - name: End to end test - Restandardise Aerial Imagery
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/restandardise.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/restandardise/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/restandardise.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/restandardise/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 0.2m
           cmp --silent "${{ runner.temp }}/restandardise/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
 
       - name: End to end test - Translate Ascii Files (Elevation)
@@ -69,7 +69,7 @@ jobs:
 
       - name: End to end test - Remove empty files
         run: |
-          docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01
+          docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01 --gsd 0.2m
           empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
           [[ -n "$empty_target_directory" ]]
 
