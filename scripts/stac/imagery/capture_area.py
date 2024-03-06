@@ -1,8 +1,11 @@
 import json
 from typing import Any, Dict, List
 
+from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, Geometry, to_geojson, union_all
 from shapely.geometry import Polygon
+
+from scripts.logging.time_helper import time_in_ms
 
 DECIMAL_DEGREES_1M = 0.00001
 """
@@ -95,6 +98,14 @@ def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]
     Returns:
         The capture-area geojson document.
     """
+    start_time = time_in_ms()
+    get_log().trace("Generating capture-area started")
+
     merged_polygons = merge_polygons(polygons, get_buffer_distance(gsd))
+
+    get_log().trace(
+        "Generating capture-area ended",
+        duration=time_in_ms() - start_time,
+    )
 
     return to_feature(merged_polygons)
