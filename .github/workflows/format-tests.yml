@@ -14,13 +14,17 @@ jobs:
       - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4
         with:
           python-version: "3.12.3"
+      - uses: cachix/install-nix-action@8887e596b4ee1134dae06b98d573bd674693f47c # v26
+      - uses: cachix/cachix-action@18cf96c7c98e048e10a83abd92116114cd8504be # v14
+        with:
+          name: linz
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Format
+        run: nix-shell --pure --run 'pre-commit run --all-files'
       - name: Install
         run: |
           pip install poetry
           poetry install --no-root
-      - name: Format
-        run: |
-          poetry run pre-commit run --all-files
       - name: Unit Tests
         run: |
           poetry run pytest --doctest-modules .
