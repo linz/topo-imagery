@@ -5,13 +5,14 @@ from botocore.exceptions import ClientError
 from moto import mock_s3
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
+from pytest_subtests import SubTests
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs_s3 import exists, list_files_in_uri, read, write
 
 
 @mock_s3  # type: ignore
-def test_write() -> None:
+def test_write(subtests: SubTests) -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
@@ -19,20 +20,26 @@ def test_write() -> None:
     write("s3://testbucket/test.file", b"test content")
 
     resp = boto3_client.get_object(Bucket="testbucket", Key="test.file")
-    assert resp["Body"].read() == b"test content"
-    assert resp["ContentType"] == "binary/octet-stream"
+    with subtests.test():
+        assert resp["Body"].read() == b"test content"
+
+    with subtests.test():
+        assert resp["ContentType"] == "binary/octet-stream"
 
 
 @mock_s3  # type: ignore
-def test_write_content_type() -> None:
+def test_write_content_type(subtests: SubTests) -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
 
     write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
     resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
-    assert resp["Body"].read() == b"test content"
-    assert resp["ContentType"] == ContentType.GEOTIFF.value
+    with subtests.test():
+        assert resp["Body"].read() == b"test content"
+
+    with subtests.test():
+        assert resp["ContentType"] == ContentType.GEOTIFF.value
 
 
 @mock_s3  # type: ignore
@@ -94,12 +101,15 @@ def test_directory_exists() -> None:
 
 
 @mock_s3  # type: ignore
-def test_exists_bucket_not_exists(capsys: CaptureFixture[str]) -> None:
+def test_exists_bucket_not_exists(capsys: CaptureFixture[str], subtests: SubTests) -> None:
     file_exists = exists("s3://testbucket/test.file")
 
     logs = json.loads(capsys.readouterr().out)
-    assert logs["msg"] == "s3_bucket_not_found"
-    assert file_exists is False
+    with subtests.test():
+        assert logs["msg"] == "s3_bucket_not_found"
+
+    with subtests.test():
+        assert file_exists is False
 
 
 @mock_s3  # type: ignore
@@ -127,7 +137,7 @@ def test_exists_object_starting_with_not_exists() -> None:
 
 
 @mock_s3  # type: ignore
-def test_list_files_in_uri() -> None:
+def test_list_files_in_uri(subtests: SubTests) -> None:
     bucket_name = "testbucket"
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -138,6 +148,11 @@ def test_list_files_in_uri() -> None:
 
     files = list_files_in_uri(f"s3://{bucket_name}/data/", [".json", "_meta.xml"], boto3_client)
 
-    assert len(files) == 2
-    assert set(files) == {"data/collection.json", "data/image_meta.xml"}
-    assert "data/image.tiff" not in files
+    with subtests.test():
+        assert len(files) == 2
+
+    with subtests.test():
+        assert set(files) == {"data/collection.json", "data/image_meta.xml"}
+
+    with subtests.test():
+        assert "data/image.tiff" not in files

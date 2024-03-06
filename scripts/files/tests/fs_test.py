@@ -6,6 +6,7 @@ from boto3 import resource
 from moto import mock_s3
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
+from pytest_subtests import SubTests
 
 from scripts.files.fs import NoSuchFileError, read, write, write_all, write_sidecars
 
@@ -63,7 +64,7 @@ def test_write_sidecars_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     assert "No sidecar file found; skipping" in capsys.readouterr().out
 
 
-def test_write_sidecars_one_found(capsys: CaptureFixture[str]) -> None:
+def test_write_sidecars_one_found(capsys: CaptureFixture[str], subtests: SubTests) -> None:
     target = mkdtemp()
     # Add a file to read
     content = b"test content"
@@ -73,8 +74,10 @@ def test_write_sidecars_one_found(capsys: CaptureFixture[str]) -> None:
     # Write the sidecar files with one unexisting
     write_sidecars([non_existing_path, path], os.path.join(target, "/tmp"))
     logs = capsys.readouterr().out
-    # One has not been found
-    assert "No sidecar file found; skipping" in logs
-    # One has been found
-    assert "wrote_sidecar_file" in logs
+    with subtests.test(msg="One has not been found"):
+        assert "No sidecar file found; skipping" in logs
+
+    with subtests.test(msg="One has been found"):
+        assert "wrote_sidecar_file" in logs
+
     rmtree(target)
