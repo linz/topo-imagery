@@ -22,6 +22,7 @@ from scripts.gdal.gdal_preset import (
     get_transform_srs_command,
 )
 from scripts.logging.time_helper import time_in_ms
+from scripts.stac.imagery.capture_area import get_buffer_distance, gsd_to_float
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
@@ -32,6 +33,7 @@ def run_standardising(
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
+    gsd: str,
     target_output: str = "/tmp/",
 ) -> List[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
@@ -43,6 +45,7 @@ def run_standardising(
         concurrency: number of concurrent files to process
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
+        gsd: Ground Sample Distance in meters
         target_output: output directory path. Defaults to "/tmp/"
 
     Returns:
@@ -64,6 +67,7 @@ def run_standardising(
                     source_epsg=source_epsg,
                     target_epsg=target_epsg,
                     target_output=target_output,
+                    gsd=gsd,
                     cutline=cutline,
                 ),
                 todo,
@@ -102,6 +106,7 @@ def standardising(
     preset: str,
     source_epsg: str,
     target_epsg: str,
+    gsd: str,
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> Optional[FileTiff]:
@@ -112,6 +117,7 @@ def standardising(
         preset: gdal preset to use. See `gdal.gdal_preset.py`
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
+        gsd: Ground Sample Distance in meters
         cutline: path to the cutline. Must be `.fgb` or `.geojson`
         target_output: output directory path. Defaults to "/tmp/"
 
@@ -209,7 +215,15 @@ def standardising(
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
                 # Create footprint GeoJSON
                 run_gdal(
-                    ["gdal_footprint", "-t_srs", EpsgCode.EPSG_4326, "-max_points", "unlimited"],
+                    [
+                        "gdal_footprint",
+                        "-t_srs",
+                        EpsgCode.EPSG_4326,
+                        "-max_points",
+                        "unlimited",
+                        "-simplify",
+                        str(get_buffer_distance(gsd_to_float(gsd))),
+                    ],
                     standardized_working_path,
                     footprint_tmp_path,
                 )
