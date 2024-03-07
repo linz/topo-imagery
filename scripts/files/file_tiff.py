@@ -1,13 +1,13 @@
 import json
 from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List, Optional
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
 from scripts.gdal.gdalinfo import GdalInfo
 
-DEFAULT_NO_DATA_VALUE = Decimal(-9999)
+DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(-9999)
 
 
 class FileTiffErrorType(str, Enum):
