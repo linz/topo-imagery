@@ -180,44 +180,23 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
 
 
 def test_capture_area_added(metadata: CollectionMetadata) -> None:
+    """
+    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
+    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
+    below.
+    """
     collection = ImageryCollection(metadata)
     file_name = "capture-area.geojson"
 
     polygons = []
     polygons.append(
         shapely.geometry.shape(
-            {
-                "type": "MultiPolygon",
-                "coordinates": [
-                    [
-                        [
-                            [178.259659571653, -38.40831927359251],
-                            [178.26012930415902, -38.41478071250544],
-                            [178.26560430668172, -38.41453416326152],
-                            [178.26513409076952, -38.40807278109057],
-                            [178.259659571653, -38.40831927359251],
-                        ]
-                    ]
-                ],
-            }
+            {"type": "MultiPolygon", "coordinates": [[[[176, -39], [177, -41], [179, -40], [178, -38], [176, -39]]]]}
         )
     )
     polygons.append(
         shapely.geometry.shape(
-            {
-                "type": "MultiPolygon",
-                "coordinates": [
-                    [
-                        [
-                            [178.25418498567294, -38.40856551170436],
-                            [178.25465423474975, -38.41502700730107],
-                            [178.26012930415902, -38.41478071250544],
-                            [178.259659571653, -38.40831927359251],
-                            [178.25418498567294, -38.40856551170436],
-                        ]
-                    ]
-                ],
-            }
+            {"type": "MultiPolygon", "coordinates": [[[[174, -40], [175, -42], [177, -41], [176, -39], [174, -40]]]]}
         )
     )
     with tempfile.TemporaryDirectory() as tmp_path:
@@ -234,12 +213,16 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
     assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
     assert StacExtensions.file.value in collection.stac["stac_extensions"]
     assert "file:checksum" in collection.stac["assets"]["capture_area"]
-    assert (
-        collection.stac["assets"]["capture_area"]["file:checksum"]
-        == "1220b15694be7495af38e0f70af67cfdc4f19b8bc415a2eb77d780e7a32c6e5b42c2"
+
+    assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
+        "1220c32e1e9b9d2b5f3ce18d4d2f1cd71d177664a2e570cca7cb76204a06f17d5103",  # geos 3.11
+        "1220edd9baf5d16fc76c00e48ff11f476e2e39949a36b411a99f729168178ffe7f06",  # geos 3.12
     )
     assert "file:size" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:size"] == 339
+    assert collection.stac["assets"]["capture_area"]["file:size"] in (
+        235,  # geos 3.11
+        169,  # geos 3.12
+    )
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
