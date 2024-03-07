@@ -182,7 +182,7 @@ def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
 def test_capture_area_added(metadata: CollectionMetadata) -> None:
     """
     TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
-    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.1
+    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
     below.
     """
     collection = ImageryCollection(metadata)
