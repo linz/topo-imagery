@@ -34,6 +34,9 @@ def get_vfs_path(path: str) -> str:
 
     Returns:
         str: the path modified to comply with the corresponding storage service.
+    Examples:
+        >>> get_vfs_path("s3://scratch-bucket/path/to/file.tiff")
+        '/vsis3/scratch-bucket/path/to/file.tiff'
     """
     return path.replace("s3://", "/vsis3/")
 
