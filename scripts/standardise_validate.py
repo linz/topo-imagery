@@ -28,6 +28,7 @@ def main() -> None:
         required=True,
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
@@ -57,6 +58,7 @@ def main() -> None:
         concurrency,
         arguments.source_epsg,
         arguments.target_epsg,
+        arguments.gsd,
         arguments.target,
     )
 
@@ -81,14 +83,7 @@ def main() -> None:
                 standardised_path = file.get_path_standardised()
                 env_argo_template = os.environ.get("ARGO_TEMPLATE")
                 if env_argo_template:
-                    argo_template = json.loads(env_argo_template)
-                    s3_information = argo_template["archiveLocation"]["s3"]
-                    standardised_path = os.path.join(
-                        "/vsis3",
-                        s3_information["bucket"],
-                        s3_information["key"],
-                        *file.get_path_standardised().split("/"),
-                    )
+                    standardised_path = get_vfs_path(file.get_path_standardised())
                     original_s3_path: List[str] = []
                     for path in original_path:
                         original_s3_path.append(get_vfs_path(path))

@@ -9,7 +9,7 @@ import ulid
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
-from scripts.stac.imagery.capture_area import generate_capture_area
+from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
@@ -95,7 +95,7 @@ class ImageryCollection:
         """
 
         # The GSD is measured in meters (e.g., `0.3m`)
-        capture_area_document = generate_capture_area(polygons, float(self.metadata["gsd"].replace("m", "")))
+        capture_area_document = generate_capture_area(polygons, gsd_to_float(self.metadata["gsd"]))
         capture_area_content: bytes = json.dumps(capture_area_document).encode("utf-8")
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {

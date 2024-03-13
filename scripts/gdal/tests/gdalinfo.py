@@ -29,7 +29,7 @@ def add_band(
     )
 
 
-def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: List[List[int]], no_data_value: Optional[int] = None) -> None:
+def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: List[List[int]], no_data_value: Optional[str] = None) -> None:
     if gdalinfo.get("bands", None) is None:
         gdalinfo["bands"] = []
 

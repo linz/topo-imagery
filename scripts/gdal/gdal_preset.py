@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from linz_logger import get_log
 
+from scripts.files.file_tiff import DEFAULT_NO_DATA_VALUE
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdalinfo import GdalInfo
 
@@ -50,7 +51,7 @@ DEM_LERC = [
     "-mo",
     "AREA_OR_POINT=Area",
     "-a_nodata",
-    "-9999",
+    str(DEFAULT_NO_DATA_VALUE),
 ]
 
 COMPRESS_LZW = [

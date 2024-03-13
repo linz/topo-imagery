@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.4.0](https://github.com/linz/topo-imagery/compare/v4.3.0...v4.4.0) (2024-03-06)
+
+
+### Features
+
+* log capture-area generation duration TDE-1080 ([#889](https://github.com/linz/topo-imagery/issues/889)) ([5fd8f65](https://github.com/linz/topo-imagery/commit/5fd8f652aef1ce8c24a93a1a1816a9aa7164d880))
+
+
+### Bug Fixes
+
+* footprint should exists if tiff already exists ([#890](https://github.com/linz/topo-imagery/issues/890)) ([9868072](https://github.com/linz/topo-imagery/commit/9868072acbcf95ef58e1ad9b209f7b4a4a647011))
+
+## [4.3.0](https://github.com/linz/topo-imagery/compare/v4.2.4...v4.3.0) (2024-03-06)
+
+
+### Features
+
+* simplify footprint geometry tde-1080 ([#891](https://github.com/linz/topo-imagery/issues/891)) ([a932a17](https://github.com/linz/topo-imagery/commit/a932a17125560d9e7007dec733f378d56799256e))
+
 ## [4.2.4](https://github.com/linz/topo-imagery/compare/v4.2.3...v4.2.4) (2024-02-27)
 
 

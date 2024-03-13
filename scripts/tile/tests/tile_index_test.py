@@ -1,4 +1,5 @@
 import pytest
+from pytest_subtests import SubTests
 
 from scripts.tile.tests.tile_index_data import MAP_SHEET_DATA
 from scripts.tile.tile_index import Bounds, Point, Size, get_bounds_from_name, get_mapsheet_offset, get_tile_offset
@@ -24,9 +25,11 @@ def test_get_tile_offset() -> None:
 
 
 @pytest.mark.dependency(depends=["test_get_tile_offset"])
-def test_get_mapsheet_offset() -> None:
+def test_get_mapsheet_offset(subtests: SubTests) -> None:
     # Point(x=SHEET_WIDTH * x + SHEET_ORIGIN_LEFT, y=SHEET_ORIGIN_TOP - SHEET_HEIGHT * y)
     for sheet_data in MAP_SHEET_DATA:
-        map_sheet_offset = get_mapsheet_offset(sheet_data["code"])
+        sheet_code = sheet_data["code"]
+        map_sheet_offset = get_mapsheet_offset(sheet_code)
         origin = Point(x=sheet_data["origin"]["x"], y=sheet_data["origin"]["y"])
-        assert map_sheet_offset == origin
+        with subtests.test(msg=sheet_code):
+            assert map_sheet_offset == origin
