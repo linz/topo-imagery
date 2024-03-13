@@ -1,13 +1,18 @@
+from pytest_subtests import SubTests
+
 from scripts.aws.aws_helper import parse_path
 from scripts.cli.cli_helper import is_argo
 
 
-def test_parse_path_s3() -> None:
+def test_parse_path_s3(subtests: SubTests) -> None:
     s3_path = "s3://bucket-name/path/to/the/file.test"
     path = parse_path(s3_path)
 
-    assert path.bucket == "bucket-name"
-    assert path.key == "path/to/the/file.test"
+    with subtests.test():
+        assert path.bucket == "bucket-name"
+
+    with subtests.test():
+        assert path.key == "path/to/the/file.test"
 
 
 def test_parse_path_local() -> None:
