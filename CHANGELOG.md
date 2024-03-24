@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.5.0](https://github.com/linz/topo-imagery/compare/v4.4.0...v4.5.0) (2024-03-24)
+
+
+### Features
+
+* Use subtests for multi-assert tests ([#896](https://github.com/linz/topo-imagery/issues/896)) ([eb92bd2](https://github.com/linz/topo-imagery/commit/eb92bd2d550013f41538f2beb69e69abf0e6fd5d))
+
+
+### Bug Fixes
+
+* Treat "no data" value as a decimal number TDE-1077 ([#893](https://github.com/linz/topo-imagery/issues/893)) ([a9b4a84](https://github.com/linz/topo-imagery/commit/a9b4a84cbfa84ea48dd3e970c9fabe6175058001))
+* update gdal version to 3.8.4 to fix footprints bug TDE-1106 ([#923](https://github.com/linz/topo-imagery/issues/923)) ([7a3367e](https://github.com/linz/topo-imagery/commit/7a3367ed9edebae49ebc50044ebe03a9e6fe63a6))
+* Use integer coordinates TDE-1077 ([#895](https://github.com/linz/topo-imagery/issues/895)) ([b381bb6](https://github.com/linz/topo-imagery/commit/b381bb690d7bef68d15194b147568bcd1b8561f1))
+* wrong vsis3 path logged ([#906](https://github.com/linz/topo-imagery/issues/906)) ([f491eb1](https://github.com/linz/topo-imagery/commit/f491eb1578ef3462170b79edb5f7775596ca2481))
+
+
+### Documentation
+
+* Document default "no data" value TDE-1077 ([#901](https://github.com/linz/topo-imagery/issues/901)) ([d15919f](https://github.com/linz/topo-imagery/commit/d15919ffc81309d0767ae13e5e7ab00b37136235))
+
 ## [4.4.0](https://github.com/linz/topo-imagery/compare/v4.3.0...v4.4.0) (2024-03-06)
 
 
