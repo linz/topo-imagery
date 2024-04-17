@@ -17,10 +17,10 @@ def parse_rfc_3339_date(date_string: str) -> datetime:
 
 def format_rfc_3339_datetime_string(datetime_object: datetime) -> str:
     time_zone_name = datetime_object.tzname()
-    if time_zone_name != "UTC":
-        raise NotUtcDatetime(time_zone_name)
+    if time_zone_name is None:
+        raise NaiveDatetimeError()
 
-    return datetime_object.strftime(RFC_3339_DATETIME_FORMAT)
+    return datetime_object.astimezone(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT)
 
 
 def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> str:
@@ -39,6 +39,6 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
     return format_rfc_3339_datetime_string(datetime_utc)
 
 
-class NotUtcDatetime(Exception):
-    def __init__(self, time_zone_name: str | None):
-        super().__init__(f"Not a UTC time zone: {time_zone_name}")
+class NaiveDatetimeError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Can't convert naive datetime to UTC")
