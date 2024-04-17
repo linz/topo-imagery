@@ -1,12 +1,11 @@
 import json
 import os
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-import shapely.geometry
 import shapely.ops
 import ulid
 
+from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
@@ -192,20 +191,20 @@ class ImageryCollection:
 
         interval = self.stac["extent"]["temporal"]["interval"][0]
 
-        item_start = datetime.strptime(item_start_datetime, "%Y-%m-%dT%H:%M:%SZ")
-        item_end = datetime.strptime(item_end_datetime, "%Y-%m-%dT%H:%M:%SZ")
+        item_start = parse_rfc_3339_datetime(item_start_datetime)
+        item_end = parse_rfc_3339_datetime(item_end_datetime)
 
         collection_datetimes = []
         for date in interval:
-            collection_datetimes.append(datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ"))
+            collection_datetimes.append(parse_rfc_3339_datetime(date))
 
         start_datetime = min(collection_datetimes[0], collection_datetimes[1], item_start)
         end_datetime = max(collection_datetimes[0], collection_datetimes[1], item_end)
 
         self.update_extent(
             interval=[
-                start_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                end_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                format_rfc_3339_datetime_string(start_datetime),
+                format_rfc_3339_datetime_string(end_datetime),
             ]
         )
 
