@@ -6,9 +6,13 @@ RFC_3339_DATE_FORMAT = "%Y-%m-%d"
 RFC_3339_DATETIME_FORMAT = f"{RFC_3339_DATE_FORMAT}T%H:%M:%SZ"
 
 
-class NotUtcDatetime(Exception):
-    def __init__(self, time_zone_name: str | None):
-        super().__init__(f"Not a UTC time zone: {time_zone_name}")
+def parse_rfc_3339_datetime(datetime_string: str) -> datetime:
+    naive_datetime = datetime.strptime(datetime_string, RFC_3339_DATETIME_FORMAT)
+    return naive_datetime.replace(tzinfo=timezone.utc)
+
+
+def parse_rfc_3339_date(date_string: str) -> datetime:
+    return parse_rfc_3339_datetime(f"{date_string}T00:00:00Z")
 
 
 def format_rfc_3339_datetime_string(datetime_object: datetime) -> str:
@@ -35,10 +39,6 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
     return format_rfc_3339_datetime_string(datetime_utc)
 
 
-def parse_rfc_3339_datetime(datetime_string: str) -> datetime:
-    naive_datetime = datetime.strptime(datetime_string, RFC_3339_DATETIME_FORMAT)
-    return naive_datetime.replace(tzinfo=timezone.utc)
-
-
-def parse_rfc_3339_date(date_string: str) -> datetime:
-    return parse_rfc_3339_datetime(f"{date_string}T00:00:00Z")
+class NotUtcDatetime(Exception):
+    def __init__(self, time_zone_name: str | None):
+        super().__init__(f"Not a UTC time zone: {time_zone_name}")
