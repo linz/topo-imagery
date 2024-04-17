@@ -78,7 +78,7 @@ def format_date(date: datetime) -> str:
     """
     date_string_nz = f"{date.strftime('%Y-%m-%d')}T00:00:00.000"
     datetime_utc = nzt_datetime_to_utc_datetime(date_string_nz)
-    return datetime_utc.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
+    return datetime_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def nzt_datetime_to_utc_datetime(date: str) -> datetime:
