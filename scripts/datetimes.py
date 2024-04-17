@@ -19,7 +19,7 @@ def format_rfc_3339_datetime_string(datetime_object: datetime) -> str:
     return datetime_object.strftime(RFC_3339_DATETIME_FORMAT)
 
 
-def format_rfc_3339_date_string(datetime_object: datetime) -> str:
+def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> str:
     """Convert datetime to New Zealand midnight and format it to UTC"""
     naive_midnight_datetime_string = f"{datetime_object.strftime(RFC_3339_DATE_FORMAT)}T00:00:00.000"
 
