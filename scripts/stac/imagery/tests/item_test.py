@@ -19,8 +19,8 @@ def test_imagery_stac_item(mocker, subtests: SubTests) -> None:  # type: ignore
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)
-    start_datetime = "2021-01-27 00:00:00Z"
-    end_datetime = "2021-01-27 00:00:00Z"
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
 
     item = ImageryItem(id_, path)
     item.update_spatial(geometry, bbox)
