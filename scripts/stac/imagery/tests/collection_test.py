@@ -8,6 +8,7 @@ from typing import Generator
 
 import pytest
 import shapely.geometry
+from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
 from scripts.files.fs import read
@@ -112,7 +113,7 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker, metadata: CollectionMetadata, subtests: SubTests) -> None:  # type: ignore
+def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests: SubTests) -> None:
     collection = ImageryCollection(metadata)
     mocker.patch("scripts.files.fs.read", return_value=b"")
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
