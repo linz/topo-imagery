@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
 from scripts.files.files_helper import get_file_name_from_path
@@ -8,7 +9,7 @@ from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-def test_imagery_stac_item(mocker, subtests: SubTests) -> None:  # type: ignore
+def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     # mock functions that interact with files
     geometry = {
         "type": "Polygon",
@@ -58,7 +59,7 @@ def test_imagery_stac_item(mocker, subtests: SubTests) -> None:  # type: ignore
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(mocker, subtests: SubTests) -> None:  # type: ignore
+def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",

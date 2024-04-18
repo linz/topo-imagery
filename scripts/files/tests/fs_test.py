@@ -3,7 +3,7 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 from boto3 import resource
-from moto import mock_s3
+from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
@@ -16,7 +16,7 @@ def test_read_key_not_found_local() -> None:
         read("test_dir/test.file")
 
 
-@mock_s3  # type: ignore
+@mock_aws
 def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
@@ -40,7 +40,7 @@ def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> Non
     assert "No sidecar file found; skipping" in capsys.readouterr().out
 
 
-@mock_s3  # type: ignore
+@mock_aws
 def test_write_all_key_not_found_s3() -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
@@ -52,7 +52,7 @@ def test_write_all_key_not_found_s3() -> None:
     assert str(e.value) == "Not all mandatory source files were written"
 
 
-@mock_s3  # type: ignore
+@mock_aws
 def test_write_sidecars_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
