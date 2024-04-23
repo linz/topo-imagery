@@ -1,12 +1,19 @@
 import os
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
-from typing import List, Optional
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
 
 from boto3 import resource
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+else:
+    S3Client = dict
 
 
 def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
@@ -77,6 +84,12 @@ def exists(path: str) -> bool:
     if is_s3(path):
         return fs_s3.exists(path)
     return fs_local.exists(path)
+
+
+def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
+    if is_s3(path):
+        return fs_s3.modified(fs_s3.bucket_name_from_path(path), fs_s3.prefix_from_path(path), s3_client)
+    return fs_local.modified(Path(path))
 
 
 def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> List[str]:

@@ -240,5 +240,6 @@ def get_object_parallel_multithreading(
                 yield key, exception
 
 
-def modified(bucket_name: str, key: str, s3_client: S3Client) -> datetime:
+def modified(bucket_name: str, key: str, s3_client: Optional[S3Client]) -> datetime:
+    s3_client = s3_client or client("s3")
     return _get_object(bucket_name, key, s3_client)["LastModified"]
