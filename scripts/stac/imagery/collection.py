@@ -129,20 +129,28 @@ class ImageryCollection:
             item: STAC Item to add
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
+        file_checksum = checksum.multihash_as_hex(json.dumps(item).encode("utf-8"))
         if item_self_link:
-            self.add_link(href=item_self_link["href"])
+            self.add_link(href=item_self_link["href"], checksum=file_checksum)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
-    def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
+    def add_link(
+        self, href: str, rel: str = "item", file_type: str = "application/json", checksum: Optional[str] = None
+    ) -> None:
         """Add a `link` to the existing `links` list of the Collection.
 
         Args:
             href: path
-            rel: type of link. Defaults to "item".
+            rel: type of link. Defaults to "item". Defaults to "item".
             file_type: type of file pointed by the link. Defaults to "application/json".
+            checksum: Optional checksum of file. Defaults to None.
         """
-        self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+
+        link = {"rel": rel, "href": href, "type": file_type}
+        if checksum:
+            link["file:checksum"] = checksum
+        self.stac["links"].append(link)
 
     def add_providers(self, providers: List[Provider]) -> None:
         """Add a list of Providers to the existing list of `providers` of the Collection.

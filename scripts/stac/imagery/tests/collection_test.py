@@ -130,7 +130,12 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
     collection.add_item(item.stac)
 
     with subtests.test():
-        assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
+        assert {
+            "file:checksum": "122052794e4bb0f892b1681cb0efb8c4fdb8f034751cac347b76cc468e8bcbe9a700",
+            "rel": "item",
+            "href": "./BR34_5000_0304.json",
+            "type": "application/json",
+        } in collection.stac["links"]
 
     with subtests.test():
         assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
