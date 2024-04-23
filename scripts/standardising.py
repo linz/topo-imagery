@@ -164,7 +164,6 @@ def standardising(
 
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
-        target_vrt = os.path.join(tmp_path, "output.vrt")
 
         # Apply cutline
         if cutline:
