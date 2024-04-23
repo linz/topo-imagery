@@ -144,7 +144,7 @@ class ImageryCollection:
             href: path
             rel: type of link. Defaults to "item".
             file_type: type of file pointed by the link. Defaults to "application/json".
-            checksum: Optional checksum of file. Defaults to None.
+            file_checksum: Optional checksum of file. Defaults to None.
         """
 
         link = {"rel": rel, "href": href, "type": file_type}
