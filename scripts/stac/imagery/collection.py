@@ -142,7 +142,7 @@ class ImageryCollection:
 
         Args:
             href: path
-            rel: type of link. Defaults to "item". Defaults to "item".
+            rel: type of link. Defaults to "item".
             file_type: type of file pointed by the link. Defaults to "application/json".
             checksum: Optional checksum of file. Defaults to None.
         """
