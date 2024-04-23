@@ -131,12 +131,12 @@ class ImageryCollection:
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         file_checksum = checksum.multihash_as_hex(json.dumps(item).encode("utf-8"))
         if item_self_link:
-            self.add_link(href=item_self_link["href"], checksum=file_checksum)
+            self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
     def add_link(
-        self, href: str, rel: str = "item", file_type: str = "application/json", checksum: Optional[str] = None
+        self, href: str, rel: str = "item", file_type: str = "application/json", file_checksum: Optional[str] = None
     ) -> None:
         """Add a `link` to the existing `links` list of the Collection.
 
@@ -148,8 +148,8 @@ class ImageryCollection:
         """
 
         link = {"rel": rel, "href": href, "type": file_type}
-        if checksum:
-            link["file:checksum"] = checksum
+        if file_checksum:
+            link["file:checksum"] = file_checksum
         self.stac["links"].append(link)
 
     def add_providers(self, providers: List[Provider]) -> None:
