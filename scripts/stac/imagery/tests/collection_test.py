@@ -131,7 +131,7 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
 
     with subtests.test():
         assert {
-            "file:checksum": "122052794e4bb0f892b1681cb0efb8c4fdb8f034751cac347b76cc468e8bcbe9a700",
+            "file:checksum": "1220a049888b3971d9ed3fd52b830cfeb379d7069d6b7a927456bcf1fabab0ec4f46",
             "rel": "item",
             "href": "./BR34_5000_0304.json",
             "type": "application/json",
