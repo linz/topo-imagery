@@ -14,7 +14,7 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.files.fs import NoSuchFileError, modified, read, write, write_all, write_sidecars
-from scripts.tests.datetimes_test import any_modern_datetime
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 def test_read_key_not_found_local() -> None:
@@ -93,7 +93,7 @@ def test_write_sidecars_one_found(capsys: CaptureFixture[str], subtests: SubTest
 def test_should_get_s3_object_modified_datetime() -> None:
     bucket_name = "any-bucket-name"
     key = "any-key"
-    modified_datetime = any_modern_datetime()
+    modified_datetime = any_epoch_datetime()
 
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket=bucket_name)
@@ -106,6 +106,6 @@ def test_should_get_s3_object_modified_datetime() -> None:
 def test_should_get_local_file_modified_datetime(setup: str) -> None:
     path = os.path.join(setup, "modified.file")
     Path(path).touch()
-    modified_datetime = any_modern_datetime()
-    os.utime(path, times=(any_modern_datetime().timestamp(), modified_datetime.timestamp()))
+    modified_datetime = any_epoch_datetime()
+    os.utime(path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
     assert modified(path) == modified_datetime

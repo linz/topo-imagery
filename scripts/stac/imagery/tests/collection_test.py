@@ -17,7 +17,7 @@ from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.stac_extensions import StacExtensions
-from scripts.tests.datetimes_test import any_modern_datetime
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -119,7 +119,7 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
     mocker.patch("scripts.files.fs.read", return_value=b"")
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
-    os.utime(item_file_path, times=(any_modern_datetime().timestamp(), modified_datetime.timestamp()))
+    os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
     item = ImageryItem("BR34_5000_0304", item_file_path)
     geometry = {
         "type": "Polygon",

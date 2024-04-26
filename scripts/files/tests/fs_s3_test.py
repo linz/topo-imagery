@@ -13,7 +13,7 @@ from pytest_subtests import SubTests
 
 from scripts.files.files_helper import ContentType
 from scripts.files.fs_s3 import exists, list_files_in_uri, modified, read, write
-from scripts.tests.datetimes_test import any_modern_datetime
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 @mock_aws
@@ -167,7 +167,7 @@ def test_list_files_in_uri(subtests: SubTests) -> None:
 def test_should_get_modified_datetime() -> None:
     bucket_name = "any-bucket-name"
     key = "any-key"
-    modified_datetime = any_modern_datetime()
+    modified_datetime = any_epoch_datetime()
 
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket=bucket_name)
