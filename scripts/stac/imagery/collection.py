@@ -135,21 +135,14 @@ class ImageryCollection:
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
-    def add_link(
-        self, href: str, rel: str = "item", file_type: str = "application/json", file_checksum: Optional[str] = None
-    ) -> None:
+    def add_link(self, href: str, file_checksum: str) -> None:
         """Add a `link` to the existing `links` list of the Collection.
 
         Args:
             href: path
-            rel: type of link. Defaults to "item".
-            file_type: type of file pointed by the link. Defaults to "application/json".
-            file_checksum: Optional checksum of file. Defaults to None.
+            file_checksum: Optional checksum of file.
         """
-
-        link = {"rel": rel, "href": href, "type": file_type}
-        if file_checksum:
-            link["file:checksum"] = file_checksum
+        link = {"rel": "item", "href": href, "type": "application/json", "file:checksum": file_checksum}
         self.stac["links"].append(link)
 
     def add_providers(self, providers: List[Provider]) -> None:
