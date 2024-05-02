@@ -6,7 +6,8 @@ from typing import List
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, format_date, is_argo, load_input_files, valid_date
+from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
+from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
@@ -45,8 +46,8 @@ def main() -> None:
     except InputParameterError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
-    start_datetime = format_date(arguments.start_datetime)
-    end_datetime = format_date(arguments.end_datetime)
+    start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
+    end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -83,14 +84,7 @@ def main() -> None:
                 standardised_path = file.get_path_standardised()
                 env_argo_template = os.environ.get("ARGO_TEMPLATE")
                 if env_argo_template:
-                    argo_template = json.loads(env_argo_template)
-                    s3_information = argo_template["archiveLocation"]["s3"]
-                    standardised_path = os.path.join(
-                        "/vsis3",
-                        s3_information["bucket"],
-                        s3_information["key"],
-                        *file.get_path_standardised().split("/"),
-                    )
+                    standardised_path = get_vfs_path(file.get_path_standardised())
                     original_s3_path: List[str] = []
                     for path in original_path:
                         original_s3_path.append(get_vfs_path(path))

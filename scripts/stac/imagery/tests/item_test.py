@@ -1,12 +1,15 @@
 from datetime import datetime
 
+from pytest_mock import MockerFixture
+from pytest_subtests import SubTests
+
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-def test_imagery_stac_item(mocker) -> None:  # type: ignore
+def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     # mock functions that interact with files
     geometry = {
         "type": "Polygon",
@@ -17,29 +20,46 @@ def test_imagery_stac_item(mocker) -> None:  # type: ignore
 
     path = "./test/BR34_5000_0302.tiff"
     id_ = get_file_name_from_path(path)
-    start_datetime = "2021-01-27 00:00:00Z"
-    end_datetime = "2021-01-27 00:00:00Z"
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
 
     item = ImageryItem(id_, path)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
-    assert item.stac["id"] == id_
-    assert item.stac["properties"]["start_datetime"] == start_datetime
-    assert item.stac["properties"]["end_datetime"] == end_datetime
-    assert item.stac["properties"]["datetime"] is None
-    assert item.stac["geometry"]["coordinates"] == geometry["coordinates"]
-    assert item.stac["geometry"] == geometry
-    assert item.stac["bbox"] == bbox
-    assert (
-        item.stac["assets"]["visual"]["file:checksum"]
-        == "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    )
-    assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
+    with subtests.test():
+        assert item.stac["id"] == id_
+
+    with subtests.test():
+        assert item.stac["properties"]["start_datetime"] == start_datetime
+
+    with subtests.test():
+        assert item.stac["properties"]["end_datetime"] == end_datetime
+
+    with subtests.test():
+        assert item.stac["properties"]["datetime"] is None
+
+    with subtests.test():
+        assert item.stac["geometry"]["coordinates"] == geometry["coordinates"]
+
+    with subtests.test():
+        assert item.stac["geometry"] == geometry
+
+    with subtests.test():
+        assert item.stac["bbox"] == bbox
+
+    with subtests.test():
+        assert (
+            item.stac["assets"]["visual"]["file:checksum"]
+            == "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        )
+
+    with subtests.test():
+        assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(mocker) -> None:  # type: ignore
+def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
@@ -61,6 +81,11 @@ def test_imagery_add_collection(mocker) -> None:  # type: ignore
 
     item.add_collection(collection.stac["id"])
 
-    assert item.stac["collection"] == ulid
-    assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
-    assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+    with subtests.test():
+        assert item.stac["collection"] == ulid
+
+    with subtests.test():
+        assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+
+    with subtests.test():
+        assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]

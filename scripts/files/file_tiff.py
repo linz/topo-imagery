@@ -1,10 +1,13 @@
 import json
+from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List, Optional
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
 from scripts.gdal.gdalinfo import GdalInfo
+
+DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(-9999)
 
 
 class FileTiffErrorType(str, Enum):
@@ -221,11 +224,11 @@ class FileTiff:
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
-            # GDALINFO shows the `noDataValue` as `-9999.0`
-            if self._tiff_type == "DEM" and current_nodata_val and int(current_nodata_val) != -9999:
+            # Convert `gdalinfo -json` no data value string to decimal for numeric comparison
+            if self._tiff_type == "DEM" and current_nodata_val and Decimal(current_nodata_val) != DEFAULT_NO_DATA_VALUE:
                 self.add_error(
                     error_type=FileTiffErrorType.NO_DATA,
-                    error_message="noDataValue is not -9999",
+                    error_message=f"noDataValue is not {DEFAULT_NO_DATA_VALUE}",
                     custom_fields={"current": f"{current_nodata_val}"},
                 )
             elif self._tiff_type == "Imagery" and current_nodata_val != 255:

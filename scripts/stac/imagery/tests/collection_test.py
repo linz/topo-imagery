@@ -8,6 +8,8 @@ from typing import Generator
 
 import pytest
 import shapely.geometry
+from pytest_mock import MockerFixture
+from pytest_subtests import SubTests
 
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
@@ -34,19 +36,34 @@ def setup() -> Generator[CollectionMetadata, None, None]:
     yield metadata
 
 
-def test_title_description_id_created_on_init(metadata: CollectionMetadata) -> None:
+def test_title_description_id_created_on_init(metadata: CollectionMetadata, subtests: SubTests) -> None:
     collection = ImageryCollection(metadata)
-    assert collection.stac["title"] == "Auckland North Forest Assessment 0.3m Urban Aerial Photos (2022)"
-    assert (
-        collection.stac["description"]
-        == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
-    )
-    assert collection.stac["id"]
-    assert collection.stac["linz:region"] == "auckland"
-    assert collection.stac["linz:geographic_description"] == "Auckland North Forest Assessment"
-    assert collection.stac["linz:event_name"] == "Forest Assessment"
-    assert collection.stac["linz:lifecycle"] == "completed"
-    assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
+    with subtests.test():
+        assert collection.stac["title"] == "Auckland North Forest Assessment 0.3m Urban Aerial Photos (2022)"
+
+    with subtests.test():
+        assert (
+            collection.stac["description"]
+            == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
+        )
+
+    with subtests.test():
+        assert collection.stac["id"]
+
+    with subtests.test():
+        assert collection.stac["linz:region"] == "auckland"
+
+    with subtests.test():
+        assert collection.stac["linz:geographic_description"] == "Auckland North Forest Assessment"
+
+    with subtests.test():
+        assert collection.stac["linz:event_name"] == "Forest Assessment"
+
+    with subtests.test():
+        assert collection.stac["linz:lifecycle"] == "completed"
+
+    with subtests.test():
+        assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
 
 
 def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
@@ -96,7 +113,7 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
+def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests: SubTests) -> None:
     collection = ImageryCollection(metadata)
     mocker.patch("scripts.files.fs.read", return_value=b"")
     item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
@@ -105,16 +122,21 @@ def test_add_item(mocker, metadata: CollectionMetadata) -> None:  # type: ignore
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27 00:00:00Z"
-    end_datetime = "2021-01-27 00:00:00Z"
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
     collection.add_item(item.stac)
 
-    assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
-    assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
-    assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
+    with subtests.test():
+        assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
+
+    with subtests.test():
+        assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
+
+    with subtests.test():
+        assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:
@@ -149,37 +171,43 @@ def test_add_providers(metadata: CollectionMetadata) -> None:
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_default_provider_roles_are_kept(metadata: CollectionMetadata) -> None:
+def test_default_provider_roles_are_kept(metadata: CollectionMetadata, subtests: SubTests) -> None:
     # given we are adding a non default role to the default provider
     licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection = ImageryCollection(metadata, providers=[producer, licensor])
 
-    # then it adds the non default role to the existing default role list
-    assert {
-        "name": "Toitū Te Whenua Land Information New Zealand",
-        "roles": ["licensor", "host", "processor"],
-    } in collection.stac["providers"]
-    # then it does not duplicate the default provider
-    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
-        "providers"
-    ]
+    with subtests.test(msg="it adds the non default role to the existing default role list"):
+        assert {
+            "name": "Toitū Te Whenua Land Information New Zealand",
+            "roles": ["licensor", "host", "processor"],
+        } in collection.stac["providers"]
+
+    with subtests.test(msg="it does not duplicate the default provider"):
+        assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
+            "providers"
+        ]
 
 
-def test_default_provider_is_present(metadata: CollectionMetadata) -> None:
+def test_default_provider_is_present(metadata: CollectionMetadata, subtests: SubTests) -> None:
     # given adding a provider
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection = ImageryCollection(metadata, providers=[producer])
 
-    # then the default provider is still present
-    assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
-        "providers"
-    ]
-    # then the new provider is added
-    assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+    with subtests.test(msg="the default provider is still present"):
+        assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
+            "providers"
+        ]
+    with subtests.test(msg="the new provider is added"):
+        assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_capture_area_added(metadata: CollectionMetadata) -> None:
+def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) -> None:
+    """
+    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
+    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
+    below.
+    """
     collection = ImageryCollection(metadata)
     file_name = "capture-area.geojson"
 
@@ -225,21 +253,44 @@ def test_capture_area_added(metadata: CollectionMetadata) -> None:
         collection.add_capture_area(polygons, tmp_path, artifact_path)
         file_target = os.path.join(tmp_path, file_name)
         file_artifact = os.path.join(artifact_path, file_name)
-        assert os.path.isfile(file_target)
-        assert os.path.isfile(file_artifact)
+        with subtests.test():
+            assert os.path.isfile(file_target)
 
-    assert collection.stac["assets"]["capture_area"]["href"] == f"./{file_name}"
-    assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
-    assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
-    assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
-    assert StacExtensions.file.value in collection.stac["stac_extensions"]
-    assert "file:checksum" in collection.stac["assets"]["capture_area"]
-    assert (
-        collection.stac["assets"]["capture_area"]["file:checksum"]
-        == "1220b15694be7495af38e0f70af67cfdc4f19b8bc415a2eb77d780e7a32c6e5b42c2"
-    )
-    assert "file:size" in collection.stac["assets"]["capture_area"]
-    assert collection.stac["assets"]["capture_area"]["file:size"] == 339
+        with subtests.test():
+            assert os.path.isfile(file_artifact)
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["href"] == f"./{file_name}"
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["roles"] == ["metadata"]
+
+    with subtests.test():
+        assert StacExtensions.file.value in collection.stac["stac_extensions"]
+
+    with subtests.test():
+        assert "file:checksum" in collection.stac["assets"]["capture_area"]
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
+            "1220b15694be7495af38e0f70af67cfdc4f19b8bc415a2eb77d780e7a32c6e5b42c2",  # geos 3.11
+            "122040fc8700d5d2d04600f730e10677b19d33f3b1e43b02c7867f4cfc2101930863",  # geos 3.12
+        )
+
+    with subtests.test():
+        assert "file:size" in collection.stac["assets"]["capture_area"]
+
+    with subtests.test():
+        assert collection.stac["assets"]["capture_area"]["file:size"] in (
+            339,  # geos 3.11
+            299,  # geos 3.12
+        )
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:

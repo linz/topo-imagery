@@ -34,6 +34,9 @@ def get_vfs_path(path: str) -> str:
 
     Returns:
         str: the path modified to comply with the corresponding storage service.
+    Examples:
+        >>> get_vfs_path("s3://scratch-bucket/path/to/file.tiff")
+        '/vsis3/scratch-bucket/path/to/file.tiff'
     """
     return path.replace("s3://", "/vsis3/")
 
@@ -150,7 +153,7 @@ def gdal_info(path: str) -> GdalInfo:
     Returns:
         GdalInfo output
     """
-    # Set GDAL_PAM_ENABLED to NO to temporarily diable PAM support and prevent creation of auxiliary XML file.
+    # Set GDAL_PAM_ENABLED to NO to temporarily disable PAM support and prevent creation of auxiliary XML file.
     gdalinfo_command = ["gdalinfo", "-json", "--config", "GDAL_PAM_ENABLED", "NO"]
 
     try:
