@@ -7,10 +7,10 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
 from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
-from scripts.dict_to_json_bytes import dict_to_json_bytes
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
 

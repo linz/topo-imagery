@@ -5,9 +5,9 @@ import shapely.ops
 import ulid
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
-from scripts.dict_to_json_bytes import dict_to_json_bytes
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
@@ -235,7 +235,7 @@ class ImageryCollection:
         Args:
             destination: path of the destination
         """
-        write(destination, dict_to_json_bytes(self.stac, ensure_ascii=False), content_type=ContentType.JSON.value)
+        write(destination, dict_to_json_bytes(self.stac), content_type=ContentType.JSON.value)
 
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
