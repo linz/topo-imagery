@@ -8,7 +8,6 @@ from typing import Generator
 
 import pytest
 import shapely.geometry
-from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
 from scripts.files.fs import read
@@ -114,9 +113,8 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     collection = ImageryCollection(metadata)
-    mocker.patch("scripts.files.fs.read", return_value=b"")
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
@@ -135,7 +133,7 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
 
     with subtests.test():
         assert {
-            "file:checksum": "1220a049888b3971d9ed3fd52b830cfeb379d7069d6b7a927456bcf1fabab0ec4f46",
+            "file:checksum": "122044df6d6a8a29f2c60ad027f9805f324fd98ea924177eb8394e2c0c4c62023f8b",
             "rel": "item",
             "href": "./BR34_5000_0304.json",
             "type": "application/json",
