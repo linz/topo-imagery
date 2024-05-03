@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any, Dict, List, Optional
 
@@ -8,6 +7,7 @@ import ulid
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
@@ -95,7 +95,7 @@ class ImageryCollection:
 
         # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, gsd_to_float(self.metadata["gsd"]))
-        capture_area_content: bytes = json.dumps(capture_area_document).encode("utf-8")
+        capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
@@ -129,7 +129,7 @@ class ImageryCollection:
             item: STAC Item to add
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
-        file_checksum = checksum.multihash_as_hex(json.dumps(item).encode("utf-8"))
+        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(item))
         if item_self_link:
             self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
@@ -235,7 +235,7 @@ class ImageryCollection:
         Args:
             destination: path of the destination
         """
-        write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"), content_type=ContentType.JSON.value)
+        write(destination, dict_to_json_bytes(self.stac), content_type=ContentType.JSON.value)
 
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
