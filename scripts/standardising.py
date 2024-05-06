@@ -34,6 +34,7 @@ def run_standardising(
     source_epsg: str,
     target_epsg: str,
     gsd: str,
+    create_footprints: bool,
     target_output: str = "/tmp/",
 ) -> List[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
@@ -68,6 +69,7 @@ def run_standardising(
                     target_epsg=target_epsg,
                     target_output=target_output,
                     gsd=gsd,
+                    create_footprints=create_footprints,
                     cutline=cutline,
                 ),
                 todo,
@@ -107,6 +109,7 @@ def standardising(
     source_epsg: str,
     target_epsg: str,
     gsd: str,
+    create_footprints: bool,
     cutline: Optional[str],
     target_output: str = "/tmp/",
 ) -> Optional[FileTiff]:
@@ -212,25 +215,27 @@ def standardising(
 
         with TiffFile(standardized_working_path) as file_handle:
             if any(tile_byte_count != 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value):
-                # Create footprint GeoJSON
-                run_gdal(
-                    [
-                        "gdal_footprint",
-                        "-t_srs",
-                        EpsgCode.EPSG_4326,
-                        "-max_points",
-                        "unlimited",
-                        "-simplify",
-                        str(get_buffer_distance(gsd_to_float(gsd))),
-                    ],
-                    standardized_working_path,
-                    footprint_tmp_path,
-                )
-                write(
-                    footprint_file_path,
-                    read(footprint_tmp_path),
-                    content_type=ContentType.GEOJSON.value,
-                )
+                if create_footprints:
+                    # Create footprint GeoJSON
+                    run_gdal(
+                        [
+                            "gdal_footprint",
+                            "-t_srs",
+                            EpsgCode.EPSG_4326,
+                            "-max_points",
+                            "unlimited",
+                            "-simplify",
+                            str(get_buffer_distance(gsd_to_float(gsd))),
+                        ],
+                        standardized_working_path,
+                        footprint_tmp_path,
+                    )
+                    write(
+                        footprint_file_path,
+                        read(footprint_tmp_path),
+                        content_type=ContentType.GEOJSON.value,
+                    )
+
                 write(standardized_file_path, read(standardized_working_path), content_type=ContentType.GEOTIFF.value)
 
                 return tiff
