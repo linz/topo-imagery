@@ -87,6 +87,7 @@ def exists(path: str) -> bool:
 
 
 def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
+    """Get modified datetime for S3 URL or local path"""
     if is_s3(path):
         return fs_s3.modified(fs_s3.bucket_name_from_path(path), fs_s3.prefix_from_path(path), s3_client)
     return fs_local.modified(Path(path))
