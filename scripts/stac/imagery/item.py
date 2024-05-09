@@ -27,13 +27,11 @@ class ImageryItem:
                     "href": os.path.join(".", os.path.basename(file)),
                     "type": "image/tiff; application=geotiff; profile=cloud-optimized",
                     "file:checksum": checksum.multihash_as_hex(file_content),
+                    "created": file_modified_datetime,
+                    "updated": file_modified_datetime,
                 }
             },
             "stac_extensions": [StacExtensions.file.value],
-            "properties": {
-                "created": file_modified_datetime,
-                "updated": file_modified_datetime,
-            },
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:

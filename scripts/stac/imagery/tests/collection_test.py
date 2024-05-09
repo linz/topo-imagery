@@ -133,7 +133,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
 
     with subtests.test():
         assert {
-            "file:checksum": "122044df6d6a8a29f2c60ad027f9805f324fd98ea924177eb8394e2c0c4c62023f8b",
+            "file:checksum": "122097b5d2b049c6ffdf608af28c4ba2744fad7f03046d1f58b2523402f30577f618",
             "rel": "item",
             "href": "./BR34_5000_0304.json",
             "type": "application/json",
@@ -147,7 +147,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
 
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"{property_name} property"):
-            assert item.stac["properties"][property_name] == "2001-02-03T04:05:06Z"
+            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:
