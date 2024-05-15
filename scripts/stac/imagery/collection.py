@@ -278,7 +278,7 @@ class ImageryCollection:
                 raise MissingMetadataError("historic_survey_number")
             return " ".join(
                 value
-                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", lifecycle_tag or None]
+                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", lifecycle_tag]
                 if value is not None
             )
 
@@ -294,7 +294,7 @@ class ImageryCollection:
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    lifecycle_tag or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
@@ -303,12 +303,12 @@ class ImageryCollection:
                 value
                 for value in [
                     region,
-                    elevation_description or None,
+                    elevation_description,
                     "LiDAR",
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    lifecycle_tag or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
