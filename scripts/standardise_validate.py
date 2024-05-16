@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import sys
 from typing import List
@@ -11,8 +10,17 @@ from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
+
+
+def str_to_bool(value: str) -> bool:
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
 
 
 def main() -> None:
@@ -30,6 +38,13 @@ def main() -> None:
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
+    parser.add_argument(
+        "--create-footprints",
+        dest="create_footprints",
+        help="Create footprints for each tile ('true' / 'false')",
+        type=str_to_bool,
+        required=True,
+    )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
@@ -60,6 +75,7 @@ def main() -> None:
         arguments.source_epsg,
         arguments.target_epsg,
         arguments.gsd,
+        arguments.create_footprints,
         arguments.target,
     )
 
@@ -102,7 +118,7 @@ def main() -> None:
             item = create_item(
                 file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
             )
-            write(stac_item_path, json.dumps(item.stac).encode("utf-8"), content_type=ContentType.GEOJSON.value)
+            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)
 
 

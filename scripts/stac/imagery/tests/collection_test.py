@@ -1,14 +1,13 @@
 import json
 import os
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import Generator
 
 import pytest
 import shapely.geometry
-from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
 from scripts.files.fs import read
@@ -17,6 +16,7 @@ from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.stac_extensions import StacExtensions
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -113,10 +113,12 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     collection = ImageryCollection(metadata)
-    mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
+    item_file_path = "./scripts/tests/data/empty.tiff"
+    modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
+    os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
+    item = ImageryItem("BR34_5000_0304", item_file_path)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
@@ -130,13 +132,22 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
     collection.add_item(item.stac)
 
     with subtests.test():
-        assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
+        assert {
+            "file:checksum": "122097b5d2b049c6ffdf608af28c4ba2744fad7f03046d1f58b2523402f30577f618",
+            "rel": "item",
+            "href": "./BR34_5000_0304.json",
+            "type": "application/json",
+        } in collection.stac["links"]
 
     with subtests.test():
         assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
 
     with subtests.test():
         assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
+
+    for property_name in ["created", "updated"]:
+        with subtests.test(msg=f"{property_name} property"):
+            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:
