@@ -40,15 +40,22 @@ def test_should_raise_error_when_formatting_a_naive_datetime(subtests: SubTests)
 
 
 def test_should_be_able_to_invert_conversion() -> None:
-    start = datetime(1800, 1, 1, tzinfo=timezone.utc)
-    end = datetime(2100, 1, 1, tzinfo=timezone.utc)
-    original_datetime = any_datetime_between(start, end)
+    original_datetime = any_epoch_datetime()
     assert parse_rfc_3339_datetime(format_rfc_3339_datetime_string(original_datetime)) == original_datetime
 
 
 def test_should_format_rfc_3339_nz_midnight_datetime_string() -> None:
     datetime_object = datetime(2001, 2, 3, 4, 5, 6, tzinfo=timezone.utc)
     assert format_rfc_3339_nz_midnight_datetime_string(datetime_object) == "2001-02-02T11:00:00Z"
+
+
+def any_epoch_datetime() -> datetime:
+    """
+    Get arbitrary datetime
+    """
+    start = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    end = datetime(2100, 1, 1, tzinfo=timezone.utc)
+    return any_datetime_between(start, end)
 
 
 def any_datetime_between(start: datetime, end: datetime) -> datetime:
