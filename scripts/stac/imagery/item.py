@@ -1,7 +1,9 @@
 import os
 from typing import Any, Dict, Tuple
 
+from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
+from scripts.files.fs import modified
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
@@ -12,6 +14,7 @@ class ImageryItem:
 
     def __init__(self, id_: str, file: str) -> None:
         file_content = fs.read(file)
+        file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -24,6 +27,8 @@ class ImageryItem:
                     "href": os.path.join(".", os.path.basename(file)),
                     "type": "image/tiff; application=geotiff; profile=cloud-optimized",
                     "file:checksum": checksum.multihash_as_hex(file_content),
+                    "created": file_modified_datetime,
+                    "updated": file_modified_datetime,
                 }
             },
             "stac_extensions": [StacExtensions.file.value],
@@ -36,11 +41,10 @@ class ImageryItem:
             start_datetime: a start date in `YYYY-MM-DD` format
             end_datetime: a end date in `YYYY-MM-DD` format
         """
-        self.stac["properties"] = {
-            "start_datetime": start_datetime,
-            "end_datetime": end_datetime,
-            "datetime": None,
-        }
+        self.stac.setdefault("properties", {})
+        self.stac["properties"]["start_datetime"] = start_datetime
+        self.stac["properties"]["end_datetime"] = end_datetime
+        self.stac["properties"]["datetime"] = None
 
     # FIXME: redefine the 'Any'
     def update_spatial(self, geometry: Dict[str, Any], bbox: Tuple[float, ...]) -> None:

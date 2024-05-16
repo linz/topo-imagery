@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.6.0](https://github.com/linz/topo-imagery/compare/v4.5.0...v4.6.0) (2024-05-07)
+
+
+### Features
+
+* add checksum to item links in collections TDE-1138 ([#953](https://github.com/linz/topo-imagery/issues/953)) ([afea8f0](https://github.com/linz/topo-imagery/commit/afea8f0f9722d0980657385e420f040e93085eef))
+* add option to create footprints ([#959](https://github.com/linz/topo-imagery/issues/959)) ([ea5c98b](https://github.com/linz/topo-imagery/commit/ea5c98baa584c5445dcbedf159d409dfeeddf7ce))
+
+
+### Bug Fixes
+
+* Make compatible with latest moto ([#949](https://github.com/linz/topo-imagery/issues/949)) ([5902df0](https://github.com/linz/topo-imagery/commit/5902df0fec6dd15bb3a89ec616a2c27136a6aec5))
+* Use correct types for S3 client ([#954](https://github.com/linz/topo-imagery/issues/954)) ([2c96c13](https://github.com/linz/topo-imagery/commit/2c96c1382d521d641e2b167e4096759af9b13dce))
+
 ## [4.5.0](https://github.com/linz/topo-imagery/compare/v4.4.0...v4.5.0) (2024-03-24)
 
 
