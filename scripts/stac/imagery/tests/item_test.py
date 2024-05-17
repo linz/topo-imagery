@@ -18,7 +18,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     mocker.patch("scripts.files.fs.read", return_value=b"")
 
-    path = "./test/BR34_5000_0302.tiff"
+    path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
@@ -74,7 +74,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     ulid = "fake_ulid"
     collection = ImageryCollection(metadata=metadata, collection_id=ulid)
 
-    path = "./test/BR34_5000_0302.tiff"
+    path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
     item = ImageryItem(id_, path)

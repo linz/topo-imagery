@@ -1,23 +1,10 @@
 import os
-from shutil import rmtree
-from tempfile import mkdtemp
-from typing import Generator
+from pathlib import Path
 
 import pytest
 
-from scripts.files.fs_local import exists, read, write
-
-
-@pytest.fixture(name="setup", autouse=True)
-def fixture_setup() -> Generator[str, None, None]:
-    """
-    This function creates a temporary directory and deletes it after each test.
-    See following link for details:
-    https://docs.pytest.org/en/stable/fixture.html#yield-fixtures-recommended
-    """
-    target = mkdtemp()
-    yield target
-    rmtree(target)
+from scripts.files.fs_local import exists, modified, read, write
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 @pytest.mark.dependency(name="write")
@@ -58,3 +45,11 @@ def test_exists(setup: str) -> None:
 def test_exists_file_not_found() -> None:
     found = exists("/tmp/test.file")
     assert found is False
+
+
+def test_should_get_modified_datetime(setup: str) -> None:
+    path = Path(os.path.join(setup, "modified.file"))
+    path.touch()
+    modified_datetime = any_epoch_datetime()
+    os.utime(path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
+    assert modified(path) == modified_datetime
