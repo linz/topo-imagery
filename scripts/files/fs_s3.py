@@ -9,6 +9,7 @@ from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
 from scripts.logging.time_helper import time_in_ms
+from scripts.stac.util import checksum
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -32,13 +33,16 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     s3_path = parse_path(destination)
     key = s3_path.key
     s3 = resource("s3")
+    fileChecksum = checksum.multihash_as_hex(source)
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
         if content_type:
-            s3_object.put(Body=source, ContentType=content_type)
+            s3_object.put(
+                Body=source, ContentType=content_type, ChecksumSHA256=fileChecksum, Metadata={"file:checksum": fileChecksum}
+            )
         else:
-            s3_object.put(Body=source)
+            s3_object.put(Body=source, ChecksumSHA256=fileChecksum, Metadata={"file:checksum": fileChecksum})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
