@@ -48,6 +48,19 @@ def test_write_content_type(subtests: SubTests) -> None:
 
 
 @mock_aws
+def test_write_checksum_metadata(subtests: SubTests) -> None:
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="testbucket")
+
+    write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
+    resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
+
+    with subtests.test():
+        assert resp["Metadata"]["filechecksum"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
+
+
+@mock_aws
 def test_read() -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
