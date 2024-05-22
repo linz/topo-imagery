@@ -48,7 +48,7 @@ def test_write_content_type(subtests: SubTests) -> None:
 
 
 @mock_aws
-def test_write_checksum_metadata(subtests: SubTests) -> None:
+def test_write_multihash_as_metadata(subtests: SubTests) -> None:
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="testbucket")
@@ -57,7 +57,7 @@ def test_write_checksum_metadata(subtests: SubTests) -> None:
     resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
 
     with subtests.test():
-        assert resp["Metadata"]["filechecksum"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
+        assert resp["Metadata"]["multihash"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
 
 
 @mock_aws

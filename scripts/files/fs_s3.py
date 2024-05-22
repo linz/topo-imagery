@@ -33,14 +33,14 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     s3_path = parse_path(destination)
     key = s3_path.key
     s3 = resource("s3")
-    fileChecksum = checksum.multihash_as_hex(source)
+    multihash = checksum.multihash_as_hex(source)
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
         if content_type:
-            s3_object.put(Body=source, ContentType=content_type, Metadata={"filechecksum": fileChecksum})
+            s3_object.put(Body=source, ContentType=content_type, Metadata={"multihash": multihash})
         else:
-            s3_object.put(Body=source, Metadata={"filechecksum": fileChecksum})
+            s3_object.put(Body=source, Metadata={"multihash": multihash})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
