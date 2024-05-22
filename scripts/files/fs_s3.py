@@ -38,9 +38,9 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     try:
         s3_object = s3.Object(s3_path.bucket, key)
         if content_type:
-            s3_object.put(Body=source, ContentType=content_type, Metadata={"file:checksum": fileChecksum})
+            s3_object.put(Body=source, ContentType=content_type, Metadata={"filechecksum": fileChecksum})
         else:
-            s3_object.put(Body=source, Metadata={"file:checksum": fileChecksum})
+            s3_object.put(Body=source, Metadata={"filechecksum": fileChecksum})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
