@@ -51,7 +51,7 @@ def main() -> None:
         p.close()
         p.join()
 
-        write_all(inputs=tiffs, target=arguments.target, generated_name=False)
+        write_all(inputs=tiffs, target=arguments.target, generate_name=False)
         get_log().info("ascii file translation complete", duration=time_in_ms() - start_time, count=len(tiffs))
 
         # copy any sidecar files to target

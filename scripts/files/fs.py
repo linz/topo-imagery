@@ -95,7 +95,7 @@ def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
 
 
 def write_all(
-    inputs: List[str], target: str, concurrency: Optional[int] = 4, generated_name: Optional[bool] = True
+    inputs: List[str], target: str, concurrency: Optional[int] = 4, generate_name: Optional[bool] = True
 ) -> List[str]:
     """Writes list of files to target destination using multithreading.
     Args:
@@ -109,7 +109,7 @@ def write_all(
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {write_file(executor, input_, target, generated_name): input_ for input_ in inputs}
+        futuress = {write_file(executor, input_, target, generate_name): input_ for input_ in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
@@ -142,20 +142,20 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
                 get_log().info("wrote_sidecar_file", path=future.result())
 
 
-def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generated_name: Optional[bool] = True) -> Future[str]:
+def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_name: Optional[bool] = True) -> Future[str]:
     """Read a file from a path and write it to a target path.
     Args:
         executor: A ThreadPoolExecutor instance.
         input_: A path to a file to read.
         target: A path to write the file to.
-        generated_name: create a target file name based on multihash the source filename
+        generate_name: create a target file name based on multihash the source filename
 
     Returns:
         Future[str]: The result of the execution.
     """
     get_log().info(f"Trying write from file: {input_}")
 
-    if generated_name:
+    if generate_name:
         file_name, file_extension = os.path.splitext(input_)
         target_file_name = f"{multihash_as_hex(str.encode(file_name))}{file_extension}"
     else:
