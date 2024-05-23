@@ -159,7 +159,7 @@ def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generated
         file_name, file_extension = os.path.splitext(input_)
         target_file_name = f"{multihash_as_hex(str.encode(file_name))}{file_extension}"
     else:
-        target_file_name = input_
+        target_file_name = os.path.basename(input_)
 
     try:
         return executor.submit(copy, input_, os.path.join(target, target_file_name))
