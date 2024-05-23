@@ -139,6 +139,14 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
     assert collection.stac["title"] == title
 
 
+def test_generate_imagery_title_draft(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
+    _, metadata_hb = metadata
+    metadata_hb["lifecycle"] = "ongoing"
+    collection = ImageryCollection(metadata_hb)
+    title = "Hawke's Bay 0.3m Rural Aerial Photos (2023) - Draft"
+    assert collection.stac["title"] == title
+
+
 def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["geographic_description"] = ""

@@ -1,4 +1,6 @@
 import os
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def write(destination: str, source: bytes) -> None:
@@ -36,3 +38,9 @@ def exists(path: str) -> bool:
         True if the path exists
     """
     return os.path.exists(path)
+
+
+def modified(path: Path) -> datetime:
+    """Get path modified datetime as UTC"""
+    modified_timestamp = os.path.getmtime(path)
+    return datetime.fromtimestamp(modified_timestamp, tz=timezone.utc)
