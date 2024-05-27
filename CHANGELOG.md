@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.7.1](https://github.com/linz/topo-imagery/compare/v4.7.0...v4.7.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* Make build compatible with new GDAL container TDE-1179 ([#977](https://github.com/linz/topo-imagery/issues/977)) ([f377d61](https://github.com/linz/topo-imagery/commit/f377d61f6c9471d9458b01db19aa62d2c4abd278))
+
+
+### Reverts
+
+* "fix: Make build compatible with new GDAL container TDE-1179 ([#971](https://github.com/linz/topo-imagery/issues/971))" ([#975](https://github.com/linz/topo-imagery/issues/975)) ([3990bf9](https://github.com/linz/topo-imagery/commit/3990bf967e4da461b3e1de7d079aa3f14ed0046c))
+
 ## [4.7.0](https://github.com/linz/topo-imagery/compare/v4.6.0...v4.7.0) (2024-05-23)
 
 
