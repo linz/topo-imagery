@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.7.0](https://github.com/linz/topo-imagery/compare/v4.6.0...v4.7.0) (2024-05-23)
+
+
+### Features
+
+* timestamps when created TDE-1147 ([#956](https://github.com/linz/topo-imagery/issues/956)) ([2828f14](https://github.com/linz/topo-imagery/commit/2828f14bc2bfb1bc03963a31a2c2b64ba24f6f75))
+
+
+### Bug Fixes
+
+* add draft lifecycle tag TDE-1161 ([#964](https://github.com/linz/topo-imagery/issues/964)) ([64040d8](https://github.com/linz/topo-imagery/commit/64040d8a1a0a74b1a42ffd99d6379f4995573c98))
+* Make build compatible with new GDAL container TDE-1179 ([#971](https://github.com/linz/topo-imagery/issues/971)) ([719d96e](https://github.com/linz/topo-imagery/commit/719d96e1ff1133c351bbee7a1d93fa359cc702e4))
+* should use unique file names when copying files to standardise TDE-1186 ([#974](https://github.com/linz/topo-imagery/issues/974)) ([8b783dc](https://github.com/linz/topo-imagery/commit/8b783dce9870ff2bb5331552ff730218419f247c))
+
 ## [4.6.0](https://github.com/linz/topo-imagery/compare/v4.5.0...v4.6.0) (2024-05-07)
 
 
