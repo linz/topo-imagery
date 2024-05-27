@@ -265,18 +265,20 @@ class ImageryCollection:
             imagery_name = region
             elevation_description = None
 
-        # determine if dataset is preview
+        # determine if the dataset title requires a lifecycle tag
         if self.metadata.get("lifecycle") == "preview":
-            preview = "- Preview"
+            lifecycle_tag = "- Preview"
+        elif self.metadata.get("lifecycle") == "ongoing":
+            lifecycle_tag = "- Draft"
         else:
-            preview = None
+            lifecycle_tag = None
 
         if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
             return " ".join(
                 value
-                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", preview or None]
+                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", lifecycle_tag]
                 if value is not None
             )
 
@@ -292,7 +294,7 @@ class ImageryCollection:
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    preview or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
@@ -301,12 +303,12 @@ class ImageryCollection:
                 value
                 for value in [
                     region,
-                    elevation_description or None,
+                    elevation_description,
                     "LiDAR",
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    preview or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
