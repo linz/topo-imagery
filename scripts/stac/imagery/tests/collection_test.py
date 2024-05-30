@@ -146,7 +146,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
         assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
     for property_name in ["created", "updated"]:
-        with subtests.test(msg=f"{property_name} property"):
+        with subtests.test(msg=f"item assets.visual.{property_name}"):
             assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
 
 
