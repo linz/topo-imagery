@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from random import randint
 
 from dateutil.tz import tz
-from pytest import raises
+from pytest import approx, raises
 from pytest_subtests import SubTests
 
 from scripts.datetimes import (
@@ -11,6 +11,7 @@ from scripts.datetimes import (
     format_rfc_3339_nz_midnight_datetime_string,
     parse_rfc_3339_date,
     parse_rfc_3339_datetime,
+    utc_now,
 )
 
 
@@ -47,6 +48,15 @@ def test_should_be_able_to_invert_conversion() -> None:
 def test_should_format_rfc_3339_nz_midnight_datetime_string() -> None:
     datetime_object = datetime(2001, 2, 3, 4, 5, 6, tzinfo=timezone.utc)
     assert format_rfc_3339_nz_midnight_datetime_string(datetime_object) == "2001-02-02T11:00:00Z"
+
+
+def test_system_clock_should_return_current_time() -> None:
+    # At most five second difference
+    assert utc_now().timestamp() == approx(datetime.now().timestamp(), abs=5)
+
+
+def test_system_clock_should_return_utc_datetime() -> None:
+    assert utc_now().tzinfo == timezone.utc
 
 
 def any_epoch_datetime() -> datetime:

@@ -39,6 +39,10 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
     return format_rfc_3339_datetime_string(datetime_utc)
 
 
+def utc_now() -> datetime:
+    return datetime.now(tz=timezone.utc)
+
+
 class NaiveDatetimeError(Exception):
     def __init__(self) -> None:
         super().__init__("Can't convert naive datetime to UTC")
