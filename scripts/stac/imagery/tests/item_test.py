@@ -73,7 +73,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
         "geographic_description": None,
     }
     ulid = "fake_ulid"
-    collection = ImageryCollection(metadata=metadata, collection_id=ulid)
+    collection = ImageryCollection(metadata=metadata, now=any_epoch_datetime, collection_id=ulid)
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)

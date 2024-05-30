@@ -9,6 +9,7 @@ from boto3 import client
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import coalesce_multi_single, valid_date
+from scripts.datetimes import utc_now
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
@@ -108,6 +109,7 @@ def main() -> None:
 
     collection = ImageryCollection(
         metadata=collection_metadata,
+        now=utc_now,
         collection_id=arguments.collection_id,
         providers=providers,
     )

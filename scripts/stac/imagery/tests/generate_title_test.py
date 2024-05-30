@@ -5,6 +5,7 @@ import pytest
 
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.metadata_constants import CollectionMetadata, MissingMetadataError
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -38,14 +39,14 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
 def test_generate_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     assert collection.stac["title"] == title
 
 
 def test_generate_dem_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dem"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland LiDAR 0.3m DEM (2023)"
     assert collection.stac["title"] == title
 
@@ -53,7 +54,7 @@ def test_generate_dem_title(metadata: Tuple[CollectionMetadata, CollectionMetada
 def test_generate_dsm_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dsm"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland LiDAR 0.3m DSM (2023)"
     assert collection.stac["title"] == title
 
@@ -61,7 +62,7 @@ def test_generate_dsm_title(metadata: Tuple[CollectionMetadata, CollectionMetada
 def test_generate_satellite_imagery_title(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "satellite-imagery"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland 0.3m Satellite Imagery (2023)"
     assert collection.stac["title"] == title
 
@@ -71,7 +72,7 @@ def test_generate_historic_imagery_title(metadata: Tuple[CollectionMetadata, Col
     metadata_auck, _ = metadata
     metadata_auck["category"] = "scanned-aerial-photos"
     metadata_auck["historic_survey_number"] = "SNC8844"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     assert collection.stac["title"] == title
 
 
@@ -80,7 +81,7 @@ def test_generate_historic_imagery_title_missing_number(metadata: Tuple[Collecti
     metadata_auck["category"] = "scanned-aerial-photos"
     metadata_auck["historic_survey_number"] = None
     with pytest.raises(MissingMetadataError) as excinfo:
-        ImageryCollection(metadata_auck)
+        ImageryCollection(metadata_auck, any_epoch_datetime)
 
     assert "historic_survey_number" in str(excinfo.value)
 
@@ -88,7 +89,7 @@ def test_generate_historic_imagery_title_missing_number(metadata: Tuple[Collecti
 def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["end_datetime"] = datetime(2024, 1, 1)
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland 0.3m Rural Aerial Photos (2023-2024)"
     assert collection.stac["title"] == title
 
@@ -96,7 +97,7 @@ def test_generate_title_long_date(metadata: Tuple[CollectionMetadata, Collection
 def test_generate_title_geographic_description(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["geographic_description"] = "Ponsonby"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Ponsonby 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
@@ -105,7 +106,7 @@ def test_generate_title_event_imagery(metadata: Tuple[CollectionMetadata, Collec
     _, metadata_hb = metadata
     metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
-    collection = ImageryCollection(metadata_hb)
+    collection = ImageryCollection(metadata_hb, any_epoch_datetime)
     title = "Hawke's Bay Cyclone Gabrielle 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
@@ -115,7 +116,7 @@ def test_generate_title_event_elevation(metadata: Tuple[CollectionMetadata, Coll
     metadata_hb["category"] = "dsm"
     metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
-    collection = ImageryCollection(metadata_hb)
+    collection = ImageryCollection(metadata_hb, any_epoch_datetime)
     title = "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)"
     assert collection.stac["title"] == title
 
@@ -125,7 +126,7 @@ def test_generate_title_event_satellite_imagery(metadata: Tuple[CollectionMetada
     metadata_hb["category"] = "satellite-imagery"
     metadata_hb["geographic_description"] = "Hawke's Bay Cyclone Gabrielle"
     metadata_hb["event_name"] = "Cyclone Gabrielle"
-    collection = ImageryCollection(metadata_hb)
+    collection = ImageryCollection(metadata_hb, any_epoch_datetime)
     title = "Hawke's Bay Cyclone Gabrielle 0.3m Satellite Imagery (2023)"
     assert collection.stac["title"] == title
 
@@ -134,7 +135,7 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dsm"
     metadata_auck["lifecycle"] = "preview"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland LiDAR 0.3m DSM (2023) - Preview"
     assert collection.stac["title"] == title
 
@@ -142,7 +143,7 @@ def test_generate_dsm_title_preview(metadata: Tuple[CollectionMetadata, Collecti
 def test_generate_imagery_title_draft(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     _, metadata_hb = metadata
     metadata_hb["lifecycle"] = "ongoing"
-    collection = ImageryCollection(metadata_hb)
+    collection = ImageryCollection(metadata_hb, any_epoch_datetime)
     title = "Hawke's Bay 0.3m Rural Aerial Photos (2023) - Draft"
     assert collection.stac["title"] == title
 
@@ -151,7 +152,7 @@ def test_generate_imagery_title_empty_optional_str(metadata: Tuple[CollectionMet
     metadata_auck, _ = metadata
     metadata_auck["geographic_description"] = ""
     metadata_auck["event_name"] = ""
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
 
@@ -160,6 +161,6 @@ def test_generate_imagery_title_with_event(metadata: Tuple[CollectionMetadata, C
     metadata_auck, _ = metadata
     metadata_auck["geographic_description"] = "Auckland Forest Assessment"
     metadata_auck["event_name"] = "Forest Assessment"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     title = "Auckland Forest Assessment 0.3m Rural Aerial Photos (2023)"
     assert collection.stac["title"] == title
