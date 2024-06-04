@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, Tuple
+from datetime import datetime
+from typing import Any, Callable, Dict, Tuple
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
@@ -12,9 +13,10 @@ from scripts.stac.util.stac_extensions import StacExtensions
 class ImageryItem:
     stac: Dict[str, Any]
 
-    def __init__(self, id_: str, file: str) -> None:
+    def __init__(self, id_: str, file: str, now: Callable[[], datetime]) -> None:
         file_content = fs.read(file)
         file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
+        now_string = format_rfc_3339_datetime_string(now())
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -32,6 +34,7 @@ class ImageryItem:
                 }
             },
             "stac_extensions": [StacExtensions.file.value],
+            "properties": {"created": now_string, "updated": now_string},
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:

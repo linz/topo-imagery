@@ -2,6 +2,7 @@ from typing import Optional
 
 from linz_logger import get_log
 
+from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
@@ -35,7 +36,7 @@ def create_item(
 
     geometry, bbox = get_extents(gdalinfo_result)
 
-    item = ImageryItem(id_, file)
+    item = ImageryItem(id_, file, utc_now)
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
