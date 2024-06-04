@@ -40,6 +40,18 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
 
 
 def utc_now() -> datetime:
+    """
+    Get the current datetime with UTC time zone
+
+    Should return something close to the current time:
+        >>> current_timestamp = datetime.now().timestamp()
+        >>> current_timestamp - 5 < utc_now().timestamp() < current_timestamp + 5
+        True
+
+    Should have UTC time zone:
+        >>> utc_now().tzname()
+        'UTC'
+    """
     return datetime.now(tz=timezone.utc)
 
 
