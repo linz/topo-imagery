@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.8.0](https://github.com/linz/topo-imagery/compare/v4.7.1...v4.8.0) (2024-06-09)
+
+
+### Features
+
+* Add created/updated properties to collections TDE-1147 ([#981](https://github.com/linz/topo-imagery/issues/981)) ([00f4570](https://github.com/linz/topo-imagery/commit/00f457028ea4512419a1fe40344802cb89541729))
+* Set created/updated item properties TDE-1147 ([#980](https://github.com/linz/topo-imagery/issues/980)) ([37ee07f](https://github.com/linz/topo-imagery/commit/37ee07f413f93ab831e8bec4b656d29d31d78dbc))
+
 ## [4.7.1](https://github.com/linz/topo-imagery/compare/v4.7.0...v4.7.1) (2024-05-27)
 
 
