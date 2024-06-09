@@ -5,6 +5,7 @@ import pytest
 
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -37,7 +38,7 @@ def setup() -> Generator[Tuple[CollectionMetadata, CollectionMetadata], None, No
 
 def test_generate_description_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     description = "Orthophotography within the Auckland region captured in the 2023 flying season."
     assert collection.stac["description"] == description
 
@@ -45,7 +46,7 @@ def test_generate_description_imagery(metadata: Tuple[CollectionMetadata, Collec
 def test_generate_description_elevation(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dem"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     description = "Digital Elevation Model within the Auckland region captured in 2023."
     assert collection.stac["description"] == description
 
@@ -56,7 +57,7 @@ def test_generate_description_elevation_geographic_description_input(
     metadata_auck, _ = metadata
     metadata_auck["category"] = "dem"
     metadata_auck["geographic_description"] = "Central"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     description = "Digital Elevation Model within the Auckland region captured in 2023."
     assert collection.stac["description"] == description
 
@@ -64,7 +65,7 @@ def test_generate_description_elevation_geographic_description_input(
 def test_generate_description_satellite_imagery(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     metadata_auck, _ = metadata
     metadata_auck["category"] = "satellite-imagery"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     description = "Satellite imagery within the Auckland region captured in 2023."
     assert collection.stac["description"] == description
 
@@ -73,7 +74,7 @@ def test_generate_description_historic_imagery(metadata: Tuple[CollectionMetadat
     metadata_auck, _ = metadata
     metadata_auck["category"] = "scanned-aerial-photos"
     metadata_auck["historic_survey_number"] = "SNC8844"
-    collection = ImageryCollection(metadata_auck)
+    collection = ImageryCollection(metadata_auck, any_epoch_datetime)
     description = "Scanned aerial imagery within the Auckland region captured in 2023."
     assert collection.stac["description"] == description
 
@@ -81,7 +82,7 @@ def test_generate_description_historic_imagery(metadata: Tuple[CollectionMetadat
 def test_generate_description_event(metadata: Tuple[CollectionMetadata, CollectionMetadata]) -> None:
     _, metadata_hb = metadata
     metadata_hb["event_name"] = "Cyclone Gabrielle"
-    collection = ImageryCollection(metadata_hb)
+    collection = ImageryCollection(metadata_hb, any_epoch_datetime)
     description = "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, \
 published as a record of the Cyclone Gabrielle event."
     assert collection.stac["description"] == description
