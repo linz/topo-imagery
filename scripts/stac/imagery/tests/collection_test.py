@@ -1,10 +1,9 @@
 import json
 import os
-import tempfile
-from collections.abc import Callable, Generator
 from datetime import datetime, timezone
 from shutil import rmtree
-from tempfile import mkdtemp
+from tempfile import TemporaryDirectory, mkdtemp
+from typing import Callable, Generator
 
 import pytest
 import shapely.geometry
@@ -280,7 +279,7 @@ def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) ->
             }
         )
     )
-    with tempfile.TemporaryDirectory() as tmp_path:
+    with TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.add_capture_area(polygons, tmp_path, artifact_path)
         file_target = os.path.join(tmp_path, file_name)
