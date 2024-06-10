@@ -159,12 +159,13 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     with subtests.test():
         assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
+    now_string = format_rfc_3339_datetime_string(now)
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"collection {property_name}"):
-            assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
+            assert collection.stac[property_name] == now_string
 
         with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == format_rfc_3339_datetime_string(now)
+            assert item.stac["properties"][property_name] == now_string
 
         with subtests.test(msg=f"item assets.visual.{property_name}"):
             assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
