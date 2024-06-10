@@ -1,8 +1,8 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from shutil import rmtree
-from tempfile import TemporaryDirectory, mkdtemp
+from tempfile import NamedTemporaryFile, TemporaryDirectory, mkdtemp
 from typing import Callable, Generator
 
 import pytest
@@ -11,12 +11,13 @@ from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.fs import read
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection import MAXIMUM_KEY, MINIMUM_KEY, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.imagery.tests.item_test import any_bounding_box, any_epoch_datetime_string
 from scripts.stac.util.stac_extensions import StacExtensions
-from scripts.tests.datetimes_test import any_epoch_datetime
+from scripts.tests.datetimes_test import any_datetime_between, any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -171,6 +172,67 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
 
     with subtests.test(msg="item properties.updated"):
         assert item.properties.updated == now_string
+
+
+def test_collection_summary_created_and_updated(metadata: CollectionMetadata, subtests: SubTests) -> None:
+    collection = ImageryCollection(metadata, any_epoch_datetime)
+
+    with subtests.test(msg="Collection summaries does not exist yet"):
+        assert "summaries" not in collection.stac
+
+    oldest_datetime = any_epoch_datetime()
+    latest_datetime = oldest_datetime + timedelta(days=1)
+    intermediate_datetime = any_datetime_between(oldest_datetime + timedelta(seconds=1), latest_datetime)
+    datetime_iterator = iter([oldest_datetime, intermediate_datetime, latest_datetime])
+
+    def datetimes_func() -> datetime:
+        return next(datetime_iterator)
+
+    with NamedTemporaryFile() as asset_file:
+        collection.add_item(
+            ImageryItem(
+                "any_id_1",
+                asset_file.name,
+                datetimes_func,
+                any_epoch_datetime_string(),
+                any_epoch_datetime_string(),
+                {},
+                any_bounding_box(),
+                collection.stac["id"],
+            )
+        )
+
+        collection.add_item(
+            ImageryItem(
+                "any_id_2",
+                asset_file.name,
+                datetimes_func,
+                any_epoch_datetime_string(),
+                any_epoch_datetime_string(),
+                {},
+                any_bounding_box(),
+                collection.stac["id"],
+            )
+        )
+
+        collection.add_item(
+            ImageryItem(
+                "any_id_3",
+                asset_file.name,
+                datetimes_func,
+                any_epoch_datetime_string(),
+                any_epoch_datetime_string(),
+                {},
+                any_bounding_box(),
+                collection.stac["id"],
+            )
+        )
+
+    for property_name in ["created", "updated"]:
+        with subtests.test(msg=f"Collection summaries.{property_name}.{MINIMUM_KEY}"):
+            assert collection.stac["summaries"][property_name][MINIMUM_KEY] == format_rfc_3339_datetime_string(oldest_datetime)
+        with subtests.test(msg=f"Collection summaries.{property_name}.{MAXIMUM_KEY}"):
+            assert collection.stac["summaries"][property_name][MAXIMUM_KEY] == format_rfc_3339_datetime_string(latest_datetime)
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:
