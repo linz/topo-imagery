@@ -127,16 +127,16 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    item = ImageryItem("BR34_5000_0304", item_file_path, now_function)
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27T00:00:00Z"
-    end_datetime = "2021-01-27T00:00:00Z"
-    item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
+    item = ImageryItem(
+        "BR34_5000_0304", item_file_path, now_function, start_datetime, end_datetime, geometry, bbox, collection.stac["id"]
+    )
 
     collection.add_item(item.stac)
 

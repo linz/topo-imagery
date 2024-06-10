@@ -3,6 +3,7 @@ from datetime import datetime
 from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
+from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
@@ -24,9 +25,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
 
-    item = ImageryItem(id_, path, any_epoch_datetime)
-    item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
+    item = ImageryItem(id_, path, any_epoch_datetime, start_datetime, end_datetime, geometry, bbox, "any_collection_id")
     # checks
     with subtests.test():
         assert item.stac["id"] == id_
@@ -78,9 +77,9 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem(id_, path, any_epoch_datetime)
-
-    item.add_collection(collection.stac["id"])
+    item = ImageryItem(
+        id_, path, any_epoch_datetime, any_epoch_datetime_string(), any_epoch_datetime_string(), {}, (), collection.stac["id"]
+    )
 
     with subtests.test():
         assert item.stac["collection"] == ulid
@@ -90,3 +89,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
 
     with subtests.test():
         assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+
+
+def any_epoch_datetime_string() -> str:
+    return format_rfc_3339_datetime_string(any_epoch_datetime())
