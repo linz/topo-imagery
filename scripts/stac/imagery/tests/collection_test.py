@@ -74,7 +74,7 @@ def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
 
 def test_bbox_updated_from_none(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata, any_epoch_datetime)
-    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
+    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     collection.update_spatial_extent(bbox)
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
@@ -82,13 +82,13 @@ def test_bbox_updated_from_none(metadata: CollectionMetadata) -> None:
 def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata, any_epoch_datetime)
     # init bbox
-    bbox = [174.889641, -41.217532, 174.902344, -41.203521]
+    bbox = (174.889641, -41.217532, 174.902344, -41.203521)
     collection.update_spatial_extent(bbox)
     # update bbox
-    bbox = [174.917643, -41.211157, 174.922965, -41.205490]
+    bbox = (174.917643, -41.211157, 174.922965, -41.205490)
     collection.update_spatial_extent(bbox)
 
-    assert collection.stac["extent"]["spatial"]["bbox"] == [[174.889641, -41.217532, 174.922965, -41.203521]]
+    assert collection.stac["extent"]["spatial"]["bbox"] == [(174.889641, -41.217532, 174.922965, -41.203521)]
 
 
 def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
@@ -138,7 +138,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
         "BR34_5000_0304", item_file_path, now_function, start_datetime, end_datetime, geometry, bbox, collection.stac["id"]
     )
 
-    collection.add_item(item.stac)
+    collection.add_item(item)
 
     links = collection.stac["links"].copy()
 
@@ -163,11 +163,14 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
         with subtests.test(msg=f"collection {property_name}"):
             assert collection.stac[property_name] == now_string
 
-        with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == now_string
-
         with subtests.test(msg=f"item assets.visual.{property_name}"):
-            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
+            assert item.assets["visual"][property_name] == "2001-02-03T04:05:06Z"
+
+    with subtests.test(msg="item properties.created"):
+        assert item.properties.created == now_string
+
+    with subtests.test(msg="item properties.updated"):
+        assert item.properties.updated == now_string
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:

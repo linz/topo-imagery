@@ -1,5 +1,6 @@
 import os
 from collections.abc import Callable
+from dataclasses import asdict
 from datetime import datetime
 from typing import Any
 
@@ -11,6 +12,7 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
+from scripts.stac.imagery.item import BoundingBox, ImageryItem
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
@@ -128,18 +130,18 @@ class ImageryCollection:
         if StacExtensions.file.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
 
-    def add_item(self, item: dict[Any, Any]) -> None:
+    def add_item(self, item: ImageryItem) -> None:
         """Add an `Item` to the `links` of the `Collection`.
 
         Args:
             item: STAC Item to add
         """
-        item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
-        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(item))
+        item_self_link = next((feat for feat in item.links if feat["rel"] == "self"), None)
+        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(asdict(item)))
         if item_self_link:
             self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
-            self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
-            self.update_spatial_extent(item["bbox"])
+            self.update_temporal_extent(item.properties.start_datetime, item.properties.end_datetime)
+            self.update_spatial_extent(item.bbox)
 
     def add_link(self, href: str, file_checksum: str) -> None:
         """Add a `link` to the existing `links` list of the Collection.
@@ -160,7 +162,7 @@ class ImageryCollection:
         for p in providers:
             self.stac["providers"].append(p)
 
-    def update_spatial_extent(self, item_bbox: list[float]) -> None:
+    def update_spatial_extent(self, item_bbox: BoundingBox) -> None:
         """Update (if needed) the Collection spatial extent from a bounding box.
 
         Args:
@@ -180,7 +182,7 @@ class ImageryCollection:
         max_x = max(bbox[0], bbox[2], item_bbox[0], item_bbox[2])
         max_y = max(bbox[1], bbox[3], item_bbox[1], item_bbox[3])
 
-        self.update_extent(bbox=[min_x, min_y, max_x, max_y])
+        self.update_extent(bbox=(min_x, min_y, max_x, max_y))
 
     def update_temporal_extent(self, item_start_datetime: str, item_end_datetime: str) -> None:
         """Update (if needed) the temporal extent of the collection.
@@ -215,7 +217,7 @@ class ImageryCollection:
             ]
         )
 
-    def update_extent(self, bbox: list[float] | None = None, interval: list[str] | None = None) -> None:
+    def update_extent(self, bbox: BoundingBox | None = None, interval: list[str] | None = None) -> None:
         """Update an extent of the Collection whereas it's spatial or temporal.
 
         Args:
