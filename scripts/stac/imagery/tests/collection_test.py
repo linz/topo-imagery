@@ -235,6 +235,28 @@ def test_collection_summary_created_and_updated(metadata: CollectionMetadata, su
             assert collection.stac["summaries"][property_name][MAXIMUM_KEY] == format_rfc_3339_datetime_string(latest_datetime)
 
 
+def test_collection_asset_summary_created_and_updated_does_not_clobber_other_summaries(metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(metadata, any_epoch_datetime)
+    custom_summary_property = "custom"
+    collection.stac["summaries"] = {custom_summary_property: [0, 1]}
+
+    with NamedTemporaryFile() as any_file:
+        collection.add_item(
+            ImageryItem(
+                "oldest_id",
+                any_file.name,
+                any_epoch_datetime,
+                any_epoch_datetime_string(),
+                any_epoch_datetime_string(),
+                {},
+                any_bounding_box(),
+                collection.stac["id"],
+            )
+        )
+
+    assert custom_summary_property in collection.stac["summaries"]
+
+
 def test_write_collection(metadata: CollectionMetadata) -> None:
     target = mkdtemp()
     collectionObj = ImageryCollection(metadata, any_epoch_datetime)
