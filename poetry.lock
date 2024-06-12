@@ -1284,13 +1284,13 @@ typing = ["mypy", "rich", "twisted"]
 
 [[package]]
 name = "tifffile"
-version = "2023.12.9"
+version = "2024.4.18"
 description = "Read and write TIFF files"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "tifffile-2023.12.9-py3-none-any.whl", hash = "sha256:9b066e4b1a900891ea42ffd33dab8ba34c537935618b9893ddef42d7d422692f"},
-    {file = "tifffile-2023.12.9.tar.gz", hash = "sha256:9dd1da91180a6453018a241ff219e1905f169384355cd89c9ef4034c1b46cdb8"},
+    {file = "tifffile-2024.4.18-py3-none-any.whl", hash = "sha256:72643b5c9ef886669a00a659c9fd60a81f220d2fb6572d184c3e147435ccec43"},
+    {file = "tifffile-2024.4.18.tar.gz", hash = "sha256:5ffcd77b9d77c3aada1278631af5c8ac788438452fda2eb1b9b60d5553e95c82"},
 ]
 
 [package.dependencies]
@@ -1445,4 +1445,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "7420b6d424e2caa0995c5ad93a562c958927c2aa96d3ee33621bb2e3d0347122"
+content-hash = "71865a9501365ae855f21626fad42be291de88d791ed37c815030c2f5afaff26"
