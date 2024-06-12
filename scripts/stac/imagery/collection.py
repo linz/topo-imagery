@@ -1,5 +1,6 @@
 import os
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional
 
 import shapely.ops
 import ulid
@@ -36,6 +37,7 @@ class ImageryCollection:
     def __init__(
         self,
         metadata: CollectionMetadata,
+        now: Callable[[], datetime],
         collection_id: Optional[str] = None,
         providers: Optional[List[Provider]] = None,
     ) -> None:
@@ -44,6 +46,7 @@ class ImageryCollection:
 
         self.metadata = metadata
 
+        now_string = format_rfc_3339_datetime_string(now())
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
@@ -57,6 +60,8 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
+            "created": now_string,
+            "updated": now_string,
         }
 
         # Optional metadata
