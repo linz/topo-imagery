@@ -1,6 +1,7 @@
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Generator, List, Optional, Union
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
@@ -8,6 +9,13 @@ from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
 from scripts.logging.time_helper import time_in_ms
+from scripts.stac.util import checksum
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+    from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
+else:
+    S3Client = GetObjectOutputTypeDef = dict
 
 
 def write(destination: str, source: bytes, content_type: Optional[str] = None) -> None:
@@ -25,13 +33,14 @@ def write(destination: str, source: bytes, content_type: Optional[str] = None) -
     s3_path = parse_path(destination)
     key = s3_path.key
     s3 = resource("s3")
+    multihash = checksum.multihash_as_hex(source)
 
     try:
         s3_object = s3.Object(s3_path.bucket, key)
         if content_type:
-            s3_object.put(Body=source, ContentType=content_type)
+            s3_object.put(Body=source, ContentType=content_type, Metadata={"multihash": multihash})
         else:
-            s3_object.put(Body=source)
+            s3_object.put(Body=source, Metadata={"multihash": multihash})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
     except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
@@ -163,7 +172,7 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[client]) -> List[str]:
+def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[S3Client]) -> List[str]:
     """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
@@ -174,8 +183,7 @@ def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[client]
     Returns:
         a list of file paths
     """
-    if not s3_client:
-        s3_client = client("s3")
+    s3_client = s3_client or client("s3")
     files = []
     paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = paginator.paginate(Bucket=bucket_name_from_path(uri), Prefix=prefix_from_path(uri))
@@ -191,7 +199,7 @@ def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[client]
     return files
 
 
-def _get_object(bucket: str, file_name: str, s3_client: client) -> Any:
+def _get_object(bucket: str, file_name: str, s3_client: S3Client) -> GetObjectOutputTypeDef:
     """Get the object from `s3`
 
     Args:
@@ -207,7 +215,7 @@ def _get_object(bucket: str, file_name: str, s3_client: client) -> Any:
 
 
 def get_object_parallel_multithreading(
-    bucket: str, files_to_read: List[str], s3_client: Optional[client], concurrency: int
+    bucket: str, files_to_read: List[str], s3_client: Optional[S3Client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
     """Get s3 objects in parallel
 
@@ -220,8 +228,7 @@ def get_object_parallel_multithreading(
     Yields:
         the object when got
     """
-    if not s3_client:
-        s3_client = client("s3")
+    s3_client = s3_client or client("s3")
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         future_to_key = {executor.submit(_get_object, bucket, key, s3_client): key for key in files_to_read}
 
@@ -233,3 +240,8 @@ def get_object_parallel_multithreading(
                 yield key, future.result()
             else:
                 yield key, exception
+
+
+def modified(bucket_name: str, key: str, s3_client: Optional[S3Client]) -> datetime:
+    s3_client = s3_client or client("s3")
+    return _get_object(bucket_name, key, s3_client)["LastModified"]

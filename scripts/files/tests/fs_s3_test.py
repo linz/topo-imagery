@@ -3,12 +3,17 @@ import json
 from boto3 import client, resource
 from botocore.exceptions import ClientError
 from moto import mock_aws
+from moto.core.models import DEFAULT_ACCOUNT_ID
+from moto.s3.models import s3_backends
 from moto.s3.responses import DEFAULT_REGION_NAME
+from moto.wafv2.models import GLOBAL_REGION
+from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.files.files_helper import ContentType
-from scripts.files.fs_s3 import exists, list_files_in_uri, read, write
+from scripts.files.fs_s3 import exists, list_files_in_uri, modified, read, write
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 @mock_aws
@@ -40,6 +45,19 @@ def test_write_content_type(subtests: SubTests) -> None:
 
     with subtests.test():
         assert resp["ContentType"] == ContentType.GEOTIFF.value
+
+
+@mock_aws
+def test_write_multihash_as_metadata(subtests: SubTests) -> None:
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="testbucket")
+
+    write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
+    resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
+
+    with subtests.test():
+        assert resp["Metadata"]["multihash"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
 
 
 @mock_aws
@@ -156,3 +174,17 @@ def test_list_files_in_uri(subtests: SubTests) -> None:
 
     with subtests.test():
         assert "data/image.tiff" not in files
+
+
+@mock_aws
+def test_should_get_modified_datetime() -> None:
+    bucket_name = "any-bucket-name"
+    key = "any-key"
+    modified_datetime = any_epoch_datetime()
+
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket=bucket_name)
+    s3_client.put_object(Bucket=bucket_name, Key=key, Body=b"any body")
+    s3_backends[DEFAULT_ACCOUNT_ID][GLOBAL_REGION].buckets[bucket_name].keys[key].last_modified = modified_datetime
+
+    assert modified(bucket_name, key, s3_client) == modified_datetime

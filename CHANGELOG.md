@@ -1,5 +1,53 @@
 # Changelog
 
+## [4.8.0](https://github.com/linz/topo-imagery/compare/v4.7.1...v4.8.0) (2024-06-09)
+
+
+### Features
+
+* Add created/updated properties to collections TDE-1147 ([#981](https://github.com/linz/topo-imagery/issues/981)) ([00f4570](https://github.com/linz/topo-imagery/commit/00f457028ea4512419a1fe40344802cb89541729))
+* Set created/updated item properties TDE-1147 ([#980](https://github.com/linz/topo-imagery/issues/980)) ([37ee07f](https://github.com/linz/topo-imagery/commit/37ee07f413f93ab831e8bec4b656d29d31d78dbc))
+
+## [4.7.1](https://github.com/linz/topo-imagery/compare/v4.7.0...v4.7.1) (2024-05-27)
+
+
+### Bug Fixes
+
+* Make build compatible with new GDAL container TDE-1179 ([#977](https://github.com/linz/topo-imagery/issues/977)) ([f377d61](https://github.com/linz/topo-imagery/commit/f377d61f6c9471d9458b01db19aa62d2c4abd278))
+
+
+### Reverts
+
+* "fix: Make build compatible with new GDAL container TDE-1179 ([#971](https://github.com/linz/topo-imagery/issues/971))" ([#975](https://github.com/linz/topo-imagery/issues/975)) ([3990bf9](https://github.com/linz/topo-imagery/commit/3990bf967e4da461b3e1de7d079aa3f14ed0046c))
+
+## [4.7.0](https://github.com/linz/topo-imagery/compare/v4.6.0...v4.7.0) (2024-05-23)
+
+
+### Features
+
+* timestamps when created TDE-1147 ([#956](https://github.com/linz/topo-imagery/issues/956)) ([2828f14](https://github.com/linz/topo-imagery/commit/2828f14bc2bfb1bc03963a31a2c2b64ba24f6f75))
+
+
+### Bug Fixes
+
+* add draft lifecycle tag TDE-1161 ([#964](https://github.com/linz/topo-imagery/issues/964)) ([64040d8](https://github.com/linz/topo-imagery/commit/64040d8a1a0a74b1a42ffd99d6379f4995573c98))
+* Make build compatible with new GDAL container TDE-1179 ([#971](https://github.com/linz/topo-imagery/issues/971)) ([719d96e](https://github.com/linz/topo-imagery/commit/719d96e1ff1133c351bbee7a1d93fa359cc702e4))
+* should use unique file names when copying files to standardise TDE-1186 ([#974](https://github.com/linz/topo-imagery/issues/974)) ([8b783dc](https://github.com/linz/topo-imagery/commit/8b783dce9870ff2bb5331552ff730218419f247c))
+
+## [4.6.0](https://github.com/linz/topo-imagery/compare/v4.5.0...v4.6.0) (2024-05-07)
+
+
+### Features
+
+* add checksum to item links in collections TDE-1138 ([#953](https://github.com/linz/topo-imagery/issues/953)) ([afea8f0](https://github.com/linz/topo-imagery/commit/afea8f0f9722d0980657385e420f040e93085eef))
+* add option to create footprints ([#959](https://github.com/linz/topo-imagery/issues/959)) ([ea5c98b](https://github.com/linz/topo-imagery/commit/ea5c98baa584c5445dcbedf159d409dfeeddf7ce))
+
+
+### Bug Fixes
+
+* Make compatible with latest moto ([#949](https://github.com/linz/topo-imagery/issues/949)) ([5902df0](https://github.com/linz/topo-imagery/commit/5902df0fec6dd15bb3a89ec616a2c27136a6aec5))
+* Use correct types for S3 client ([#954](https://github.com/linz/topo-imagery/issues/954)) ([2c96c13](https://github.com/linz/topo-imagery/commit/2c96c1382d521d641e2b167e4096759af9b13dce))
+
 ## [4.5.0](https://github.com/linz/topo-imagery/compare/v4.4.0...v4.5.0) (2024-03-24)
 
 

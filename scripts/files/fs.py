@@ -1,12 +1,20 @@
 import os
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
-from typing import List, Optional
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Optional
 
 from boto3 import resource
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
+from scripts.stac.util.checksum import multihash_as_hex
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+else:
+    S3Client = dict
 
 
 def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
@@ -79,20 +87,29 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> List[str]:
-    """Writes list of files to target destination using multithreading.
+def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
+    """Get modified datetime for S3 URL or local path"""
+    if is_s3(path):
+        return fs_s3.modified(fs_s3.bucket_name_from_path(path), fs_s3.prefix_from_path(path), s3_client)
+    return fs_local.modified(Path(path))
 
+
+def write_all(
+    inputs: List[str], target: str, concurrency: Optional[int] = 4, generate_name: Optional[bool] = True
+) -> List[str]:
+    """Writes list of files to target destination using multithreading.
     Args:
         inputs: list of files to read
         target: target folder to write to
         concurrency: max thread pool workers
+        generated_name: create a target file name based on multihash the source filename
 
     Returns:
         list of written file paths
     """
     written_tiffs: List[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {write_file(executor, input_, target): input_ for input_ in inputs}
+        futuress = {write_file(executor, input_, target, generate_name): input_ for input_ in inputs}
         for future in as_completed(futuress):
             if future.exception():
                 get_log().warn("Failed Read-Write", error=future.exception())
@@ -107,15 +124,13 @@ def write_all(inputs: List[str], target: str, concurrency: Optional[int] = 4) ->
 
 
 def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> None:
-    """Writes list of files to target destination using multithreading.
+    """Writes list of files (if found) to target destination using multithreading.
+    The copy of the files have a generated file name (@see `write_file`)
 
     Args:
         inputs: list of files to read
         target: target folder to write to
         concurrency: max thread pool workers
-
-    Returns:
-
     """
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         results = {write_file(executor, input_, target): input_ for input_ in inputs}
@@ -127,20 +142,27 @@ def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 
                 get_log().info("wrote_sidecar_file", path=future.result())
 
 
-def write_file(executor: ThreadPoolExecutor, input_: str, target: str) -> Future[str]:
+def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_name: Optional[bool] = True) -> Future[str]:
     """Read a file from a path and write it to a target path.
-
     Args:
         executor: A ThreadPoolExecutor instance.
         input_: A path to a file to read.
         target: A path to write the file to.
+        generate_name: create a target file name based on multihash the source filename
 
     Returns:
         Future[str]: The result of the execution.
     """
     get_log().info(f"Trying write from file: {input_}")
+
+    if generate_name:
+        file_name, file_extension = os.path.splitext(input_)
+        target_file_name = f"{multihash_as_hex(str.encode(file_name))}{file_extension}"
+    else:
+        target_file_name = os.path.basename(input_)
+
     try:
-        return executor.submit(copy, input_, os.path.join(target, f"{os.path.basename(input_)}"))
+        return executor.submit(copy, input_, os.path.join(target, target_file_name))
     except NoSuchFileError as nsfe:
         future: Future[str] = Future()
         future.set_exception(nsfe)

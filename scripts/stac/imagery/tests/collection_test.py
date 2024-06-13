@@ -1,22 +1,23 @@
 import json
 import os
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import Generator
+from typing import Callable, Generator
 
 import pytest
 import shapely.geometry
-from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
+from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.fs import read
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.util.stac_extensions import StacExtensions
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 # pylint: disable=duplicate-code
@@ -37,7 +38,7 @@ def setup() -> Generator[CollectionMetadata, None, None]:
 
 
 def test_title_description_id_created_on_init(metadata: CollectionMetadata, subtests: SubTests) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     with subtests.test():
         assert collection.stac["title"] == "Auckland North Forest Assessment 0.3m Urban Aerial Photos (2022)"
 
@@ -68,19 +69,19 @@ def test_title_description_id_created_on_init(metadata: CollectionMetadata, subt
 
 def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
     id_ = "Parsed-Ulid"
-    collection = ImageryCollection(metadata, id_)
+    collection = ImageryCollection(metadata, any_epoch_datetime, id_)
     assert collection.stac["id"] == "Parsed-Ulid"
 
 
 def test_bbox_updated_from_none(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
     collection.update_spatial_extent(bbox)
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
 
 def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     # init bbox
     bbox = [174.889641, -41.217532, 174.902344, -41.203521]
     collection.update_spatial_extent(bbox)
@@ -92,7 +93,7 @@ def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
 
 
 def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
     collection.update_temporal_extent(start_datetime, end_datetime)
@@ -100,7 +101,7 @@ def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
 
 
 def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     # init interval
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
@@ -113,24 +114,44 @@ def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests: SubTests) -> None:
-    collection = ImageryCollection(metadata)
-    mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem("BR34_5000_0304", "./test/BR34_5000_0304.tiff")
+def fixed_now_function(now: datetime) -> Callable[[], datetime]:
+    def func() -> datetime:
+        return now
+
+    return func
+
+
+def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
+    now = any_epoch_datetime()
+    now_function = fixed_now_function(now)
+    collection = ImageryCollection(metadata, now_function)
+    item_file_path = "./scripts/tests/data/empty.tiff"
+    modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
+    os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
+    item = ImageryItem("BR34_5000_0304", item_file_path, now_function)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27 00:00:00Z"
-    end_datetime = "2021-01-27 00:00:00Z"
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
     collection.add_item(item.stac)
 
-    with subtests.test():
-        assert {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"} in collection.stac["links"]
+    links = collection.stac["links"].copy()
+
+    with subtests.test(msg="File checksum heuristic"):
+        # The checksum changes based on the contents
+        assert links[1].pop("file:checksum").startswith("1220")
+
+    with subtests.test(msg="Main links content"):
+        assert [
+            {"href": "./collection.json", "rel": "self", "type": "application/json"},
+            {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"},
+        ] == links
 
     with subtests.test():
         assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
@@ -138,10 +159,20 @@ def test_add_item(mocker: MockerFixture, metadata: CollectionMetadata, subtests:
     with subtests.test():
         assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
+    for property_name in ["created", "updated"]:
+        with subtests.test(msg=f"collection {property_name}"):
+            assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
+
+        with subtests.test(msg=f"item properties.{property_name}"):
+            assert item.stac["properties"][property_name] == format_rfc_3339_datetime_string(now)
+
+        with subtests.test(msg=f"item assets.visual.{property_name}"):
+            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
+
 
 def test_write_collection(metadata: CollectionMetadata) -> None:
     target = mkdtemp()
-    collectionObj = ImageryCollection(metadata)
+    collectionObj = ImageryCollection(metadata, any_epoch_datetime)
     collection_target = os.path.join(target, "collection.json")
     collectionObj.write_to(collection_target)
     collection = json.loads(read(collection_target))
@@ -153,7 +184,7 @@ def test_write_collection(metadata: CollectionMetadata) -> None:
 def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
     target = mkdtemp()
     title = "Manawatū-Whanganui"
-    collectionObj = ImageryCollection(metadata)
+    collectionObj = ImageryCollection(metadata, any_epoch_datetime)
     collectionObj.stac["title"] = title
     collection_target = os.path.join(target, "collection.json")
     collectionObj.write_to(collection_target)
@@ -164,7 +195,7 @@ def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
 
 
 def test_add_providers(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection.add_providers([producer])
 
@@ -175,7 +206,7 @@ def test_default_provider_roles_are_kept(metadata: CollectionMetadata, subtests:
     # given we are adding a non default role to the default provider
     licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
-    collection = ImageryCollection(metadata, providers=[producer, licensor])
+    collection = ImageryCollection(metadata, any_epoch_datetime, providers=[producer, licensor])
 
     with subtests.test(msg="it adds the non default role to the existing default role list"):
         assert {
@@ -192,7 +223,7 @@ def test_default_provider_roles_are_kept(metadata: CollectionMetadata, subtests:
 def test_default_provider_is_present(metadata: CollectionMetadata, subtests: SubTests) -> None:
     # given adding a provider
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
-    collection = ImageryCollection(metadata, providers=[producer])
+    collection = ImageryCollection(metadata, any_epoch_datetime, providers=[producer])
 
     with subtests.test(msg="the default provider is still present"):
         assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
@@ -208,7 +239,7 @@ def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) ->
     <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
     below.
     """
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     file_name = "capture-area.geojson"
 
     polygons = []
@@ -294,10 +325,10 @@ def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) ->
 
 
 def test_event_name_is_present(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     assert "Forest Assessment" == collection.stac["linz:event_name"]
 
 
 def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata)
+    collection = ImageryCollection(metadata, any_epoch_datetime)
     assert "Auckland North Forest Assessment" == collection.stac["linz:geographic_description"]

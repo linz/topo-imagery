@@ -7,6 +7,7 @@ from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
@@ -18,12 +19,12 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     mocker.patch("scripts.files.fs.read", return_value=b"")
 
-    path = "./test/BR34_5000_0302.tiff"
+    path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    start_datetime = "2021-01-27 00:00:00Z"
-    end_datetime = "2021-01-27 00:00:00Z"
+    start_datetime = "2021-01-27T00:00:00Z"
+    end_datetime = "2021-01-27T00:00:00Z"
 
-    item = ImageryItem(id_, path)
+    item = ImageryItem(id_, path, any_epoch_datetime)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
@@ -72,12 +73,12 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
         "geographic_description": None,
     }
     ulid = "fake_ulid"
-    collection = ImageryCollection(metadata=metadata, collection_id=ulid)
+    collection = ImageryCollection(metadata=metadata, now=any_epoch_datetime, collection_id=ulid)
 
-    path = "./test/BR34_5000_0302.tiff"
+    path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem(id_, path)
+    item = ImageryItem(id_, path, any_epoch_datetime)
 
     item.add_collection(collection.stac["id"])
 

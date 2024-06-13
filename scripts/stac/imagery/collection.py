@@ -1,14 +1,14 @@
-import json
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-import shapely.geometry
 import shapely.ops
 import ulid
 
+from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
@@ -37,6 +37,7 @@ class ImageryCollection:
     def __init__(
         self,
         metadata: CollectionMetadata,
+        now: Callable[[], datetime],
         collection_id: Optional[str] = None,
         providers: Optional[List[Provider]] = None,
     ) -> None:
@@ -45,6 +46,7 @@ class ImageryCollection:
 
         self.metadata = metadata
 
+        now_string = format_rfc_3339_datetime_string(now())
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
@@ -58,6 +60,8 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
+            "created": now_string,
+            "updated": now_string,
         }
 
         # Optional metadata
@@ -96,7 +100,7 @@ class ImageryCollection:
 
         # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, gsd_to_float(self.metadata["gsd"]))
-        capture_area_content: bytes = json.dumps(capture_area_document).encode("utf-8")
+        capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
@@ -130,20 +134,21 @@ class ImageryCollection:
             item: STAC Item to add
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
+        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(item))
         if item_self_link:
-            self.add_link(href=item_self_link["href"])
+            self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
-    def add_link(self, href: str, rel: str = "item", file_type: str = "application/json") -> None:
+    def add_link(self, href: str, file_checksum: str) -> None:
         """Add a `link` to the existing `links` list of the Collection.
 
         Args:
             href: path
-            rel: type of link. Defaults to "item".
-            file_type: type of file pointed by the link. Defaults to "application/json".
+            file_checksum: Optional checksum of file.
         """
-        self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+        link = {"rel": "item", "href": href, "type": "application/json", "file:checksum": file_checksum}
+        self.stac["links"].append(link)
 
     def add_providers(self, providers: List[Provider]) -> None:
         """Add a list of Providers to the existing list of `providers` of the Collection.
@@ -192,20 +197,20 @@ class ImageryCollection:
 
         interval = self.stac["extent"]["temporal"]["interval"][0]
 
-        item_start = datetime.strptime(item_start_datetime, "%Y-%m-%dT%H:%M:%SZ")
-        item_end = datetime.strptime(item_end_datetime, "%Y-%m-%dT%H:%M:%SZ")
+        item_start = parse_rfc_3339_datetime(item_start_datetime)
+        item_end = parse_rfc_3339_datetime(item_end_datetime)
 
         collection_datetimes = []
         for date in interval:
-            collection_datetimes.append(datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ"))
+            collection_datetimes.append(parse_rfc_3339_datetime(date))
 
         start_datetime = min(collection_datetimes[0], collection_datetimes[1], item_start)
         end_datetime = max(collection_datetimes[0], collection_datetimes[1], item_end)
 
         self.update_extent(
             interval=[
-                start_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                end_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                format_rfc_3339_datetime_string(start_datetime),
+                format_rfc_3339_datetime_string(end_datetime),
             ]
         )
 
@@ -235,7 +240,7 @@ class ImageryCollection:
         Args:
             destination: path of the destination
         """
-        write(destination, json.dumps(self.stac, ensure_ascii=False).encode("utf-8"), content_type=ContentType.JSON.value)
+        write(destination, dict_to_json_bytes(self.stac), content_type=ContentType.JSON.value)
 
     def _title(self) -> str:
         """Generates the title for imagery and elevation datasets.
@@ -265,18 +270,20 @@ class ImageryCollection:
             imagery_name = region
             elevation_description = None
 
-        # determine if dataset is preview
+        # determine if the dataset title requires a lifecycle tag
         if self.metadata.get("lifecycle") == "preview":
-            preview = "- Preview"
+            lifecycle_tag = "- Preview"
+        elif self.metadata.get("lifecycle") == "ongoing":
+            lifecycle_tag = "- Draft"
         else:
-            preview = None
+            lifecycle_tag = None
 
         if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
             return " ".join(
                 value
-                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", preview or None]
+                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", lifecycle_tag]
                 if value is not None
             )
 
@@ -292,7 +299,7 @@ class ImageryCollection:
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    preview or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
@@ -301,12 +308,12 @@ class ImageryCollection:
                 value
                 for value in [
                     region,
-                    elevation_description or None,
+                    elevation_description,
                     "LiDAR",
                     self.metadata["gsd"],
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    preview or None,
+                    lifecycle_tag,
                 ]
                 if value is not None
             )
