@@ -1,9 +1,9 @@
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Sequence
 
 from linz_logger import get_log
-from shapely import BufferCapStyle, BufferJoinStyle, Geometry, to_geojson, union_all
-from shapely.geometry import Polygon
+from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all
+from shapely.geometry.base import BaseGeometry
 
 from scripts.logging.time_helper import time_in_ms
 
@@ -43,11 +43,11 @@ def get_buffer_distance(gsd: float) -> float:
     return gsd * 2 * DECIMAL_DEGREES_1M
 
 
-def to_feature(geometry: Geometry) -> Dict[str, Any]:
-    """Transform a Geometry to a GeoJSON feature.
+def to_feature(geometry: BaseGeometry) -> Dict[str, Any]:
+    """Transform a BaseGeometry to a GeoJSON feature.
 
     Args:
-        geometry: a Geometry
+        geometry: a BaseGeometry
 
     Returns:
         a GeoJSON document.
@@ -55,7 +55,7 @@ def to_feature(geometry: Geometry) -> Dict[str, Any]:
     return {"geometry": json.loads(to_geojson(geometry)), "type": "Feature", "properties": {}}
 
 
-def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
+def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> BaseGeometry:
     """Merge a list of polygons by converting them to a single geometry that covers the same area.
     A buffer distance is used to buffer out the polygons before dissolving them together and then negative buffer them back in.
     The merged geometry is simplify (rounded) to the decimal used for the buffer.
@@ -80,8 +80,8 @@ def merge_polygons(polygons: List[Polygon], buffer_distance: float) -> Geometry:
     return union_simplified
 
 
-def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]:
-    """Generate the capture area from a list of polygons.
+def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: float) -> Dict[str, Any]:
+    """Generate the capture area from a list of BaseGeometries.
     Providing the `gsd` allows to round the geometry as we've seen some tiffs
     geometry being slightly off, sometimes due to rounding issue in their
     creation process (before delivery).
@@ -92,7 +92,7 @@ def generate_capture_area(polygons: List[Polygon], gsd: float) -> Dict[str, Any]
     but < buffer_factor*2 will be closed.
 
     Args:
-        polygons: list of polygons of the area
+        polygons: list of BaseGeometries of the area
         gsd: Ground Sample Distance in meters
 
     Returns:
