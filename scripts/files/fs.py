@@ -2,7 +2,7 @@ import os
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from boto3 import resource
 from linz_logger import get_log
@@ -17,7 +17,7 @@ else:
     S3Client = dict
 
 
-def write(destination: str, source: bytes, content_type: Optional[str] = None) -> str:
+def write(destination: str, source: bytes, content_type: str | None = None) -> str:
     """Write a file from its source to a destination path.
 
     Args:
@@ -87,16 +87,14 @@ def exists(path: str) -> bool:
     return fs_local.exists(path)
 
 
-def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
+def modified(path: str, s3_client: S3Client | None = None) -> datetime:
     """Get modified datetime for S3 URL or local path"""
     if is_s3(path):
         return fs_s3.modified(fs_s3.bucket_name_from_path(path), fs_s3.prefix_from_path(path), s3_client)
     return fs_local.modified(Path(path))
 
 
-def write_all(
-    inputs: list[str], target: str, concurrency: Optional[int] = 4, generate_name: Optional[bool] = True
-) -> list[str]:
+def write_all(inputs: list[str], target: str, concurrency: int | None = 4, generate_name: bool | None = True) -> list[str]:
     """Writes list of files to target destination using multithreading.
     Args:
         inputs: list of files to read
@@ -123,7 +121,7 @@ def write_all(
     return written_tiffs
 
 
-def write_sidecars(inputs: list[str], target: str, concurrency: Optional[int] = 4) -> None:
+def write_sidecars(inputs: list[str], target: str, concurrency: int | None = 4) -> None:
     """Writes list of files (if found) to target destination using multithreading.
     The copy of the files have a generated file name (@see `write_file`)
 
@@ -142,7 +140,7 @@ def write_sidecars(inputs: list[str], target: str, concurrency: Optional[int] = 
                 get_log().info("wrote_sidecar_file", path=future.result())
 
 
-def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_name: Optional[bool] = True) -> Future[str]:
+def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_name: bool | None = True) -> Future[str]:
     """Read a file from a path and write it to a target path.
     Args:
         executor: A ThreadPoolExecutor instance.

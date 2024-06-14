@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import ulid
 from shapely.geometry.base import BaseGeometry
@@ -38,8 +38,8 @@ class ImageryCollection:
         self,
         metadata: CollectionMetadata,
         now: Callable[[], datetime],
-        collection_id: Optional[str] = None,
-        providers: Optional[list[Provider]] = None,
+        collection_id: str | None = None,
+        providers: list[Provider] | None = None,
     ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
@@ -214,7 +214,7 @@ class ImageryCollection:
             ]
         )
 
-    def update_extent(self, bbox: Optional[list[float]] = None, interval: Optional[list[str]] = None) -> None:
+    def update_extent(self, bbox: list[float] | None = None, interval: list[str] | None = None) -> None:
         """Update an extent of the Collection whereas it's spatial or temporal.
 
         Args:

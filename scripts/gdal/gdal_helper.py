@@ -4,7 +4,7 @@ import subprocess
 from enum import Enum
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import Optional, cast
+from typing import cast
 
 from linz_logger import get_log
 
@@ -74,8 +74,8 @@ def get_gdal_version() -> str:
 
 def run_gdal(
     command: list[str],
-    input_file: Optional[str] = None,
-    output_file: Optional[str] = None,
+    input_file: str | None = None,
+    output_file: str | None = None,
 ) -> "subprocess.CompletedProcess[bytes]":
     """Run the GDAL command. The permissions to access to the input file are applied to the gdal environment.
 
@@ -167,7 +167,7 @@ def gdal_info(path: str) -> GdalInfo:
         raise e
 
 
-def is_geotiff(path: str, gdalinfo_data: Optional[GdalInfo] = None) -> bool:
+def is_geotiff(path: str, gdalinfo_data: GdalInfo | None = None) -> bool:
     """Verifies if a file is a GTiff based on the presence of the
     `coordinateSystem`.
 

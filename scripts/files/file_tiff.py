@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
@@ -29,7 +29,7 @@ class FileTiff:
     def __init__(
         self,
         paths: list[str],
-        preset: Optional[str] = None,
+        preset: str | None = None,
     ) -> None:
         paths_original = []
         for p in paths:
@@ -41,8 +41,8 @@ class FileTiff:
         self._paths_original = paths_original
         self._path_standardised = ""
         self._errors: list[dict[str, Any]] = []
-        self._gdalinfo: Optional[GdalInfo] = None
-        self._srs: Optional[bytes] = None
+        self._gdalinfo: GdalInfo | None = None
+        self._srs: bytes | None = None
         if preset == "dem_lerc":
             self._tiff_type = FileTiffType.DEM
         else:
@@ -112,7 +112,7 @@ class FileTiff:
         """
         self._path_standardised = path
 
-    def get_gdalinfo(self, path: Optional[str] = None) -> Optional[GdalInfo]:
+    def get_gdalinfo(self, path: str | None = None) -> GdalInfo | None:
         """Get the `gdalinfo` output for the file.
         Run gdalinfo if not already ran or if different path is specified.
         `path` is useful to specify a local file to avoid downloading from external source.
@@ -175,7 +175,7 @@ class FileTiff:
         return self._tiff_type
 
     def add_error(
-        self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[dict[str, str]] = None
+        self, error_type: FileTiffErrorType, error_message: str, custom_fields: dict[str, str] | None = None
     ) -> None:
         """Add an error in Non Visual QA errors list.
 

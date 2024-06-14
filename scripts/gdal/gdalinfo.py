@@ -1,4 +1,4 @@
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
 from scripts.tile.tile_index import Point
 
@@ -35,8 +35,8 @@ class GdalInfoBand(TypedDict):
     Examples:
         "Red", "Green", "Blue", "Alpha", "Gray", "Palette"
     """
-    noDataValue: Optional[int]
-    colorTable: Optional[GdalInfoBandColorTable]
+    noDataValue: int | None
+    colorTable: GdalInfoBandColorTable | None
 
 
 class GdalInfo(TypedDict):
@@ -68,7 +68,7 @@ class GdalInfo(TypedDict):
     metadata: dict[Any, Any]
     cornerCoordinates: dict[Any, Any]
     extent: dict[Any, Any]
-    wgs84Extent: Optional[dict[str, list[list[list[float]]]]]
+    wgs84Extent: dict[str, list[list[list[float]]]] | None
     bands: list[GdalInfoBand]
     """Coordinate system description"""
     coordinateSystem: dict[Any, Any]

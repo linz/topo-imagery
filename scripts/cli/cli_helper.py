@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from linz_logger import get_log
 
@@ -77,7 +77,7 @@ def valid_date(s: str) -> datetime:
         raise argparse.ArgumentTypeError(msg) from e
 
 
-def parse_list(list_s: str, separator: Optional[str] = ";") -> list[str]:
+def parse_list(list_s: str, separator: str | None = ";") -> list[str]:
     """Transform a string representing a list to a list of strings
     example: "foo; bar; foo bar" -> ["foo", "bar", "foo bar"]
 
@@ -93,7 +93,7 @@ def parse_list(list_s: str, separator: Optional[str] = ";") -> list[str]:
     return []
 
 
-def coalesce_multi_single(multi_items: Optional[str], single_item: Optional[str]) -> list[str]:
+def coalesce_multi_single(multi_items: str | None, single_item: str | None) -> list[str]:
     """Coalesce strings containing either semicolon delimited values or a single
     value into a list. `single_item` is used only if `multi_items` is falsy.
     If both are falsy, an empty list is returned.

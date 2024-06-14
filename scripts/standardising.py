@@ -2,7 +2,6 @@ import os
 import tempfile
 from functools import partial
 from multiprocessing import Pool
-from typing import Optional
 
 from linz_logger import get_log
 from tifffile import TiffFile
@@ -29,7 +28,7 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 def run_standardising(
     todo: list[TileFiles],
     preset: str,
-    cutline: Optional[str],
+    cutline: str | None,
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
@@ -110,9 +109,9 @@ def standardising(
     target_epsg: str,
     gsd: str,
     create_footprints: bool,
-    cutline: Optional[str],
+    cutline: str | None,
     target_output: str = "/tmp/",
-) -> Optional[FileTiff]:
+) -> FileTiff | None:
     """Apply transformations using GDAL to the source file and create a footprint sidecar file.
 
     Args:

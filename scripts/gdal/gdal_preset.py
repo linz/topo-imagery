@@ -1,5 +1,3 @@
-from typing import Optional
-
 from linz_logger import get_log
 
 from scripts.files.file_tiff import DEFAULT_NO_DATA_VALUE
@@ -118,7 +116,7 @@ def get_gdal_command(preset: str, epsg: str) -> list[str]:
     return gdal_command
 
 
-def get_cutline_command(cutline: Optional[str]) -> list[str]:
+def get_cutline_command(cutline: str | None) -> list[str]:
     """Get a `gdalwarp` command to create a virtual file (`.vrt`) which has a cutline applied and alpha added.
 
     Args:
@@ -215,8 +213,8 @@ def get_thumbnail_command(
     output: str,
     xsize: str,
     ysize: str,
-    extra_args: Optional[list[str]] = None,
-    gdalinfo_data: Optional[GdalInfo] = None,
+    extra_args: list[str] | None = None,
+    gdalinfo_data: GdalInfo | None = None,
 ) -> list[str]:
     """Get a `gdal_translate` command to create thumbnails.
 

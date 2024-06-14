@@ -1,7 +1,7 @@
 import json
 from os import environ
 from time import sleep
-from typing import Any, NamedTuple, Optional
+from typing import Any, NamedTuple
 from urllib.parse import urlparse
 
 from boto3 import Session
@@ -119,7 +119,7 @@ def get_session_credentials(prefix: str, retry_count: int = 3) -> ReadOnlyCreden
     raise last_error
 
 
-def _get_credential_config(prefix: str) -> Optional[CredentialSource]:
+def _get_credential_config(prefix: str) -> CredentialSource | None:
     """Get the credential config (`bucket-config`) for the `prefix`.
 
     Args:
