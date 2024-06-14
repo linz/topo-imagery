@@ -1,5 +1,3 @@
-from typing import List
-
 from pytest_subtests import SubTests
 
 from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list
@@ -12,7 +10,7 @@ def test_get_tile_files(subtests: SubTests) -> None:
     expected_output_filename_b = "tile_name2"
     expected_input_filenames = ["file_a.tiff", "file_b.tiff"]
 
-    source: List[TileFiles] = get_tile_files(file_source)
+    source: list[TileFiles] = get_tile_files(file_source)
     with subtests.test():
         assert expected_output_filename == source[0].output
 

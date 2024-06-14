@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 
 class CollectionMetadata(TypedDict):
@@ -23,9 +23,9 @@ class CollectionMetadata(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
-    geographic_description: Optional[str]
-    event_name: Optional[str]
-    historic_survey_number: Optional[str]
+    geographic_description: str | None
+    event_name: str | None
+    historic_survey_number: str | None
 
 
 class SubtypeParameterError(Exception):

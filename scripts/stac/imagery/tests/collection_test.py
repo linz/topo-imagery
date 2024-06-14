@@ -1,10 +1,10 @@
 import json
 import os
 import tempfile
+from collections.abc import Callable, Generator
 from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import Callable, Generator
 
 import pytest
 import shapely.geometry

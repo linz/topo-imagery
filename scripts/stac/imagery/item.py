@@ -1,6 +1,7 @@
 import os
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, Dict, Tuple
+from typing import Any
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
@@ -11,7 +12,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 
 class ImageryItem:
-    stac: Dict[str, Any]
+    stac: dict[str, Any]
 
     def __init__(self, id_: str, file: str, now: Callable[[], datetime]) -> None:
         file_content = fs.read(file)
@@ -50,7 +51,7 @@ class ImageryItem:
         self.stac["properties"]["datetime"] = None
 
     # FIXME: redefine the 'Any'
-    def update_spatial(self, geometry: Dict[str, Any], bbox: Tuple[float, ...]) -> None:
+    def update_spatial(self, geometry: dict[str, Any], bbox: tuple[float, ...]) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
 
         Args:

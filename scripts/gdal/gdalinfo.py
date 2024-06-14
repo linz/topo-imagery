@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 from scripts.tile.tile_index import Point
 
@@ -10,7 +10,7 @@ class GdalInfoBandColorTable(TypedDict):
     count: int
     """Count of entries in the colour palette
     Example: 256"""
-    entries: List[List[int]]
+    entries: list[list[int]]
     """List of colour palette entries. Each is a list of colour channel values
     Example:
     [
@@ -28,15 +28,15 @@ class GdalInfoBand(TypedDict):
     band: int
     """band offset, starting at 1
     """
-    block: List[int]
+    block: list[int]
     type: str
     colorInterpretation: str
     """Color
     Examples:
         "Red", "Green", "Blue", "Alpha", "Gray", "Palette"
     """
-    noDataValue: Optional[int]
-    colorTable: Optional[GdalInfoBandColorTable]
+    noDataValue: int | None
+    colorTable: GdalInfoBandColorTable | None
 
 
 class GdalInfo(TypedDict):
@@ -56,22 +56,22 @@ class GdalInfo(TypedDict):
         "GeoTIFF"
     """
 
-    files: List[str]
+    files: list[str]
     """List of files processed by the command
     """
-    size: List[int]
+    size: list[int]
     """Width and height of input"""
-    geoTransform: List[float]
+    geoTransform: list[float]
     """GeoTransformation information
 
     """
-    metadata: Dict[Any, Any]
-    cornerCoordinates: Dict[Any, Any]
-    extent: Dict[Any, Any]
-    wgs84Extent: Optional[Dict[str, List[List[List[float]]]]]
-    bands: List[GdalInfoBand]
+    metadata: dict[Any, Any]
+    cornerCoordinates: dict[Any, Any]
+    extent: dict[Any, Any]
+    wgs84Extent: dict[str, list[list[list[float]]]] | None
+    bands: list[GdalInfoBand]
     """Coordinate system description"""
-    coordinateSystem: Dict[Any, Any]
+    coordinateSystem: dict[Any, Any]
 
 
 def get_origin(gdalinfo: GdalInfo) -> Point:

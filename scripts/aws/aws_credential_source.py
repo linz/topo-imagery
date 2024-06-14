@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 # pylint: disable=too-many-instance-attributes
@@ -21,15 +20,15 @@ class CredentialSource:
     """
     Role arn to use
     """
-    externalId: Optional[str] = None
+    externalId: str | None = None
     """
     Role external ID if it exists
     """
-    roleSessionDuration: Optional[int] = 1 * 60 * 60
+    roleSessionDuration: int | None = 1 * 60 * 60
     """
     Max duration of the assumed session in seconds, default 1 hours
     """
-    flags: Optional[str] = None
+    flags: str | None = None
     """
     flags that the role can use either "r" for read-only or "rw" for read-write
     """

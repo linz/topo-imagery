@@ -1,5 +1,3 @@
-from typing import Optional
-
 from linz_logger import get_log
 
 from scripts.datetimes import utc_now
@@ -15,7 +13,7 @@ def create_item(
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
-    gdalinfo_result: Optional[GdalInfo] = None,
+    gdalinfo_result: GdalInfo | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
