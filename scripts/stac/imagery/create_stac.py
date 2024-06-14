@@ -34,10 +34,7 @@ def create_item(
 
     geometry, bbox = get_extents(gdalinfo_result)
 
-    item = ImageryItem(id_, file, utc_now)
-    item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(geometry, bbox)
-    item.add_collection(collection_id)
+    item = ImageryItem(id_, file, utc_now, start_datetime, end_datetime, geometry, bbox, collection_id)
 
     get_log().info("ImageryItem created", path=file)
     return item
