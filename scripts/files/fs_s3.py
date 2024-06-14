@@ -1,7 +1,8 @@
+from collections.abc import Generator
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Generator, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
