@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Tuple
+from typing import Any, Callable
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
@@ -50,7 +50,7 @@ class ImageryItem:
         self.stac["properties"]["datetime"] = None
 
     # FIXME: redefine the 'Any'
-    def update_spatial(self, geometry: dict[str, Any], bbox: Tuple[float, ...]) -> None:
+    def update_spatial(self, geometry: dict[str, Any], bbox: tuple[float, ...]) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
 
         Args:
