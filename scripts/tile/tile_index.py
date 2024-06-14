@@ -1,5 +1,5 @@
 import re
-from typing import NamedTuple, Union
+from typing import NamedTuple
 
 from scripts.tile.util import charcodeat
 
@@ -20,13 +20,13 @@ CHAR_S = charcodeat("S", 0)
 class Point(NamedTuple):
     """Class that represents a point(x,y)"""
 
-    x: Union[int, float]
-    y: Union[int, float]
+    x: int | float
+    y: int | float
 
 
 class Size(NamedTuple):
-    width: Union[int, float]
-    height: Union[int, float]
+    width: int | float
+    height: int | float
 
 
 class Bounds(NamedTuple):

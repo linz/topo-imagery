@@ -2,7 +2,7 @@ from collections.abc import Generator
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
@@ -217,7 +217,7 @@ def _get_object(bucket: str, file_name: str, s3_client: S3Client) -> GetObjectOu
 
 def get_object_parallel_multithreading(
     bucket: str, files_to_read: list[str], s3_client: S3Client | None, concurrency: int
-) -> Generator[Any, Union[Any, BaseException], None]:
+) -> Generator[Any, Any | BaseException, None]:
     """Get s3 objects in parallel
 
     Args:
