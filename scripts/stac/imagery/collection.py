@@ -1,6 +1,7 @@
 import os
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 import ulid
 from shapely.geometry.base import BaseGeometry

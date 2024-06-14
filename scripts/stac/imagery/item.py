@@ -1,6 +1,7 @@
 import os
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
