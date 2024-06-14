@@ -68,7 +68,7 @@ class GdalInfo(TypedDict):
     metadata: Dict[Any, Any]
     cornerCoordinates: Dict[Any, Any]
     extent: Dict[Any, Any]
-    wgs84Extent: Optional[Dict[str, List[float]]]
+    wgs84Extent: Optional[Dict[str, List[List[List[float]]]]]
     bands: List[GdalInfoBand]
     """Coordinate system description"""
     coordinateSystem: Dict[Any, Any]
