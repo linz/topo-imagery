@@ -4,7 +4,7 @@ import subprocess
 from enum import Enum
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from linz_logger import get_log
 
@@ -41,11 +41,11 @@ def get_vfs_path(path: str) -> str:
     return path.replace("s3://", "/vsis3/")
 
 
-def command_to_string(command: List[str]) -> str:
+def command_to_string(command: list[str]) -> str:
     """Format the command, each arguments separated by a white space.
 
     Args:
-        command (List[str]): each arguments of the command as a string in a list.
+        command (list[str]): each arguments of the command as a string in a list.
 
     Returns:
         str: the formatted command.
@@ -73,7 +73,7 @@ def get_gdal_version() -> str:
 
 
 def run_gdal(
-    command: List[str],
+    command: list[str],
     input_file: Optional[str] = None,
     output_file: Optional[str] = None,
 ) -> "subprocess.CompletedProcess[bytes]":

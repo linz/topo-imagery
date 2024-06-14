@@ -2,7 +2,7 @@ import os
 import tempfile
 from functools import partial
 from multiprocessing import Pool
-from typing import List, Optional
+from typing import Optional
 
 from linz_logger import get_log
 from tifffile import TiffFile
@@ -27,7 +27,7 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
 def run_standardising(
-    todo: List[TileFiles],
+    todo: list[TileFiles],
     preset: str,
     cutline: Optional[str],
     concurrency: int,
@@ -36,7 +36,7 @@ def run_standardising(
     gsd: str,
     create_footprints: bool,
     target_output: str = "/tmp/",
-) -> List[FileTiff]:
+) -> list[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
 
     Args:
@@ -84,7 +84,7 @@ def run_standardising(
     return standardized_tiffs
 
 
-def create_vrt(source_tiffs: List[str], target_path: str, add_alpha: bool = False) -> str:
+def create_vrt(source_tiffs: list[str], target_path: str, add_alpha: bool = False) -> str:
     """Create a VRT from a list of tiffs files
 
     Args:
@@ -146,7 +146,7 @@ def standardising(
     with tempfile.TemporaryDirectory() as tmp_path:
         standardized_working_path = os.path.join(tmp_path, standardized_file_name)
         footprint_tmp_path = os.path.join(tmp_path, footprint_file_name)
-        sidecars: List[str] = []
+        sidecars: list[str] = []
         for extension in [".prj", ".tfw"]:
             for file_input in tiff.get_paths_original():
                 sidecars.append(f"{os.path.splitext(file_input)[0]}{extension}")

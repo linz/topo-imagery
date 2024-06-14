@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Optional
 
 import ulid
 from shapely.geometry.base import BaseGeometry
@@ -39,7 +39,7 @@ class ImageryCollection:
         metadata: CollectionMetadata,
         now: Callable[[], datetime],
         collection_id: Optional[str] = None,
-        providers: Optional[List[Provider]] = None,
+        providers: Optional[list[Provider]] = None,
     ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
@@ -87,7 +87,7 @@ class ImageryCollection:
 
         self.add_providers(providers)
 
-    def add_capture_area(self, polygons: List[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
+    def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
@@ -150,7 +150,7 @@ class ImageryCollection:
         link = {"rel": "item", "href": href, "type": "application/json", "file:checksum": file_checksum}
         self.stac["links"].append(link)
 
-    def add_providers(self, providers: List[Provider]) -> None:
+    def add_providers(self, providers: list[Provider]) -> None:
         """Add a list of Providers to the existing list of `providers` of the Collection.
 
         Args:
@@ -159,7 +159,7 @@ class ImageryCollection:
         for p in providers:
             self.stac["providers"].append(p)
 
-    def update_spatial_extent(self, item_bbox: List[float]) -> None:
+    def update_spatial_extent(self, item_bbox: list[float]) -> None:
         """Update (if needed) the Collection spatial extent from a bounding box.
 
         Args:
@@ -214,7 +214,7 @@ class ImageryCollection:
             ]
         )
 
-    def update_extent(self, bbox: Optional[List[float]] = None, interval: Optional[List[str]] = None) -> None:
+    def update_extent(self, bbox: Optional[list[float]] = None, interval: Optional[list[str]] = None) -> None:
         """Update an extent of the Collection whereas it's spatial or temporal.
 
         Args:

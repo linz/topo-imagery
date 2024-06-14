@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, TypedDict
+from typing import TypedDict
 
 
 class ProviderRole(str, Enum):
@@ -12,5 +12,5 @@ class ProviderRole(str, Enum):
 class Provider(TypedDict):
     name: str
     """Organization name"""
-    roles: List[ProviderRole]
+    roles: list[ProviderRole]
     """Organization roles"""

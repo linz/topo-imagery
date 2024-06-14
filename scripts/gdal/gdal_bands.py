@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from linz_logger import get_log
 
@@ -6,7 +6,7 @@ from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
-def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
+def find_band(bands: list[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
     """Look for a specific colorInterperation inside of a `gdalinfo` band output.
 
     Args:
@@ -23,7 +23,7 @@ def find_band(bands: List[GdalInfoBand], color: str) -> Optional[GdalInfoBand]:
 
 
 # pylint: disable-msg=too-many-return-statements
-def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Optional[str] = None) -> List[str]:
+def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Optional[str] = None) -> list[str]:
     """Get the banding parameters for a `gdal_translate` command.
 
     Args:
@@ -39,7 +39,7 @@ def get_gdal_band_offset(file: str, info: Optional[GdalInfo] = None, preset: Opt
 
     bands = info["bands"]
 
-    band_alpha_arg: List[str] = []
+    band_alpha_arg: list[str] = []
     if band_alpha := find_band(bands, "Alpha"):
         band_alpha_arg.extend(["-b", str(band_alpha["band"])])
 

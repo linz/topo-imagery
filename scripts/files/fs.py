@@ -2,7 +2,7 @@ import os
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from boto3 import resource
 from linz_logger import get_log
@@ -95,8 +95,8 @@ def modified(path: str, s3_client: Optional[S3Client] = None) -> datetime:
 
 
 def write_all(
-    inputs: List[str], target: str, concurrency: Optional[int] = 4, generate_name: Optional[bool] = True
-) -> List[str]:
+    inputs: list[str], target: str, concurrency: Optional[int] = 4, generate_name: Optional[bool] = True
+) -> list[str]:
     """Writes list of files to target destination using multithreading.
     Args:
         inputs: list of files to read
@@ -107,7 +107,7 @@ def write_all(
     Returns:
         list of written file paths
     """
-    written_tiffs: List[str] = []
+    written_tiffs: list[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
         futuress = {write_file(executor, input_, target, generate_name): input_ for input_ in inputs}
         for future in as_completed(futuress):
@@ -123,7 +123,7 @@ def write_all(
     return written_tiffs
 
 
-def write_sidecars(inputs: List[str], target: str, concurrency: Optional[int] = 4) -> None:
+def write_sidecars(inputs: list[str], target: str, concurrency: Optional[int] = 4) -> None:
     """Writes list of files (if found) to target destination using multithreading.
     The copy of the files have a generated file name (@see `write_file`)
 

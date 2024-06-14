@@ -1,7 +1,7 @@
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Generator, Optional, Union
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
@@ -172,7 +172,7 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[S3Client]) -> List[str]:
+def list_files_in_uri(uri: str, suffixes: list[str], s3_client: Optional[S3Client]) -> list[str]:
     """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
@@ -215,7 +215,7 @@ def _get_object(bucket: str, file_name: str, s3_client: S3Client) -> GetObjectOu
 
 
 def get_object_parallel_multithreading(
-    bucket: str, files_to_read: List[str], s3_client: Optional[S3Client], concurrency: int
+    bucket: str, files_to_read: list[str], s3_client: Optional[S3Client], concurrency: int
 ) -> Generator[Any, Union[Any, BaseException], None]:
     """Get s3 objects in parallel
 

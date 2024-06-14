@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-from typing import List
 
 import shapely.geometry
 import shapely.ops
@@ -89,7 +88,7 @@ def main() -> None:
     arguments = parser.parse_args()
     uri = arguments.uri
 
-    providers: List[Provider] = []
+    providers: list[Provider] = []
     for producer_name in coalesce_multi_single(arguments.producer_list, arguments.producer):
         providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
     for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):

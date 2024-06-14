@@ -1,7 +1,7 @@
 import json
 from os import environ
 from time import sleep
-from typing import Any, List, NamedTuple, Optional
+from typing import Any, NamedTuple, Optional
 from urllib.parse import urlparse
 
 from boto3 import Session
@@ -17,7 +17,7 @@ aws_profile = environ.get("AWS_PROFILE")
 session = Session(profile_name=aws_profile)
 sessions: dict[str, Session] = {}
 
-bucket_roles: List[CredentialSource] = []
+bucket_roles: list[CredentialSource] = []
 
 client_sts = session.client("sts")
 

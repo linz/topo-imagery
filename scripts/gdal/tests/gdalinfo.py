@@ -1,4 +1,4 @@
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
@@ -29,7 +29,7 @@ def add_band(
     )
 
 
-def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: List[List[int]], no_data_value: Optional[str] = None) -> None:
+def add_palette_band(gdalinfo: GdalInfo, colour_table_entries: list[list[int]], no_data_value: Optional[str] = None) -> None:
     if gdalinfo.get("bands", None) is None:
         gdalinfo["bands"] = []
 

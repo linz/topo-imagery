@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from linz_logger import get_log
 
@@ -86,7 +86,7 @@ WEBP_OVERVIEWS = [
 ]
 
 
-def get_gdal_command(preset: str, epsg: str) -> List[str]:
+def get_gdal_command(preset: str, epsg: str) -> list[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
@@ -97,7 +97,7 @@ def get_gdal_command(preset: str, epsg: str) -> List[str]:
         a list of arguments to run `gdal_translate`
     """
     get_log().info("gdal_preset", preset=preset)
-    gdal_command: List[str] = ["gdal_translate"]
+    gdal_command: list[str] = ["gdal_translate"]
 
     gdal_command.extend(BASE_COG)
     # Force the source projection to an input EPSG
@@ -118,7 +118,7 @@ def get_gdal_command(preset: str, epsg: str) -> List[str]:
     return gdal_command
 
 
-def get_cutline_command(cutline: Optional[str]) -> List[str]:
+def get_cutline_command(cutline: Optional[str]) -> list[str]:
     """Get a `gdalwarp` command to create a virtual file (`.vrt`) which has a cutline applied and alpha added.
 
     Args:
@@ -144,7 +144,7 @@ def get_cutline_command(cutline: Optional[str]) -> List[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alpha: bool = False) -> List[str]:
+def get_build_vrt_command(files: list[str], output: str = "output.vrt", add_alpha: bool = False) -> list[str]:
     """Build a VRT from a list of tiff files.
 
     Args:
@@ -166,7 +166,7 @@ def get_build_vrt_command(files: List[str], output: str = "output.vrt", add_alph
     return gdal_command
 
 
-def get_alpha_command() -> List[str]:
+def get_alpha_command() -> list[str]:
     """Get a `gdalwarp` command to create a virtual file (.vrt) which has an alpha added.
 
     Returns:
@@ -183,7 +183,7 @@ def get_alpha_command() -> List[str]:
     ]
 
 
-def get_transform_srs_command(source_epsg: str, target_epsg: str) -> List[str]:
+def get_transform_srs_command(source_epsg: str, target_epsg: str) -> list[str]:
     """Get a `gdalwarp` command to transform the srs.
 
     Args:
@@ -215,9 +215,9 @@ def get_thumbnail_command(
     output: str,
     xsize: str,
     ysize: str,
-    extra_args: Optional[List[str]] = None,
+    extra_args: Optional[list[str]] = None,
     gdalinfo_data: Optional[GdalInfo] = None,
-) -> List[str]:
+) -> list[str]:
     """Get a `gdal_translate` command to create thumbnails.
 
     Args:
@@ -250,7 +250,7 @@ def get_thumbnail_command(
     return command
 
 
-def get_ascii_translate_command() -> List[str]:
+def get_ascii_translate_command() -> list[str]:
     """Get a `translate` command to transform the ascii files to tiff.
 
     Args:

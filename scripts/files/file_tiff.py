@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any, List, Optional
+from typing import Annotated, Any, Optional
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
@@ -28,7 +28,7 @@ class FileTiff:
 
     def __init__(
         self,
-        paths: List[str],
+        paths: list[str],
         preset: Optional[str] = None,
     ) -> None:
         paths_original = []
@@ -40,7 +40,7 @@ class FileTiff:
 
         self._paths_original = paths_original
         self._path_standardised = ""
-        self._errors: List[dict[str, Any]] = []
+        self._errors: list[dict[str, Any]] = []
         self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
         if preset == "dem_lerc":
@@ -141,7 +141,7 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
-    def get_errors(self) -> List[dict[str, Any]]:
+    def get_errors(self) -> list[dict[str, Any]]:
         """Get the Non Visual QA errors.
 
         Returns:
@@ -149,7 +149,7 @@ class FileTiff:
         """
         return self._errors
 
-    def get_paths_original(self) -> List[str]:
+    def get_paths_original(self) -> list[str]:
         """Get the path(es) of the original (non standardised) file.
         It can be a list of path if the standardised file is a retiled image.
 

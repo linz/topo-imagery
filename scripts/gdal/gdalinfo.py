@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 from scripts.tile.tile_index import Point
 
@@ -10,7 +10,7 @@ class GdalInfoBandColorTable(TypedDict):
     count: int
     """Count of entries in the colour palette
     Example: 256"""
-    entries: List[List[int]]
+    entries: list[list[int]]
     """List of colour palette entries. Each is a list of colour channel values
     Example:
     [
@@ -28,7 +28,7 @@ class GdalInfoBand(TypedDict):
     band: int
     """band offset, starting at 1
     """
-    block: List[int]
+    block: list[int]
     type: str
     colorInterpretation: str
     """Color
@@ -56,20 +56,20 @@ class GdalInfo(TypedDict):
         "GeoTIFF"
     """
 
-    files: List[str]
+    files: list[str]
     """List of files processed by the command
     """
-    size: List[int]
+    size: list[int]
     """Width and height of input"""
-    geoTransform: List[float]
+    geoTransform: list[float]
     """GeoTransformation information
 
     """
     metadata: dict[Any, Any]
     cornerCoordinates: dict[Any, Any]
     extent: dict[Any, Any]
-    wgs84Extent: Optional[dict[str, List[List[List[float]]]]]
-    bands: List[GdalInfoBand]
+    wgs84Extent: Optional[dict[str, list[list[list[float]]]]]
+    bands: list[GdalInfoBand]
     """Coordinate system description"""
     coordinateSystem: dict[Any, Any]
 

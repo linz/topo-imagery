@@ -2,7 +2,7 @@ import argparse
 import json
 from datetime import datetime
 from os import environ
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from linz_logger import get_log
 
@@ -16,10 +16,10 @@ class InputParameterError(Exception):
 
 class TileFiles(NamedTuple):
     output: str
-    inputs: List[str]
+    inputs: list[str]
 
 
-def get_tile_files(source: str) -> List[TileFiles]:
+def get_tile_files(source: str) -> list[TileFiles]:
     """Transform a JSON string representing a list of input file paths and output tile name created
     by `argo-tasks` (see examples) to a list of `TileFiles`
 
@@ -37,7 +37,7 @@ def get_tile_files(source: str) -> List[TileFiles]:
         [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'])]
     """
     try:
-        source_json: List[TileFiles] = json.loads(
+        source_json: list[TileFiles] = json.loads(
             source, object_hook=lambda d: TileFiles(inputs=d["input"], output=d["output"])
         )
     except (json.decoder.JSONDecodeError, KeyError) as e:
@@ -47,7 +47,7 @@ def get_tile_files(source: str) -> List[TileFiles]:
     return source_json
 
 
-def load_input_files(path: str) -> List[TileFiles]:
+def load_input_files(path: str) -> list[TileFiles]:
     """Load the TileFiles from a JSON input file containing a list of output and input files.
     Args:
         path: path to a JSON file listing output name and input files
@@ -58,7 +58,7 @@ def load_input_files(path: str) -> List[TileFiles]:
     source = json.dumps(json.loads(read(path)))
 
     try:
-        tile_files: List[TileFiles] = get_tile_files(source)
+        tile_files: list[TileFiles] = get_tile_files(source)
         return tile_files
     except InputParameterError as e:
         get_log().error("An error occurred while getting tile_files", error=str(e))
@@ -77,7 +77,7 @@ def valid_date(s: str) -> datetime:
         raise argparse.ArgumentTypeError(msg) from e
 
 
-def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
+def parse_list(list_s: str, separator: Optional[str] = ";") -> list[str]:
     """Transform a string representing a list to a list of strings
     example: "foo; bar; foo bar" -> ["foo", "bar", "foo bar"]
 
@@ -93,7 +93,7 @@ def parse_list(list_s: str, separator: Optional[str] = ";") -> List[str]:
     return []
 
 
-def coalesce_multi_single(multi_items: Optional[str], single_item: Optional[str]) -> List[str]:
+def coalesce_multi_single(multi_items: Optional[str], single_item: Optional[str]) -> list[str]:
     """Coalesce strings containing either semicolon delimited values or a single
     value into a list. `single_item` is used only if `multi_items` is falsy.
     If both are falsy, an empty list is returned.
