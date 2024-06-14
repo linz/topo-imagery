@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, List, Optional
 
 import ulid
 from shapely.geometry.base import BaseGeometry
@@ -32,7 +32,7 @@ CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 
 
 class ImageryCollection:
-    stac: Dict[str, Any]
+    stac: dict[str, Any]
 
     def __init__(
         self,
@@ -127,7 +127,7 @@ class ImageryCollection:
         if StacExtensions.file.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
 
-    def add_item(self, item: Dict[Any, Any]) -> None:
+    def add_item(self, item: dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
 
         Args:

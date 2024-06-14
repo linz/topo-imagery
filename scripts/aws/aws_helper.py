@@ -1,7 +1,7 @@
 import json
 from os import environ
 from time import sleep
-from typing import Any, Dict, List, NamedTuple, Optional
+from typing import Any, List, NamedTuple, Optional
 from urllib.parse import urlparse
 
 from boto3 import Session
@@ -15,7 +15,7 @@ S3Path = NamedTuple("S3Path", [("bucket", str), ("key", str)])
 
 aws_profile = environ.get("AWS_PROFILE")
 session = Session(profile_name=aws_profile)
-sessions: Dict[str, Session] = {}
+sessions: dict[str, Session] = {}
 
 bucket_roles: List[CredentialSource] = []
 
@@ -67,7 +67,7 @@ def get_session(prefix: str) -> Session:
     if current_session is not None:
         return current_session
 
-    extra_args: Dict[str, Any] = {"DurationSeconds": cfg.roleSessionDuration}
+    extra_args: dict[str, Any] = {"DurationSeconds": cfg.roleSessionDuration}
 
     if cfg.externalId:
         extra_args["ExternalId"] = cfg.externalId

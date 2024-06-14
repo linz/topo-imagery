@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, List, Optional, TypedDict
 
 from scripts.tile.tile_index import Point
 
@@ -65,13 +65,13 @@ class GdalInfo(TypedDict):
     """GeoTransformation information
 
     """
-    metadata: Dict[Any, Any]
-    cornerCoordinates: Dict[Any, Any]
-    extent: Dict[Any, Any]
-    wgs84Extent: Optional[Dict[str, List[List[List[float]]]]]
+    metadata: dict[Any, Any]
+    cornerCoordinates: dict[Any, Any]
+    extent: dict[Any, Any]
+    wgs84Extent: Optional[dict[str, List[List[List[float]]]]]
     bands: List[GdalInfoBand]
     """Coordinate system description"""
-    coordinateSystem: Dict[Any, Any]
+    coordinateSystem: dict[Any, Any]
 
 
 def get_origin(gdalinfo: GdalInfo) -> Point:

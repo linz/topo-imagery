@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, List, Optional
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
@@ -40,7 +40,7 @@ class FileTiff:
 
         self._paths_original = paths_original
         self._path_standardised = ""
-        self._errors: List[Dict[str, Any]] = []
+        self._errors: List[dict[str, Any]] = []
         self._gdalinfo: Optional[GdalInfo] = None
         self._srs: Optional[bytes] = None
         if preset == "dem_lerc":
@@ -141,7 +141,7 @@ class FileTiff:
                 self.add_error(error_type=FileTiffErrorType.GDAL_INFO, error_message=f"error(s): {str(e)}")
         return self._gdalinfo
 
-    def get_errors(self) -> List[Dict[str, Any]]:
+    def get_errors(self) -> List[dict[str, Any]]:
         """Get the Non Visual QA errors.
 
         Returns:
@@ -175,7 +175,7 @@ class FileTiff:
         return self._tiff_type
 
     def add_error(
-        self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[Dict[str, str]] = None
+        self, error_type: FileTiffErrorType, error_message: str, custom_fields: Optional[dict[str, str]] = None
     ) -> None:
         """Add an error in Non Visual QA errors list.
 
