@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from linz_logger import get_log
 
 from scripts.datetimes import utc_now
@@ -10,8 +12,8 @@ from scripts.stac.imagery.item import ImageryItem
 
 def create_item(
     file: str,
-    start_datetime: str,
-    end_datetime: str,
+    start_datetime: datetime,
+    end_datetime: datetime,
     collection_id: str,
     gdalinfo_result: GdalInfo | None = None,
 ) -> ImageryItem:
@@ -34,7 +36,7 @@ def create_item(
 
     geometry, bbox = get_extents(gdalinfo_result)
 
-    item = ImageryItem(id_, file, utc_now, start_datetime, end_datetime, geometry, bbox, collection_id)
+    item = ImageryItem(id_, geometry, bbox, utc_now, start_datetime, end_datetime, file, collection_id)
 
     get_log().info("ImageryItem created", path=file)
     return item

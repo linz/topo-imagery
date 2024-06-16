@@ -127,15 +127,14 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    start_datetime = "2021-01-27T00:00:00Z"
-    end_datetime = "2021-01-27T00:00:00Z"
+    start_datetime = end_datetime = datetime(2021, 1, 27, tzinfo=timezone.utc)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     item = ImageryItem(
-        "BR34_5000_0304", item_file_path, now_function, start_datetime, end_datetime, geometry, bbox, collection.stac["id"]
+        "BR34_5000_0304", geometry, bbox, now_function, start_datetime, end_datetime, item_file_path, collection.stac["id"]
     )
 
     collection.add_item(item)
@@ -148,15 +147,17 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
 
     with subtests.test(msg="Main links content"):
         assert [
-            {"href": "./collection.json", "rel": "self", "type": "application/json"},
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
             {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"},
         ] == links
 
     with subtests.test():
-        assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
+        assert collection.stac["extent"]["temporal"]["interval"] == [
+            [format_rfc_3339_datetime_string(start_datetime), format_rfc_3339_datetime_string(start_datetime)]
+        ]
 
     with subtests.test():
-        assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
+        assert collection.stac["extent"]["spatial"]["bbox"] == [list(bbox)]
 
     now_string = format_rfc_3339_datetime_string(now)
     for property_name in ["created", "updated"]:
@@ -164,13 +165,13 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
             assert collection.stac[property_name] == now_string
 
         with subtests.test(msg=f"item assets.visual.{property_name}"):
-            assert item.assets["visual"][property_name] == "2001-02-03T04:05:06Z"
+            assert getattr(item.assets["visual"], property_name) == "2001-02-03T04:05:06Z"
 
     with subtests.test(msg="item properties.created"):
-        assert item.properties.created == now_string
+        assert item.properties["created"] == now_string
 
     with subtests.test(msg="item properties.updated"):
-        assert item.properties.updated == now_string
+        assert item.properties["updated"] == now_string
 
 
 def test_write_collection(metadata: CollectionMetadata) -> None:

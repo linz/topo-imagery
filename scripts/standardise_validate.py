@@ -1,12 +1,10 @@
 import argparse
 import os
 import sys
-from dataclasses import asdict
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
-from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
@@ -61,8 +59,6 @@ def main() -> None:
     except InputParameterError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
-    start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
-    end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -116,9 +112,13 @@ def main() -> None:
 
             # Create STAC and save in target
             item = create_item(
-                file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
+                file.get_path_standardised(),
+                arguments.start_datetime,
+                arguments.end_datetime,
+                arguments.collection_id,
+                file.get_gdalinfo(),
             )
-            write(stac_item_path, dict_to_json_bytes(asdict(item)), content_type=ContentType.GEOJSON.value)
+            write(stac_item_path, dict_to_json_bytes(item.to_dict()), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)
 
 

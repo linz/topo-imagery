@@ -1,10 +1,10 @@
 import os
 from collections.abc import Callable
-from dataclasses import asdict
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import ulid
+from pystac import RelType
 from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
@@ -136,12 +136,12 @@ class ImageryCollection:
         Args:
             item: STAC Item to add
         """
-        item_self_link = next((feat for feat in item.links if feat["rel"] == "self"), None)
-        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(asdict(item)))
+        item_self_link = next((feat for feat in item.links if feat.rel == RelType.SELF), None)
+        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(item.to_dict()))
         if item_self_link:
-            self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
-            self.update_temporal_extent(item.properties.start_datetime, item.properties.end_datetime)
-            self.update_spatial_extent(item.bbox)
+            self.add_link(href=item_self_link.href, file_checksum=file_checksum)
+            self.update_temporal_extent(item.properties["start_datetime"], item.properties["end_datetime"])
+            self.update_spatial_extent(cast(BoundingBox, item.bbox))
 
     def add_link(self, href: str, file_checksum: str) -> None:
         """Add a `link` to the existing `links` list of the Collection.

@@ -1,11 +1,13 @@
 import argparse
 import json
 import os
+from typing import cast
 
 import shapely.geometry
 import shapely.ops
 from boto3 import client
 from linz_logger import get_log
+from pystac import read_file
 
 from scripts.cli.cli_helper import coalesce_multi_single, valid_date
 from scripts.datetimes import utc_now
@@ -13,6 +15,7 @@ from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
@@ -126,12 +129,12 @@ def main() -> None:
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
     ):
-        content = json.load(result["Body"])
         # The following if/else looks like it could be avoid by refactoring `list_files_in_uri()`
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
-            if arguments.collection_id != content.get("collection"):
+            item = cast(ImageryItem, read_file(result["Body"]))
+            if arguments.collection_id != item.collection_id:
                 get_log().trace(
                     "skipping: item.collection != collection.id",
                     file=key,
@@ -139,10 +142,11 @@ def main() -> None:
                     reason="skip",
                 )
                 continue
-            collection.add_item(content)
-            get_log().info("item added to collection", item=content["id"], file=key)
+            collection.add_item(item)
+            get_log().info("item added to collection", item=item.id, file=key)
         elif key.endswith(SUFFIX_FOOTPRINT):
             get_log().debug(f"adding geometry from {key}")
+            content = json.load(result["Body"])
             polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
 
     if polygons:
