@@ -1,7 +1,8 @@
+from collections.abc import Generator
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from boto3 import client, resource
 from botocore.exceptions import ClientError
@@ -18,7 +19,7 @@ else:
     S3Client = GetObjectOutputTypeDef = dict
 
 
-def write(destination: str, source: bytes, content_type: Optional[str] = None) -> None:
+def write(destination: str, source: bytes, content_type: str | None = None) -> None:
     """Write a source (bytes) in a AWS s3 destination (path in a bucket).
 
     Args:
@@ -172,7 +173,7 @@ def prefix_from_path(path: str) -> str:
     return path.replace(f"s3://{bucket_name}/", "")
 
 
-def list_files_in_uri(uri: str, suffixes: List[str], s3_client: Optional[S3Client]) -> List[str]:
+def list_files_in_uri(uri: str, suffixes: list[str], s3_client: S3Client | None) -> list[str]:
     """Get a list of file paths from a s3 path based on their suffixes
 
     Args:
@@ -215,8 +216,8 @@ def _get_object(bucket: str, file_name: str, s3_client: S3Client) -> GetObjectOu
 
 
 def get_object_parallel_multithreading(
-    bucket: str, files_to_read: List[str], s3_client: Optional[S3Client], concurrency: int
-) -> Generator[Any, Union[Any, BaseException], None]:
+    bucket: str, files_to_read: list[str], s3_client: S3Client | None, concurrency: int
+) -> Generator[Any, Any | BaseException, None]:
     """Get s3 objects in parallel
 
     Args:
@@ -242,6 +243,6 @@ def get_object_parallel_multithreading(
                 yield key, exception
 
 
-def modified(bucket_name: str, key: str, s3_client: Optional[S3Client]) -> datetime:
+def modified(bucket_name: str, key: str, s3_client: S3Client | None) -> datetime:
     s3_client = s3_client or client("s3")
     return _get_object(bucket_name, key, s3_client)["LastModified"]

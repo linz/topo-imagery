@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Sequence
+from typing import Any, Sequence
 
 from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all
@@ -43,7 +43,7 @@ def get_buffer_distance(gsd: float) -> float:
     return gsd * 2 * DECIMAL_DEGREES_1M
 
 
-def to_feature(geometry: BaseGeometry) -> Dict[str, Any]:
+def to_feature(geometry: BaseGeometry) -> dict[str, Any]:
     """Transform a BaseGeometry to a GeoJSON feature.
 
     Args:
@@ -80,7 +80,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     return union_simplified
 
 
-def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: float) -> Dict[str, Any]:
+def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: float) -> dict[str, Any]:
     """Generate the capture area from a list of BaseGeometries.
     Providing the `gsd` allows to round the geometry as we've seen some tiffs
     geometry being slightly off, sometimes due to rounding issue in their

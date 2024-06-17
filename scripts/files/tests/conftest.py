@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from shutil import rmtree
 from tempfile import mkdtemp
-from typing import Generator
 
 import pytest
 

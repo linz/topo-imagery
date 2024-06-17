@@ -1,7 +1,7 @@
 import argparse
 import os
 import sys
-from typing import List
+from dataclasses import asdict
 
 from linz_logger import get_log
 
@@ -96,12 +96,12 @@ def main() -> None:
                 # If the file is not valid (Non Visual QA errors)
                 # Logs the `vsis3` path to use `gdal` on the file directly from `s3`
                 # This is to help data analysts to verify the file.
-                original_path: List[str] = file.get_paths_original()
+                original_path: list[str] = file.get_paths_original()
                 standardised_path = file.get_path_standardised()
                 env_argo_template = os.environ.get("ARGO_TEMPLATE")
                 if env_argo_template:
                     standardised_path = get_vfs_path(file.get_path_standardised())
-                    original_s3_path: List[str] = []
+                    original_s3_path: list[str] = []
                     for path in original_path:
                         original_s3_path.append(get_vfs_path(path))
                     original_path = original_s3_path
@@ -118,7 +118,7 @@ def main() -> None:
             item = create_item(
                 file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
             )
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+            write(stac_item_path, dict_to_json_bytes(asdict(item)), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)
 
 

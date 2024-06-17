@@ -1,8 +1,8 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 
-def dict_to_json_bytes(input_dict: Dict[str, Any]) -> bytes:
+def dict_to_json_bytes(input_dict: dict[str, Any]) -> bytes:
     """
     Try to convert a `dict` into UTF-8 encoded `bytes` representing a JSON dictionary
 
