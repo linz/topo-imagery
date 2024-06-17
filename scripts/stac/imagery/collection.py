@@ -33,6 +33,11 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 
+CREATED_KEY = "created"
+UPDATED_KEY = "updated"
+MAXIMUM_KEY = "maximum"
+MINIMUM_KEY = "minimum"
+
 
 class ImageryCollection:
     stac: dict[str, Any]
@@ -63,8 +68,8 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
-            "created": now_string,
-            "updated": now_string,
+            CREATED_KEY: now_string,
+            UPDATED_KEY: now_string,
         }
 
         # Optional metadata
@@ -142,6 +147,7 @@ class ImageryCollection:
             self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
             self.update_temporal_extent(item.properties.start_datetime, item.properties.end_datetime)
             self.update_spatial_extent(item.bbox)
+        self.update_summaries(item.properties.created, item.properties.updated)
 
     def add_link(self, href: str, file_checksum: str) -> None:
         """Add a `link` to the existing `links` list of the Collection.
@@ -359,3 +365,22 @@ class ImageryCollection:
             desc = desc + f", published as a record of the {event} event"
 
         return desc + "."
+
+    def update_summaries(self, created: str, updated: str) -> None:
+        summaries = self.stac.setdefault("summaries", {})
+
+        if CREATED_KEY in summaries:
+            summaries[CREATED_KEY] = {
+                MINIMUM_KEY: min(summaries[CREATED_KEY][MINIMUM_KEY], created),
+                MAXIMUM_KEY: max(summaries[CREATED_KEY][MAXIMUM_KEY], created),
+            }
+        else:
+            summaries[CREATED_KEY] = {MINIMUM_KEY: created, MAXIMUM_KEY: created}
+
+        if UPDATED_KEY in summaries:
+            summaries[UPDATED_KEY] = {
+                MINIMUM_KEY: min(summaries[UPDATED_KEY][MINIMUM_KEY], updated),
+                MAXIMUM_KEY: max(summaries[UPDATED_KEY][MAXIMUM_KEY], updated),
+            }
+        else:
+            summaries[UPDATED_KEY] = {MINIMUM_KEY: updated, MAXIMUM_KEY: updated}
