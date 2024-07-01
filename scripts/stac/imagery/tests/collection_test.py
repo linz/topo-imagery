@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import asdict
 from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import TemporaryDirectory, mkdtemp
@@ -138,7 +139,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
         "BR34_5000_0304", item_file_path, now_function, start_datetime, end_datetime, geometry, bbox, collection.stac["id"]
     )
 
-    collection.add_item(item)
+    collection.add_item(asdict(item))
 
     links = collection.stac["links"].copy()
 
