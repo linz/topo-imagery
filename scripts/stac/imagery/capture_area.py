@@ -1,5 +1,6 @@
 import json
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all
@@ -75,7 +76,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     union_buffered = union_all(buffered_polygons)
     # Negative buffer back in the polygons
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
-    union_simplified = union_unbuffered.simplify(buffer_distance)
+    union_simplified = union_unbuffered.simplify(buffer_distance).reverse()
 
     return union_simplified
 
