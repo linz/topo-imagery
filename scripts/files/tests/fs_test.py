@@ -14,6 +14,7 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.files.fs import NoSuchFileError, modified, read, write, write_all, write_sidecars
+from scripts.stac.util.checksum import multihash_as_hex
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
@@ -34,11 +35,30 @@ def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
 
 
 def test_write_all_file_not_found_local() -> None:
-    # Raises an exception as all files are not writte·
+    # Raises an exception as all files are not written
     with raises(Exception) as e:
         write_all(["/test.prj"], "/tmp")
 
     assert str(e.value) == "Not all mandatory source files were written"
+
+
+def test_write_all_in_order(setup: str) -> None:
+
+    path1 = Path(os.path.join(setup, "file1.tif"))
+    path2 = Path(os.path.join(setup, "file2.tif"))
+    path1.write_text("this file will be a little larger and contain some text")
+    path2.touch()
+    path1string = path1.as_posix()
+    path2string = path2.as_posix()
+
+    written_files = write_all(inputs=[path1string, path2string], target="/tmp", generate_name=False)
+
+    i = 0
+    while i < 100:
+        written_files = write_all(inputs=[path1string, path2string], target="/tmp", generate_name=False)
+        print(written_files)
+        assert written_files == ['/tmp/file1.tif', '/tmp/file2.tif']
+        i += 1
 
 
 def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> None:
