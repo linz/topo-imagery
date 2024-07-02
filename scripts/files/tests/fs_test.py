@@ -43,15 +43,12 @@ def test_write_all_file_not_found_local() -> None:
 
 
 def test_write_all_in_order(setup: str) -> None:
-
     path1 = Path(os.path.join(setup, "file1.tif"))
     path2 = Path(os.path.join(setup, "file2.tif"))
     path1.write_text("this file will be a little larger and contain some text")
     path2.touch()
     path1string = path1.as_posix()
     path2string = path2.as_posix()
-
-    written_files = write_all(inputs=[path1string, path2string], target="/tmp", generate_name=False)
 
     i = 0
     while i < 100:
