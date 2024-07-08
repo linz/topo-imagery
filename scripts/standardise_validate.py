@@ -1,7 +1,6 @@
 import argparse
 import os
 import sys
-from dataclasses import asdict
 
 from linz_logger import get_log
 
@@ -118,7 +117,7 @@ def main() -> None:
             item = create_item(
                 file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
             )
-            write(stac_item_path, dict_to_json_bytes(asdict(item)), content_type=ContentType.GEOJSON.value)
+            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)
 
 

@@ -11,7 +11,6 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
-from scripts.stac.imagery.item import BoundingBox
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
@@ -161,7 +160,7 @@ class ImageryCollection:
         for p in providers:
             self.stac["providers"].append(p)
 
-    def update_spatial_extent(self, item_bbox: BoundingBox) -> None:
+    def update_spatial_extent(self, item_bbox: list[float]) -> None:
         """Update (if needed) the Collection spatial extent from a bounding box.
 
         Args:
@@ -181,7 +180,7 @@ class ImageryCollection:
         max_x = max(bbox[0], bbox[2], item_bbox[0], item_bbox[2])
         max_y = max(bbox[1], bbox[3], item_bbox[1], item_bbox[3])
 
-        self.update_extent(bbox=(min_x, min_y, max_x, max_y))
+        self.update_extent(bbox=[min_x, min_y, max_x, max_y])
 
     def update_temporal_extent(self, item_start_datetime: str, item_end_datetime: str) -> None:
         """Update (if needed) the temporal extent of the collection.
@@ -216,7 +215,7 @@ class ImageryCollection:
             ]
         )
 
-    def update_extent(self, bbox: BoundingBox | None = None, interval: list[str] | None = None) -> None:
+    def update_extent(self, bbox: list[float] | None = None, interval: list[str] | None = None) -> None:
         """Update an extent of the Collection whereas it's spatial or temporal.
 
         Args:

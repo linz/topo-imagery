@@ -1,10 +1,9 @@
 from shapely.geometry import Polygon
 
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.item import BoundingBox
 
 
-def get_extents(gdalinfo_result: GdalInfo) -> tuple[dict[str, list[list[list[float]]]], BoundingBox]:
+def get_extents(gdalinfo_result: GdalInfo) -> tuple[dict[str, list[list[list[float]]]], tuple[float, float, float, float]]:
     """Get the geometry and bounding box from the `gdalinfo`.
 
     Args:
