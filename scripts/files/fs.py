@@ -1,5 +1,5 @@
 import os
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -105,14 +105,18 @@ def write_all(inputs: list[str], target: str, concurrency: int | None = 4, gener
     Returns:
         list of written file paths
     """
+    results: list[Future] = []  # type: ignore
     written_tiffs: list[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futuress = {write_file(executor, input_, target, generate_name): input_ for input_ in inputs}
-        for future in as_completed(futuress):
-            if future.exception():
-                get_log().warn("Failed Read-Write", error=future.exception())
-            else:
-                written_tiffs.append(future.result())
+        for input_ in inputs:
+            results.append(executor.submit(write_file, input_, target, generate_name))
+
+    for future in results:
+        print(future.exception())
+        if future.exception():
+            get_log().warn("Failed Read-Write", error=future.exception())
+        else:
+            written_tiffs.append(future.result())
 
     if len(inputs) != len(written_tiffs):
         get_log().error("Missing Files", count=len(inputs) - len(written_tiffs))
@@ -130,26 +134,29 @@ def write_sidecars(inputs: list[str], target: str, concurrency: int | None = 4) 
         target: target folder to write to
         concurrency: max thread pool workers
     """
+    results: list[Future] = []  # type: ignore
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        results = {write_file(executor, input_, target): input_ for input_ in inputs}
-        for future in as_completed(results):
-            future_ex = future.exception()
-            if isinstance(future_ex, NoSuchFileError):
-                get_log().info("No sidecar file found; skipping", path=future_ex.path)
-            else:
-                get_log().info("wrote_sidecar_file", path=future.result())
+        for input_ in inputs:
+            results.append(executor.submit(write_file, input_, target))
+
+    for future in results:
+        print("hello")
+        future_ex = future.exception()
+        if isinstance(future_ex, NoSuchFileError):
+            get_log().info("No sidecar file found; skipping", error="future.exception()")
+        else:
+            get_log().info("wrote_sidecar_file", path=future.result())
 
 
-def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_name: bool | None = True) -> Future[str]:
+def write_file(input_: str, target: str, generate_name: bool | None = True) -> str:
     """Read a file from a path and write it to a target path.
     Args:
-        executor: A ThreadPoolExecutor instance.
-        input_: A path to a file to read.
+        input: A path to a file to read.
         target: A path to write the file to.
         generate_name: create a target file name based on multihash the source filename
 
     Returns:
-        Future[str]: The result of the execution.
+        str: Target file name.
     """
     get_log().info(f"Trying write from file: {input_}")
 
@@ -159,12 +166,7 @@ def write_file(executor: ThreadPoolExecutor, input_: str, target: str, generate_
     else:
         target_file_name = os.path.basename(input_)
 
-    try:
-        return executor.submit(copy, input_, os.path.join(target, target_file_name))
-    except NoSuchFileError as nsfe:
-        future: Future[str] = Future()
-        future.set_exception(nsfe)
-        return future
+    return copy(input_, os.path.join(target, target_file_name))
 
 
 class NoSuchFileError(Exception):
