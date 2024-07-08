@@ -112,7 +112,6 @@ def write_all(inputs: list[str], target: str, concurrency: int | None = 4, gener
             results.append(executor.submit(write_file, input_, target, generate_name))
 
     for future in results:
-        print(future.exception())
         if future.exception():
             get_log().warn("Failed Read-Write", error=future.exception())
         else:
@@ -140,7 +139,6 @@ def write_sidecars(inputs: list[str], target: str, concurrency: int | None = 4) 
             results.append(executor.submit(write_file, input_, target))
 
     for future in results:
-        print("hello")
         future_ex = future.exception()
         if isinstance(future_ex, NoSuchFileError):
             get_log().info("No sidecar file found; skipping", error="future.exception()")
