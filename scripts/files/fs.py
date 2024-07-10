@@ -141,7 +141,7 @@ def write_sidecars(inputs: list[str], target: str, concurrency: int | None = 4) 
     for future in results:
         future_ex = future.exception()
         if isinstance(future_ex, NoSuchFileError):
-            get_log().info("No sidecar file found; skipping", error="future.exception()")
+            get_log().info("No sidecar file found; skipping", error=future.exception())
         else:
             get_log().info("wrote_sidecar_file", path=future.result())
 
