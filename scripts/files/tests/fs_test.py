@@ -92,9 +92,12 @@ def test_write_sidecars_one_found(capsys: CaptureFixture[str], subtests: SubTest
 def test_write_all_in_order(setup: str) -> None:
     inputs: list[str] = []
     i = 0
-    while i < 20:
+    while i < 10:
         path = Path(os.path.join(setup, str(i)))
-        path.touch()
+        if i % 2 == 0:
+            path.write_text("a" * 1000 * 1000)  # 1MB
+        else:
+            path.touch()
         inputs.append(path.as_posix())
         i += 1
     written_files = write_all(inputs=inputs, target=setup, generate_name=False)
