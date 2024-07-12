@@ -102,7 +102,7 @@ def test_write_all_in_order(setup: str) -> None:
         inputs.append(path.as_posix())
         i += 1
     written_files = write_all(inputs=inputs, target=setup, generate_name=False)
-    assert written_files != inputs
+    assert written_files == inputs
 
 
 @mock_aws
