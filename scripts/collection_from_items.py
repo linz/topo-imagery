@@ -134,7 +134,7 @@ def main() -> None:
         if key.endswith(SUFFIX_JSON):
             if arguments.collection_id != content.get("collection"):
                 get_log().warn(
-                    "skipping: item.collection != collection.id",
+                    "skipping: item.collection and collection.id do not match",
                     file=key,
                     action="collection_from_items",
                     reason="skip",
@@ -148,21 +148,25 @@ def main() -> None:
 
     if polygons:
         collection.add_capture_area(polygons, uri)
+        get_log().info(
+            "Capture area created",
+        )
 
     item_match_count = [dictionary["rel"] for dictionary in collection.stac["links"]].count("item")
 
-    if item_match_count:
-        get_log().info(
-            "Matching items added to collection and capture-area created",
-            item_count=len(files_to_read),
-            item_match_count=item_match_count,
-            duration=time_in_ms() - start_time,
-        )
-    else:
+    if not item_match_count:
         get_log().error(
             "No items were added to collection",
         )
         raise Exception(f"Collection {collection.stac['id']} has no items")
+
+    get_log().info(
+        "Matching items added to collection",
+        item_count=len(files_to_read),
+        item_match_count=item_match_count,
+        duration=time_in_ms() - start_time,
+    )
+
     destination = os.path.join(uri, "collection.json")
     collection.write_to(destination)
     get_log().info("collection written", destination=destination)
