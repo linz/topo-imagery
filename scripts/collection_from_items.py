@@ -18,6 +18,7 @@ from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
@@ -132,7 +133,7 @@ def main() -> None:
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
             if arguments.collection_id != content.get("collection"):
-                get_log().trace(
+                get_log().warn(
                     "skipping: item.collection != collection.id",
                     file=key,
                     action="collection_from_items",
@@ -148,13 +149,20 @@ def main() -> None:
     if polygons:
         collection.add_capture_area(polygons, uri)
 
-    get_log().info(
-        "Matching items added to collection and capture-area created",
-        item_count=len(files_to_read),
-        item_match_count=[dictionary["rel"] for dictionary in collection.stac["links"]].count("item"),
-        duration=time_in_ms() - start_time,
-    )
+    item_match_count = [dictionary["rel"] for dictionary in collection.stac["links"]].count("item")
 
+    if item_match_count:
+        get_log().info(
+            "Matching items added to collection and capture-area created",
+            item_count=len(files_to_read),
+            item_match_count=item_match_count,
+            duration=time_in_ms() - start_time,
+        )
+    else:
+        get_log().error(
+            "No items were added to collection",
+        )
+        raise Exception(f"Collection {collection.stac['id']} has no items")
     destination = os.path.join(uri, "collection.json")
     collection.write_to(destination)
     get_log().info("collection written", destination=destination)
