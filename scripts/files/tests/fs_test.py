@@ -89,6 +89,22 @@ def test_write_sidecars_one_found(capsys: CaptureFixture[str], subtests: SubTest
     rmtree(target)
 
 
+def test_write_all_in_order(setup: str) -> None:
+    inputs: list[str] = []
+    file_contents = "a" * 1000 * 1000
+    i = 0
+    while i < 10:
+        path = Path(os.path.join(setup, str(i)))
+        if i % 2 == 0:
+            path.write_text(file_contents, encoding="utf-8")  # 1MB
+        else:
+            path.touch()
+        inputs.append(path.as_posix())
+        i += 1
+    written_files = write_all(inputs=inputs, target=setup, generate_name=False)
+    assert written_files == inputs
+
+
 @mock_aws
 def test_should_get_s3_object_modified_datetime() -> None:
     bucket_name = "any-bucket-name"
