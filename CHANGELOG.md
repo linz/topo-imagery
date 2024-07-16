@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.9.0](https://github.com/linz/topo-imagery/compare/v4.8.0...v4.9.0) (2024-07-16)
+
+
+### Features
+
+* Add Shapely type library TDE-1205 ([#988](https://github.com/linz/topo-imagery/issues/988)) ([f5e97e7](https://github.com/linz/topo-imagery/commit/f5e97e779c61246aadf99bbb4cf9538ffcb5a981))
+* use new pull request template ([#999](https://github.com/linz/topo-imagery/issues/999)) ([9a6a0b2](https://github.com/linz/topo-imagery/commit/9a6a0b2971934a03607876c51feb8435ec985e00))
+
+
+### Bug Fixes
+
+* concurrency file order TDE-1213 ([#998](https://github.com/linz/topo-imagery/issues/998)) ([37dcb8b](https://github.com/linz/topo-imagery/commit/37dcb8b49d9a0cf45dcc6d0ce3011a4d6016e9e7))
+* Treat item as `dict` TDE-1209 ([#993](https://github.com/linz/topo-imagery/issues/993)) ([384d0fc](https://github.com/linz/topo-imagery/commit/384d0fc674ce8fe4f1ff8726362881887a68522f))
+
+
+### Reverts
+
+* Pull Requests [#993](https://github.com/linz/topo-imagery/issues/993) and [#985](https://github.com/linz/topo-imagery/issues/985) ([#997](https://github.com/linz/topo-imagery/issues/997)) ([289880c](https://github.com/linz/topo-imagery/commit/289880c6886a2bbe6908feb2924aa68f1a7750a8))
+
 ## [4.8.0](https://github.com/linz/topo-imagery/compare/v4.7.1...v4.8.0) (2024-06-09)
 
 
