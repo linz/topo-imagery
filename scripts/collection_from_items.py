@@ -132,9 +132,12 @@ def main() -> None:
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
-            if arguments.collection_id != content.get("collection"):
+            collection_id = arguments.collection_id
+            item_collection_id = content.get("collection")
+            print(arguments.collection_id, content.get("collection"))
+            if collection_id != item_collection_id:
                 get_log().warn(
-                    "skipping: item.collection and collection.id do not match",
+                    f"skipping: item collection id {item_collection_id} and collection id {collection_id} do not match",
                     file=key,
                     action="collection_from_items",
                     reason="skip",
