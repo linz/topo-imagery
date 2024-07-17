@@ -17,6 +17,7 @@ from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READA
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+# TODO: Refactor this function to avoid these pylint disable comments and improve testability
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
 def main() -> None:
