@@ -120,6 +120,8 @@ def main() -> None:
 
     s3_client = client("s3")
 
+    collection_id = collection.stac["id"]
+
     files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
 
     start_time = time_in_ms()
@@ -132,12 +134,18 @@ def main() -> None:
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
-            collection_id = arguments.collection_id
+            if content["type"] != "Feature":
+                get_log().warn(
+                    "skipping: not a STAC item",
+                    file=key,
+                    action="collection_from_items",
+                    reason="skip",
+                )
+                continue
             item_collection_id = content.get("collection")
-            print(arguments.collection_id, content.get("collection"))
             if collection_id != item_collection_id:
                 get_log().warn(
-                    f"skipping: item collection id {item_collection_id} and collection id {collection_id} do not match",
+                    f"skipping: {item_collection_id} and {collection_id} do not match",
                     file=key,
                     action="collection_from_items",
                     reason="skip",
@@ -159,9 +167,9 @@ def main() -> None:
 
     if not item_match_count:
         get_log().error(
-            "No items were added to collection",
+            f"Collection {collection_id} has no items",
         )
-        raise Exception(f"Collection {collection.stac['id']} has no items")
+        raise Exception(f"Collection {collection_id} has no items")
 
     get_log().info(
         "Matching items added to collection",
