@@ -4,6 +4,7 @@ from typing import Any, Sequence
 from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all
 from shapely.geometry.base import BaseGeometry
+from shapely.ops import orient
 
 from scripts.logging.time_helper import time_in_ms
 
@@ -76,8 +77,11 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     # Negative buffer back in the polygons
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
     union_simplified = union_unbuffered.simplify(buffer_distance)
+    # Apply right-hand rule winding order (exterior rings should be counter-clockwise) to the geometry
+    # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
+    oriented_union_simplified = orient(union_simplified, sign=1.0)
 
-    return union_simplified
+    return oriented_union_simplified
 
 
 def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: float) -> dict[str, Any]:
