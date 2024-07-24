@@ -1,5 +1,7 @@
+from typing import cast
+
 from shapely import get_exterior_ring, is_ccw
-from shapely.geometry import Polygon, shape
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
@@ -151,7 +153,7 @@ def test_capture_area_orientation_polygon() -> None:
 
 def test_capture_area_orientation_multipolygon() -> None:
     # Test the orientation of the capture area
-    # The multipolygon capture area should be the same as the polygon and not reversed
+    # The multipolygon capture area polygons should be the same as the polygon and not reversed
     polygons = []
     polygons.append(
         shape(
@@ -185,4 +187,5 @@ def test_capture_area_orientation_multipolygon() -> None:
         )
     )
     capture_area = generate_capture_area(polygons, 0.05)
-    assert is_ccw(get_exterior_ring(shape(capture_area["geometry"]).geoms[0]))
+    mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
+    assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
