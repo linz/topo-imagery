@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import sys
 from argparse import Namespace
 from typing import List
 
@@ -88,7 +87,7 @@ def parse_args(args: List[str] | None) -> Namespace:
     )
 
     return parser.parse_args(args)
-    
+
 
 # pylint: disable=too-many-locals
 def main(args: List[str] | None = None) -> None:
