@@ -29,9 +29,32 @@ def test_should_create_collection_file() -> None:
     item.add_collection("abc")
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
     # CLI arguments
-    args = ['--uri', 's3://stacfiles/', '--collection-id',  'abc', '--category', 'urban-aerial-photos', '--region', 'hawkes-bay', '--gsd', '1m', '--start-date', '2023-09-20', '--end-date', '2023-09-20', '--lifecycle', 'ongoing', '--producer', 'Placeholder', '--licensor', 'Placeholder', '--concurrency', '25']
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--start-date",
+        "2023-09-20",
+        "--end-date",
+        "2023-09-20",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
     # Call script's main function
     main(args)
     # Verify collection.json has been created
     resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
-    assert '"type": "Collection"' in resp["Body"].read().decode('utf-8')
+    assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
