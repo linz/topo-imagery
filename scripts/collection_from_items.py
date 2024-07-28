@@ -93,7 +93,6 @@ def parse_args(args: List[str] | None) -> Namespace:
 def main(args: List[str] | None = None) -> None:
     arguments = parse_args(args)
     uri = arguments.uri
-    print(arguments.start_date)
 
     providers: list[Provider] = []
     for producer_name in coalesce_multi_single(arguments.producer_list, arguments.producer):
