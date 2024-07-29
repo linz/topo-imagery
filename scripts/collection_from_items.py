@@ -19,6 +19,10 @@ from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READA
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+class NoItemsError(Exception):
+    pass
+
+
 def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
@@ -125,6 +129,8 @@ def main(args: List[str] | None = None) -> None:
 
     s3_client = client("s3")
 
+    collection_id = collection.stac["id"]
+
     files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
 
     start_time = time_in_ms()
@@ -137,9 +143,18 @@ def main(args: List[str] | None = None) -> None:
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
-            if arguments.collection_id != content.get("collection"):
-                get_log().trace(
-                    "skipping: item.collection != collection.id",
+            if content["type"] != "Feature":
+                get_log().warn(
+                    "skipping: not a STAC item",
+                    file=key,
+                    action="collection_from_items",
+                    reason="skip",
+                )
+                continue
+            item_collection_id = content.get("collection")
+            if collection_id != item_collection_id:
+                get_log().warn(
+                    f"skipping: {item_collection_id} and {collection_id} do not match",
                     file=key,
                     action="collection_from_items",
                     reason="skip",
@@ -153,11 +168,22 @@ def main(args: List[str] | None = None) -> None:
 
     if polygons:
         collection.add_capture_area(polygons, uri)
+        get_log().info(
+            "Capture area created",
+        )
+
+    item_match_count = [dictionary["rel"] for dictionary in collection.stac["links"]].count("item")
+
+    if not item_match_count:
+        get_log().error(
+            f"Collection {collection_id} has no items",
+        )
+        raise NoItemsError(f"Collection {collection_id} has no items")
 
     get_log().info(
-        "Matching items added to collection and capture-area created",
+        "Matching items added to collection",
         item_count=len(files_to_read),
-        item_match_count=[dictionary["rel"] for dictionary in collection.stac["links"]].count("item"),
+        item_match_count=item_match_count,
         duration=time_in_ms() - start_time,
     )
 
