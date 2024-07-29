@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.10.0](https://github.com/linz/topo-imagery/compare/v4.9.0...v4.10.0) (2024-07-29)
+
+
+### Features
+
+* More types ([#989](https://github.com/linz/topo-imagery/issues/989)) ([3f7cd57](https://github.com/linz/topo-imagery/commit/3f7cd571e837ce3d8a8528f181b181d41549dd14))
+
+
+### Bug Fixes
+
+* capture area winding order TDE-1205 ([#1008](https://github.com/linz/topo-imagery/issues/1008)) ([61be096](https://github.com/linz/topo-imagery/commit/61be096bc9af997933ef6bee6cd72d441d350bc7))
+* error on collection with no items TDE-1216 ([#1000](https://github.com/linz/topo-imagery/issues/1000)) ([d351d85](https://github.com/linz/topo-imagery/commit/d351d85f42fd096628b65629f8be30a5f617d920))
+
 ## [4.9.0](https://github.com/linz/topo-imagery/compare/v4.8.0...v4.9.0) (2024-07-16)
 
 
