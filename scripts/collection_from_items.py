@@ -19,6 +19,10 @@ from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READA
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
+class NoItemsError(Exception):
+    pass
+
+
 def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
@@ -174,7 +178,7 @@ def main(args: List[str] | None = None) -> None:
         get_log().error(
             f"Collection {collection_id} has no items",
         )
-        raise Exception(f"Collection {collection_id} has no items")
+        raise NoItemsError(f"Collection {collection_id} has no items")
 
     get_log().info(
         "Matching items added to collection",

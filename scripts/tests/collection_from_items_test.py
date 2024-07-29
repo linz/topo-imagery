@@ -1,20 +1,24 @@
+from collections.abc import Generator
+from datetime import datetime
+
+import pytest
 from boto3 import client, resource
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
+from pytest import CaptureFixture, raises
+from pytest_subtests import SubTests
 
-from scripts.collection_from_items import main
+from scripts.collection_from_items import NoItemsError, main
 from scripts.datetimes import utc_now
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-@mock_aws
-def test_should_create_collection_file() -> None:
-    # Mock AWS S3
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="stacfiles")
+@pytest.fixture(name="item", autouse=True)
+def setup() -> Generator[ImageryItem, None, None]:
     # Create mocked STAC Item
     item = ImageryItem("123", "./scripts/tests/data/empty.tiff", utc_now)
     geometry = {
@@ -26,6 +30,15 @@ def test_should_create_collection_file() -> None:
     end_datetime = "2021-01-27T00:00:00Z"
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
+    yield item
+
+
+@mock_aws
+def test_should_create_collection_file(item: ImageryItem) -> None:
+    # Mock AWS S3
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
     # CLI arguments
@@ -55,6 +68,108 @@ def test_should_create_collection_file() -> None:
     ]
     # Call script's main function
     main(args)
+
     # Verify collection.json has been created
     resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
     assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
+
+
+@mock_aws
+def test_should_fail_if_collection_has_no_matching_items(
+    item: ImageryItem, capsys: CaptureFixture[str], subtests: SubTests
+) -> None:
+    # Mock AWS S3
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="stacfiles")
+    item_collection_id = "abc"
+    item.add_collection(item_collection_id)
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    # CLI arguments
+    # collection ID is `def` <> `abc`
+    collection_id = "def"
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        collection_id,
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--start-date",
+        "2023-09-20",
+        "--end-date",
+        "2023-09-20",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
+    # Call script's main function
+    with raises(NoItemsError):
+        main(args)
+
+    logs = capsys.readouterr().out
+
+    with subtests.test(msg="Collection IDs do not match"):
+        assert f"skipping: {item_collection_id} and {collection_id} do not match" in logs
+
+    assert f"Collection {collection_id} has no items" in logs
+
+
+@mock_aws
+def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
+    # Mock AWS S3
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="stacfiles")
+    collection_id = "abc"
+    # Create mocked "existing" Collection
+    metadata: CollectionMetadata = {
+        "category": "urban-aerial-photos",
+        "region": "hawkes-bay",
+        "gsd": "1m",
+        "start_datetime": datetime(2023, 9, 20),
+        "end_datetime": datetime(2023, 9, 20),
+        "lifecycle": "ongoing",
+        "event_name": None,
+        "geographic_description": None,
+        "historic_survey_number": None,
+    }
+    existing_collection = ImageryCollection(metadata, utc_now, collection_id)
+    write("s3://stacfiles/collection.json", dict_to_json_bytes(existing_collection.stac))
+    # CLI arguments
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        collection_id,
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--start-date",
+        "2023-09-20",
+        "--end-date",
+        "2023-09-20",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
+    # Call script's main function
+    with raises(NoItemsError):
+        main(args)
+
+    assert "skipping: not a STAC item" in capsys.readouterr().out
