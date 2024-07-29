@@ -310,8 +310,7 @@ def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) ->
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "1220b15694be7495af38e0f70af67cfdc4f19b8bc415a2eb77d780e7a32c6e5b42c2",  # geos 3.11
-            "122040fc8700d5d2d04600f730e10677b19d33f3b1e43b02c7867f4cfc2101930863",  # geos 3.12
+            "1220369cd5d4179f5f68ca0fd9be70b9f66033fcc6bb2f3305c0ad977adc79d7ad53",  # geos 3.11 - geos 3.12 as yet untested
         )
 
     with subtests.test():

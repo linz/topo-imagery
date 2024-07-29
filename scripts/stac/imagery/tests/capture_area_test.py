@@ -1,4 +1,7 @@
-from shapely.geometry import Polygon
+from typing import cast
+
+from shapely import get_exterior_ring, is_ccw
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
@@ -121,3 +124,68 @@ def test_generate_capture_area_not_rounded() -> None:
     # This gap should not be covered in the capture-area
     # as the GSD is 0.2m * a buffer of 2 * 2 < 0.88m
     assert capture_area_expected != capture_area_result
+
+
+def test_capture_area_orientation_polygon() -> None:
+    # Test the orientation of the capture area
+    # The polygon capture area should be the same as the polygon and not reversed
+    polygons = []
+    polygons.append(
+        shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [174.673418475601466, -37.051277768264598],
+                            [174.673425023818197, -37.051550327851878],
+                            [174.673479832051271, -37.051280958541774],
+                            [174.673418475601466, -37.051277768264598],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    capture_area = generate_capture_area(polygons, 0.05)
+    assert is_ccw(get_exterior_ring(shape(capture_area["geometry"])))
+
+
+def test_capture_area_orientation_multipolygon() -> None:
+    # Test the orientation of the capture area
+    # The multipolygon capture area polygons should be the same as the polygon and not reversed
+    polygons = []
+    polygons.append(
+        shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [175.01786467173446, -36.80914409510033],
+                            [175.0154395531313, -36.80918523526587],
+                            [175.01524959114974, -36.80950706997984],
+                            [175.01312143626905, -36.81369683085496],
+                            [175.01801611134528, -36.81491172712502],
+                            [175.01786467173446, -36.80914409510033],
+                        ]
+                    ],
+                    [
+                        [
+                            [174.99635270693256, -36.809507300287486],
+                            [174.99160937900407, -36.80958686195598],
+                            [174.9916815185804, -36.80966722253352],
+                            [174.9909875028488, -36.810093453911804],
+                            [174.99113976763834, -36.815970642382126],
+                            [174.99336131537976, -36.81582975812777],
+                            [174.99645096077896, -36.81328982536313],
+                            [174.99635270693256, -36.809507300287486],
+                        ]
+                    ],
+                ],
+            }
+        )
+    )
+    capture_area = generate_capture_area(polygons, 0.05)
+    mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
+    assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))

@@ -1,6 +1,8 @@
 import argparse
 import json
 import os
+from argparse import Namespace
+from typing import List
 
 import shapely.geometry
 import shapely.ops
@@ -17,10 +19,7 @@ from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READA
 from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
-# TODO: Refactor this function to avoid these pylint disable comments and improve testability
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-statements
-def main() -> None:
+def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
@@ -87,7 +86,12 @@ def main() -> None:
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
 
-    arguments = parser.parse_args()
+    return parser.parse_args(args)
+
+
+# pylint: disable=too-many-locals
+def main(args: List[str] | None = None) -> None:
+    arguments = parse_args(args)
     uri = arguments.uri
 
     providers: list[Provider] = []
