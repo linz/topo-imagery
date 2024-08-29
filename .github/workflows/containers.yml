@@ -72,7 +72,7 @@ jobs:
             const tags = [];
             if ('${{github.event.label.name}}' == 'container') {
               tags.push('ghcr.io/${{ github.repository }}:pr-${{github.event.number}}');
-            } else{
+            } else {
               tags.push('ghcr.io/${{ github.repository }}:latest');
               tags.push('ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}'); 
             }
