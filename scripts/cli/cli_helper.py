@@ -38,7 +38,7 @@ def get_tile_files(source: str) -> list[TileFiles]:
 
     Example:
         >>> get_tile_files('[{"output": "CE16_5000_1001", "input": ["s3://bucket/SN9457_CE16_10k_0501.tif"]}]')
-        [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'])]
+        [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'], includeDerived=False)]
     """
     try:
         source_json: list[TileFiles] = json.loads(
