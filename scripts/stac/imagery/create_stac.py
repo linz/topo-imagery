@@ -16,7 +16,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: GdalInfo | None = None,
-    derived_from: Optional[List[str]] = [], # FIXME
+    derived_from: Optional[List[str]] = [],  # FIXME
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
