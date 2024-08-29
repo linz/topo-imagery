@@ -115,7 +115,12 @@ def main() -> None:
 
             # Create STAC and save in target
             item = create_item(
-                file.get_path_standardised(), start_datetime, end_datetime, arguments.collection_id, file.get_gdalinfo()
+                file.get_path_standardised(),
+                start_datetime,
+                end_datetime,
+                arguments.collection_id,
+                file.get_gdalinfo(),
+                derived_from=file.get_derived_from(),
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)

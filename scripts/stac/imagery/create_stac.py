@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from linz_logger import get_log
 
 from scripts.datetimes import utc_now
@@ -14,6 +16,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: GdalInfo | None = None,
+    derived_from: Optional[List[str]] = [], # FIXME
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -38,6 +41,10 @@ def create_item(
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
+
+    for derived in derived_from:
+        # TODO: add checksum and maybe created datetime and updated datetime
+        item.add_link(rel="derived_from", href=derived)
 
     get_log().info("ImageryItem created", path=file)
     return item

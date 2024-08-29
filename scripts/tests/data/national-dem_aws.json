@@ -1,0 +1,11 @@
+[
+  {
+    "output": "BR20",
+    "input": [
+      "s3://nz-elevation/west-coast/west-coast_2020-2022/dem_1m/2193/BR20_10000_0401.tiff",
+      "s3://nz-elevation/west-coast/west-coast_2020-2022/dem_1m/2193/BR20_10000_0402.tiff",
+      "s3://nz-elevation/west-coast/west-coast_2020-2022/dem_1m/2193/BR20_10000_0403.tiff"
+    ],
+    "includeDerived": true
+  }
+]
