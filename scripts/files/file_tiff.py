@@ -41,6 +41,7 @@ class FileTiff:
             paths_original.append(unquote(p))
 
         self._paths_original = paths_original
+        self._derived_from = []
         if include_derived:
             self._derived_from = [f"{os.path.splitext(path)[0]}.json" for path in paths_original]
         self._path_standardised = ""

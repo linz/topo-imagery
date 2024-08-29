@@ -16,7 +16,7 @@ def test_get_tile_files(subtests: SubTests) -> None:
 
     with subtests.test():
         assert expected_input_filenames == source[0].inputs
-    
+
     with subtests.test():
         assert source[0].includeDerived is False
 
