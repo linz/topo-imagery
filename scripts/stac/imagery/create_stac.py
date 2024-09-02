@@ -2,10 +2,13 @@ from linz_logger import get_log
 
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
+from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.link import Link, Relation
+from scripts.stac.util.media_type import StacMediaType
 
 
 def create_item(
@@ -42,8 +45,7 @@ def create_item(
     item.add_collection(collection_id)
 
     for derived in derived_from:
-        # TODO: add checksum and maybe created datetime and updated datetime
-        item.add_link(rel="derived_from", href=derived)
+        item.add_link(Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=read(derived)))
 
     get_log().info("ImageryItem created", path=file)
     return item

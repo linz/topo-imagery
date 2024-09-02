@@ -25,8 +25,10 @@ from scripts.stac.imagery.metadata_constants import (
     SubtypeParameterError,
 )
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
@@ -135,21 +137,17 @@ class ImageryCollection:
             item: STAC Item to add
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
-        file_checksum = checksum.multihash_as_hex(dict_to_json_bytes(item))
         if item_self_link:
-            self.add_link(href=item_self_link["href"], file_checksum=file_checksum)
+            self.stac["links"].append(
+                Link(
+                    path=item_self_link["href"],
+                    rel=Relation.ITEM,
+                    media_type=StacMediaType.JSON,
+                    file_content=dict_to_json_bytes(item),
+                ).stac
+            )
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
-
-    def add_link(self, href: str, file_checksum: str) -> None:
-        """Add a `link` to the existing `links` list of the Collection.
-
-        Args:
-            href: path
-            file_checksum: Optional checksum of file.
-        """
-        link = {"rel": "item", "href": href, "type": "application/json", "file:checksum": file_checksum}
-        self.stac["links"].append(link)
 
     def add_providers(self, providers: list[Provider]) -> None:
         """Add a list of Providers to the existing list of `providers` of the Collection.
