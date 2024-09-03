@@ -16,8 +16,8 @@ def create_item(
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
-    derived_from: list[str],
     gdalinfo_result: GdalInfo | None = None,
+    derived_from: list[str] | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -26,8 +26,8 @@ def create_item(
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
-        derived_from: list of STAC Items from where this Item is derived
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
+        derived_from: list of STAC Items from where this Item is derived. Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
@@ -44,8 +44,11 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    for derived in derived_from:
-        item.add_link(Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=read(derived)))
+    if derived_from is not None:
+        for derived in derived_from:
+            item.add_link(
+                Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=read(derived))
+            )
 
     get_log().info("ImageryItem created", path=file)
     return item

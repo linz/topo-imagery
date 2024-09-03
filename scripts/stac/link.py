@@ -36,6 +36,6 @@ class Link:
             "rel": rel,
             "type": media_type,
         }
-           
+
         if file_content:
             self.stac["file:checksum"] = checksum.multihash_as_hex(file_content)
