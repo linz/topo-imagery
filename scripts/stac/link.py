@@ -13,8 +13,7 @@ class Relation(str, Enum):
     COLLECTION = "collection"
     ITEM = "item"
     DERIVED_FROM = "derived_from"
-    """ TODO: Explain where `derived_from` comes from. 
-    It is not in https://www.iana.org/assignments/link-relations/link-relations.xhtml nor in the stac-spec"""
+    """ https://github.com/radiantearth/stac-spec/blob/master/best-practices.md#derived-from-relation-derived_from"""
 
 
 # pylint: disable=too-few-public-methods
