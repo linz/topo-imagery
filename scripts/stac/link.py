@@ -24,7 +24,7 @@ class Link:
         path: A string that represents the actual link in the format of an URL.
         rel: A string that represents the relationship that the link has to the object it will be added to.
         media_type: `StacMediaType` of the link file.
-        file_content: The content of the file that will be used to store the checksum in `file:checksum`.
+        file_content: Optional. The content of the file that will be used to store the checksum in `file:checksum`.
         It assumes using the STAC `file` extension.
     """
 
