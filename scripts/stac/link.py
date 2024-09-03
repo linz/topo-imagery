@@ -30,7 +30,7 @@ class Link:
 
     stac: dict[str, str]
 
-    def __init__(self, path: str, rel: str, media_type: StacMediaType | None, file_content: bytes | None = None) -> None:
+    def __init__(self, path: str, rel: str, media_type: StacMediaType, file_content: bytes | None = None) -> None:
         self.stac = {
             "href": path,
             "rel": rel,
