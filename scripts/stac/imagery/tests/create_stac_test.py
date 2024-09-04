@@ -13,11 +13,11 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
     )
 
     item = create_item(
-        "./scripts/tests/data/empty.tiff", "2024-01-01", "2024-01-02", "abc123", fake_gdal_info, [f"{derived_from_path}"]
+        "./scripts/tests/data/empty.tiff", "2024-01-01", "2024-01-02", "abc123", fake_gdal_info, [derived_from_path.as_posix()]
     )
 
     assert {
-        "href": f"{derived_from_path}",
+        "href": derived_from_path.as_posix(),
         "rel": "derived_from",
         "type": "application/json",
         "file:checksum": "12208010297a79dc2605d99cde3d1ca63f72647637529ef6eb3d57eef1c951dcf939",
