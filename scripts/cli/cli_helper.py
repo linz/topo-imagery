@@ -17,8 +17,10 @@ class InputParameterError(Exception):
 class TileFiles(NamedTuple):
     output: str
     """ The tile name of the output file that will be created """
+
     inputs: list[str]
     """ The list of input files to be used to create the output file """
+
     includeDerived: bool = False
     """ Whether the STAC Item should include the derived_from links """
 
