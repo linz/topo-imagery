@@ -16,7 +16,13 @@ class InputParameterError(Exception):
 
 class TileFiles(NamedTuple):
     output: str
+    """ The tile name of the output file that will be created """
+
     inputs: list[str]
+    """ The list of input files to be used to create the output file """
+
+    includeDerived: bool = False
+    """ Whether the STAC Item should include the derived_from links """
 
 
 def get_tile_files(source: str) -> list[TileFiles]:
@@ -34,11 +40,14 @@ def get_tile_files(source: str) -> list[TileFiles]:
 
     Example:
         >>> get_tile_files('[{"output": "CE16_5000_1001", "input": ["s3://bucket/SN9457_CE16_10k_0501.tif"]}]')
-        [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'])]
+        [TileFiles(output='CE16_5000_1001', inputs=['s3://bucket/SN9457_CE16_10k_0501.tif'], includeDerived=False)]
     """
     try:
         source_json: list[TileFiles] = json.loads(
-            source, object_hook=lambda d: TileFiles(inputs=d["input"], output=d["output"])
+            source,
+            object_hook=lambda d: TileFiles(
+                inputs=d["input"], output=d["output"], includeDerived=d.get("includeDerived", False)
+            ),
         )
     except (json.decoder.JSONDecodeError, KeyError) as e:
         get_log().error(type(e).__name__, error=str(e))

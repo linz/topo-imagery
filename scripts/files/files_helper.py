@@ -8,8 +8,8 @@ SUFFIX_FOOTPRINT = "_footprint.geojson"
 class ContentType(str, Enum):
     GEOTIFF = "image/tiff; application=geotiff; profile=cloud-optimized"
     JSON = "application/json"
-    # https://www.iana.org/assignments/media-types/application/geo+json
     GEOJSON = "application/geo+json"
+    """ https://www.iana.org/assignments/media-types/application/geo+json"""
     JPEG = "image/jpeg"
 
 

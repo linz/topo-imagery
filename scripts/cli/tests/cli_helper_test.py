@@ -17,8 +17,27 @@ def test_get_tile_files(subtests: SubTests) -> None:
     with subtests.test():
         assert expected_input_filenames == source[0].inputs
 
+    with subtests.test(msg="Should not include derived by default"):
+        assert source[0].includeDerived is False
+
     with subtests.test():
         assert expected_output_filename_b == source[1].output
+
+
+def test_get_tile_files_with_include_derived(subtests: SubTests) -> None:
+    file_source = '[{"output": "tile_name","input": ["file_a.tiff", "file_b.tiff"], "includeDerived": true}]'
+    expected_output_filename = "tile_name"
+    expected_input_filenames = ["file_a.tiff", "file_b.tiff"]
+
+    source: list[TileFiles] = get_tile_files(file_source)
+    with subtests.test():
+        assert expected_output_filename == source[0].output
+
+    with subtests.test():
+        assert expected_input_filenames == source[0].inputs
+
+    with subtests.test():
+        assert source[0].includeDerived is True
 
 
 def test_parse_list() -> None:

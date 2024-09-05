@@ -133,7 +133,7 @@ def standardising(
     footprint_file_name = files.output + SUFFIX_FOOTPRINT
     standardized_file_path = os.path.join(target_output, standardized_file_name)
     footprint_file_path = os.path.join(target_output, footprint_file_name)
-    tiff = FileTiff(files.inputs, preset)
+    tiff = FileTiff(files.inputs, preset, files.includeDerived)
     tiff.set_path_standardised(standardized_file_path)
 
     # Already proccessed can skip processing

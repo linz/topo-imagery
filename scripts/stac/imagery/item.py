@@ -6,8 +6,10 @@ from typing import Any
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files import fs
 from scripts.files.fs import modified
+from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 
@@ -22,9 +24,7 @@ class ImageryItem:
             "type": "Feature",
             "stac_version": STAC_VERSION,
             "id": id_,
-            "links": [
-                {"rel": "self", "href": f"./{id_}.json", "type": "application/json"},
-            ],
+            "links": [Link(path=f"./{id_}.json", rel=Relation.SELF, media_type=StacMediaType.JSON).stac],
             "assets": {
                 "visual": {
                     "href": os.path.join(".", os.path.basename(file)),
@@ -68,8 +68,8 @@ class ImageryItem:
             collection_id: the id of the collection to link
         """
         self.stac["collection"] = collection_id
-        self.add_link(rel="collection")
-        self.add_link(rel="parent")
+        self.add_link(Link(path="./collection.json", rel=Relation.COLLECTION, media_type=StacMediaType.JSON))
+        self.add_link(Link(path="./collection.json", rel=Relation.PARENT, media_type=StacMediaType.JSON))
 
-    def add_link(self, rel: str, href: str = "./collection.json", file_type: str = "application/json") -> None:
-        self.stac["links"].append({"rel": rel, "href": href, "type": file_type})
+    def add_link(self, link: Link) -> None:
+        self.stac["links"].append(link.stac)

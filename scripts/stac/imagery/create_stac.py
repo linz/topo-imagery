@@ -2,10 +2,13 @@ from linz_logger import get_log
 
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
+from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.link import Link, Relation
+from scripts.stac.util.media_type import StacMediaType
 
 
 def create_item(
@@ -14,6 +17,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdalinfo_result: GdalInfo | None = None,
+    derived_from: list[str] | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -23,6 +27,7 @@ def create_item(
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
+        derived_from: list of STAC Items from where this Item is derived. Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
@@ -38,6 +43,12 @@ def create_item(
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
+
+    if derived_from is not None:
+        for derived in derived_from:
+            item.add_link(
+                Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=read(derived))
+            )
 
     get_log().info("ImageryItem created", path=file)
     return item
