@@ -51,12 +51,11 @@ def create_item(
             derived_stac = json.loads(derived_item_content.decode("UTF-8"))
             start_date_list.append(derived_stac["properties"]["start_datetime"])
             end_date_list.append(derived_stac["properties"]["end_datetime"])
-
             item.add_link(
                 Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=derived_item_content)
             )
-        start_datetime = min(start_date_list, key=lambda d: parse_rfc_3339_datetime(d))
-        end_datetime = max(end_date_list, key=lambda d: parse_rfc_3339_datetime(d))
+        start_datetime = min(start_date_list, key=parse_rfc_3339_datetime)
+        end_datetime = max(end_date_list, key=parse_rfc_3339_datetime)
 
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
