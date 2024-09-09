@@ -1355,20 +1355,6 @@ files = [
 ]
 
 [[package]]
-name = "types-shapely"
-version = "2.0.0.20240820"
-description = "Typing stubs for shapely"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "types-shapely-2.0.0.20240820.tar.gz", hash = "sha256:dd384ea757e94b951a5eb69ce9d5eb3dcdcd6a6138edefc5394e41400d01c372"},
-    {file = "types_shapely-2.0.0.20240820-py3-none-any.whl", hash = "sha256:8b0fa12a0a0bfe342b9dfc146f2f2248e4760a4486d766787276abbc532d0641"},
-]
-
-[package.dependencies]
-numpy = ">=1.20,<2.1.0"
-
-[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -1456,4 +1442,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.6"
-content-hash = "32b7aa2b5cb128276161fd6a313c27a532b3b700db10c3530ca131dbb0b0a3dc"
+content-hash = "d716c2f23f3bfd041e55f315430c8aed18a23d9f7b1468ade2bc02391032b27c"
