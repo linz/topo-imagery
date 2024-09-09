@@ -1366,17 +1366,17 @@ files = [
 
 [[package]]
 name = "types-shapely"
-version = "2.0.0.20240613"
+version = "2.0.0.20240820"
 description = "Typing stubs for shapely"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-shapely-2.0.0.20240613.tar.gz", hash = "sha256:d5ee564554274b11f8ee267e27b2640c1b165f8b49cea4723010fd24fc111ff2"},
-    {file = "types_shapely-2.0.0.20240613-py3-none-any.whl", hash = "sha256:ce8e9fc6e030a00e2fb1120864b0ff564dceb15be09374633f9050911683bde3"},
+    {file = "types-shapely-2.0.0.20240820.tar.gz", hash = "sha256:dd384ea757e94b951a5eb69ce9d5eb3dcdcd6a6138edefc5394e41400d01c372"},
+    {file = "types_shapely-2.0.0.20240820-py3-none-any.whl", hash = "sha256:8b0fa12a0a0bfe342b9dfc146f2f2248e4760a4486d766787276abbc532d0641"},
 ]
 
 [package.dependencies]
-numpy = ">=1.20"
+numpy = ">=1.20,<2.1.0"
 
 [[package]]
 name = "types-urllib3"
