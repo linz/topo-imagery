@@ -1,7 +1,10 @@
+from decimal import Decimal
+from typing import Annotated
+
 from linz_logger import get_log
 
-from scripts.files.file_tiff import DEFAULT_NO_DATA_VALUE
 from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_presets import Preset
 from scripts.gdal.gdalinfo import GdalInfo
 
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
@@ -35,6 +38,7 @@ BASE_COG = [
     "overviews=ignore_existing",
 ]
 
+DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(-9999)
 DEM_LERC = [
     "-co",
     "compress=lerc",
@@ -101,16 +105,16 @@ def get_gdal_command(preset: str, epsg: str) -> list[str]:
     # Force the source projection to an input EPSG
     gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
 
-    if preset == "lzw":
+    if preset == Preset.LZW.value:
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
         gdal_command.extend(COMPRESS_LZW)
         gdal_command.extend(WEBP_OVERVIEWS)
 
-    elif preset == "webp":
+    elif preset == Preset.WEBP.value:
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
         gdal_command.extend(WEBP_OVERVIEWS)
 
-    elif preset == "dem_lerc":
+    elif preset == Preset.DEM_LERC.value:
         gdal_command.extend(DEM_LERC)
 
     return gdal_command

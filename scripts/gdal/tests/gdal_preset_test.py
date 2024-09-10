@@ -1,10 +1,11 @@
 from pytest_subtests import SubTests
 
 from scripts.gdal.gdal_preset import get_cutline_command, get_gdal_command
+from scripts.gdal.gdal_presets import Preset
 
 
 def test_preset_webp(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command("webp", epsg="2193")
+    gdal_command = get_gdal_command(Preset.WEBP.value, epsg="2193")
 
     # Basic cog creation
     with subtests.test():
@@ -44,7 +45,7 @@ def test_preset_webp(subtests: SubTests) -> None:
 
 
 def test_preset_lzw(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command("lzw", epsg="2193")
+    gdal_command = get_gdal_command(Preset.LZW.value, epsg="2193")
 
     # Basic cog creation
     with subtests.test():
@@ -84,7 +85,7 @@ def test_preset_lzw(subtests: SubTests) -> None:
 
 
 def test_preset_dem_lerc(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command("dem_lerc", epsg="2193")
+    gdal_command = get_gdal_command(Preset.DEM_LERC.value, epsg="2193")
     # Basic cog creation
     with subtests.test():
         assert "COG" in gdal_command

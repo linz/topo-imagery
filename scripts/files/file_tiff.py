@@ -2,13 +2,13 @@ import json
 import os
 from decimal import Decimal
 from enum import Enum
-from typing import Annotated, Any
+from typing import Any
 from urllib.parse import unquote
 
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
+from scripts.gdal.gdal_preset import DEFAULT_NO_DATA_VALUE
+from scripts.gdal.gdal_presets import Preset
 from scripts.gdal.gdalinfo import GdalInfo
-
-DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(-9999)
 
 
 class FileTiffErrorType(str, Enum):
@@ -51,7 +51,7 @@ class FileTiff:
         self._errors: list[dict[str, Any]] = []
         self._gdalinfo: GdalInfo | None = None
         self._srs: bytes | None = None
-        if preset == "dem_lerc":
+        if preset == Preset.DEM_LERC.value:
             self._tiff_type = FileTiffType.DEM
         else:
             self._tiff_type = FileTiffType.IMAGERY
