@@ -1,3 +1,5 @@
+import json
+
 from linz_logger import get_log
 
 from scripts.datetimes import utc_now
@@ -40,15 +42,20 @@ def create_item(
     geometry, bbox = get_extents(gdalinfo_result)
 
     item = ImageryItem(id_, file, utc_now)
-    item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(geometry, bbox)
-    item.add_collection(collection_id)
 
     if derived_from is not None:
         for derived in derived_from:
+            derived_item_content = read(derived)
+            derived_stac = json.loads(derived_item_content.decode("UTF-8"))
+            start_datetime = min(start_datetime, derived_stac["properties"]["start_datetime"])
+            end_datetime = max(end_datetime, derived_stac["properties"]["end_datetime"])
             item.add_link(
-                Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=read(derived))
+                Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=derived_item_content)
             )
+
+    item.update_datetime(start_datetime, end_datetime)
+    item.update_spatial(geometry, bbox)
+    item.add_collection(collection_id)
 
     get_log().info("ImageryItem created", path=file)
     return item
