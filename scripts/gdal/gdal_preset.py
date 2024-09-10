@@ -88,7 +88,7 @@ WEBP_OVERVIEWS = [
 ]
 
 
-def get_gdal_command(preset: str, epsg: str) -> list[str]:
+def get_gdal_command(preset: str, epsg: int) -> list[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
