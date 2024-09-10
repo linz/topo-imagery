@@ -220,7 +220,7 @@ def standardising(
                         [
                             "gdal_footprint",
                             "-t_srs",
-                            f"EPSG:{EpsgNumber.EPSG_WGS_1984.value}",
+                            f"EPSG:{EpsgNumber.WGS_1984.value}",
                             "-max_points",
                             "unlimited",
                             "-simplify",

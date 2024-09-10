@@ -6,7 +6,7 @@ from scripts.gdal.gdal_presets import Preset
 
 
 def test_preset_webp(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(Preset.WEBP.value, epsg=EpsgNumber.EPSG_NZGD2000.value)
+    gdal_command = get_gdal_command(Preset.WEBP.value, epsg=EpsgNumber.NZTM_2000.value)
 
     # Basic cog creation
     with subtests.test():
@@ -42,11 +42,11 @@ def test_preset_webp(subtests: SubTests) -> None:
         assert "overviews=ignore_existing" in gdal_command
 
     with subtests.test():
-        assert f"EPSG:{EpsgNumber.EPSG_NZGD2000.value}" in gdal_command
+        assert f"EPSG:{EpsgNumber.NZTM_2000.value}" in gdal_command
 
 
 def test_preset_lzw(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(Preset.LZW.value, epsg=EpsgNumber.EPSG_NZGD2000.value)
+    gdal_command = get_gdal_command(Preset.LZW.value, epsg=EpsgNumber.NZTM_2000.value)
 
     # Basic cog creation
     with subtests.test():
@@ -82,11 +82,11 @@ def test_preset_lzw(subtests: SubTests) -> None:
         assert "overview_quality=90" in gdal_command
 
     with subtests.test():
-        assert f"EPSG:{EpsgNumber.EPSG_NZGD2000.value}" in gdal_command
+        assert f"EPSG:{EpsgNumber.NZTM_2000.value}" in gdal_command
 
 
 def test_preset_dem_lerc(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(Preset.DEM_LERC.value, epsg=EpsgNumber.EPSG_NZGD2000.value)
+    gdal_command = get_gdal_command(Preset.DEM_LERC.value, epsg=EpsgNumber.NZTM_2000.value)
     # Basic cog creation
     with subtests.test():
         assert "COG" in gdal_command
@@ -124,7 +124,7 @@ def test_preset_dem_lerc(subtests: SubTests) -> None:
         assert "overview_quality=90" not in gdal_command
 
     with subtests.test():
-        assert f"EPSG:{EpsgNumber.EPSG_NZGD2000.value}" in gdal_command
+        assert f"EPSG:{EpsgNumber.NZTM_2000.value}" in gdal_command
 
 
 def test_cutline_params(subtests: SubTests) -> None:
