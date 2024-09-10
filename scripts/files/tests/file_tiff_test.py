@@ -1,4 +1,5 @@
 from scripts.files.file_tiff import FileTiff, FileTiffErrorType
+from scripts.gdal.gdal_presets import Preset
 from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
 
 
@@ -74,7 +75,7 @@ def test_check_band_count_valid_1_dem() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo)
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_band_count(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -89,7 +90,7 @@ def test_check_band_count_invalid_alpha_dem() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo, color_interpretation="Alpha")
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -105,7 +106,7 @@ def test_check_band_count_invalid_3_dem() -> None:
     add_band(gdalinfo)
     add_band(gdalinfo)
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_band_count(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -164,7 +165,7 @@ def test_check_color_interpretation_valid_dem() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Gray")
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert not file_tiff.get_errors()
@@ -179,7 +180,7 @@ def test_check_color_interpretation_invalid_dem() -> None:
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_color_interpretation(gdalinfo)
 
     assert file_tiff.get_errors()
@@ -321,7 +322,7 @@ def test_should_throw_when_encountering_non_integer_no_data_value() -> None:
     gdalinfo = fake_gdal_info()
     add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))], no_data_value="-9999.1")
 
-    file_tiff = FileTiff(["test"], "dem_lerc")
+    file_tiff = FileTiff(["test"], Preset.DEM_LERC.value)
     file_tiff.check_no_data(gdalinfo)
 
     assert file_tiff.get_errors() == [

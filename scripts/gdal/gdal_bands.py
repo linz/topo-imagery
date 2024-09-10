@@ -1,6 +1,7 @@
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import gdal_info
+from scripts.gdal.gdal_presets import Preset
 from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
@@ -43,7 +44,7 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
 
     if band_grey := find_band(bands, "Gray"):
         band_grey_index = str(band_grey["band"])
-        if preset == "dem_lerc":
+        if preset == Preset.DEM_LERC.value:
             # return single band if DEM/DSM
             return ["-b", band_grey_index]
         # Grey scale imagery, set R,G and B to just the grey_band
