@@ -19,11 +19,11 @@ class GDALExecutionException(Exception):
     pass
 
 
-class EpsgCode(str, Enum):
-    EPSG_2193 = "EPSG:2193"
-    """ NZGD2000 / New Zealand Transverse Mercator 2000 (NZTM) """
-    EPSG_4326 = "EPSG:4326"
-    """ WGS84 - World Geodetic System 1984"""
+class EpsgNumber(int, Enum):
+    EPSG_NZGD2000 = 2193
+    """New Zealand Transverse Mercator 2000 (NZTM)"""
+    EPSG_WGS_1984 = 4326
+    """World Geodetic System 1984"""
 
 
 def get_vfs_path(path: str) -> str:
@@ -135,7 +135,7 @@ def get_srs() -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", EpsgCode.EPSG_2193]
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{EpsgNumber.EPSG_NZGD2000.value}"]
     gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
     if gdalsrsinfo_result.stderr:
         raise Exception(
