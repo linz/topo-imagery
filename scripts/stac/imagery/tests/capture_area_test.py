@@ -13,7 +13,7 @@ def test_merge_polygons() -> None:
     polygons = []
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     polygons.append(Polygon([(1.0, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.0, 1.0)]))
-    expected_merged_polygon = Polygon([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
+    expected_merged_polygon = Polygon([(1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (1.0, 1.0)])
     merged_polygons = merge_polygons(polygons, 0)
 
     print(f"Polygon A: {to_feature(polygons[0])}")
@@ -21,9 +21,9 @@ def test_merge_polygons() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    # Using `Polygon.equals()` as merge_polygons might return a different set of coordinates for the same geometry
+    # Using `Polygon.equals_exact()` as merge_polygons might return a different set of coordinates for the same geometry
     # In this example: `Polygon([(2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0), (2.0, 1.0)])`
-    assert merged_polygons.equals(expected_merged_polygon)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
 
 
 def test_merge_polygons_with_rounding() -> None:
@@ -31,7 +31,7 @@ def test_merge_polygons_with_rounding() -> None:
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     # The following polygon is off by 0.1 to the "right" from the previous one
     polygons.append(Polygon([(1.1, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.1, 1.0)]))
-    expected_merged_polygon = Polygon([(0.0, 1.0), (2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
+    expected_merged_polygon = Polygon([(2.0, 1.0), (0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0)])
     # By giving a buffer distance of 0.1, we want to correct this margin of error and have the two polygons being merged
     merged_polygons = merge_polygons(polygons, 0.1)
 
@@ -40,7 +40,7 @@ def test_merge_polygons_with_rounding() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert merged_polygons.equals(expected_merged_polygon)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
 
 
 def test_merge_polygons_with_rounding_margin_too_big() -> None:
@@ -54,13 +54,13 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     expected_merged_polygon = Polygon(
         [
             (1.0, 1.0),
-            (1.0, 0.15093536161009757),
-            (1.015018629811984, 0.1501862981198402),
-            (1.1, 1.0),
-            (1.9999999999999998, 1.0),
-            (1.9999999999999998, 0.0),
-            (0.0, 0.0),
             (0.0, 1.0),
+            (0.0, 0.0),
+            (1.9999999999999998, 0.0),
+            (1.9999999999999998, 1.0),
+            (1.1, 1.0),
+            (1.015018629811984, 0.1501862981198402),
+            (1.0, 0.15093536161009757),
             (1.0, 1.0),
         ]
     )
@@ -70,7 +70,7 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert merged_polygons.equals(expected_merged_polygon)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
 
 
 def test_generate_capture_area_rounded() -> None:
@@ -87,7 +87,6 @@ def test_generate_capture_area_rounded() -> None:
     capture_area_expected = generate_capture_area(polygons_no_gap, 0.2)
     # Generate the capture area of the polygons that have a gap between each other
     capture_area_result = generate_capture_area(polygon_with_gap, 0.2)
-
     print(f"Polygon no gap A: {to_feature(polygons_no_gap[0])}")
     print(f"Polygon no gap B: {to_feature(polygons_no_gap[1])}")
     print(f"Polygon with gap A: {to_feature(polygon_with_gap[0])}")
