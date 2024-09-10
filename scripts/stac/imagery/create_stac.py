@@ -2,7 +2,7 @@ import json
 
 from linz_logger import get_log
 
-from scripts.datetimes import parse_rfc_3339_datetime, utc_now
+from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
@@ -44,18 +44,14 @@ def create_item(
     item = ImageryItem(id_, file, utc_now)
 
     if derived_from is not None:
-        start_date_list = []
-        end_date_list = []
         for derived in derived_from:
             derived_item_content = read(derived)
             derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            start_date_list.append(derived_stac["properties"]["start_datetime"])
-            end_date_list.append(derived_stac["properties"]["end_datetime"])
+            start_datetime = min(start_datetime, derived_stac["properties"]["start_datetime"])
+            end_datetime = max(end_datetime, derived_stac["properties"]["end_datetime"])
             item.add_link(
                 Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=derived_item_content)
             )
-        start_datetime = min(start_date_list, key=parse_rfc_3339_datetime)
-        end_datetime = max(end_date_list, key=parse_rfc_3339_datetime)
 
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
