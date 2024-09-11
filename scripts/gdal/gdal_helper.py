@@ -20,9 +20,9 @@ class GDALExecutionException(Exception):
 
 
 class EpsgNumber(int, Enum):
-    EPSG_NZGD2000 = 2193
-    """New Zealand Transverse Mercator 2000 (NZTM)"""
-    EPSG_WGS_1984 = 4326
+    NZTM_2000 = 2193
+    """New Zealand Transverse Mercator 2000"""
+    WGS_1984 = 4326
     """World Geodetic System 1984"""
 
 
@@ -135,7 +135,7 @@ def get_srs() -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{EpsgNumber.EPSG_NZGD2000.value}"]
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{EpsgNumber.NZTM_2000.value}"]
     gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
     if gdalsrsinfo_result.stderr:
         raise Exception(
