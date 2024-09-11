@@ -47,10 +47,16 @@ def main() -> None:
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
-        "--start-datetime", dest="start_datetime", help="Start datetime in format YYYY-MM-DD", type=valid_date, required=True
+        "--start-datetime",
+        dest="start_datetime",
+        help="Start datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
     )
     parser.add_argument(
-        "--end-datetime", dest="end_datetime", help="End datetime in format YYYY-MM-DD", type=valid_date, required=True
+        "--end-datetime",
+        dest="end_datetime",
+        help="End datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     arguments = parser.parse_args()
@@ -60,8 +66,16 @@ def main() -> None:
     except InputParameterError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
+
+    # When standardising output includeDerived, start_datetime and end_datetime are optional
+    if arguments.start_datetime is None or arguments.end_datetime is None:
+        for tile in tile_files:
+            if not tile.includeDerived:
+                raise Exception("--start_datetime and --end_datetime are required if standardising non-derived files.")
+
     start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
     end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
+
     concurrency: int = 1
     if is_argo():
         concurrency = 4
