@@ -78,9 +78,7 @@ def is_argo() -> bool:
     return bool(environ.get("ARGO_TEMPLATE"))
 
 
-def valid_date(s: str) -> datetime | None:
-    if not s:
-        return None
+def valid_date(s: str) -> datetime:
     try:
         return parse_rfc_3339_date(s)
     except ValueError as e:
