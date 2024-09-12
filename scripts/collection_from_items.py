@@ -89,6 +89,13 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
+    parser.add_argument(
+        "--capture-dates",
+        dest="capture_dates",
+        action="store_true",
+        help="Add a capture-dates.geojson.gz file to the collection assets",
+        required=False,
+    )
 
     return parser.parse_args(args)
 
@@ -186,6 +193,9 @@ def main(args: List[str] | None = None) -> None:
         item_match_count=item_match_count,
         duration=time_in_ms() - start_time,
     )
+
+    if arguments.capture_dates:
+        collection.add_capture_dates(uri)
 
     destination = os.path.join(uri, "collection.json")
     collection.write_to(destination)
