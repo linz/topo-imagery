@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.10.0](https://github.com/linz/topo-imagery/compare/v4.9.0...v4.10.0) (2024-09-12)
+
+
+### Features
+
+* add derived_from links to item TDE-1251 ([#1043](https://github.com/linz/topo-imagery/issues/1043)) ([077f14f](https://github.com/linz/topo-imagery/commit/077f14f3ab158ef47525b44b7929ddff593ff80e))
+* determine start and end datetimes when item include derived TDE-1258 ([#1052](https://github.com/linz/topo-imagery/issues/1052)) ([62d571a](https://github.com/linz/topo-imagery/commit/62d571a6fdd196d4eef584b0c91aab7f3c4afa4a))
+* make start_datetime and end_datetime optional when includeDerived is True TDE-1258 ([#1065](https://github.com/linz/topo-imagery/issues/1065)) ([57f088c](https://github.com/linz/topo-imagery/commit/57f088c1adc7c204f8338493a467eee1fe77df54))
+* More types ([#989](https://github.com/linz/topo-imagery/issues/989)) ([3f7cd57](https://github.com/linz/topo-imagery/commit/3f7cd571e837ce3d8a8528f181b181d41549dd14))
+
+
+### Bug Fixes
+
+* capture area winding order TDE-1205 ([#1008](https://github.com/linz/topo-imagery/issues/1008)) ([61be096](https://github.com/linz/topo-imagery/commit/61be096bc9af997933ef6bee6cd72d441d350bc7))
+* error on collection with no items TDE-1216 ([#1000](https://github.com/linz/topo-imagery/issues/1000)) ([d351d85](https://github.com/linz/topo-imagery/commit/d351d85f42fd096628b65629f8be30a5f617d920))
+
 ## [4.9.0](https://github.com/linz/topo-imagery/compare/v4.8.0...v4.9.0) (2024-07-16)
 
 
