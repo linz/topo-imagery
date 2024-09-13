@@ -132,6 +132,13 @@ class ImageryCollection:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
 
     def add_capture_dates(self, source_directory: str) -> None:
+        """Add the gzipped capture dates metadata file for the National 1m DEM dataset.
+        The `href` or path of capture-dates.geojson.gz is always set as the relative `./capture-dates.geojson.gz`
+
+        Args:
+            source_directory: the location of the capture-dates.geojson.gz file to be linked
+        """
+
         capture_dates_content = read(os.path.join(source_directory, CAPTURE_DATES_FILE_NAME))
         file_checksum = checksum.multihash_as_hex(capture_dates_content)
         capture_dates = {
