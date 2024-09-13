@@ -134,6 +134,9 @@ def main(args: List[str] | None = None) -> None:
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
+    if arguments.capture_dates:
+        collection.add_capture_dates(uri)
+
     s3_client = client("s3")
 
     collection_id = collection.stac["id"]
@@ -193,9 +196,6 @@ def main(args: List[str] | None = None) -> None:
         item_match_count=item_match_count,
         duration=time_in_ms() - start_time,
     )
-
-    if arguments.capture_dates:
-        collection.add_capture_dates(uri)
 
     destination = os.path.join(uri, "collection.json")
     collection.write_to(destination)
