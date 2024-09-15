@@ -8,7 +8,7 @@ from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import write
+from scripts.files.fs import read, write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
 from scripts.stac.imagery.metadata_constants import (
@@ -32,6 +32,7 @@ from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
+CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 
 
 class ImageryCollection:
@@ -129,6 +130,26 @@ class ImageryCollection:
 
         if StacExtensions.file.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
+
+    def add_capture_dates(self, source_directory: str) -> None:
+        """Add the capture dates metadata file for the National 1m DEM dataset.
+        The `href` or path of capture-dates.geojson is always set as the relative `./capture-dates.geojson`
+
+        Args:
+            source_directory: the location of the capture-dates.geojson file to be linked
+        """
+
+        capture_dates_content = read(os.path.join(source_directory, CAPTURE_DATES_FILE_NAME))
+        file_checksum = checksum.multihash_as_hex(capture_dates_content)
+        capture_dates = {
+            "href": f"./{CAPTURE_DATES_FILE_NAME}",
+            "title": "Capture dates",
+            "type": ContentType.GEOJSON,
+            "roles": ["metadata"],
+            "file:checksum": file_checksum,
+            "file:size": len(capture_dates_content),
+        }
+        self.stac.setdefault("assets", {})["capture_dates"] = capture_dates
 
     def add_item(self, item: dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.

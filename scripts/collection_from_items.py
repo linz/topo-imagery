@@ -89,6 +89,13 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
+    parser.add_argument(
+        "--capture-dates",
+        dest="capture_dates",
+        action="store_true",
+        help="Add a capture-dates.geojson.gz file to the collection assets",
+        required=False,
+    )
 
     return parser.parse_args(args)
 
@@ -126,6 +133,9 @@ def main(args: List[str] | None = None) -> None:
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
+
+    if arguments.capture_dates:
+        collection.add_capture_dates(uri)
 
     s3_client = client("s3")
 

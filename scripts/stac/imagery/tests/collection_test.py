@@ -8,10 +8,15 @@ from tempfile import mkdtemp
 
 import pytest
 import shapely.geometry
+from boto3 import resource
+from moto import mock_aws
+from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
+from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
+from scripts.files.fs_s3 import write
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
@@ -331,3 +336,20 @@ def test_event_name_is_present(metadata: CollectionMetadata) -> None:
 def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(metadata, any_epoch_datetime)
     assert "Auckland North Forest Assessment" == collection.stac["linz:geographic_description"]
+
+
+@mock_aws
+def test_capture_dates_added(metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(metadata, any_epoch_datetime)
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="flat")
+    write("s3://flat/capture-dates.geojson", b"")
+    collection.add_capture_dates("s3://flat")
+    assert collection.stac["assets"]["capture_dates"] == {
+        "href": "./capture-dates.geojson",
+        "title": "Capture dates",
+        "type": ContentType.GEOJSON,
+        "roles": ["metadata"],
+        "file:checksum": "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "file:size": 0,
+    }
