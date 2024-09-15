@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.11.0](https://github.com/linz/topo-imagery/compare/v4.10.0...v4.11.0) (2024-09-15)
+
+
+### Features
+
+* add capture dates asset link to collection TDE-1256 ([#1069](https://github.com/linz/topo-imagery/issues/1069)) ([d4b391a](https://github.com/linz/topo-imagery/commit/d4b391a60f27159be14d9074e4545a863aed57fc))
+
 ## [4.10.0](https://github.com/linz/topo-imagery/compare/v4.9.0...v4.10.0) (2024-09-12)
 
 
