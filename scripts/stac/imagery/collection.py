@@ -133,7 +133,7 @@ class ImageryCollection:
 
     def add_capture_dates(self, source_directory: str) -> None:
         """Add the capture dates metadata file for the National 1m DEM dataset.
-        The `href` or path of capture-dates.geojson.gz is always set as the relative `./capture-dates.geojson`
+        The `href` or path of capture-dates.geojson is always set as the relative `./capture-dates.geojson`
 
         Args:
             source_directory: the location of the capture-dates.geojson file to be linked
