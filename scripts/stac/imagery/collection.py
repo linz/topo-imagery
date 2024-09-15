@@ -32,7 +32,7 @@ from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
-CAPTURE_DATES_FILE_NAME = "capture-dates.geojson.gz"
+CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 
 
 class ImageryCollection:
@@ -132,11 +132,11 @@ class ImageryCollection:
             self.stac["stac_extensions"].append(StacExtensions.file.value)
 
     def add_capture_dates(self, source_directory: str) -> None:
-        """Add the gzipped capture dates metadata file for the National 1m DEM dataset.
-        The `href` or path of capture-dates.geojson.gz is always set as the relative `./capture-dates.geojson.gz`
+        """Add the capture dates metadata file for the National 1m DEM dataset.
+        The `href` or path of capture-dates.geojson.gz is always set as the relative `./capture-dates.geojson`
 
         Args:
-            source_directory: the location of the capture-dates.geojson.gz file to be linked
+            source_directory: the location of the capture-dates.geojson file to be linked
         """
 
         capture_dates_content = read(os.path.join(source_directory, CAPTURE_DATES_FILE_NAME))
@@ -144,7 +144,7 @@ class ImageryCollection:
         capture_dates = {
             "href": f"./{CAPTURE_DATES_FILE_NAME}",
             "title": "Capture dates",
-            "type": "application/gzip",
+            "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,
             "file:size": len(capture_dates_content),
