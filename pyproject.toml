@@ -32,7 +32,8 @@ authors = [
     "Daniel Silk <dsilk@linz.govt.nz>",
     "Paul Fouquet <pfouquet@linz.govt.nz>",
     "Alice Fage <afage@linz.govt.nz>",
-    "Megan Davidson <mdavidson@linz.govt.nz>"
+    "Megan Davidson <mdavidson@linz.govt.nz>",
+    "Victor Engmark <vengmark@linz.govt.nz>",
 ]
 
 [tool.poetry.dependencies]
