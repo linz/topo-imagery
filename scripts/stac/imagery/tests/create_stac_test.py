@@ -26,6 +26,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
             "",
             "",
             "abc123",
+            "any GDAL version",
             fake_gdal_info,
             [derived_from_path.as_posix()],
         )
@@ -63,6 +64,7 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
             "",
             "",
             "abc123",
+            "any GDAL version",
             fake_gdal_info,
             [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
         )

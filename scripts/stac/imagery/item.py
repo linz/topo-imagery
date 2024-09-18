@@ -17,7 +17,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 class ImageryItem:
     stac: dict[str, Any]
 
-    def __init__(self, id_: str, file: str, now: Callable[[], datetime]) -> None:
+    def __init__(self, id_: str, file: str, gdal_version: str, now: Callable[[], datetime]) -> None:
         file_content = fs.read(file)
         file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
         now_string = format_rfc_3339_datetime_string(now())
@@ -40,6 +40,7 @@ class ImageryItem:
                 "created": now_string,
                 "updated": now_string,
                 "processing:datetime": now_string,
+                "processing:software": {"gdal": gdal_version},
                 "processing:version": environ["GIT_VERSION"],
             },
         }
