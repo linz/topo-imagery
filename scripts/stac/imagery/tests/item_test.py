@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
@@ -24,7 +24,10 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
 
-    item = ImageryItem(id_, path, any_epoch_datetime)
+    def fake_now() -> datetime:
+        return datetime(1979, 1, 1, tzinfo=timezone.utc)
+
+    item = ImageryItem(id_, path, fake_now)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
@@ -39,6 +42,9 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
 
     with subtests.test():
         assert item.stac["properties"]["datetime"] is None
+
+    with subtests.test():
+        assert item.stac["properties"]["created"] == item.stac["properties"]["updated"] == "1979-01-01T00:00:00Z"
 
     with subtests.test():
         assert item.stac["geometry"]["coordinates"] == geometry["coordinates"]
