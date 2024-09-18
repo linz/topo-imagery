@@ -18,9 +18,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    item = create_item(
-        "./scripts/tests/data/empty.tiff", "2024-01-01", "2024-01-02", "abc123", fake_gdal_info, [derived_from_path.as_posix()]
-    )
+    item = create_item("./scripts/tests/data/empty.tiff", "", "", "abc123", fake_gdal_info, [derived_from_path.as_posix()])
 
     assert {
         "href": derived_from_path.as_posix(),
@@ -51,8 +49,8 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
 
     item = create_item(
         "./scripts/tests/data/empty.tiff",
-        "2024-01-01",
-        "2024-01-02",
+        "",
+        "",
         "abc123",
         fake_gdal_info,
         [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
