@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+from os import environ
+from unittest.mock import patch
 
 from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
@@ -28,7 +30,9 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     def fake_now() -> datetime:
         return datetime(1979, 1, 1, tzinfo=timezone.utc)
 
-    item = ImageryItem(id_, path, fake_now)
+    git_version = "any Git version string"
+    with patch.dict(environ, {"GIT_VERSION": git_version}):
+        item = ImageryItem(id_, path, fake_now)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
@@ -51,6 +55,9 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
             == item.stac["properties"]["processing:datetime"]
             == "1979-01-01T00:00:00Z"
         )
+
+    with subtests.test():
+        assert item.stac["properties"]["processing:version"] == git_version
 
     with subtests.test():
         assert item.stac["stac_extensions"] == [StacExtensions.file.value, StacExtensions.processing.value]
@@ -93,7 +100,8 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem(id_, path, any_epoch_datetime)
+    with patch.dict(environ, {"GIT_VERSION": "any Git version"}):
+        item = ImageryItem(id_, path, any_epoch_datetime)
 
     item.add_collection(collection.stac["id"])
 

@@ -1,6 +1,7 @@
 import os
 from collections.abc import Callable
 from datetime import datetime
+from os import environ
 from typing import Any
 
 from scripts.datetimes import format_rfc_3339_datetime_string
@@ -35,7 +36,12 @@ class ImageryItem:
                 }
             },
             "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
-            "properties": {"created": now_string, "updated": now_string, "processing:datetime": now_string},
+            "properties": {
+                "created": now_string,
+                "updated": now_string,
+                "processing:datetime": now_string,
+                "processing:version": environ["GIT_VERSION"],
+            },
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:

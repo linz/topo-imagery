@@ -5,6 +5,7 @@ from collections.abc import Callable, Generator
 from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import mkdtemp
+from unittest.mock import patch
 
 import pytest
 import shapely.geometry
@@ -133,7 +134,8 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    item = ImageryItem("BR34_5000_0304", item_file_path, now_function)
+    with patch.dict(os.environ, {"GIT_VERSION": "any Git version"}):
+        item = ImageryItem("BR34_5000_0304", item_file_path, now_function)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
