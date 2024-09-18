@@ -7,6 +7,7 @@ from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
@@ -44,7 +45,15 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         assert item.stac["properties"]["datetime"] is None
 
     with subtests.test():
-        assert item.stac["properties"]["created"] == item.stac["properties"]["updated"] == "1979-01-01T00:00:00Z"
+        assert (
+            item.stac["properties"]["created"]
+            == item.stac["properties"]["updated"]
+            == item.stac["properties"]["processing:datetime"]
+            == "1979-01-01T00:00:00Z"
+        )
+
+    with subtests.test():
+        assert item.stac["stac_extensions"] == [StacExtensions.file.value, StacExtensions.processing.value]
 
     with subtests.test():
         assert item.stac["geometry"]["coordinates"] == geometry["coordinates"]

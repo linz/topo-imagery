@@ -34,8 +34,8 @@ class ImageryItem:
                     "updated": file_modified_datetime,
                 }
             },
-            "stac_extensions": [StacExtensions.file.value],
-            "properties": {"created": now_string, "updated": now_string},
+            "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
+            "properties": {"created": now_string, "updated": now_string, "processing:datetime": now_string},
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
