@@ -24,6 +24,11 @@ RUN /root/.local/bin/poetry bundle venv --no-ansi --no-interaction --only=main -
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.9.0@sha256:d1a38af532e5d9e3991c4a6bddc2f2cb52644dc30a4eb8242101e8e23c3f83f6
 
+ARG GIT_HASH
+ENV GIT_HASH=${GIT_HASH:?'GIT_HASH is mandatory'}
+ARG GIT_VERSION
+ENV GIT_VERSION=${GIT_VERSION:?'GIT_VERSION is mandatory'}
+
 ENV TZ=Etc/UTC
 
 # Copy just the bundle from the first stage

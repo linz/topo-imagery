@@ -27,7 +27,7 @@ The scripts have been implemented to be run inside the Docker container only. Th
 - Build the `Docker` image:
 
 ```bash
-docker build . -t topo-imagery
+docker build --build-arg=GIT_HASH=dev --build-arg=GIT_VERSION=dev --tag=topo-imagery .
 ```
 
 - Running `standardising_validate.py` script
