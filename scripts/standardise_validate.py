@@ -24,6 +24,8 @@ def str_to_bool(value: str) -> bool:
 
 def main() -> None:
     # pylint: disable-msg=too-many-locals
+    # pylint: disable-msg=too-many-branches
+    # pylint: disable-msg=too-many-statements
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument(
@@ -72,9 +74,11 @@ def main() -> None:
         for tile in tile_files:
             if not tile.includeDerived:
                 raise Exception("--start_datetime and --end_datetime are required if standardising non-derived files.")
-
-    start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
-    end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
+        start_datetime = ""
+        end_datetime = ""
+    else:
+        start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
+        end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
 
     concurrency: int = 1
     if is_argo():
