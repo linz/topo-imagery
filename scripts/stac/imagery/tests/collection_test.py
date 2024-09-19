@@ -134,7 +134,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    with patch.dict(os.environ, {"GIT_VERSION": "any Git version"}):
+    with patch.dict(os.environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = ImageryItem("BR34_5000_0304", item_file_path, "any GDAL version", now_function)
     geometry = {
         "type": "Polygon",

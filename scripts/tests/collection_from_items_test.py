@@ -22,7 +22,7 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 @pytest.fixture(name="item", autouse=True)
 def setup() -> Generator[ImageryItem, None, None]:
     # Create mocked STAC Item
-    with patch.dict(environ, {"GIT_VERSION": "any Git version"}):
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", utc_now)
     geometry = {
         "type": "Polygon",

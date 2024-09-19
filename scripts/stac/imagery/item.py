@@ -40,7 +40,10 @@ class ImageryItem:
                 "created": now_string,
                 "updated": now_string,
                 "processing:datetime": now_string,
-                "processing:software": {"gdal": gdal_version},
+                "processing:software": {
+                    "gdal": gdal_version,
+                    "linz/topo-imagery": f"https://github.com/linz/topo-imagery/commit/{environ['GIT_HASH']}",
+                },
                 "processing:version": environ["GIT_VERSION"],
             },
         }

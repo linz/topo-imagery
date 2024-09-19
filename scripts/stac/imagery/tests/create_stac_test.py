@@ -20,7 +20,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    with patch.dict(environ, {"GIT_VERSION": "any Git version"}):
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = create_item(
             "./scripts/tests/data/empty.tiff",
             "",
@@ -58,7 +58,7 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    with patch.dict(environ, {"GIT_VERSION": "any Git version"}):
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = create_item(
             "./scripts/tests/data/empty.tiff",
             "",

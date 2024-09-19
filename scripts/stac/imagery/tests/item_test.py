@@ -30,9 +30,10 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     def fake_now() -> datetime:
         return datetime(1979, 1, 1, tzinfo=timezone.utc)
 
+    git_hash = "any Git hash"
     git_version = "any Git version string"
     gdal_version_string = "any GDAL version string"
-    with patch.dict(environ, {"GIT_VERSION": git_version}):
+    with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
         item = ImageryItem(id_, path, gdal_version_string, fake_now)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
@@ -61,7 +62,10 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         assert item.stac["properties"]["processing:version"] == git_version
 
     with subtests.test():
-        assert item.stac["properties"]["processing:software"] == {"gdal": gdal_version_string}
+        assert item.stac["properties"]["processing:software"] == {
+            "gdal": gdal_version_string,
+            "linz/topo-imagery": f"https://github.com/linz/topo-imagery/commit/{git_hash}",
+        }
 
     with subtests.test():
         assert item.stac["stac_extensions"] == [StacExtensions.file.value, StacExtensions.processing.value]
@@ -104,7 +108,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    with patch.dict(environ, {"GIT_VERSION": "any Git version"}):
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = ImageryItem(id_, path, "any GDAL version", any_epoch_datetime)
 
     item.add_collection(collection.stac["id"])
