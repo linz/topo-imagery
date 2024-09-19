@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.11.1](https://github.com/linz/topo-imagery/compare/v4.11.0...v4.11.1) (2024-09-19)
+
+
+### Bug Fixes
+
+* Don't attempt to install project inside virtualenv ([#1074](https://github.com/linz/topo-imagery/issues/1074)) ([dd989d0](https://github.com/linz/topo-imagery/commit/dd989d0500c3edc8eb847be86848a4ae9d54c8e2))
+* start_datetime and end_datetime must be init if derived_from TDE-1258 ([#1079](https://github.com/linz/topo-imagery/issues/1079)) ([f0c8a4e](https://github.com/linz/topo-imagery/commit/f0c8a4e634ceb1359a1167368d69a955b04481bb))
+
 ## [4.11.0](https://github.com/linz/topo-imagery/compare/v4.10.0...v4.11.0) (2024-09-15)
 
 
