@@ -47,11 +47,11 @@ def run_standardising(
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
         gsd: Ground Sample Distance in meters
+        gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
 
     Returns:
         a list of FileTiff wrapper
-        :param gdal_version:
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
