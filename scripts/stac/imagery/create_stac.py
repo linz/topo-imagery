@@ -47,12 +47,10 @@ def create_item(
         for derived in derived_from:
             derived_item_content = read(derived)
             derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            if not start_datetime and not end_datetime:
+            if not start_datetime or derived_stac["properties"]["start_datetime"] < start_datetime:
                 start_datetime = derived_stac["properties"]["start_datetime"]
+            if not end_datetime or derived_stac["properties"]["end_datetime"] > end_datetime:
                 end_datetime = derived_stac["properties"]["end_datetime"]
-            else:
-                start_datetime = min(start_datetime, derived_stac["properties"]["start_datetime"])
-                end_datetime = max(end_datetime, derived_stac["properties"]["end_datetime"])
             item.add_link(
                 Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=derived_item_content)
             )

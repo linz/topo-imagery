@@ -8,9 +8,10 @@ import shapely.geometry
 import shapely.ops
 from boto3 import client
 from linz_logger import get_log
+from shapely.geometry.base import BaseGeometry
 
-from scripts.cli.cli_helper import coalesce_multi_single, valid_date
-from scripts.datetimes import utc_now
+from scripts.cli.cli_helper import coalesce_multi_single
+from scripts.datetimes import parse_rfc_3339_datetime, utc_now
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
@@ -48,16 +49,6 @@ def parse_args(args: List[str] | None) -> Namespace:
         help="Optional Geographic Description of dataset, e.g. Hutt City",
         type=str,
         required=False,
-    )
-    parser.add_argument(
-        "--start-date",
-        dest="start_date",
-        help="Start date in format YYYY-MM-DD (Inclusive)",
-        type=valid_date,
-        required=True,
-    )
-    parser.add_argument(
-        "--end-date", dest="end_date", help="End date in format YYYY-MM-DD (Inclusive)", type=valid_date, required=True
     )
     parser.add_argument("--event", dest="event", help="Event name if applicable", type=str, required=False)
     parser.add_argument(
@@ -100,50 +91,73 @@ def parse_args(args: List[str] | None) -> Namespace:
     return parser.parse_args(args)
 
 
-# pylint: disable=too-many-locals
-def main(args: List[str] | None = None) -> None:
-    arguments = parse_args(args)
-    uri = arguments.uri
+def create_collection(
+    collection_id: str,
+    collection_metadata: CollectionMetadata,
+    producers: list[str],
+    licensors: list[str],
+    item_polygons: list[BaseGeometry],
+    add_capture_dates: bool,
+    uri: str,
+) -> ImageryCollection:
+    """Create an ImageryCollection object.
+    If `item_polygons` is not empty, it will add a generated capture area to the collection.
 
+    Args:
+        collection_id: id of the collection
+        collection_metadata: metadata of the collection
+        producers: producers of the dataset
+        licensors: licensors of the dataset
+        item_polygons: polygons of the items linked to the collection
+        add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
+        uri: path of the dataset
+
+    Returns:
+        an ImageryCollection object
+    """
     providers: list[Provider] = []
-    for producer_name in coalesce_multi_single(arguments.producer_list, arguments.producer):
+    for producer_name in producers:
         providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in coalesce_multi_single(arguments.licensor_list, arguments.licensor):
+    for licensor_name in licensors:
         providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
-
-    collection_metadata: CollectionMetadata = {
-        "category": arguments.category,
-        "region": arguments.region,
-        "gsd": arguments.gsd,
-        "start_datetime": arguments.start_date,
-        "end_datetime": arguments.end_date,
-        "lifecycle": arguments.lifecycle,
-        "geographic_description": arguments.geographic_description,
-        "event_name": arguments.event,
-        "historic_survey_number": arguments.historic_survey_number,
-    }
 
     collection = ImageryCollection(
         metadata=collection_metadata,
         now=utc_now,
-        collection_id=arguments.collection_id,
+        collection_id=collection_id,
         providers=providers,
     )
+
+    if add_capture_dates:
+        collection.add_capture_dates(uri)
+
+    if item_polygons:
+        collection.add_capture_area(item_polygons, uri)
+        get_log().info(
+            "Capture area created",
+        )
+
+    return collection
+
+
+# pylint: disable=too-many-locals
+def main(args: List[str] | None = None) -> None:
+    start_time = time_in_ms()
+    arguments = parse_args(args)
+    uri = arguments.uri
+    collection_id = arguments.collection_id
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
-    if arguments.capture_dates:
-        collection.add_capture_dates(uri)
-
     s3_client = client("s3")
-
-    collection_id = collection.stac["id"]
 
     files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
 
-    start_time = time_in_ms()
+    items_to_add = []
+    start_datetime = ""
+    end_datetime = ""
     polygons = []
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
@@ -170,36 +184,54 @@ def main(args: List[str] | None = None) -> None:
                     reason="skip",
                 )
                 continue
-            collection.add_item(content)
-            get_log().info("item added to collection", item=content["id"], file=key)
+            items_to_add.append(content)
+            if not start_datetime or content["properties"]["start_datetime"] < start_datetime:
+                start_datetime = content["properties"]["start_datetime"]
+            if not end_datetime or content["properties"]["end_datetime"] > end_datetime:
+                end_datetime = content["properties"]["end_datetime"]
+            get_log().info("Item added to Collection", item=content["id"], file=key)
         elif key.endswith(SUFFIX_FOOTPRINT):
             get_log().debug(f"adding geometry from {key}")
             polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
 
-    if polygons:
-        collection.add_capture_area(polygons, uri)
-        get_log().info(
-            "Capture area created",
-        )
-
-    item_match_count = [dictionary["rel"] for dictionary in collection.stac["links"]].count("item")
-
-    if not item_match_count:
+    if len(items_to_add) == 0:
         get_log().error(
-            f"Collection {collection_id} has no items",
+            f"Collection {collection_id} has no items. Collection will not be created.",
         )
         raise NoItemsError(f"Collection {collection_id} has no items")
 
-    get_log().info(
-        "Matching items added to collection",
-        item_count=len(files_to_read),
-        item_match_count=item_match_count,
-        duration=time_in_ms() - start_time,
+    collection_metadata: CollectionMetadata = {
+        "category": arguments.category,
+        "region": arguments.region,
+        "gsd": arguments.gsd,
+        "start_datetime": parse_rfc_3339_datetime(start_datetime),
+        "end_datetime": parse_rfc_3339_datetime(end_datetime),
+        "lifecycle": arguments.lifecycle,
+        "geographic_description": arguments.geographic_description,
+        "event_name": arguments.event,
+        "historic_survey_number": arguments.historic_survey_number,
+    }
+
+    collection = create_collection(
+        collection_id,
+        collection_metadata,
+        coalesce_multi_single(arguments.producer_list, arguments.producer),
+        coalesce_multi_single(arguments.licensor_list, arguments.licensor),
+        polygons,
+        arguments.capture_dates,
+        uri,
     )
 
     destination = os.path.join(uri, "collection.json")
     collection.write_to(destination)
-    get_log().info("collection written", destination=destination)
+
+    get_log().info(
+        "Collection created",
+        item_count=len(files_to_read),
+        item_match_count=items_to_add,
+        duration=time_in_ms() - start_time,
+        destination=destination,
+    )
 
 
 if __name__ == "__main__":
