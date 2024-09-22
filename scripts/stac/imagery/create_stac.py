@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
@@ -22,6 +23,7 @@ def create_collection(
     collection_metadata: CollectionMetadata,
     producers: list[str],
     licensors: list[str],
+    stac_items: list[dict[Any, Any]],
     item_polygons: list[BaseGeometry],
     add_capture_dates: bool,
     uri: str,
@@ -53,6 +55,9 @@ def create_collection(
         collection_id=collection_id,
         providers=providers,
     )
+
+    for item in stac_items:
+        collection.add_item(item)
 
     if add_capture_dates:
         collection.add_capture_dates(uri)

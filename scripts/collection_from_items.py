@@ -166,6 +166,7 @@ def main(args: List[str] | None = None) -> None:
         collection_metadata,
         coalesce_multi_single(arguments.producer_list, arguments.producer),
         coalesce_multi_single(arguments.licensor_list, arguments.licensor),
+        items_to_add,
         polygons,
         arguments.capture_dates,
         uri,
