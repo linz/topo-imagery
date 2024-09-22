@@ -1,6 +1,7 @@
 import json
 
 from linz_logger import get_log
+from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
@@ -8,9 +9,61 @@ from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
+
+
+def create_collection(
+    collection_id: str,
+    collection_metadata: CollectionMetadata,
+    producers: list[str],
+    licensors: list[str],
+    item_polygons: list[BaseGeometry],
+    add_capture_dates: bool,
+    uri: str,
+) -> ImageryCollection:
+    """Create an ImageryCollection object.
+    If `item_polygons` is not empty, it will add a generated capture area to the collection.
+
+    Args:
+        collection_id: id of the collection
+        collection_metadata: metadata of the collection
+        producers: producers of the dataset
+        licensors: licensors of the dataset
+        item_polygons: polygons of the items linked to the collection
+        add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
+        uri: path of the dataset
+
+    Returns:
+        an ImageryCollection object
+    """
+    providers: list[Provider] = []
+    for producer_name in producers:
+        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
+    for licensor_name in licensors:
+        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+
+    collection = ImageryCollection(
+        metadata=collection_metadata,
+        now=utc_now,
+        collection_id=collection_id,
+        providers=providers,
+    )
+
+    if add_capture_dates:
+        collection.add_capture_dates(uri)
+
+    if item_polygons:
+        collection.add_capture_area(item_polygons, uri)
+        get_log().info(
+            "Capture area created",
+        )
+
+    return collection
 
 
 def create_item(

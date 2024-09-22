@@ -8,16 +8,14 @@ import shapely.geometry
 import shapely.ops
 from boto3 import client
 from linz_logger import get_log
-from shapely.geometry.base import BaseGeometry
 
 from scripts.cli.cli_helper import coalesce_multi_single
-from scripts.datetimes import parse_rfc_3339_datetime, utc_now
+from scripts.datetimes import parse_rfc_3339_datetime
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.create_stac import create_collection
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
-from scripts.stac.imagery.provider import Provider, ProviderRole
 
 
 class NoItemsError(Exception):
@@ -89,55 +87,6 @@ def parse_args(args: List[str] | None) -> Namespace:
     )
 
     return parser.parse_args(args)
-
-
-def create_collection(
-    collection_id: str,
-    collection_metadata: CollectionMetadata,
-    producers: list[str],
-    licensors: list[str],
-    item_polygons: list[BaseGeometry],
-    add_capture_dates: bool,
-    uri: str,
-) -> ImageryCollection:
-    """Create an ImageryCollection object.
-    If `item_polygons` is not empty, it will add a generated capture area to the collection.
-
-    Args:
-        collection_id: id of the collection
-        collection_metadata: metadata of the collection
-        producers: producers of the dataset
-        licensors: licensors of the dataset
-        item_polygons: polygons of the items linked to the collection
-        add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
-        uri: path of the dataset
-
-    Returns:
-        an ImageryCollection object
-    """
-    providers: list[Provider] = []
-    for producer_name in producers:
-        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in licensors:
-        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
-
-    collection = ImageryCollection(
-        metadata=collection_metadata,
-        now=utc_now,
-        collection_id=collection_id,
-        providers=providers,
-    )
-
-    if add_capture_dates:
-        collection.add_capture_dates(uri)
-
-    if item_polygons:
-        collection.add_capture_area(item_polygons, uri)
-        get_log().info(
-            "Capture area created",
-        )
-
-    return collection
 
 
 # pylint: disable=too-many-locals
