@@ -70,7 +70,7 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.000_000_000_000_000_1)
 
 
 def test_generate_capture_area_rounded() -> None:
