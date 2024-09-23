@@ -155,7 +155,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     with subtests.test(msg="Main links content"):
         assert [
             {"href": "./collection.json", "rel": "self", "type": "application/json"},
-            {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"},
+            {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/geo+json"},
         ] == links
 
     with subtests.test():
