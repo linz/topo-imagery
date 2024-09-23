@@ -223,6 +223,9 @@ def standardising(
                             f"EPSG:{EpsgNumber.WGS_1984.value}",
                             "-max_points",
                             "unlimited",
+                            # Round to 8 decimal places to reduce unnecessary complexity
+                            "-lco",
+                            "COORDINATE_PRECISION=8",
                             "-simplify",
                             str(get_buffer_distance(gsd_to_float(gsd))),
                         ],
