@@ -118,8 +118,7 @@ def main() -> None:
                 # This is to help data analysts to verify the file.
                 original_path: list[str] = file.get_paths_original()
                 standardised_path = file.get_path_standardised()
-                env_argo_template = os.environ.get("ARGO_TEMPLATE")
-                if env_argo_template:
+                if os.environ.get("ARGO_TEMPLATE"):
                     standardised_path = get_vfs_path(file.get_path_standardised())
                     original_s3_path: list[str] = []
                     for path in original_path:
