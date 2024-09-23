@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
@@ -64,7 +65,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",

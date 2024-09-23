@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 from argparse import Namespace
+from decimal import Decimal
 from typing import List
 
 import shapely.geometry
@@ -41,7 +42,7 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=True,
         choices=HUMAN_READABLE_REGIONS.keys(),
     )
-    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=Decimal, required=True)
     parser.add_argument(
         "--geographic-description",
         dest="geographic_description",

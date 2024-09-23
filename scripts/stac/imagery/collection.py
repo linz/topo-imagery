@@ -10,7 +10,7 @@ from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_da
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read, write
 from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.capture_area import generate_capture_area, gsd_to_float
+from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
@@ -103,7 +103,7 @@ class ImageryCollection:
         """
 
         # The GSD is measured in meters (e.g., `0.3m`)
-        capture_area_document = generate_capture_area(polygons, gsd_to_float(self.metadata["gsd"]))
+        capture_area_document = generate_capture_area(polygons, self.metadata["gsd"])
         capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {
@@ -303,7 +303,13 @@ class ImageryCollection:
                 raise MissingMetadataError("historic_survey_number")
             return " ".join(
                 value
-                for value in [imagery_name, self.metadata["gsd"], historic_survey_number, f"({date})", lifecycle_tag]
+                for value in [
+                    imagery_name,
+                    f"{self.metadata['gsd']}{GSD_UNIT}",
+                    historic_survey_number,
+                    f"({date})",
+                    lifecycle_tag,
+                ]
                 if value is not None
             )
 
@@ -316,7 +322,7 @@ class ImageryCollection:
                 value
                 for value in [
                     imagery_name,
-                    self.metadata["gsd"],
+                    f"{self.metadata['gsd']}{GSD_UNIT}",
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
                     lifecycle_tag,
@@ -330,7 +336,7 @@ class ImageryCollection:
                     region,
                     elevation_description,
                     "LiDAR",
-                    self.metadata["gsd"],
+                    f"{self.metadata['gsd']}{GSD_UNIT}",
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
                     lifecycle_tag,
@@ -376,3 +382,6 @@ class ImageryCollection:
             desc = desc + f", published as a record of the {event} event"
 
         return desc + "."
+
+
+GSD_UNIT = "m"

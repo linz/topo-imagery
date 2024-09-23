@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from decimal import Decimal
 
 from linz_logger import get_log
 
@@ -38,7 +39,7 @@ def main() -> None:
         required=True,
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
-    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset", type=str, required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=Decimal, required=True)
     parser.add_argument(
         "--create-footprints",
         dest="create_footprints",
