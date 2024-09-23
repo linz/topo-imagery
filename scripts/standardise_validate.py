@@ -22,10 +22,7 @@ def str_to_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
 
 
-def main() -> None:
-    # pylint: disable-msg=too-many-locals
-    # pylint: disable-msg=too-many-branches
-    # pylint: disable-msg=too-many-statements
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument(
@@ -61,7 +58,13 @@ def main() -> None:
         type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
-    arguments = parser.parse_args()
+    return parser.parse_args()
+
+
+def main() -> None:
+    # pylint: disable-msg=too-many-locals
+    # pylint: disable-msg=too-many-branches
+    arguments = parse_args()
 
     try:
         tile_files = load_input_files(arguments.from_file)
