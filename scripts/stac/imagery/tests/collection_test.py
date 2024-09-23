@@ -25,7 +25,6 @@ from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
-# pylint: disable=duplicate-code
 @pytest.fixture(name="metadata", autouse=True)
 def setup() -> Generator[CollectionMetadata, None, None]:
     metadata: CollectionMetadata = {
