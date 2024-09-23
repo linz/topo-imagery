@@ -6,6 +6,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
 from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
+from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
@@ -61,9 +62,27 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def report_non_visual_qa_errors(file: FileTiff) -> None:
+    # If the file is not valid (Non Visual QA errors)
+    # Logs the `vsis3` path to use `gdal` on the file directly from `s3`
+    # This is to help data analysts to verify the file.
+    original_path: list[str] = file.get_paths_original()
+    standardised_path = file.get_path_standardised()
+    if os.environ.get("ARGO_TEMPLATE"):
+        standardised_path = get_vfs_path(file.get_path_standardised())
+        original_s3_path: list[str] = []
+        for path in original_path:
+            original_s3_path.append(get_vfs_path(path))
+        original_path = original_s3_path
+    get_log().info(
+        "non_visual_qa_errors",
+        originalPath=",".join(original_path),
+        standardisedPath=standardised_path,
+        errors=file.get_errors(),
+    )
+
+
 def main() -> None:
-    # pylint: disable-msg=too-many-locals
-    # pylint: disable-msg=too-many-branches
     arguments = parse_args()
 
     try:
@@ -113,23 +132,7 @@ def main() -> None:
 
             # Validate the file
             if not file.validate():
-                # If the file is not valid (Non Visual QA errors)
-                # Logs the `vsis3` path to use `gdal` on the file directly from `s3`
-                # This is to help data analysts to verify the file.
-                original_path: list[str] = file.get_paths_original()
-                standardised_path = file.get_path_standardised()
-                if os.environ.get("ARGO_TEMPLATE"):
-                    standardised_path = get_vfs_path(file.get_path_standardised())
-                    original_s3_path: list[str] = []
-                    for path in original_path:
-                        original_s3_path.append(get_vfs_path(path))
-                    original_path = original_s3_path
-                get_log().info(
-                    "non_visual_qa_errors",
-                    originalPath=",".join(original_path),
-                    standardisedPath=standardised_path,
-                    errors=file.get_errors(),
-                )
+                report_non_visual_qa_errors(file)
             else:
                 get_log().info("non_visual_qa_passed", path=file.get_path_standardised())
 
