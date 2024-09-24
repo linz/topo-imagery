@@ -163,7 +163,7 @@ class ImageryCollection:
                 Link(
                     path=item_self_link["href"],
                     rel=Relation.ITEM,
-                    media_type=StacMediaType.JSON,
+                    media_type=StacMediaType.GEOJSON,
                     file_content=dict_to_json_bytes(item),
                 ).stac
             )
