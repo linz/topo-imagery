@@ -36,6 +36,7 @@ def create_collection(
         collection_metadata: metadata of the collection
         producers: producers of the dataset
         licensors: licensors of the dataset
+        stac_items: items to link to the collection
         item_polygons: polygons of the items linked to the collection
         add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
         uri: path of the dataset
