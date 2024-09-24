@@ -56,7 +56,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         )
 
     with subtests.test():
-        assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "self", "href": f"./{id_}.json", "type": "application/geo+json"} in item.stac["links"]
 
 
 # pylint: disable=duplicate-code
