@@ -162,14 +162,14 @@ def main(args: List[str] | None = None) -> None:
     }
 
     collection = create_collection(
-        collection_id,
-        collection_metadata,
-        coalesce_multi_single(arguments.producer_list, arguments.producer),
-        coalesce_multi_single(arguments.licensor_list, arguments.licensor),
-        items_to_add,
-        polygons,
-        arguments.capture_dates,
-        uri,
+        collection_id=collection_id,
+        collection_metadata=collection_metadata,
+        producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
+        licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
+        stac_items=items_to_add,
+        item_polygons=polygons,
+        add_capture_dates=arguments.capture_dates,
+        uri=uri,
     )
 
     destination = os.path.join(uri, "collection.json")
