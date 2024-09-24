@@ -138,7 +138,7 @@ def main(args: List[str] | None = None) -> None:
                 start_datetime = content["properties"]["start_datetime"]
             if not end_datetime or content["properties"]["end_datetime"] > end_datetime:
                 end_datetime = content["properties"]["end_datetime"]
-            get_log().info("Item added to Collection", item=content["id"], file=key)
+            get_log().info("Item will be added to Collection", item=content["id"], file=key)
         elif key.endswith(SUFFIX_FOOTPRINT):
             get_log().debug(f"adding geometry from {key}")
             polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
