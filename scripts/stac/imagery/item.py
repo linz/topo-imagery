@@ -24,7 +24,7 @@ class ImageryItem:
             "type": "Feature",
             "stac_version": STAC_VERSION,
             "id": id_,
-            "links": [Link(path=f"./{id_}.json", rel=Relation.SELF, media_type=StacMediaType.JSON).stac],
+            "links": [Link(path=f"./{id_}.json", rel=Relation.SELF, media_type=StacMediaType.GEOJSON).stac],
             "assets": {
                 "visual": {
                     "href": os.path.join(".", os.path.basename(file)),

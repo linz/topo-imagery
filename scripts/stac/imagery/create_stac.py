@@ -54,7 +54,12 @@ def create_item(
                 start_datetime = min(start_datetime, derived_stac["properties"]["start_datetime"])
                 end_datetime = max(end_datetime, derived_stac["properties"]["end_datetime"])
             item.add_link(
-                Link(path=derived, rel=Relation.DERIVED_FROM, media_type=StacMediaType.JSON, file_content=derived_item_content)
+                Link(
+                    path=derived,
+                    rel=Relation.DERIVED_FROM,
+                    media_type=StacMediaType.GEOJSON,
+                    file_content=derived_item_content,
+                )
             )
 
     item.update_datetime(start_datetime, end_datetime)
