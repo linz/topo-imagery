@@ -27,7 +27,7 @@ jobs:
 
       - name: Build containers
         run: |
-          docker build --build-arg=GIT_HASH=test --build-arg=GIT_VERSION=test --label "github_run_id=${GITHUB_RUN_ID}" --tag topo-imagery .
+          docker build --label "github_run_id=${GITHUB_RUN_ID}" --tag topo-imagery .
 
       - name: End to end test - Aerial Imagery
         run: |

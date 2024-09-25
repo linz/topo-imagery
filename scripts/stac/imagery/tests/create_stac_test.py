@@ -1,8 +1,6 @@
 import json
-from os import environ
 from pathlib import Path
 from typing import cast
-from unittest.mock import patch
 
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.create_stac import create_item
@@ -20,16 +18,15 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = create_item(
-            "./scripts/tests/data/empty.tiff",
-            "",
-            "",
-            "abc123",
-            "any GDAL version",
-            fake_gdal_info,
-            [derived_from_path.as_posix()],
-        )
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        fake_gdal_info,
+        [derived_from_path.as_posix()],
+    )
 
     assert {
         "href": derived_from_path.as_posix(),
@@ -58,16 +55,15 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = create_item(
-            "./scripts/tests/data/empty.tiff",
-            "",
-            "",
-            "abc123",
-            "any GDAL version",
-            fake_gdal_info,
-            [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
-        )
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        fake_gdal_info,
+        [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
+    )
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"

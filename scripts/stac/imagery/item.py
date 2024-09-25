@@ -21,6 +21,11 @@ class ImageryItem:
         file_content = fs.read(file)
         file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
         now_string = format_rfc_3339_datetime_string(now())
+        if (topo_imagery_hash := environ.get("GIT_HASH")) is not None:
+            commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
+        else:
+            commit_url = "GIT_HASH not specified"
+
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -40,11 +45,8 @@ class ImageryItem:
                 "created": now_string,
                 "updated": now_string,
                 "processing:datetime": now_string,
-                "processing:software": {
-                    "gdal": gdal_version,
-                    "linz/topo-imagery": f"https://github.com/linz/topo-imagery/commit/{environ['GIT_HASH']}",
-                },
-                "processing:version": environ["GIT_VERSION"],
+                "processing:software": {"gdal": gdal_version, "linz/topo-imagery": commit_url},
+                "processing:version": environ.get("GIT_VERSION", "GIT_VERSION not specified"),
             },
         }
 

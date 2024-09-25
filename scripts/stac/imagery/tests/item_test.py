@@ -108,8 +108,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = ImageryItem(id_, path, "any GDAL version", any_epoch_datetime)
+    item = ImageryItem(id_, path, "any GDAL version", any_epoch_datetime)
 
     item.add_collection(collection.stac["id"])
 
@@ -121,3 +120,13 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
 
     with subtests.test():
         assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+
+
+def test_should_set_fallback_version_strings(subtests: SubTests) -> None:
+    item = ImageryItem("any ID", "./scripts/tests/data/empty.tiff", "any GDAL version", any_epoch_datetime)
+
+    with subtests.test():
+        assert item.stac["properties"]["processing:software"]["linz/topo-imagery"] == "GIT_HASH not specified"
+
+    with subtests.test():
+        assert item.stac["properties"]["processing:version"] == "GIT_VERSION not specified"
