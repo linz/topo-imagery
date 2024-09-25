@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.11.2](https://github.com/linz/topo-imagery/compare/v4.11.1...v4.11.2) (2024-09-24)
+
+
+### Bug Fixes
+
+* Use GeoJSON media type for item links TDE-1254 ([#1086](https://github.com/linz/topo-imagery/issues/1086)) ([57dd0a8](https://github.com/linz/topo-imagery/commit/57dd0a86566e739a16c124be6ef24aca99565b79))
+
 ## [4.11.1](https://github.com/linz/topo-imagery/compare/v4.11.0...v4.11.1) (2024-09-19)
 
 
