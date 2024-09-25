@@ -63,9 +63,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def report_non_visual_qa_errors(file: FileTiff) -> None:
-    # If the file is not valid (Non Visual QA errors)
-    # Logs the `vsis3` path to use `gdal` on the file directly from `s3`
-    # This is to help data analysts to verify the file.
+    """
+    If the file is not valid (Non Visual QA errors) logs the `vsis3` path to use `gdal` on the file directly from `s3`.
+    This is to help data analysts to verify the file.
+    """
     original_path: list[str] = file.get_paths_original()
     standardised_path = file.get_path_standardised()
     if os.environ.get("ARGO_TEMPLATE"):
