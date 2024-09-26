@@ -1,6 +1,8 @@
 import argparse
 import json
+import warnings
 from datetime import datetime
+from decimal import Decimal
 from os import environ
 from typing import NamedTuple
 
@@ -120,3 +122,15 @@ def coalesce_multi_single(multi_items: str | None, single_item: str | None) -> l
     elif single_item:
         output.append(single_item)
     return output
+
+
+def str_to_gsd(value: str) -> Decimal:
+    number_value = value.removesuffix("m")
+    if number_value != value:
+        warnings.warn(
+            "Specifying GSD with a trailing 'm' character will not be supported in future versions. "
+            "Please use a plain decimal number like '0.3' instead.",
+            DeprecationWarning,
+        )
+
+    return Decimal(number_value)

@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import TypedDict
 
 
@@ -19,7 +20,7 @@ class CollectionMetadata(TypedDict):
 
     category: str
     region: str
-    gsd: str
+    gsd: Decimal
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
