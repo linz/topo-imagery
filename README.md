@@ -53,7 +53,7 @@ Run `docker run topo-imagery python standardise_validate.py --help` to get the l
 - Example of local execution. This example uses the test data available on this repo and create the output will be created in a `~/tmp/` on the local machine (volume share with `Docker`):
 
 ```bash
-docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --from-file ./tests/data/aerial.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/ --source-epsg 2193 --target-epsg 2193 --gsd 10m --create-footprints=true
+docker run -v ${HOME}/tmp/:/tmp/:rw topo-imagery python standardise_validate.py --preset webp --from-file ./tests/data/aerial.json --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --target /tmp/ --source-epsg 2193 --target-epsg 2193 --gsd 10 --create-footprints=true
 ```
 
 To use an AWS test dataset (input located in an AWS S3 bucket), log into the AWS account and add the following arguments to the `docker run` command:
