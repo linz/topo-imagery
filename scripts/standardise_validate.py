@@ -1,11 +1,10 @@
 import argparse
 import os
 import sys
-from decimal import Decimal
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
+from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
 from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
@@ -39,7 +38,7 @@ def main() -> None:
         required=True,
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
-    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=Decimal, required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
     parser.add_argument(
         "--create-footprints",
         dest="create_footprints",

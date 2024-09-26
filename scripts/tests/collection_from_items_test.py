@@ -53,7 +53,7 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1",
+        "1m",
         "--start-date",
         "2023-09-20",
         "--end-date",

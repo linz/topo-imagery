@@ -2,7 +2,6 @@ import argparse
 import json
 import os
 from argparse import Namespace
-from decimal import Decimal
 from typing import List
 
 import shapely.geometry
@@ -10,7 +9,7 @@ import shapely.ops
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, valid_date
+from scripts.cli.cli_helper import coalesce_multi_single, str_to_gsd, valid_date
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
@@ -42,7 +41,7 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=True,
         choices=HUMAN_READABLE_REGIONS.keys(),
     )
-    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=Decimal, required=True)
+    parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
     parser.add_argument(
         "--geographic-description",
         dest="geographic_description",
