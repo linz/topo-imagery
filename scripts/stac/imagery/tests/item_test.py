@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from decimal import Decimal
 from os import environ
 from unittest.mock import patch
 
@@ -86,7 +87,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         )
 
     with subtests.test():
-        assert {"rel": "self", "href": f"./{id_}.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "self", "href": f"./{id_}.json", "type": "application/geo+json"} in item.stac["links"]
 
 
 # pylint: disable=duplicate-code
@@ -94,7 +95,7 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",

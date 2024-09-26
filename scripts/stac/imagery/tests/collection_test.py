@@ -3,6 +3,7 @@ import os
 import tempfile
 from collections.abc import Callable, Generator
 from datetime import datetime, timezone
+from decimal import Decimal
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -31,7 +32,7 @@ def setup() -> Generator[CollectionMetadata, None, None]:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2022, 2, 2),
         "end_datetime": datetime(2022, 2, 2),
         "lifecycle": "completed",
@@ -155,7 +156,7 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
     with subtests.test(msg="Main links content"):
         assert [
             {"href": "./collection.json", "rel": "self", "type": "application/json"},
-            {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/json"},
+            {"rel": "item", "href": "./BR34_5000_0304.json", "type": "application/geo+json"},
         ] == links
 
     with subtests.test():

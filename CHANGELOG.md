@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.11.2](https://github.com/linz/topo-imagery/compare/v4.11.1...v4.11.2) (2024-09-24)
+
+
+### Bug Fixes
+
+* Use GeoJSON media type for item links TDE-1254 ([#1086](https://github.com/linz/topo-imagery/issues/1086)) ([57dd0a8](https://github.com/linz/topo-imagery/commit/57dd0a86566e739a16c124be6ef24aca99565b79))
+
+## [4.11.1](https://github.com/linz/topo-imagery/compare/v4.11.0...v4.11.1) (2024-09-19)
+
+
+### Bug Fixes
+
+* Don't attempt to install project inside virtualenv ([#1074](https://github.com/linz/topo-imagery/issues/1074)) ([dd989d0](https://github.com/linz/topo-imagery/commit/dd989d0500c3edc8eb847be86848a4ae9d54c8e2))
+* start_datetime and end_datetime must be init if derived_from TDE-1258 ([#1079](https://github.com/linz/topo-imagery/issues/1079)) ([f0c8a4e](https://github.com/linz/topo-imagery/commit/f0c8a4e634ceb1359a1167368d69a955b04481bb))
+
 ## [4.11.0](https://github.com/linz/topo-imagery/compare/v4.10.0...v4.11.0) (2024-09-15)
 
 

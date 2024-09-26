@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from datetime import datetime
+from decimal import Decimal
 from os import environ
 from unittest.mock import patch
 
@@ -100,7 +101,7 @@ def test_should_fail_if_collection_has_no_matching_items(
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1m",
+        "1",
         "--start-date",
         "2023-09-20",
         "--end-date",
@@ -136,7 +137,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "hawkes-bay",
-        "gsd": "1m",
+        "gsd": Decimal("1"),
         "start_datetime": datetime(2023, 9, 20),
         "end_datetime": datetime(2023, 9, 20),
         "lifecycle": "ongoing",
@@ -157,7 +158,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1m",
+        "1",
         "--start-date",
         "2023-09-20",
         "--end-date",

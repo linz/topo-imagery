@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from datetime import datetime
+from decimal import Decimal
 
 import pytest
 
@@ -14,7 +15,7 @@ def setup() -> Generator[tuple[CollectionMetadata, CollectionMetadata], None, No
     metadata_auck: CollectionMetadata = {
         "category": "rural-aerial-photos",
         "region": "auckland",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
@@ -25,7 +26,7 @@ def setup() -> Generator[tuple[CollectionMetadata, CollectionMetadata], None, No
     metadata_hb: CollectionMetadata = {
         "category": "rural-aerial-photos",
         "region": "hawkes-bay",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",

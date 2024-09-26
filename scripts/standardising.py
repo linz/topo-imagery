@@ -1,5 +1,6 @@
 import os
 import tempfile
+from decimal import Decimal
 from functools import partial
 from multiprocessing import Pool
 
@@ -21,7 +22,7 @@ from scripts.gdal.gdal_preset import (
     get_transform_srs_command,
 )
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.capture_area import get_buffer_distance, gsd_to_float
+from scripts.stac.imagery.capture_area import get_buffer_distance
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
@@ -32,7 +33,7 @@ def run_standardising(
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
-    gsd: str,
+    gsd: Decimal,
     create_footprints: bool,
     gdal_version: str,
     target_output: str = "/tmp/",
@@ -108,7 +109,7 @@ def standardising(
     preset: str,
     source_epsg: str,
     target_epsg: str,
-    gsd: str,
+    gsd: Decimal,
     create_footprints: bool,
     cutline: str | None,
     target_output: str = "/tmp/",
@@ -225,7 +226,7 @@ def standardising(
                             "-max_points",
                             "unlimited",
                             "-simplify",
-                            str(get_buffer_distance(gsd_to_float(gsd))),
+                            str(get_buffer_distance(gsd)),
                         ],
                         standardized_working_path,
                         footprint_tmp_path,

@@ -31,7 +31,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
     assert {
         "href": derived_from_path.as_posix(),
         "rel": "derived_from",
-        "type": "application/json",
+        "type": "application/geo+json",
         "file:checksum": "12209c3d50f21fdd739de5c76b3c7ca60ee7f5cf69c2cf92b1d0136308cf63d9c5d5",
     } in item.stac["links"]
 
