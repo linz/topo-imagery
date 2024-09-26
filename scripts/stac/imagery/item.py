@@ -1,6 +1,7 @@
 import os
 from collections.abc import Callable
 from datetime import datetime
+from os import environ
 from typing import Any
 
 from scripts.datetimes import format_rfc_3339_datetime_string
@@ -16,10 +17,15 @@ from scripts.stac.util.stac_extensions import StacExtensions
 class ImageryItem:
     stac: dict[str, Any]
 
-    def __init__(self, id_: str, file: str, now: Callable[[], datetime]) -> None:
+    def __init__(self, id_: str, file: str, gdal_version: str, now: Callable[[], datetime]) -> None:
         file_content = fs.read(file)
         file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
         now_string = format_rfc_3339_datetime_string(now())
+        if (topo_imagery_hash := environ.get("GIT_HASH")) is not None:
+            commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
+        else:
+            commit_url = "GIT_HASH not specified"
+
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -34,8 +40,14 @@ class ImageryItem:
                     "updated": file_modified_datetime,
                 }
             },
-            "stac_extensions": [StacExtensions.file.value],
-            "properties": {"created": now_string, "updated": now_string},
+            "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
+            "properties": {
+                "created": now_string,
+                "updated": now_string,
+                "processing:datetime": now_string,
+                "processing:software": {"gdal": gdal_version, "linz/topo-imagery": commit_url},
+                "processing:version": environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+            },
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:

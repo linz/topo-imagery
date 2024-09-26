@@ -1,6 +1,8 @@
 from collections.abc import Generator
 from datetime import datetime
 from decimal import Decimal
+from os import environ
+from unittest.mock import patch
 
 import pytest
 from boto3 import client, resource
@@ -21,7 +23,8 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 @pytest.fixture(name="item", autouse=True)
 def setup() -> Generator[ImageryItem, None, None]:
     # Create mocked STAC Item
-    item = ImageryItem("123", "./scripts/tests/data/empty.tiff", utc_now)
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
+        item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", utc_now)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
