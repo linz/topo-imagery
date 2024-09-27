@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import Generator
 
 import pytest
@@ -11,7 +12,7 @@ def fake_collection_metadata() -> Generator[CollectionMetadata, None, None]:
     collection_metadata: CollectionMetadata = {
         "category": "rural-aerial-photos",
         "region": "hawkes-bay",
-        "gsd": "0.3m",
+        "gsd": Decimal("0.3"),
         "start_datetime": datetime(2023, 1, 1),
         "end_datetime": datetime(2023, 2, 2),
         "lifecycle": "completed",
