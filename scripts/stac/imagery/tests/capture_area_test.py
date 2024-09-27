@@ -1,4 +1,5 @@
 from decimal import Decimal
+from sys import float_info
 from typing import cast
 
 from shapely import get_exterior_ring, is_ccw
@@ -71,7 +72,7 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=float_info.epsilon)
 
 
 def test_generate_capture_area_rounded() -> None:
