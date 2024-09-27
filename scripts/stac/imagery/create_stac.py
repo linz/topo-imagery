@@ -77,6 +77,7 @@ def create_item(
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
+    gdal_version: str,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
 ) -> ImageryItem:
@@ -87,6 +88,7 @@ def create_item(
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
+        gdal_version: GDAL version
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
 
@@ -100,7 +102,7 @@ def create_item(
 
     geometry, bbox = get_extents(gdalinfo_result)
 
-    item = ImageryItem(id_, file, utc_now)
+    item = ImageryItem(id_, file, gdal_version, utc_now)
 
     if derived_from is not None:
         for derived in derived_from:

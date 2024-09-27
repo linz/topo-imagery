@@ -1,3 +1,5 @@
+from decimal import Decimal
+from sys import float_info
 from typing import cast
 
 from shapely import get_exterior_ring, is_ccw
@@ -70,7 +72,7 @@ def test_merge_polygons_with_rounding_margin_too_big() -> None:
     print(f"GeoJSON expected: {to_feature(expected_merged_polygon)}")
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
-    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
+    assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=float_info.epsilon)
 
 
 def test_generate_capture_area_rounded() -> None:
@@ -84,9 +86,9 @@ def test_generate_capture_area_rounded() -> None:
 
     # Using GSD of 0.2m
     # Generate the capture area of the polygons that don't have a gap between each other
-    capture_area_expected = generate_capture_area(polygons_no_gap, 0.2)
+    capture_area_expected = generate_capture_area(polygons_no_gap, Decimal("0.2"))
     # Generate the capture area of the polygons that have a gap between each other
-    capture_area_result = generate_capture_area(polygon_with_gap, 0.2)
+    capture_area_result = generate_capture_area(polygon_with_gap, Decimal("0.2"))
     print(f"Polygon no gap A: {to_feature(polygons_no_gap[0])}")
     print(f"Polygon no gap B: {to_feature(polygons_no_gap[1])}")
     print(f"Polygon with gap A: {to_feature(polygon_with_gap[0])}")
@@ -110,9 +112,9 @@ def test_generate_capture_area_not_rounded() -> None:
 
     # Using GSD of 0.2m
     # Generate the capture area of the polygons that don't have a gap between each other
-    capture_area_expected = generate_capture_area(polygons_no_gap, 0.2)
+    capture_area_expected = generate_capture_area(polygons_no_gap, Decimal("0.2"))
     # Generate the capture area of the polygons that have a gap between each other
-    capture_area_result = generate_capture_area(polygon_with_gap, 0.2)
+    capture_area_result = generate_capture_area(polygon_with_gap, Decimal("0.2"))
 
     print(f"Polygon no gap A: {to_feature(polygons_no_gap[0])}")
     print(f"Polygon no gap B: {to_feature(polygons_no_gap[1])}")
@@ -146,7 +148,7 @@ def test_capture_area_orientation_polygon() -> None:
             }
         )
     )
-    capture_area = generate_capture_area(polygons, 0.05)
+    capture_area = generate_capture_area(polygons, Decimal("0.05"))
     assert is_ccw(get_exterior_ring(shape(capture_area["geometry"])))
 
 
@@ -185,6 +187,6 @@ def test_capture_area_orientation_multipolygon() -> None:
             }
         )
     )
-    capture_area = generate_capture_area(polygons, 0.05)
+    capture_area = generate_capture_area(polygons, Decimal("0.05"))
     mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
     assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))

@@ -18,7 +18,6 @@ def test_generate_description_elevation(fake_collection_metadata: CollectionMeta
 
 def test_generate_description_elevation_geographic_description_input(fake_collection_metadata: CollectionMetadata) -> None:
     fake_collection_metadata["category"] = "dem"
-    fake_collection_metadata["category"] = "dem"
     fake_collection_metadata["geographic_description"] = "Central"
     collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     description = "Digital Elevation Model within the Hawke's Bay region captured in 2023."

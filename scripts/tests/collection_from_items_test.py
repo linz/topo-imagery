@@ -1,5 +1,8 @@
 from collections.abc import Generator
 from datetime import datetime
+from decimal import Decimal
+from os import environ
+from unittest.mock import patch
 
 import pytest
 from boto3 import client, resource
@@ -20,7 +23,8 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 @pytest.fixture(name="item", autouse=True)
 def setup() -> Generator[ImageryItem, None, None]:
     # Create mocked STAC Item
-    item = ImageryItem("123", "./scripts/tests/data/empty.tiff", utc_now)
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
+        item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", utc_now)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
@@ -93,7 +97,7 @@ def test_should_fail_if_collection_has_no_matching_items(
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1m",
+        "1",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -125,7 +129,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "hawkes-bay",
-        "gsd": "1m",
+        "gsd": Decimal("1"),
         "start_datetime": datetime(2023, 9, 20),
         "end_datetime": datetime(2023, 9, 20),
         "lifecycle": "ongoing",
@@ -146,7 +150,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1m",
+        "1",
         "--lifecycle",
         "ongoing",
         "--producer",

@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
@@ -8,29 +9,13 @@ from shapely.ops import orient
 
 from scripts.logging.time_helper import time_in_ms
 
-DECIMAL_DEGREES_1M = 0.00001
+DECIMAL_DEGREES_1M = Decimal("0.00001")
 """
 Degree precision of ~1m (decimal places 5, https://en.wikipedia.org/wiki/Decimal_degrees)
 """
 
 
-def gsd_to_float(gsd: str) -> float:
-    """Transform the gsd from its string/human readable format to a float.
-
-    Args:
-        gsd: gsd as it's passed to the cli
-
-    Returns:
-        gsd as a float
-
-    Examples:
-        >>> gsd_to_float("0.2m")
-        0.2
-    """
-    return float(gsd.replace("m", ""))
-
-
-def get_buffer_distance(gsd: float) -> float:
+def get_buffer_distance(gsd: Decimal) -> float:
     """The `gsd` (in meters) is multiplied by 2 and then by the 1m degree of precision.
     A `buffer factor` of 2 was decided on after experimenting with different outputs,
     details of this can be found in TDE-1049.
@@ -41,7 +26,7 @@ def get_buffer_distance(gsd: float) -> float:
     Returns:
         buffer distance as a float
     """
-    return gsd * 2 * DECIMAL_DEGREES_1M
+    return float(gsd * 2 * DECIMAL_DEGREES_1M)
 
 
 def to_feature(geometry: BaseGeometry) -> dict[str, Any]:
@@ -84,7 +69,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     return oriented_union_simplified
 
 
-def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: float) -> dict[str, Any]:
+def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: Decimal) -> dict[str, Any]:
     """Generate the capture area from a list of BaseGeometries.
     Providing the `gsd` allows to round the geometry as we've seen some tiffs
     geometry being slightly off, sometimes due to rounding issue in their

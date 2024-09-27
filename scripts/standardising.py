@@ -1,5 +1,6 @@
 import os
 import tempfile
+from decimal import Decimal
 from functools import partial
 from multiprocessing import Pool
 
@@ -12,7 +13,7 @@ from scripts.files.file_tiff import FileTiff, FileTiffType
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import EpsgNumber, gdal_info, get_gdal_version, run_gdal
+from scripts.gdal.gdal_helper import EpsgNumber, gdal_info, run_gdal
 from scripts.gdal.gdal_preset import (
     get_alpha_command,
     get_build_vrt_command,
@@ -21,7 +22,7 @@ from scripts.gdal.gdal_preset import (
     get_transform_srs_command,
 )
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.capture_area import get_buffer_distance, gsd_to_float
+from scripts.stac.imagery.capture_area import get_buffer_distance
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
@@ -32,8 +33,9 @@ def run_standardising(
     concurrency: int,
     source_epsg: str,
     target_epsg: str,
-    gsd: str,
+    gsd: Decimal,
     create_footprints: bool,
+    gdal_version: str,
     target_output: str = "/tmp/",
 ) -> list[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
@@ -46,6 +48,7 @@ def run_standardising(
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
         gsd: Ground Sample Distance in meters
+        gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
 
     Returns:
@@ -54,7 +57,6 @@ def run_standardising(
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
 
-    gdal_version = get_gdal_version()
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(todo))
 
     with Pool(concurrency) as p:
@@ -107,7 +109,7 @@ def standardising(
     preset: str,
     source_epsg: str,
     target_epsg: str,
-    gsd: str,
+    gsd: Decimal,
     create_footprints: bool,
     cutline: str | None,
     target_output: str = "/tmp/",
@@ -224,7 +226,7 @@ def standardising(
                             "-max_points",
                             "unlimited",
                             "-simplify",
-                            str(get_buffer_distance(gsd_to_float(gsd))),
+                            str(get_buffer_distance(gsd)),
                         ],
                         standardized_working_path,
                         footprint_tmp_path,
