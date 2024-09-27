@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import cast
 
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.create_stac import create_item
+from scripts.stac.imagery.create_stac import create_collection, create_item
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
 def test_create_item_with_derived_from(tmp_path: Path) -> None:
@@ -58,3 +59,20 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
+
+
+def test_create_collection(fake_collection_metadata: CollectionMetadata) -> None:
+    collection_id = "test_collection"
+
+    collection = create_collection(
+        collection_id=collection_id,
+        collection_metadata=fake_collection_metadata,
+        producers=[],
+        licensors=[],
+        stac_items=[],
+        item_polygons=[],
+        add_capture_dates=False,
+        uri="test",
+    )
+
+    assert collection.stac["id"] == collection_id

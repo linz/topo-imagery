@@ -1,6 +1,8 @@
 import json
+from typing import Any
 
 from linz_logger import get_log
+from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
@@ -8,9 +10,66 @@ from scripts.files.fs import read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
+
+
+def create_collection(
+    collection_id: str,
+    collection_metadata: CollectionMetadata,
+    producers: list[str],
+    licensors: list[str],
+    stac_items: list[dict[Any, Any]],
+    item_polygons: list[BaseGeometry],
+    add_capture_dates: bool,
+    uri: str,
+) -> ImageryCollection:
+    """Create an ImageryCollection object.
+    If `item_polygons` is not empty, it will add a generated capture area to the collection.
+
+    Args:
+        collection_id: id of the collection
+        collection_metadata: metadata of the collection
+        producers: producers of the dataset
+        licensors: licensors of the dataset
+        stac_items: items to link to the collection
+        item_polygons: polygons of the items linked to the collection
+        add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
+        uri: path of the dataset
+
+    Returns:
+        an ImageryCollection object
+    """
+    providers: list[Provider] = []
+    for producer_name in producers:
+        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
+    for licensor_name in licensors:
+        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+
+    collection = ImageryCollection(
+        metadata=collection_metadata,
+        now=utc_now,
+        collection_id=collection_id,
+        providers=providers,
+    )
+
+    for item in stac_items:
+        collection.add_item(item)
+
+    if add_capture_dates:
+        collection.add_capture_dates(uri)
+
+    if item_polygons:
+        collection.add_capture_area(item_polygons, uri)
+        get_log().info(
+            "Capture area created",
+        )
+
+    return collection
 
 
 def create_item(
@@ -47,12 +106,10 @@ def create_item(
         for derived in derived_from:
             derived_item_content = read(derived)
             derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            if not start_datetime and not end_datetime:
+            if not start_datetime or derived_stac["properties"]["start_datetime"] < start_datetime:
                 start_datetime = derived_stac["properties"]["start_datetime"]
+            if not end_datetime or derived_stac["properties"]["end_datetime"] > end_datetime:
                 end_datetime = derived_stac["properties"]["end_datetime"]
-            else:
-                start_datetime = min(start_datetime, derived_stac["properties"]["start_datetime"])
-                end_datetime = max(end_datetime, derived_stac["properties"]["end_datetime"])
             item.add_link(
                 Link(
                     path=derived,
