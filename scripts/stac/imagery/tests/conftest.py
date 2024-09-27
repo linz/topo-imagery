@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Generator
+from typing import Iterator
 
 import pytest
 
@@ -8,7 +8,7 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
 @pytest.fixture(autouse=True)
-def fake_collection_metadata() -> Generator[CollectionMetadata, None, None]:
+def fake_collection_metadata() -> Iterator[CollectionMetadata]:
     collection_metadata: CollectionMetadata = {
         "category": "rural-aerial-photos",
         "region": "hawkes-bay",
