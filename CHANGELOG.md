@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.0.0](https://github.com/linz/topo-imagery/compare/v4.11.2...v5.0.0) (2024-09-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* dates from item TDE-1258 ([#1099](https://github.com/linz/topo-imagery/issues/1099))
+* Auto-fill GSD unit TDE-1211 ([#1089](https://github.com/linz/topo-imagery/issues/1089))
+
+### Features
+
+* Add topo-imagery version information to STAC TDE-1265 ([#1080](https://github.com/linz/topo-imagery/issues/1080)) ([2039606](https://github.com/linz/topo-imagery/commit/20396060cdc5218f4ccd66a182195fb70f896837))
+* Auto-fill GSD unit TDE-1211 ([#1089](https://github.com/linz/topo-imagery/issues/1089)) ([df257c9](https://github.com/linz/topo-imagery/commit/df257c9b6c81224df5626097c4a906b353aed4aa))
+* dates from item TDE-1258 ([#1099](https://github.com/linz/topo-imagery/issues/1099)) ([8aabe64](https://github.com/linz/topo-imagery/commit/8aabe6488de8382a953d5d3fd1c7d1b8ae69415b))
+
 ## [4.11.2](https://github.com/linz/topo-imagery/compare/v4.11.1...v4.11.2) (2024-09-24)
 
 
