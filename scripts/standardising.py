@@ -47,6 +47,7 @@ def run_standardising(
         concurrency: number of concurrent files to process
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
+        create_footprints: Whether to create footprints
         gsd: Ground Sample Distance in meters
         gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
@@ -122,6 +123,7 @@ def standardising(
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
         gsd: Ground Sample Distance in meters
+        create_footprints: Whether to create footprints
         cutline: path to the cutline. Must be `.fgb` or `.geojson`
         target_output: output directory path. Defaults to "/tmp/"
 
