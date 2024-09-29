@@ -1,13 +1,11 @@
 import json
 import os
 import tempfile
-from collections.abc import Callable, Generator
+from collections.abc import Callable
 from datetime import datetime, timezone
-from decimal import Decimal
 from shutil import rmtree
 from tempfile import mkdtemp
 
-import pytest
 import shapely.geometry
 from boto3 import resource
 from moto import mock_aws
@@ -26,42 +24,27 @@ from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
-# pylint: disable=duplicate-code
-@pytest.fixture(name="metadata", autouse=True)
-def setup() -> Generator[CollectionMetadata, None, None]:
-    metadata: CollectionMetadata = {
-        "category": "urban-aerial-photos",
-        "region": "auckland",
-        "gsd": Decimal("0.3"),
-        "start_datetime": datetime(2022, 2, 2),
-        "end_datetime": datetime(2022, 2, 2),
-        "lifecycle": "completed",
-        "event_name": "Forest Assessment",
-        "historic_survey_number": None,
-        "geographic_description": "Auckland North Forest Assessment",
-    }
-    yield metadata
-
-
-def test_title_description_id_created_on_init(metadata: CollectionMetadata, subtests: SubTests) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_title_description_id_created_on_init(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
+    fake_collection_metadata["event_name"] = "Forest Assessment"
+    fake_collection_metadata["geographic_description"] = "Hawke's Bay Forest Assessment"
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     with subtests.test():
-        assert collection.stac["title"] == "Auckland North Forest Assessment 0.3m Urban Aerial Photos (2022)"
+        assert collection.stac["title"] == "Hawke's Bay Forest Assessment 0.3m Rural Aerial Photos (2023)"
 
     with subtests.test():
         assert (
             collection.stac["description"]
-            == "Orthophotography within the Auckland region captured in the 2022 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
+            == "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
         )
 
     with subtests.test():
         assert collection.stac["id"]
 
     with subtests.test():
-        assert collection.stac["linz:region"] == "auckland"
+        assert collection.stac["linz:region"] == "hawkes-bay"
 
     with subtests.test():
-        assert collection.stac["linz:geographic_description"] == "Auckland North Forest Assessment"
+        assert collection.stac["linz:geographic_description"] == "Hawke's Bay Forest Assessment"
 
     with subtests.test():
         assert collection.stac["linz:event_name"] == "Forest Assessment"
@@ -70,24 +53,24 @@ def test_title_description_id_created_on_init(metadata: CollectionMetadata, subt
         assert collection.stac["linz:lifecycle"] == "completed"
 
     with subtests.test():
-        assert collection.stac["linz:geospatial_category"] == "urban-aerial-photos"
+        assert collection.stac["linz:geospatial_category"] == "rural-aerial-photos"
 
 
-def test_id_parsed_on_init(metadata: CollectionMetadata) -> None:
+def test_id_parsed_on_init(fake_collection_metadata: CollectionMetadata) -> None:
     id_ = "Parsed-Ulid"
-    collection = ImageryCollection(metadata, any_epoch_datetime, id_)
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime, id_)
     assert collection.stac["id"] == "Parsed-Ulid"
 
 
-def test_bbox_updated_from_none(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_bbox_updated_from_none(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
     collection.update_spatial_extent(bbox)
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
 
-def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_bbox_updated_from_existing(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     # init bbox
     bbox = [174.889641, -41.217532, 174.902344, -41.203521]
     collection.update_spatial_extent(bbox)
@@ -98,16 +81,16 @@ def test_bbox_updated_from_existing(metadata: CollectionMetadata) -> None:
     assert collection.stac["extent"]["spatial"]["bbox"] == [[174.889641, -41.217532, 174.922965, -41.203521]]
 
 
-def test_interval_updated_from_none(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_interval_updated_from_none(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
     collection.update_temporal_extent(start_datetime, end_datetime)
     assert collection.stac["extent"]["temporal"]["interval"] == [[start_datetime, end_datetime]]
 
 
-def test_interval_updated_from_existing(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_interval_updated_from_existing(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     # init interval
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
@@ -127,10 +110,10 @@ def fixed_now_function(now: datetime) -> Callable[[], datetime]:
     return func
 
 
-def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     now = any_epoch_datetime()
     now_function = fixed_now_function(now)
-    collection = ImageryCollection(metadata, now_function)
+    collection = ImageryCollection(fake_collection_metadata, now_function)
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
@@ -176,9 +159,9 @@ def test_add_item(metadata: CollectionMetadata, subtests: SubTests) -> None:
             assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
 
 
-def test_write_collection(metadata: CollectionMetadata) -> None:
+def test_write_collection(fake_collection_metadata: CollectionMetadata) -> None:
     target = mkdtemp()
-    collectionObj = ImageryCollection(metadata, any_epoch_datetime)
+    collectionObj = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     collection_target = os.path.join(target, "collection.json")
     collectionObj.write_to(collection_target)
     collection = json.loads(read(collection_target))
@@ -187,10 +170,10 @@ def test_write_collection(metadata: CollectionMetadata) -> None:
     assert collection["title"] == collectionObj.stac["title"]
 
 
-def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
+def test_write_collection_special_chars(fake_collection_metadata: CollectionMetadata) -> None:
     target = mkdtemp()
     title = "Manawatū-Whanganui"
-    collectionObj = ImageryCollection(metadata, any_epoch_datetime)
+    collectionObj = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     collectionObj.stac["title"] = title
     collection_target = os.path.join(target, "collection.json")
     collectionObj.write_to(collection_target)
@@ -200,19 +183,19 @@ def test_write_collection_special_chars(metadata: CollectionMetadata) -> None:
     assert collection["title"] == title
 
 
-def test_add_providers(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_add_providers(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
     collection.add_providers([producer])
 
     assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_default_provider_roles_are_kept(metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_default_provider_roles_are_kept(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     # given we are adding a non default role to the default provider
     licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
-    collection = ImageryCollection(metadata, any_epoch_datetime, providers=[producer, licensor])
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime, providers=[producer, licensor])
 
     with subtests.test(msg="it adds the non default role to the existing default role list"):
         assert {
@@ -226,10 +209,10 @@ def test_default_provider_roles_are_kept(metadata: CollectionMetadata, subtests:
         ]
 
 
-def test_default_provider_is_present(metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_default_provider_is_present(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     # given adding a provider
     producer: Provider = {"name": "Maxar", "roles": [ProviderRole.PRODUCER]}
-    collection = ImageryCollection(metadata, any_epoch_datetime, providers=[producer])
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime, providers=[producer])
 
     with subtests.test(msg="the default provider is still present"):
         assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
@@ -239,13 +222,13 @@ def test_default_provider_is_present(metadata: CollectionMetadata, subtests: Sub
         assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
 
 
-def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_capture_area_added(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     """
     TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
     <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
     below.
     """
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     file_name = "capture-area.geojson"
 
     polygons = []
@@ -329,19 +312,21 @@ def test_capture_area_added(metadata: CollectionMetadata, subtests: SubTests) ->
         )
 
 
-def test_event_name_is_present(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_event_name_is_present(fake_collection_metadata: CollectionMetadata) -> None:
+    fake_collection_metadata["event_name"] = "Forest Assessment"
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     assert "Forest Assessment" == collection.stac["linz:event_name"]
 
 
-def test_geographic_description_is_present(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
-    assert "Auckland North Forest Assessment" == collection.stac["linz:geographic_description"]
+def test_geographic_description_is_present(fake_collection_metadata: CollectionMetadata) -> None:
+    fake_collection_metadata["geographic_description"] = "Hawke's Bay Forest Assessment"
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
+    assert "Hawke's Bay Forest Assessment" == collection.stac["linz:geographic_description"]
 
 
 @mock_aws
-def test_capture_dates_added(metadata: CollectionMetadata) -> None:
-    collection = ImageryCollection(metadata, any_epoch_datetime)
+def test_capture_dates_added(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime)
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="flat")
     write("s3://flat/capture-dates.geojson", b"")
