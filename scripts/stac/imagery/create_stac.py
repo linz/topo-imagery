@@ -18,6 +18,7 @@ from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
 
 
+# pylint: disable=too-many-positional-arguments
 def create_collection(
     collection_id: str,
     collection_metadata: CollectionMetadata,

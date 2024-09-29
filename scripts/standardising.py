@@ -26,6 +26,7 @@ from scripts.stac.imagery.capture_area import get_buffer_distance
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
+# pylint: disable=too-many-positional-arguments
 def run_standardising(
     todo: list[TileFiles],
     preset: str,
@@ -105,6 +106,7 @@ def create_vrt(source_tiffs: list[str], target_path: str, add_alpha: bool = Fals
 
 # pylint: disable-msg=too-many-locals
 # pylint: disable-msg=too-many-statements
+# pylint: disable=too-many-positional-arguments
 def standardising(
     files: TileFiles,
     preset: str,
