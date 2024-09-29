@@ -1,7 +1,7 @@
-from collections.abc import Generator
 from datetime import datetime
 from decimal import Decimal
 from os import environ
+from typing import Iterator
 from unittest.mock import patch
 
 import pytest
@@ -21,7 +21,7 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
 @pytest.fixture(name="item", autouse=True)
-def setup() -> Generator[ImageryItem, None, None]:
+def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
     with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", utc_now)
@@ -57,10 +57,6 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
         "hawkes-bay",
         "--gsd",
         "1m",
-        "--start-date",
-        "2023-09-20",
-        "--end-date",
-        "2023-09-20",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -102,10 +98,6 @@ def test_should_fail_if_collection_has_no_matching_items(
         "hawkes-bay",
         "--gsd",
         "1",
-        "--start-date",
-        "2023-09-20",
-        "--end-date",
-        "2023-09-20",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -159,10 +151,6 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "hawkes-bay",
         "--gsd",
         "1",
-        "--start-date",
-        "2023-09-20",
-        "--end-date",
-        "2023-09-20",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -177,3 +165,44 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         main(args)
 
     assert "skipping: not a STAC item" in capsys.readouterr().out
+
+
+@mock_aws
+def test_should_determine_dates_from_items(item: ImageryItem) -> None:
+    # Mock AWS S3
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item_a.json", dict_to_json_bytes(item.stac))
+    item.stac["properties"]["start_datetime"] = "2022-04-12T00:00:00Z"
+    item.stac["properties"]["end_datetime"] = "2022-04-12T00:00:00Z"
+    write("s3://stacfiles/item_b.json", dict_to_json_bytes(item.stac))
+
+    # CLI arguments
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
+    # Call script's main function
+    main(args)
+
+    # Verify collection.json has been created
+    resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    assert "(2021-2022)" in resp["Body"].read().decode("utf-8")
