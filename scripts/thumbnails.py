@@ -49,13 +49,12 @@ def thumbnails(path: str, target: str) -> str | None:
         gdalinfo_data = gdal_helper.gdal_info(source_tiff)
         if is_geotiff(source_tiff, gdalinfo_data):
             get_log().info("thumbnail_generate_geotiff", path=target_thumbnail)
-            run_gdal(get_thumbnail_command("jpeg", source_tiff, transitional_jpg, "50%", "50%", gdalinfo_data=gdalinfo_data))
-            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%", gdalinfo_data=gdalinfo_data))
+            run_gdal(get_thumbnail_command(source_tiff, transitional_jpg, "50%", "50%", gdalinfo_data=gdalinfo_data))
+            run_gdal(get_thumbnail_command(transitional_jpg, tmp_thumbnail, "30%", "30%", gdalinfo_data=gdalinfo_data))
         else:
             get_log().info("thumbnail_generate_tiff", path=target_thumbnail)
             run_gdal(
                 get_thumbnail_command(
-                    "jpeg",
                     source_tiff,
                     transitional_jpg,
                     "50%",
@@ -67,7 +66,7 @@ def thumbnails(path: str, target: str) -> str | None:
                     extra_args=["-srcwin", "1280", "730", "7140", "9950"],
                 )
             )
-            run_gdal(get_thumbnail_command("jpeg", transitional_jpg, tmp_thumbnail, "30%", "30%", gdalinfo_data=gdalinfo_data))
+            run_gdal(get_thumbnail_command(transitional_jpg, tmp_thumbnail, "30%", "30%", gdalinfo_data=gdalinfo_data))
 
         # Upload to target
         write(target_thumbnail, read(tmp_thumbnail), content_type=ContentType.JPEG.value)

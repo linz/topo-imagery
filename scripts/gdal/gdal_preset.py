@@ -212,7 +212,6 @@ def get_transform_srs_command(source_epsg: str, target_epsg: str) -> list[str]:
 
 
 def get_thumbnail_command(
-    format_: str,
     input_: str,
     output: str,
     xsize: str,
@@ -224,7 +223,6 @@ def get_thumbnail_command(
     """Get a `gdal_translate` command to create thumbnails.
 
     Args:
-        format_: output format.
         input_: input file path.
         output: target output file path.
         xsize: sets the x size of the output file in [%].
@@ -240,7 +238,7 @@ def get_thumbnail_command(
     command = [
         "gdal_translate",
         "-of",
-        format_,
+        "jpeg",
         input_,
         output,
         "-outsize",
