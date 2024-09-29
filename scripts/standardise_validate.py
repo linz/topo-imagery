@@ -147,8 +147,8 @@ def main() -> None:
                 end_datetime,
                 arguments.collection_id,
                 gdal_version,
-                file.get_gdalinfo(),
-                file.get_derived_from_paths(),
+                gdalinfo_result=file.get_gdalinfo(),
+                derived_from=file.get_derived_from_paths(),
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)

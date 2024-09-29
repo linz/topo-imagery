@@ -78,6 +78,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdal_version: str,
+    *,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
 ) -> ImageryItem:
