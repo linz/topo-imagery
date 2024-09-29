@@ -217,8 +217,9 @@ def get_thumbnail_command(
     output: str,
     xsize: str,
     ysize: str,
+    gdalinfo_data: GdalInfo,
+    *,
     extra_args: list[str] | None = None,
-    gdalinfo_data: GdalInfo | None = None,
 ) -> list[str]:
     """Get a `gdal_translate` command to create thumbnails.
 
