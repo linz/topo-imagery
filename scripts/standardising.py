@@ -140,7 +140,7 @@ def standardising(
     tiff = FileTiff(files.inputs, preset, files.includeDerived)
     tiff.set_path_standardised(standardized_file_path)
 
-    # Already proccessed can skip processing
+    # Already processed can skip processing
     if exists(standardized_file_path):
         get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
         return tiff
