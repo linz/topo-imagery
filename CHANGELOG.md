@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/linz/topo-imagery/compare/v5.0.0...v5.0.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* round footprints to 8 decimal places TDE-1237 ([#1088](https://github.com/linz/topo-imagery/issues/1088)) ([fbb0930](https://github.com/linz/topo-imagery/commit/fbb09307048b8c0c1ed160f584074359366dcb3b))
+
 ## [5.0.0](https://github.com/linz/topo-imagery/compare/v4.11.2...v5.0.0) (2024-09-29)
 
 
