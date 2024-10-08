@@ -190,3 +190,42 @@ def test_capture_area_orientation_multipolygon() -> None:
     capture_area = generate_capture_area(polygons, Decimal("0.05"))
     mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
     assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
+
+
+def test_capture_area_rounding_decimal_places() -> None:
+    # Test that the capture area is rounded to 8 decimal places
+    polygons = []
+    polygons.append(
+        shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [174.673418475601466, -37.051277768264598],
+                            [174.673425023818197, -37.051550327851878],
+                            [174.673479898051271, -37.051280958541774],
+                            [174.673418475601466, -37.051277768264598],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    capture_area_expected = {
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [174.67342502, -37.05155033],
+                    [174.6734799, -37.05128096],
+                    [174.67341848, -37.05127777],
+                    [174.67342502, -37.05155033],
+                ]
+            ],
+        },
+        "type": "Feature",
+        "properties": {},
+    }
+    capture_area = generate_capture_area(polygons, Decimal("1"))
+    assert capture_area == capture_area_expected
