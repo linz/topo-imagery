@@ -27,8 +27,8 @@ def merge_provider_roles(providers: list[Provider]) -> list[Provider]:
         a list of `Provider` objects with merged roles
 
     Example:
-        >>> merge_provider_roles([{"name": "Maxar", "roles": [ProviderRole.PRODUCER]}, {"name": "Maxar",
-        "roles": [ProviderRole.LICENSOR]}])
+        >>> merge_provider_roles([{"name": "Maxar", "roles": [ProviderRole.PRODUCER]}, {"name": "Maxar",\
+              "roles": [ProviderRole.LICENSOR]}])
         [{'name': 'Maxar', 'roles': [<ProviderRole.PRODUCER: 'producer'>, <ProviderRole.LICENSOR: 'licensor'>]}]
     """
     merged_providers: list[Provider] = []
