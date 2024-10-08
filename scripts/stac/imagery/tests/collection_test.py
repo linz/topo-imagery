@@ -299,17 +299,14 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, subtes
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "1220369cd5d4179f5f68ca0fd9be70b9f66033fcc6bb2f3305c0ad977adc79d7ad53",  # geos 3.11 - geos 3.12 as yet untested
+            "1220ba57cd77defc7fa72e140f4faa0846e8905ae443de04aef99bf381d4650c17a0",  # geos 3.11 - geos 3.12 as yet untested
         )
 
     with subtests.test():
         assert "file:size" in collection.stac["assets"]["capture_area"]
 
     with subtests.test():
-        assert collection.stac["assets"]["capture_area"]["file:size"] in (
-            339,  # geos 3.11
-            299,  # geos 3.12
-        )
+        assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
 def test_event_name_is_present(fake_collection_metadata: CollectionMetadata) -> None:
