@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.0.2](https://github.com/linz/topo-imagery/compare/v5.0.1...v5.0.2) (2024-10-09)
+
+
+### Bug Fixes
+
+* capture area rounding TDE-1237 ([#1116](https://github.com/linz/topo-imagery/issues/1116)) ([d055f49](https://github.com/linz/topo-imagery/commit/d055f49f59ca1d64c5b19babcbcd91f9bfd657e0))
+* providers should not be duplicated when having different roles TDE-1286 ([#1115](https://github.com/linz/topo-imagery/issues/1115)) ([46303cb](https://github.com/linz/topo-imagery/commit/46303cb6dd00b5c66802340d087d1f85848dbfb1))
+
 ## [5.0.1](https://github.com/linz/topo-imagery/compare/v5.0.0...v5.0.1) (2024-10-03)
 
 
