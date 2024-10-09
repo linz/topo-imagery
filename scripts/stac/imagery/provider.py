@@ -17,8 +17,7 @@ class Provider(TypedDict):
 
 
 def merge_provider_roles(providers: list[Provider]) -> list[Provider]:
-    """Merge the roles of the providers with the same name.
-    Does not manage duplicates in the final roles list.
+    """Remove duplicate providers based on name and merge their roles. See example below.
 
     Args:
         providers: a list of `Provider` objects
