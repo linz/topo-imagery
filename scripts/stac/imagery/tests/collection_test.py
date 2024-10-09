@@ -200,7 +200,7 @@ def test_default_provider_roles_are_kept(fake_collection_metadata: CollectionMet
     with subtests.test(msg="it adds the non default role to the existing default role list"):
         assert {
             "name": "Toitū Te Whenua Land Information New Zealand",
-            "roles": ["licensor", "host", "processor"],
+            "roles": ["host", "licensor", "processor"],
         } in collection.stac["providers"]
 
     with subtests.test(msg="it does not duplicate the default provider"):
@@ -220,6 +220,17 @@ def test_default_provider_is_present(fake_collection_metadata: CollectionMetadat
         ]
     with subtests.test(msg="the new provider is added"):
         assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
+
+
+def test_providers_are_not_duplicated(fake_collection_metadata: CollectionMetadata) -> None:
+    producer: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.PRODUCER]}
+    licensor: Provider = {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.LICENSOR]}
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime, providers=[producer, licensor])
+    assert len(collection.stac["providers"]) == 1
+    assert {
+        "name": "Toitū Te Whenua Land Information New Zealand",
+        "roles": ["host", "licensor", "processor", "producer"],
+    } in collection.stac["providers"]
 
 
 def test_capture_area_added(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:

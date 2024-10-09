@@ -24,7 +24,7 @@ from scripts.stac.imagery.metadata_constants import (
     MissingMetadataError,
     SubtypeParameterError,
 )
-from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -89,7 +89,7 @@ class ImageryCollection:
                 {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]}
             )
 
-        self.add_providers(providers)
+        self.add_providers(merge_provider_roles(providers))
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
@@ -172,11 +172,13 @@ class ImageryCollection:
 
     def add_providers(self, providers: list[Provider]) -> None:
         """Add a list of Providers to the existing list of `providers` of the Collection.
+        The provider roles are sorted alphabetically.
 
         Args:
             providers: a list of `Provider` objects
         """
         for p in providers:
+            p["roles"] = sorted(p["roles"])
             self.stac["providers"].append(p)
 
     def update_spatial_extent(self, item_bbox: list[float]) -> None:
