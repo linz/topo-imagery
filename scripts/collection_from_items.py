@@ -85,6 +85,13 @@ def parse_args(args: List[str] | None) -> Namespace:
         help="Add a capture-dates.geojson.gz file to the collection assets",
         required=False,
     )
+    parser.add_argument(
+        "--add-title-suffix",
+        dest="add_title_suffix",
+        action="store_true",
+        help="Add a title suffix to the collection title based on the lifecycle. For example, '[TITLE] - Preview'",
+        required=False,
+    )
 
     return parser.parse_args(args)
 

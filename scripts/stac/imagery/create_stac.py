@@ -18,6 +18,7 @@ from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
 
 
+# pylint: disable=too-many-arguments
 def create_collection(
     collection_id: str,
     collection_metadata: CollectionMetadata,
@@ -27,6 +28,7 @@ def create_collection(
     item_polygons: list[BaseGeometry],
     add_capture_dates: bool,
     uri: str,
+    add_title_suffix: bool = False,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
@@ -40,6 +42,7 @@ def create_collection(
         item_polygons: polygons of the items linked to the collection
         add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
         uri: path of the dataset
+        add_title_suffix: whether to add a title suffix to the collection title based on the lifecycle
 
     Returns:
         an ImageryCollection object
@@ -55,6 +58,7 @@ def create_collection(
         now=utc_now,
         collection_id=collection_id,
         providers=providers,
+        add_title_suffix=add_title_suffix,
     )
 
     for item in stac_items:

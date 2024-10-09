@@ -106,6 +106,14 @@ def test_generate_imagery_title_draft(fake_collection_metadata: CollectionMetada
     assert collection.stac["title"] == title
 
 
+def test_generate_imagery_title_without_suffix(fake_collection_metadata: CollectionMetadata) -> None:
+    # `ongoing` lifecycle nominal case adds a suffix
+    fake_collection_metadata["lifecycle"] = "ongoing"
+    collection = ImageryCollection(metadata=fake_collection_metadata, now=any_epoch_datetime, add_title_suffix=False)
+    title = "Hawke's Bay 0.3m Rural Aerial Photos (2023)"
+    assert collection.stac["title"] == title
+
+
 def test_generate_imagery_title_empty_optional_str(fake_collection_metadata: CollectionMetadata) -> None:
     fake_collection_metadata["geographic_description"] = ""
     fake_collection_metadata["event_name"] = ""
