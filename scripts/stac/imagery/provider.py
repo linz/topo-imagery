@@ -38,4 +38,5 @@ def merge_provider_roles(providers: list[Provider]) -> list[Provider]:
             for p in merged_providers:
                 if p["name"] == provider["name"]:
                     p["roles"].extend(provider["roles"])
+                    continue
     return merged_providers
