@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
-from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all
+from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
@@ -62,9 +62,10 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     # Negative buffer back in the polygons
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
     union_simplified = union_unbuffered.simplify(buffer_distance)
+    union_rounded = wkt.loads(wkt.dumps(union_simplified, rounding_precision=8))
     # Apply right-hand rule winding order (exterior rings should be counter-clockwise) to the geometry
     # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
-    oriented_union_simplified = orient(union_simplified, sign=1.0)
+    oriented_union_simplified = orient(union_rounded, sign=1.0)
 
     return oriented_union_simplified
 
