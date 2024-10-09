@@ -26,6 +26,7 @@ from scripts.stac.imagery.capture_area import get_buffer_distance
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
+# pylint: disable=too-many-positional-arguments
 def run_standardising(
     todo: list[TileFiles],
     preset: str,
@@ -47,6 +48,7 @@ def run_standardising(
         concurrency: number of concurrent files to process
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
+        create_footprints: Whether to create footprints
         gsd: Ground Sample Distance in meters
         gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
@@ -104,6 +106,7 @@ def create_vrt(source_tiffs: list[str], target_path: str, add_alpha: bool = Fals
 
 # pylint: disable-msg=too-many-locals
 # pylint: disable-msg=too-many-statements
+# pylint: disable=too-many-positional-arguments
 def standardising(
     files: TileFiles,
     preset: str,
@@ -122,6 +125,7 @@ def standardising(
         source_epsg: EPSG code of the source file
         target_epsg: EPSG code of reprojection
         gsd: Ground Sample Distance in meters
+        create_footprints: Whether to create footprints
         cutline: path to the cutline. Must be `.fgb` or `.geojson`
         target_output: output directory path. Defaults to "/tmp/"
 
@@ -138,7 +142,7 @@ def standardising(
     tiff = FileTiff(files.inputs, preset, files.includeDerived)
     tiff.set_path_standardised(standardized_file_path)
 
-    # Already proccessed can skip processing
+    # Already processed can skip processing
     if exists(standardized_file_path):
         get_log().info("standardised_tiff_already_exists", path=standardized_file_path)
         return tiff

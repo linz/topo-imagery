@@ -18,6 +18,7 @@ from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
 
 
+# pylint: disable=too-many-positional-arguments
 def create_collection(
     collection_id: str,
     collection_metadata: CollectionMetadata,
@@ -78,6 +79,7 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdal_version: str,
+    *,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
 ) -> ImageryItem:
