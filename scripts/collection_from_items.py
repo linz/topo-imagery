@@ -177,6 +177,7 @@ def main(args: List[str] | None = None) -> None:
         item_polygons=polygons,
         add_capture_dates=arguments.capture_dates,
         uri=uri,
+        add_title_suffix=arguments.add_title_suffix,
     )
 
     destination = os.path.join(uri, "collection.json")
