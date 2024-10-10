@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/linz/topo-imagery/compare/v5.0.2...v5.1.0) (2024-10-10)
+
+
+### Features
+
+* allow forcing Collection title to not have suffix TDE-1289 ([#1120](https://github.com/linz/topo-imagery/issues/1120)) ([7ca3c43](https://github.com/linz/topo-imagery/commit/7ca3c4329a46cc282e4bc9ba474eeb254c00667e))
+
 ## [5.0.2](https://github.com/linz/topo-imagery/compare/v5.0.1...v5.0.2) (2024-10-09)
 
 
