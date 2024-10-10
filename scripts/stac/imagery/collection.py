@@ -44,6 +44,7 @@ class ImageryCollection:
         now: Callable[[], datetime],
         collection_id: str | None = None,
         providers: list[Provider] | None = None,
+        add_title_suffix: bool = True,
     ) -> None:
         if not collection_id:
             collection_id = str(ulid.ULID())
@@ -55,7 +56,7 @@ class ImageryCollection:
             "type": "Collection",
             "stac_version": STAC_VERSION,
             "id": collection_id,
-            "title": self._title(),
+            "title": self._title(add_title_suffix),
             "description": self._description(),
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
@@ -264,12 +265,20 @@ class ImageryCollection:
         """
         write(destination, dict_to_json_bytes(self.stac), content_type=ContentType.JSON.value)
 
-    def _title(self) -> str:
+    def _title(self, add_suffix: bool = True) -> str:
         """Generates the title for imagery and elevation datasets.
         Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
         DEM / DSM:
           https://github.com/linz/elevation/blob/master/docs/naming.md
+
+        Args:
+            add_suffix: Weither to add a suffix based on the lifecycle. For example, " - Preview". Defaults to True.
+
+        Raises:
+            MissingMetadataError: if required metadata is missing
+            SubtypeParameterError: if category is not recognised
+
         Returns:
             Dataset Title
         """
@@ -292,13 +301,13 @@ class ImageryCollection:
             imagery_name = region
             elevation_description = None
 
-        # determine if the dataset title requires a lifecycle tag
-        if self.metadata.get("lifecycle") == "preview":
-            lifecycle_tag = "- Preview"
-        elif self.metadata.get("lifecycle") == "ongoing":
-            lifecycle_tag = "- Draft"
-        else:
-            lifecycle_tag = None
+        # determine if the dataset title requires a suffix based on its lifecycle
+        lifecycle_suffix = None
+        if add_suffix:
+            if self.metadata.get("lifecycle") == "preview":
+                lifecycle_suffix = "- Preview"
+            elif self.metadata.get("lifecycle") == "ongoing":
+                lifecycle_suffix = "- Draft"
 
         if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
@@ -310,7 +319,7 @@ class ImageryCollection:
                     f"{self.metadata['gsd']}{GSD_UNIT}",
                     historic_survey_number,
                     f"({date})",
-                    lifecycle_tag,
+                    lifecycle_suffix,
                 ]
                 if value is not None
             )
@@ -327,7 +336,7 @@ class ImageryCollection:
                     f"{self.metadata['gsd']}{GSD_UNIT}",
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    lifecycle_tag,
+                    lifecycle_suffix,
                 ]
                 if value is not None
             )
@@ -341,7 +350,7 @@ class ImageryCollection:
                     f"{self.metadata['gsd']}{GSD_UNIT}",
                     DATA_CATEGORIES[self.metadata["category"]],
                     f"({date})",
-                    lifecycle_tag,
+                    lifecycle_suffix,
                 ]
                 if value is not None
             )
