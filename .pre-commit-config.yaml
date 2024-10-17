@@ -17,7 +17,7 @@ repos:
         args: [--edit, --fail]
         files: \.nix$
         language: system
-        stages: [commit]
+        stages: [pre-commit]
 
       - id: gitlint
         name: gitlint
@@ -47,7 +47,7 @@ repos:
         entry: nixfmt
         files: \.nix$
         language: system
-        stages: [commit]
+        stages: [pre-commit]
 
       - id: pylint
         name: pylint
@@ -64,7 +64,7 @@ repos:
         files: \.nix$
         pass_filenames: false
         language: system
-        stages: [commit]
+        stages: [pre-commit]
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: a99a3fbe79a9d346cabd02a5e167ad0edafe616b # v2.3.0
