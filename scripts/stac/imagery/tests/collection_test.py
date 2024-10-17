@@ -297,6 +297,12 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, subtes
         assert collection.stac["assets"]["capture_area"]["title"] == "Capture area"
 
     with subtests.test():
+        assert (
+            collection.stac["assets"]["capture_area"]["description"] == "Boundary of the total capture area for "
+            "this collection. Excludes nodata areas in the source data. Geometries are simplified."
+        )
+
+    with subtests.test():
         assert collection.stac["assets"]["capture_area"]["type"] == "application/geo+json"
 
     with subtests.test():
@@ -342,6 +348,9 @@ def test_capture_dates_added(fake_collection_metadata: CollectionMetadata) -> No
     assert collection.stac["assets"]["capture_dates"] == {
         "href": "./capture-dates.geojson",
         "title": "Capture dates",
+        "description": "Boundaries of individual surveys or flight runs that make up the overall collection with the "
+        "data collection dates, data source links and other associated metadata, such as producers and licensors, "
+        "where available. Excludes nodata areas in the source data. Geometries are simplified.",
         "type": ContentType.GEOJSON,
         "roles": ["metadata"],
         "file:checksum": "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

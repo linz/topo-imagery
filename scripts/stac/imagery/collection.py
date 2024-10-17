@@ -110,6 +110,8 @@ class ImageryCollection:
         capture_area = {
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
             "title": "Capture area",
+            "description": "Boundary of the total capture area for this collection. Excludes nodata areas in the source "
+            "data. Geometries are simplified.",
             "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,
@@ -145,6 +147,9 @@ class ImageryCollection:
         capture_dates = {
             "href": f"./{CAPTURE_DATES_FILE_NAME}",
             "title": "Capture dates",
+            "description": "Boundaries of individual surveys or flight runs that make up the overall collection with "
+            "the data collection dates, data source links and other associated metadata, such as producers and licensors, "
+            "where available. Excludes nodata areas in the source data. Geometries are simplified.",
             "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,
