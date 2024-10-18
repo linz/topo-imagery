@@ -110,7 +110,7 @@ def main(args: List[str] | None = None) -> None:
     start_time = time_in_ms()
     arguments = parse_args(args)
     uri = arguments.uri
-    collection_id = arguments.collection_id
+    odr_url = arguments.odr_url
 
     s3_client = client("s3")
 

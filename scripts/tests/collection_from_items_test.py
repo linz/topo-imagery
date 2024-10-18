@@ -49,8 +49,6 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
     args = [
         "--uri",
         "s3://stacfiles/",
-        "--collection-id",
-        "abc",
         "--category",
         "urban-aerial-photos",
         "--region",
@@ -143,8 +141,6 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
     args = [
         "--uri",
         "s3://stacfiles/",
-        "--collection-id",
-        collection_id,
         "--category",
         "urban-aerial-photos",
         "--region",
@@ -183,8 +179,6 @@ def test_should_determine_dates_from_items(item: ImageryItem) -> None:
     args = [
         "--uri",
         "s3://stacfiles/",
-        "--collection-id",
-        "abc",
         "--category",
         "urban-aerial-photos",
         "--region",
