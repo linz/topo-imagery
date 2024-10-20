@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.0](https://github.com/linz/topo-imagery/compare/v5.1.0...v5.2.0) (2024-10-17)
+
+
+### Features
+
+* add description field for assets in collection TDE-1294 ([#1132](https://github.com/linz/topo-imagery/issues/1132)) ([4d6c030](https://github.com/linz/topo-imagery/commit/4d6c030d9da64f04d647ad116c6f478bbf2437f0))
+
 ## [5.1.0](https://github.com/linz/topo-imagery/compare/v5.0.2...v5.1.0) (2024-10-10)
 
 
