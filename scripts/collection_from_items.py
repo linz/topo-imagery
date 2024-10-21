@@ -22,9 +22,18 @@ class NoItemsError(Exception):
     pass
 
 
+def s3_uri(value: str) -> str:
+    prefix = "s3://"
+    if not value.startswith(prefix):
+        raise argparse.ArgumentTypeError(f"S3 URI must start with '{prefix}'")
+    return value
+
+
 def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
+    parser.add_argument(
+        "--uri", dest="uri", help="s3 path to items and collection.json write location", required=True, type=s3_uri
+    )
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
         "--category",
@@ -102,10 +111,6 @@ def main(args: List[str] | None = None) -> None:
     arguments = parse_args(args)
     uri = arguments.uri
     collection_id = arguments.collection_id
-
-    if not uri.startswith("s3://"):
-        msg = f"uri is not a s3 path: {uri}"
-        raise argparse.ArgumentTypeError(msg)
 
     s3_client = client("s3")
 

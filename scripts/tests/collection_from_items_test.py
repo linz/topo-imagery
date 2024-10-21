@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from decimal import Decimal
 from os import environ
@@ -71,7 +72,8 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
 
     # Verify collection.json has been created
     resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
-    assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
+    collection = json.load(resp["Body"])
+    assert collection["type"] == "Collection"
 
 
 @mock_aws
