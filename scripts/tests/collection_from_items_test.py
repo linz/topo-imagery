@@ -39,7 +39,7 @@ def setup() -> Iterator[ImageryItem]:
 
 
 @mock_aws
-def test_should_create_collection_file(item: ImageryItem) -> None:
+def test_should_create_collection_file_with_new_slug(item: ImageryItem, subtests: SubTests) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -73,6 +73,10 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
     # Verify collection.json has been created
     resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
     collection = json.load(resp["Body"])
+
+    with subtests.test():
+        assert collection["linz:slug"] == "hawkes-bay_2021-2022_1.0m"
+
     assert collection["type"] == "Collection"
 
 
