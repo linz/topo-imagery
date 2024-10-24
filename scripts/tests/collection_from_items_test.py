@@ -16,17 +16,31 @@ from scripts.datetimes import format_rfc_3339_datetime_string, utc_now
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.tests.collection_test import any_gdal_version, any_multihash_as_hex
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 @pytest.fixture(name="item", autouse=True)
 def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
-    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", current_datetime, current_datetime)
+    with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}), patch(
+        "scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()
+    ):
+        item = ImageryItem(
+            "123",
+            STACAsset(
+                **{
+                    "href": "./scripts/tests/data/empty.tiff",
+                    "file:checksum": any_multihash_as_hex(),
+                    "created": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                    "updated": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                }
+            ),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+        )
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],

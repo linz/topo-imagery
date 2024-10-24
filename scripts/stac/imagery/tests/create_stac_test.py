@@ -1,11 +1,17 @@
 import json
+from datetime import timedelta
+from os import utime
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
+
+from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.create_stac import create_collection, create_item
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.tests.collection_test import any_gdal_version, any_multihash_as_hex
 from scripts.tests.datetimes_test import any_epoch_datetime
 
 
@@ -21,16 +27,16 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    item = create_item(
-        "./scripts/tests/data/empty.tiff",
-        "",
-        "",
-        "abc123",
-        "any GDAL version",
-        format_rfc_3339_datetime_string(any_epoch_datetime()),
-        fake_gdal_info,
-        [derived_from_path.as_posix()],
-    )
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            "./scripts/tests/data/empty.tiff",
+            "",
+            "",
+            "abc123",
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            fake_gdal_info,
+            [derived_from_path.as_posix()],
+        )
 
     assert {
         "href": derived_from_path.as_posix(),
@@ -59,27 +65,38 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    item = create_item(
-        "./scripts/tests/data/empty.tiff",
-        "",
-        "",
-        "abc123",
-        "any GDAL version",
-        format_rfc_3339_datetime_string(any_epoch_datetime()),
-        fake_gdal_info,
-        [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
-    )
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            "./scripts/tests/data/empty.tiff",
+            "",
+            "",
+            "abc123",
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            fake_gdal_info,
+            [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
+        )
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
 
 
-def test_create_item_when_resupplying(tmp_path: Path) -> None:
+def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
+    tiff_path = f"./scripts/tests/data/{item_name}.tiff"
+    file_modified_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
     existing_item_content = {
         "type": "Feature",
-        "id": f"{item_name}",
+        "id": item_name,
+        "assets": {
+            "visual": {
+                "href": tiff_path,
+                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+                "file:checksum": "12205f300ac3bd1d289da1517144d4851050e544c43c58c23ccfcc1f6968f764a45a",
+                "created": file_modified_datetime,
+                "updated": file_modified_datetime,
+            }
+        },
         "properties": {"created": "2024-09-02T12:00:00Z", "updated": "2024-09-10T12:00:00Z"},
     }
 
@@ -89,42 +106,48 @@ def test_create_item_when_resupplying(tmp_path: Path) -> None:
     )
 
     current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    item = create_item(
-        f"./scripts/tests/data/{item_name}.tiff",
-        "",
-        "",
-        "abc123",
-        "any GDAL version",
-        current_datetime,
-        fake_gdal_info,
-        published_path=tmp_path.as_posix(),
-    )
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            tiff_path,
+            "",
+            "",
+            "abc123",
+            current_datetime,
+            fake_gdal_info,
+            published_path=tmp_path.as_posix(),
+        )
 
-    assert item.stac["properties"]["created"] == "2024-09-02T12:00:00Z"
-    assert item.stac["properties"]["updated"] == current_datetime
+    with subtests.test(msg="properties.created"):
+        assert item.stac["properties"]["created"] == "2024-09-02T12:00:00Z"
+    with subtests.test(msg="properties.updated"):
+        assert item.stac["properties"]["updated"] == current_datetime
+
+    for attribute in ["created", "updated"]:
+        with subtests.test(msg=f"assets.visual.{attribute}"):
+            assert item.stac["assets"]["visual"][attribute] == file_modified_datetime
 
 
 def test_create_item_when_resupplying_from_incomplete_metadata(tmp_path: Path) -> None:
     # TODO: Remove this test once TDE-1103 is DONE
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
-    existing_item_content = {"type": "Feature", "id": f"{item_name}"}
+    existing_item_content = {"type": "Feature", "id": item_name}
     existing_item.write_text(json.dumps(existing_item_content))
     fake_gdal_info: GdalInfo = cast(
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
     current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    item = create_item(
-        f"./scripts/tests/data/{item_name}.tiff",
-        "",
-        "",
-        "abc123",
-        "any GDAL version",
-        current_datetime,
-        fake_gdal_info,
-        published_path=tmp_path.as_posix(),
-    )
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            f"./scripts/tests/data/{item_name}.tiff",
+            "",
+            "",
+            "abc123",
+            current_datetime,
+            fake_gdal_info,
+            published_path=tmp_path.as_posix(),
+        )
 
     assert item.stac["properties"]["created"] == current_datetime
     assert item.stac["properties"]["updated"] == current_datetime
@@ -136,19 +159,63 @@ def test_create_item_when_resupplying_with_new_file(tmp_path: Path) -> None:
     )
 
     current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    item = create_item(
-        "./scripts/tests/data/empty.tiff",
-        "",
-        "",
-        "abc123",
-        "any GDAL version",
-        current_datetime,
-        fake_gdal_info,
-        published_path=tmp_path.as_posix(),
-    )
+
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            "./scripts/tests/data/empty.tiff",
+            "",
+            "",
+            "abc123",
+            current_datetime,
+            fake_gdal_info,
+            published_path=tmp_path.as_posix(),
+        )
 
     assert item.stac["properties"]["created"] == current_datetime
     assert item.stac["properties"]["updated"] == current_datetime
+
+
+def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_path: Path) -> None:
+    item_name = "empty"
+    original_item = tmp_path / f"{item_name}.json"
+    asset_file = "./scripts/tests/data/empty.tiff"
+    created_datetime = any_epoch_datetime()
+    created_datetime_string = format_rfc_3339_datetime_string(created_datetime)
+    original_item_content = {
+        "type": "Feature",
+        "id": item_name,
+        "assets": {
+            "visual": {
+                "href": asset_file,
+                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+                "file:checksum": any_multihash_as_hex(),
+                "created": created_datetime_string,
+                "updated": created_datetime_string,
+            }
+        },
+        "properties": {"created": "2024-09-02T12:00:00Z", "updated": "2024-09-10T12:00:00Z"},
+    }
+    modified_datetime = created_datetime + timedelta(days=1)
+    utime(asset_file, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
+
+    original_item.write_text(json.dumps(original_item_content))
+
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = create_item(
+            "./scripts/tests/data/empty.tiff",
+            "",
+            "",
+            "abc123",
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            cast(GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}),
+            published_path=tmp_path.as_posix(),
+        )
+
+    with subtests.test(msg="assets.visual.created"):
+        assert item.stac["assets"]["visual"]["created"] == created_datetime_string
+
+    with subtests.test(msg="assets.visual.updated"):
+        assert item.stac["assets"]["visual"]["updated"] == format_rfc_3339_datetime_string(modified_datetime)
 
 
 def test_create_collection(fake_collection_metadata: CollectionMetadata) -> None:

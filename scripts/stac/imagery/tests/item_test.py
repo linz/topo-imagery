@@ -9,8 +9,9 @@ from pytest_subtests import SubTests
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.tests.collection_test import any_gdal_version, any_multihash_as_hex
 from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime
 
@@ -29,13 +30,28 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
 
-    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-
+    created_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    updated_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
     git_hash = "any Git hash"
     git_version = "any Git version string"
     gdal_version_string = "any GDAL version string"
-    with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, path, gdal_version_string, current_datetime, current_datetime)
+    multihash = any_multihash_as_hex()
+    with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}), patch(
+        "scripts.stac.imagery.item.get_gdal_version", return_value=gdal_version_string
+    ):
+        item = ImageryItem(
+            id_,
+            STACAsset(
+                **{
+                    "href": path,
+                    "file:checksum": multihash,
+                    "created": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                    "updated": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                }
+            ),
+            created_datetime,
+            updated_datetime,
+        )
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
@@ -52,12 +68,9 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         assert item.stac["properties"]["datetime"] is None
 
     with subtests.test():
-        assert (
-            item.stac["properties"]["created"]
-            == item.stac["properties"]["updated"]
-            == item.stac["properties"]["processing:datetime"]
-            == current_datetime
-        )
+        assert item.stac["properties"]["created"] == created_datetime
+
+    assert item.stac["properties"]["updated"] == item.stac["properties"]["processing:datetime"] == updated_datetime
 
     with subtests.test():
         assert item.stac["properties"]["processing:version"] == git_version
@@ -81,10 +94,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
         assert item.stac["bbox"] == bbox
 
     with subtests.test():
-        assert (
-            item.stac["assets"]["visual"]["file:checksum"]
-            == "1220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-        )
+        assert item.stac["assets"]["visual"]["file:checksum"] == multihash
 
     with subtests.test():
         assert {"rel": "self", "href": f"./{id_}.json", "type": "application/geo+json"} in item.stac["links"]
@@ -109,8 +119,20 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    item = ImageryItem(id_, path, "any GDAL version", current_datetime, current_datetime)
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = ImageryItem(
+            id_,
+            STACAsset(
+                **{
+                    "href": path,
+                    "file:checksum": any_multihash_as_hex(),
+                    "created": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                    "updated": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                }
+            ),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+        )
 
     item.add_collection(collection.stac["id"])
 
@@ -125,8 +147,20 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
 
 
 def test_should_set_fallback_version_strings(subtests: SubTests) -> None:
-    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
-    item = ImageryItem("any ID", "./scripts/tests/data/empty.tiff", "any GDAL version", current_datetime, current_datetime)
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = ImageryItem(
+            "any ID",
+            STACAsset(
+                **{
+                    "href": "./scripts/tests/data/empty.tiff",
+                    "file:checksum": any_multihash_as_hex(),
+                    "created": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                    "updated": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                }
+            ),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+        )
 
     with subtests.test():
         assert item.stac["properties"]["processing:software"]["linz/topo-imagery"] == "GIT_HASH not specified"

@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 from enum import Enum
+from functools import lru_cache
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import cast
@@ -53,6 +54,7 @@ def command_to_string(command: list[str]) -> str:
     return " ".join(command)
 
 
+@lru_cache(maxsize=1)
 def get_gdal_version() -> str:
     """Return the GDAL version assuming all GDAL commands are in the same version of gdalinfo.
 
