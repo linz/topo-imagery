@@ -29,9 +29,9 @@ def main(args: List[str] | None = None) -> None:
         odr_collection = json.loads(odr_collection_bytes)
         collection_id = odr_collection["id"]
 
-        if slug := odr_collection["linz:slug"]:
-            with open("/tmp/slug", "w", encoding="utf-8") as slug_file:
-                slug_file.write(slug)
+        if linz_slug := odr_collection["linz:slug"]:
+            with open("/tmp/linz_slug", "w", encoding="utf-8") as slug_file:
+                slug_file.write(linz_slug)
     else:
         collection_id = str(ULID())
 

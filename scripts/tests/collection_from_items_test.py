@@ -89,12 +89,12 @@ def test_should_create_collection_file_with_existing_slug(item: ImageryItem, sub
     item.add_collection("abc")
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
     # CLI arguments
-    slug = "this_is_my_predefined_slug"  # pretend we got this slug from ODR collection.json
+    linz_slug = "this_is_my_predefined_slug"  # pretend we got this slug from ODR collection.json
     args = [
         "--uri",
         "s3://stacfiles/",
-        "--slug",
-        slug,
+        "--linz-slug",
+        linz_slug,
         "--collection-id",
         "abc",
         "--category",
