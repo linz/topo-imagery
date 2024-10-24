@@ -8,6 +8,21 @@ SLUG_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789_.-"
 
 
 def slugify(value: str) -> str:
+    """
+    Function to convert a string to a slugified string.
+    Slugified in this context means:
+        - Only SLUG_CHARS are permitted
+        - ASCII upper case characters converted to lower case characters
+        - Some special characters converted to a similar ASCII representation, for example: & -> -and-; ø -> o
+        - Multiple hyphens collapsed into one hyphen
+
+    Args:
+        value: string to be converted to slug
+
+    Returns:
+        converted string, processed according to the above rules
+
+    """
     result = sub(
         r"--+",
         "-",
@@ -30,6 +45,14 @@ def slugify(value: str) -> str:
 
 
 def remove_diacritics(value: str) -> str:
+    """
+    Function to remove diacritics from a string.
+    Args:
+        value: input string
+
+    Returns:
+        converted string, with diacritics replaced by their respective ASCII base character without diacritics
+    """
     combining_diacritical_marks = r"[\u0300-\u036F]"
     return sub(combining_diacritical_marks, "", normalize("NFD", value))
 
