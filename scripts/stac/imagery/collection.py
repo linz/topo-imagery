@@ -28,6 +28,7 @@ from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from scripts.stac.util.linz_slug import create_linz_slug
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
@@ -45,7 +46,10 @@ class ImageryCollection:
         collection_id: str | None = None,
         providers: list[Provider] | None = None,
         add_title_suffix: bool = True,
+        linz_slug: str | None = None,
     ) -> None:
+        if not linz_slug:
+            linz_slug = create_linz_slug(metadata)
         if not collection_id:
             collection_id = str(ulid.ULID())
 
@@ -65,6 +69,7 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
+            "linz:slug": linz_slug,
             "created": now_string,
             "updated": now_string,
         }

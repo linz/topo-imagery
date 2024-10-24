@@ -29,6 +29,7 @@ def create_collection(
     add_capture_dates: bool,
     uri: str,
     add_title_suffix: bool = False,
+    linz_slug: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
@@ -43,6 +44,7 @@ def create_collection(
         add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
         uri: path of the dataset
         add_title_suffix: whether to add a title suffix to the collection title based on the lifecycle
+        linz_slug: slugified string for the collection if supplied from ODR URL
 
     Returns:
         an ImageryCollection object
@@ -59,6 +61,7 @@ def create_collection(
         collection_id=collection_id,
         providers=providers,
         add_title_suffix=add_title_suffix,
+        linz_slug=linz_slug,
     )
 
     for item in stac_items:

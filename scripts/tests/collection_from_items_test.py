@@ -75,7 +75,7 @@ def test_should_create_collection_file_with_new_slug(item: ImageryItem, subtests
     collection = json.load(resp["Body"])
 
     with subtests.test():
-        assert collection["linz:slug"] == "hawkes-bay_2021-2022_1.0m"
+        assert collection["linz:slug"] == "hawkes-bay_2021_1m"
 
     assert collection["type"] == "Collection"
 
