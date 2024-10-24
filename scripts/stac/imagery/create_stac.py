@@ -147,29 +147,6 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
     Returns:
         An ImageryItem with basic information.
     """
-    id_ = get_file_name_from_path(asset_path)
-    file_content = fs.read(asset_path)
-    created_datetime = current_datetime
-
-    if published_path:
-        # FIXME: make this try/catch nicer
-        try:
-            existing_item_content = read(os.path.join(published_path, f"{id_}.json"))
-            existing_item = json.loads(existing_item_content.decode("UTF-8"))
-            created_datetime = existing_item["properties"]["created"]
-        except NoSuchFileError:
-            get_log().info(f"No Item is published for ID: {id_}")
-        except KeyError:
-            get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
-
-    stac_asset = STACAsset(
-        **{
-            "href": os.path.join(".", os.path.basename(asset_path)),
-            "file:checksum": multihash_as_hex(file_content),
-            "created": created_datetime,
-            "updated": current_datetime,
-        }
-    )
 
     if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
         commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
@@ -181,6 +158,45 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
             "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+        }
+    )
+
+    id_ = get_file_name_from_path(asset_path)
+    file_content = fs.read(asset_path)
+    created_datetime = updated_datetime = current_datetime
+
+    if published_path:
+        # FIXME: make this try/catch nicer
+        try:
+            existing_item_content = read(os.path.join(published_path, f"{id_}.json"))
+            existing_item = json.loads(existing_item_content.decode("UTF-8"))
+            created_datetime = existing_item["properties"]["created"]
+            try:
+                if multihash_as_hex(file_content) == existing_item["assets"]["visual"]["file:checksum"]:
+                    # Keep existing created time and processing properties
+                    created_datetime = existing_item["assets"]["visual"]["created"]
+                    updated_datetime = existing_item["assets"]["visual"]["updated"]
+                    stac_processing = STACProcessing(
+                        **{
+                            "processing:datetime": existing_item["properties"]["processing:datetime"],
+                            "processing:software": existing_item["properties"]["processing:software"],
+                            "processing:version": existing_item["properties"]["processing:version"],
+                        }
+                    )
+            except KeyError:
+                get_log().info(f"Existing Item for {id_} does not have 'assets.visual' attributes")
+
+        except NoSuchFileError:
+            get_log().info(f"No Item is published for ID: {id_}")
+        except KeyError:
+            get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
+
+    stac_asset = STACAsset(
+        **{
+            "href": os.path.join(".", os.path.basename(asset_path)),
+            "file:checksum": multihash_as_hex(file_content),
+            "created": created_datetime,
+            "updated": updated_datetime,
         }
     )
 

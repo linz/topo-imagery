@@ -18,7 +18,7 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
-from scripts.stac.imagery.tests.generators import any_stac_processing, fixed_now_function
+from scripts.stac.imagery.tests.generators import any_multihash_as_hex, any_stac_processing, fixed_now_function
 from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
 
@@ -107,12 +107,14 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTes
     collection = ImageryCollection(fake_collection_metadata, fixed_now_function(now))
     asset_created_datetime = any_epoch_datetime_string()
     asset_updated_datetime = any_epoch_datetime_string()
+    item_file_path = "./scripts/tests/data/empty.tiff"
+
     item = ImageryItem(
         "BR34_5000_0304",
         STACAsset(
             **{
-                "href": "any href",
-                "file:checksum": "any checksum",
+                "href": item_file_path,
+                "file:checksum": any_multihash_as_hex(),
                 "created": asset_created_datetime,
                 "updated": asset_updated_datetime,
             }

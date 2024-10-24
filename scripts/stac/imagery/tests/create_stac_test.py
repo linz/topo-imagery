@@ -7,6 +7,7 @@ from pytest_subtests import SubTests
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.create_stac import create_collection, create_item
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.tests.generators import any_multihash_as_hex
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
@@ -78,11 +79,22 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
 def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
-    created_datetime = any_epoch_datetime_string()
+    tiff_path = f"./scripts/tests/data/{item_name}.tiff"
+    created_datetime = "created datetime"
+    updated_datetime = "updated datetime"
     existing_item_content = {
         "type": "Feature",
-        "id": f"{item_name}",
-        "properties": {"created": created_datetime, "updated": any_epoch_datetime_string()},
+        "id": item_name,
+        "assets": {
+            "visual": {
+                "href": tiff_path,
+                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+                "file:checksum": "12205f300ac3bd1d289da1517144d4851050e544c43c58c23ccfcc1f6968f764a45a",
+                "created": created_datetime,
+                "updated": updated_datetime,
+            }
+        },
+        "properties": {"created": created_datetime, "updated": updated_datetime},
     }
 
     existing_item.write_text(json.dumps(existing_item_content))
@@ -90,9 +102,9 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    current_datetime = any_epoch_datetime_string()
+    current_datetime = "current datetime"
     item = create_item(
-        f"./scripts/tests/data/{item_name}.tiff",
+        tiff_path,
         "",
         "",
         "abc123",
@@ -102,24 +114,30 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
         published_path=tmp_path.as_posix(),
     )
 
-    with subtests.test("created"):
+    with subtests.test(msg="properties.created"):
         assert item.stac["properties"]["created"] == created_datetime
 
-    with subtests.test("updated"):
-        assert item.stac["properties"]["updated"] == current_datetime
+    with subtests.test(msg="properties.updated"):
+        assert item.stac["properties"]["updated"] == updated_datetime
+
+    with subtests.test(msg="assets.visual.created"):
+        assert item.stac["assets"]["visual"]["created"] == created_datetime
+
+    with subtests.test(msg="assets.visual.updated"):
+        assert item.stac["assets"]["visual"]["updated"] == updated_datetime
 
 
 def test_create_item_when_resupplying_from_incomplete_metadata(subtests: SubTests, tmp_path: Path) -> None:
     # TODO: Remove this test once TDE-1103 is DONE
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
-    existing_item_content = {"type": "Feature", "id": f"{item_name}"}
+    existing_item_content = {"type": "Feature", "id": item_name}
     existing_item.write_text(json.dumps(existing_item_content))
     fake_gdal_info: GdalInfo = cast(
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    current_datetime = any_epoch_datetime_string()
+    current_datetime = "current datetime"
     item = create_item(
         f"./scripts/tests/data/{item_name}.tiff",
         "",
@@ -143,7 +161,7 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
         GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
     )
 
-    current_datetime = any_epoch_datetime_string()
+    current_datetime = "current datetime"
     item = create_item(
         "./scripts/tests/data/empty.tiff",
         "",
@@ -160,6 +178,48 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
 
     with subtests.test("updated"):
         assert item.stac["properties"]["updated"] == current_datetime
+
+
+def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_path: Path) -> None:
+    item_name = "empty"
+    original_item = tmp_path / f"{item_name}.json"
+    asset_file = f"./scripts/tests/data/{item_name}.tiff"
+    created_datetime = "created datetime"
+    updated_datetime = "updated datetime"
+    original_item_content = {
+        "type": "Feature",
+        "id": item_name,
+        "assets": {
+            "visual": {
+                "href": asset_file,
+                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+                "file:checksum": any_multihash_as_hex(),
+                "created": created_datetime,
+                "updated": updated_datetime,
+            }
+        },
+        "properties": {"created": created_datetime, "updated": updated_datetime},
+    }
+
+    original_item.write_text(json.dumps(original_item_content))
+
+    current_datetime = "current datetime"
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        current_datetime,
+        cast(GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}),
+        published_path=tmp_path.as_posix(),
+    )
+
+    with subtests.test(msg="assets.visual.created"):
+        assert item.stac["assets"]["visual"]["created"] == created_datetime
+
+    with subtests.test(msg="assets.visual.updated"):
+        assert item.stac["assets"]["visual"]["updated"] == current_datetime
 
 
 def test_create_collection(fake_collection_metadata: CollectionMetadata) -> None:
