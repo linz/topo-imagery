@@ -12,19 +12,21 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.collection_from_items import NoItemsError, main
-from scripts.datetimes import utc_now
+from scripts.datetimes import format_rfc_3339_datetime_string, utc_now
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 @pytest.fixture(name="item", autouse=True)
 def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
     with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", utc_now)
+        item = ImageryItem("123", "./scripts/tests/data/empty.tiff", "any GDAL version", current_datetime, current_datetime)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],

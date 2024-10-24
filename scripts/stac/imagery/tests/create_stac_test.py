@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 from typing import cast
 
+from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.create_stac import create_collection, create_item
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 def test_create_item_with_derived_from(tmp_path: Path) -> None:
@@ -25,6 +27,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         "",
         "abc123",
         "any GDAL version",
+        format_rfc_3339_datetime_string(any_epoch_datetime()),
         fake_gdal_info,
         [derived_from_path.as_posix()],
     )
@@ -62,12 +65,90 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         "",
         "abc123",
         "any GDAL version",
+        format_rfc_3339_datetime_string(any_epoch_datetime()),
         fake_gdal_info,
         [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
     )
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
+
+
+def test_create_item_when_resupplying(tmp_path: Path) -> None:
+    item_name = "empty"
+    existing_item = tmp_path / f"{item_name}.json"
+    existing_item_content = {
+        "type": "Feature",
+        "id": f"{item_name}",
+        "properties": {"created": "2024-09-02T12:00:00Z", "updated": "2024-09-10T12:00:00Z"},
+    }
+
+    existing_item.write_text(json.dumps(existing_item_content))
+    fake_gdal_info: GdalInfo = cast(
+        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
+    )
+
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    item = create_item(
+        f"./scripts/tests/data/{item_name}.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        current_datetime,
+        fake_gdal_info,
+        published_path=tmp_path.as_posix(),
+    )
+
+    assert item.stac["properties"]["created"] == "2024-09-02T12:00:00Z"
+    assert item.stac["properties"]["updated"] == current_datetime
+
+
+def test_create_item_when_resupplying_from_incomplete_metadata(tmp_path: Path) -> None:
+    # TODO: Remove this test once TDE-1103 is DONE
+    item_name = "empty"
+    existing_item = tmp_path / f"{item_name}.json"
+    existing_item_content = {"type": "Feature", "id": f"{item_name}"}
+    existing_item.write_text(json.dumps(existing_item_content))
+    fake_gdal_info: GdalInfo = cast(
+        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
+    )
+
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    item = create_item(
+        f"./scripts/tests/data/{item_name}.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        current_datetime,
+        fake_gdal_info,
+        published_path=tmp_path.as_posix(),
+    )
+
+    assert item.stac["properties"]["created"] == current_datetime
+    assert item.stac["properties"]["updated"] == current_datetime
+
+
+def test_create_item_when_resupplying_with_new_file(tmp_path: Path) -> None:
+    fake_gdal_info: GdalInfo = cast(
+        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
+    )
+
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        current_datetime,
+        fake_gdal_info,
+        published_path=tmp_path.as_posix(),
+    )
+
+    assert item.stac["properties"]["created"] == current_datetime
+    assert item.stac["properties"]["updated"] == current_datetime
 
 
 def test_create_collection(fake_collection_metadata: CollectionMetadata) -> None:

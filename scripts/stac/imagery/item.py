@@ -1,6 +1,4 @@
 import os
-from collections.abc import Callable
-from datetime import datetime
 from os import environ
 from typing import Any
 
@@ -17,10 +15,10 @@ from scripts.stac.util.stac_extensions import StacExtensions
 class ImageryItem:
     stac: dict[str, Any]
 
-    def __init__(self, id_: str, file: str, gdal_version: str, now: Callable[[], datetime]) -> None:
+    def __init__(self, id_: str, file: str, gdal_version: str, created_datetime: str, updated_datetime: str) -> None:
         file_content = fs.read(file)
         file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
-        now_string = format_rfc_3339_datetime_string(now())
+
         if (topo_imagery_hash := environ.get("GIT_HASH")) is not None:
             commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
         else:
@@ -42,9 +40,9 @@ class ImageryItem:
             },
             "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
             "properties": {
-                "created": now_string,
-                "updated": now_string,
-                "processing:datetime": now_string,
+                "created": created_datetime,
+                "updated": updated_datetime,
+                "processing:datetime": updated_datetime,
                 "processing:software": {"gdal": gdal_version, "linz/topo-imagery": commit_url},
                 "processing:version": environ.get("GIT_VERSION", "GIT_VERSION not specified"),
             },

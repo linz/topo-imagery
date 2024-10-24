@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from os import environ
 from unittest.mock import patch
@@ -6,6 +6,7 @@ from unittest.mock import patch
 from pytest_mock import MockerFixture
 from pytest_subtests import SubTests
 
+from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
@@ -28,14 +29,13 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
 
-    def fake_now() -> datetime:
-        return datetime(1979, 1, 1, tzinfo=timezone.utc)
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
 
     git_hash = "any Git hash"
     git_version = "any Git version string"
     gdal_version_string = "any GDAL version string"
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, path, gdal_version_string, fake_now)
+        item = ImageryItem(id_, path, gdal_version_string, current_datetime, current_datetime)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     # checks
@@ -56,7 +56,7 @@ def test_imagery_stac_item(mocker: MockerFixture, subtests: SubTests) -> None:
             item.stac["properties"]["created"]
             == item.stac["properties"]["updated"]
             == item.stac["properties"]["processing:datetime"]
-            == "1979-01-01T00:00:00Z"
+            == current_datetime
         )
 
     with subtests.test():
@@ -109,7 +109,8 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     mocker.patch("scripts.files.fs.read", return_value=b"")
-    item = ImageryItem(id_, path, "any GDAL version", any_epoch_datetime)
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    item = ImageryItem(id_, path, "any GDAL version", current_datetime, current_datetime)
 
     item.add_collection(collection.stac["id"])
 
@@ -124,7 +125,8 @@ def test_imagery_add_collection(mocker: MockerFixture, subtests: SubTests) -> No
 
 
 def test_should_set_fallback_version_strings(subtests: SubTests) -> None:
-    item = ImageryItem("any ID", "./scripts/tests/data/empty.tiff", "any GDAL version", any_epoch_datetime)
+    current_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
+    item = ImageryItem("any ID", "./scripts/tests/data/empty.tiff", "any GDAL version", current_datetime, current_datetime)
 
     with subtests.test():
         assert item.stac["properties"]["processing:software"]["linz/topo-imagery"] == "GIT_HASH not specified"

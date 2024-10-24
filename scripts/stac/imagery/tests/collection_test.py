@@ -113,11 +113,12 @@ def fixed_now_function(now: datetime) -> Callable[[], datetime]:
 def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     now = any_epoch_datetime()
     now_function = fixed_now_function(now)
+    current_datetime = format_rfc_3339_datetime_string(now)
     collection = ImageryCollection(fake_collection_metadata, now_function)
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    item = ImageryItem("BR34_5000_0304", item_file_path, "any GDAL version", now_function)
+    item = ImageryItem("BR34_5000_0304", item_file_path, "any GDAL version", current_datetime, current_datetime)
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
@@ -150,10 +151,10 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTes
 
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"collection {property_name}"):
-            assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
+            assert collection.stac[property_name] == current_datetime
 
         with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == format_rfc_3339_datetime_string(now)
+            assert item.stac["properties"][property_name] == current_datetime
 
         with subtests.test(msg=f"item assets.visual.{property_name}"):
             assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"

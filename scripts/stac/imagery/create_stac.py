@@ -1,4 +1,5 @@
 import json
+from os import path
 from typing import Any
 
 from linz_logger import get_log
@@ -6,7 +7,7 @@ from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import utc_now
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import read
+from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
@@ -82,8 +83,10 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdal_version: str,
+    current_datetime: str,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
+    published_path: str | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -93,8 +96,10 @@ def create_item(
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
         gdal_version: GDAL version
+        current_datetime: datetime string that represents the current time when the item is created.
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
+        published_path: path of the published dataset. Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
@@ -105,8 +110,19 @@ def create_item(
         gdalinfo_result = gdal_info(file)
 
     geometry, bbox = get_extents(gdalinfo_result)
+    created_datetime = current_datetime
+    if published_path:
+        # FIXME: make this try/catch nicer
+        try:
+            existing_item_content = read(path.join(published_path, f"{id_}.json"))
+            existing_item = json.loads(existing_item_content.decode("UTF-8"))
+            created_datetime = existing_item["properties"]["created"]
+        except NoSuchFileError:
+            get_log().info(f"No Item is published for ID: {id_}")
+        except KeyError:
+            get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
 
-    item = ImageryItem(id_, file, gdal_version, utc_now)
+    item = ImageryItem(id_, file, gdal_version, created_datetime, current_datetime)
 
     if derived_from is not None:
         for derived in derived_from:
