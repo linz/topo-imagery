@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from decimal import Decimal
 from os import environ
@@ -38,7 +39,7 @@ def setup() -> Iterator[ImageryItem]:
 
 
 @mock_aws
-def test_should_create_collection_file(item: ImageryItem) -> None:
+def test_should_create_collection_file_with_new_slug(item: ImageryItem, subtests: SubTests) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -71,7 +72,57 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
 
     # Verify collection.json has been created
     resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
-    assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
+    collection = json.load(resp["Body"])
+
+    with subtests.test():
+        assert collection["linz:slug"] == "hawkes-bay_2021_1m"
+
+    assert collection["type"] == "Collection"
+
+
+@mock_aws
+def test_should_create_collection_file_with_existing_slug(item: ImageryItem, subtests: SubTests) -> None:
+    # Mock AWS S3
+    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
+    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    # CLI arguments
+    linz_slug = "this_is_my_predefined_slug"  # pretend we got this slug from ODR collection.json
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--linz-slug",
+        linz_slug,
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
+    # Call script's main function
+    main(args)
+
+    # Verify collection.json has been created
+    resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    collection = json.load(resp["Body"])
+
+    with subtests.test():
+        assert collection["linz:slug"] == "this_is_my_predefined_slug"
+
+    assert collection["type"] == "Collection"
 
 
 @mock_aws

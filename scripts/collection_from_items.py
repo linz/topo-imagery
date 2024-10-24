@@ -22,9 +22,21 @@ class NoItemsError(Exception):
     pass
 
 
+def s3_uri(value: str) -> str:
+    prefix = "s3://"
+    if not value.startswith(prefix):
+        raise argparse.ArgumentTypeError(f"S3 URI must start with '{prefix}'")
+    return value
+
+
 def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
+    parser.add_argument(
+        "--uri", dest="uri", help="s3 path to items and collection.json write location", required=True, type=s3_uri
+    )
+    parser.add_argument(
+        "--linz-slug", dest="linz_slug", help="linz:slug value from the existing collection.json", required=False, type=str
+    )
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
         "--category",
@@ -101,11 +113,8 @@ def main(args: List[str] | None = None) -> None:
     start_time = time_in_ms()
     arguments = parse_args(args)
     uri = arguments.uri
+    linz_slug = arguments.linz_slug
     collection_id = arguments.collection_id
-
-    if not uri.startswith("s3://"):
-        msg = f"uri is not a s3 path: {uri}"
-        raise argparse.ArgumentTypeError(msg)
 
     s3_client = client("s3")
 
@@ -178,6 +187,7 @@ def main(args: List[str] | None = None) -> None:
         add_capture_dates=arguments.capture_dates,
         uri=uri,
         add_title_suffix=arguments.add_title_suffix,
+        linz_slug=linz_slug,
     )
 
     destination = os.path.join(uri, "collection.json")
