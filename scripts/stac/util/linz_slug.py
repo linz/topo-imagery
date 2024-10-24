@@ -2,6 +2,8 @@ from json import dumps
 from re import findall, sub
 from unicodedata import normalize
 
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
+
 SLUG_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789_.-"
 
 
@@ -30,3 +32,32 @@ def slugify(value: str) -> str:
 def remove_diacritics(value: str) -> str:
     combining_diacritical_marks = r"[\u0300-\u036F]"
     return sub(combining_diacritical_marks, "", normalize("NFD", value))
+
+
+def create_linz_slug(metadata: CollectionMetadata) -> str:
+    """
+    Function to create a linz-slugified string based on a collection's metadata dictionary.
+    Args:
+        metadata: Collection metadata dictionary
+
+    Returns:
+        string built from the collection's metadata dictionary in the following format:
+        Imagery:      [<geographic_description>|<region>][_<survey_number>?]_<start_year>[-<end_year>?]_<gsd>m
+        Elevation:    [<geographic_description>|<region>]_<start_year>[-<end_year>?]
+    """
+
+    slug_items = [
+        metadata["geographic_description"] or metadata["region"],
+    ]
+    if metadata["historic_survey_number"]:
+        slug_items.append("historic_survey_number")
+    slug_items.append(
+        f"{metadata["start_datetime"].year}{-metadata["end_datetime"].year if
+        metadata["end_datetime"].year > metadata["start_datetime"].year else ""}"
+    )
+    if metadata["category"] not in ["dem", "dsm"]:
+        slug_items.append(f"{metadata['gsd']}m")
+
+    raw_slug = "_".join(slug_items)
+
+    return slugify(raw_slug)
