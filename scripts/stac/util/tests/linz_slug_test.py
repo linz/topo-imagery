@@ -2,7 +2,7 @@ from random import choice
 
 from pytest import raises
 
-from scripts.stac.util.slug import SLUG_CHARS, slugify
+from scripts.stac.util.linz_slug import SLUG_CHARS, slugify
 
 
 def test_should_pass_through_output_alphabet_unchanged() -> None:
