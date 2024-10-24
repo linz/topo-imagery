@@ -104,13 +104,11 @@ def test_interval_updated_from_existing(fake_collection_metadata: CollectionMeta
 
 def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     now = any_epoch_datetime()
-    now_string = format_rfc_3339_datetime_string(now)
     collection = ImageryCollection(fake_collection_metadata, fixed_now_function(now))
     asset_created_datetime = any_epoch_datetime_string()
     asset_updated_datetime = any_epoch_datetime_string()
     item = ImageryItem(
         "BR34_5000_0304",
-        now_string,
         STACAsset(
             **{
                 "href": "any href",
@@ -153,10 +151,13 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTes
 
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"collection {property_name}"):
-            assert collection.stac[property_name] == now_string
+            assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
 
-        with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == now_string
+    with subtests.test(msg="item properties.created"):
+        assert item.stac["properties"]["created"] == asset_created_datetime
+
+    with subtests.test(msg="item properties.updated"):
+        assert item.stac["properties"]["updated"] == asset_updated_datetime
 
     with subtests.test(msg="item assets.visual.created"):
         assert item.stac["assets"]["visual"]["created"] == asset_created_datetime

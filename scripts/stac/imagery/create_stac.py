@@ -5,10 +5,10 @@ from typing import Any
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 
-from scripts.datetimes import format_rfc_3339_datetime_string, utc_now
+from scripts.datetimes import utc_now
 from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import modified, read
+from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
@@ -17,7 +17,7 @@ from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, ST
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
-from scripts.stac.util import checksum
+from scripts.stac.util.checksum import multihash_as_hex
 from scripts.stac.util.media_type import StacMediaType
 
 
@@ -85,8 +85,10 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdal_version: str,
+    current_datetime: str,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
+    published_path: str | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -96,18 +98,18 @@ def create_item(
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
         gdal_version: GDAL version
+        current_datetime: datetime string that represents the current time when the item is created
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
+        published_path: path of the published dataset. Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    item = create_base_item(asset_path, gdal_version)
+    item = create_base_item(asset_path, gdal_version, current_datetime, published_path)
 
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(asset_path)
-
-    geometry, bbox = get_extents(gdalinfo_result)
 
     if derived_from is not None:
         for derived in derived_from:
@@ -127,36 +129,47 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(geometry, bbox)
+    item.update_spatial(*get_extents(gdalinfo_result))
     item.add_collection(collection_id)
 
     get_log().info("ImageryItem created", path=asset_path)
     return item
 
 
-def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
+def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, published_path: str | None) -> ImageryItem:
     """
     Args:
         asset_path: path of the visual asset (TIFF)
         gdal_version: GDAL version string
+        current_datetime: datetime string that represents the current time when the item is created
+        published_path: path of the published dataset
 
     Returns:
         An ImageryItem with basic information.
     """
     id_ = get_file_name_from_path(asset_path)
     file_content = fs.read(asset_path)
-    file_modified_datetime = format_rfc_3339_datetime_string(modified(asset_path))
+    created_datetime = current_datetime
+
+    if published_path:
+        # FIXME: make this try/catch nicer
+        try:
+            existing_item_content = read(os.path.join(published_path, f"{id_}.json"))
+            existing_item = json.loads(existing_item_content.decode("UTF-8"))
+            created_datetime = existing_item["properties"]["created"]
+        except NoSuchFileError:
+            get_log().info(f"No Item is published for ID: {id_}")
+        except KeyError:
+            get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
 
     stac_asset = STACAsset(
         **{
             "href": os.path.join(".", os.path.basename(asset_path)),
-            "file:checksum": checksum.multihash_as_hex(file_content),
-            "created": file_modified_datetime,
-            "updated": file_modified_datetime,
+            "file:checksum": multihash_as_hex(file_content),
+            "created": created_datetime,
+            "updated": current_datetime,
         }
     )
-
-    now_string = format_rfc_3339_datetime_string(utc_now())
 
     if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
         commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
@@ -165,10 +178,10 @@ def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
 
     stac_processing = STACProcessing(
         **{
-            "processing:datetime": now_string,
+            "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
     )
 
-    return ImageryItem(id_, now_string, stac_asset, stac_processing)
+    return ImageryItem(id_, stac_asset, stac_processing)

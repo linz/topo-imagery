@@ -10,7 +10,7 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 def test_imagery_stac_item(subtests: SubTests) -> None:
@@ -29,10 +29,9 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     git_hash = "any Git hash"
     git_version = "any Git version string"
     asset = any_stac_asset()
-    now_string = any_epoch_datetime_string()
     stac_processing = any_stac_processing()
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, now_string, asset, stac_processing)
+        item = ImageryItem(id_, asset, stac_processing)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
@@ -53,11 +52,11 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
                 },
             ],
             "properties": {
-                "created": now_string,
+                "created": asset["created"],
                 "datetime": None,
                 "end_datetime": end_datetime,
                 "start_datetime": start_datetime,
-                "updated": now_string,
+                "updated": asset["updated"],
                 **stac_processing,
             },
             "stac_extensions": [
@@ -87,7 +86,7 @@ def test_imagery_add_collection(subtests: SubTests) -> None:
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_epoch_datetime_string(), any_stac_asset(), any_stac_processing())
+    item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
 
     item.add_collection(collection.stac["id"])
 

@@ -59,6 +59,15 @@ def parse_args() -> argparse.Namespace:
         type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help=(
+            "The datetime that is used as current datetime in the metadata. "
+            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
+        ),
+        required=True,
+    )
     return parser.parse_args()
 
 
@@ -147,6 +156,7 @@ def main() -> None:
                 end_datetime,
                 arguments.collection_id,
                 gdal_version,
+                arguments.current_datetime,
                 file.get_gdalinfo(),
                 file.get_derived_from_paths(),
             )

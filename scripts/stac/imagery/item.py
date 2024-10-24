@@ -26,7 +26,7 @@ STACProcessing = TypedDict(
 class ImageryItem:
     stac: dict[str, Any]
 
-    def __init__(self, id_: str, now_string: str, stac_asset: STACAsset, stac_processing: STACProcessing) -> None:
+    def __init__(self, id_: str, stac_asset: STACAsset, stac_processing: STACProcessing) -> None:
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
@@ -34,7 +34,7 @@ class ImageryItem:
             "links": [Link(path=f"./{id_}.json", rel=Relation.SELF, media_type=StacMediaType.GEOJSON).stac],
             "assets": {"visual": {**stac_asset, "type": "image/tiff; application=geotiff; profile=cloud-optimized"}},
             "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
-            "properties": {"created": now_string, "updated": now_string, **stac_processing},
+            "properties": {"created": stac_asset["created"], "updated": stac_asset["updated"], **stac_processing},
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:

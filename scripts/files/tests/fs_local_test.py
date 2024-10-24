@@ -1,10 +1,8 @@
 import os
-from pathlib import Path
 
 import pytest
 
-from scripts.files.fs_local import exists, modified, read, write
-from scripts.tests.datetimes_test import any_epoch_datetime
+from scripts.files.fs_local import exists, read, write
 
 
 @pytest.mark.dependency(name="write")
@@ -45,11 +43,3 @@ def test_exists(setup: str) -> None:
 def test_exists_file_not_found() -> None:
     found = exists("/tmp/test.file")
     assert found is False
-
-
-def test_should_get_modified_datetime(setup: str) -> None:
-    path = Path(os.path.join(setup, "modified.file"))
-    path.touch()
-    modified_datetime = any_epoch_datetime()
-    os.utime(path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    assert modified(path) == modified_datetime
