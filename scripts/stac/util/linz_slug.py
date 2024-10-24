@@ -65,22 +65,30 @@ def create_linz_slug(metadata: CollectionMetadata) -> str:
 
     Returns:
         string built from the collection's metadata dictionary in the following format:
-        Imagery:      [<geographic_description>|<region>][_<survey_number>?]_<start_year>[-<end_year>?]_<gsd>m
-        Elevation:    [<geographic_description>|<region>]_<start_year>[-<end_year>?]
+        - Imagery:      [<geographic_description>|<region>][_<survey_number>?]_<start_year>[-<end_year>?]_<gsd>m
+        - Elevation:    [<geographic_description>|<region>]_<start_year>[-<end_year>?]
     """
 
-    slug_items = [
-        metadata["geographic_description"] or metadata["region"],
-    ]
-    if metadata["historic_survey_number"]:
-        slug_items.append("historic_survey_number")
-    slug_items.append(
-        f"{metadata["start_datetime"].year}{-metadata["end_datetime"].year if
-        metadata["end_datetime"].year > metadata["start_datetime"].year else ""}"
-    )
-    if metadata["category"] not in ["dem", "dsm"]:
-        slug_items.append(f"{metadata['gsd']}m")
+    # Start building linz:slug with geographic description or region information
+    slug_parts = [metadata["geographic_description"] or metadata["region"]]
 
-    raw_slug = "_".join(slug_items)
+    # Add historic survey number if it exists
+    if metadata["historic_survey_number"]:
+        slug_parts.append(metadata["historic_survey_number"])
+
+    # Add start and end years
+    start_year = metadata["start_datetime"].year
+    end_year = metadata["end_datetime"].year
+
+    if end_year > start_year:
+        slug_parts.append(f"{start_year}-{end_year}")
+    else:
+        slug_parts.append(f"{start_year}")
+
+    # Add ground sample distance if this is not elevation data
+    if metadata["category"] not in ["dem", "dsm"]:
+        slug_parts.append(f"{metadata['gsd']}m")
+
+    raw_slug = "_".join(slug_parts)
 
     return slugify(raw_slug)
