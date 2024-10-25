@@ -9,7 +9,7 @@ from scripts.datetimes import format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
-from scripts.gdal.gdal_helper import get_gdal_version, get_srs, get_vfs_path
+from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
@@ -59,6 +59,12 @@ def parse_args() -> argparse.Namespace:
         type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help="The datetime that is used as current datetime in the metadata",
+        required=True,
+    )
     return parser.parse_args()
 
 
@@ -107,8 +113,6 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    gdal_version = get_gdal_version()
-
     tiff_files = run_standardising(
         tile_files,
         arguments.preset,
@@ -118,7 +122,6 @@ def main() -> None:
         arguments.target_epsg,
         arguments.gsd,
         arguments.create_footprints,
-        gdal_version,
         arguments.target,
     )
 
@@ -146,7 +149,7 @@ def main() -> None:
                 start_datetime,
                 end_datetime,
                 arguments.collection_id,
-                gdal_version,
+                arguments.current_datetime,
                 file.get_gdalinfo(),
                 file.get_derived_from_paths(),
             )

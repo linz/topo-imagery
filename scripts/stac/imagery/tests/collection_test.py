@@ -3,8 +3,11 @@ import os
 import tempfile
 from collections.abc import Callable
 from datetime import datetime, timezone
+from random import choice
 from shutil import rmtree
+from string import printable
 from tempfile import mkdtemp
+from unittest.mock import patch
 
 import shapely.geometry
 from boto3 import resource
@@ -17,9 +20,10 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.util.checksum import multihash_as_hex
 from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime
 
@@ -110,14 +114,46 @@ def fixed_now_function(now: datetime) -> Callable[[], datetime]:
     return func
 
 
+def any_multihash_as_hex() -> str:
+    return multihash_as_hex(any_bytes(64))
+
+
+def any_bytes(byte_count: int) -> bytes:
+    return os.urandom(byte_count)
+
+
+def any_string() -> str:
+    return "".join(choice(printable) for _ in range(10))
+
+
+def any_gdal_version() -> str:
+    return any_string()
+
+
 def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     now = any_epoch_datetime()
     now_function = fixed_now_function(now)
+    created_datetime = format_rfc_3339_datetime_string(any_epoch_datetime())
     collection = ImageryCollection(fake_collection_metadata, now_function)
     item_file_path = "./scripts/tests/data/empty.tiff"
     modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
     os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    item = ImageryItem("BR34_5000_0304", item_file_path, "any GDAL version", now_function)
+
+    with patch("scripts.stac.imagery.item.get_gdal_version", return_value=any_gdal_version()):
+        item = ImageryItem(
+            "BR34_5000_0304",
+            STACAsset(
+                **{
+                    "href": item_file_path,
+                    "file:checksum": any_multihash_as_hex(),
+                    "created": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                    "updated": format_rfc_3339_datetime_string(any_epoch_datetime()),
+                }
+            ),
+            created_datetime,
+            format_rfc_3339_datetime_string(any_epoch_datetime()),
+        )
+
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
@@ -151,12 +187,6 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTes
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"collection {property_name}"):
             assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
-
-        with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == format_rfc_3339_datetime_string(now)
-
-        with subtests.test(msg=f"item assets.visual.{property_name}"):
-            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
 
 
 def test_write_collection(fake_collection_metadata: CollectionMetadata) -> None:
