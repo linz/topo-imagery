@@ -29,6 +29,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
     )
+    parser.add_argument(
+        "--published-path",
+        dest="published_path",
+        help=("The path of the published dataset. Example: 's3://nz-imagery/wellington/porirua_2024_0.1m/rgb/2193/'"),
+        required=False,
+    )
     parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
     parser.add_argument(
         "--target-epsg",
@@ -159,6 +165,7 @@ def main() -> None:
                 arguments.current_datetime,
                 file.get_gdalinfo(),
                 file.get_derived_from_paths(),
+                arguments.published_path,
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)

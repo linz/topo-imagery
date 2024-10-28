@@ -1,0 +1,58 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "BQ25_10000_0305",
+  "links": [
+    {
+      "href": "./BQ25_10000_0305.json",
+      "rel": "self",
+      "type": "application/geo+json"
+    },
+    {
+      "href": "./collection.json",
+      "rel": "collection",
+      "type": "application/json"
+    },
+    { "href": "./collection.json", "rel": "parent", "type": "application/json" }
+  ],
+  "assets": {
+    "visual": {
+      "href": "/tmp/BQ25_10000_0305.tiff",
+      "file:checksum": "1220a2fb26080135bb39515795a61046db5155ffecf74901a1ac544a983839ae6b86",
+      "created": "2024-10-01T10:31:00Z",
+      "updated": "2024-10-28T21:42:00Z",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized"
+    }
+  },
+  "stac_extensions": [
+    "https://stac-extensions.github.io/file/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/processing/v1.2.0/schema.json"
+  ],
+  "properties": {
+    "created": "2024-10-01T10:31:00Z",
+    "updated": "2025-01-03T08:24:00Z",
+    "processing:datetime": "2025-01-03T08:24:00Z",
+    "processing:software": {
+      "gdal": "GDAL 3.9.0, released 2024/05/07",
+      "linz/topo-imagery": "https://github.com/linz/topo-imagery/commit/"
+    },
+    "processing:version": "",
+    "start_datetime": "2022-12-31T11:00:00Z",
+    "end_datetime": "2022-12-31T11:00:00Z",
+    "datetime": null
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [173.0860059, -41.3030235],
+        [173.0860913, -41.367879],
+        [173.1434853, -41.3678217],
+        [173.143343, -41.3029664],
+        [173.0860059, -41.3030235]
+      ]
+    ]
+  },
+  "bbox": [173.0860059, -41.367879, 173.1434853, -41.3029664],
+  "collection": "123"
+}

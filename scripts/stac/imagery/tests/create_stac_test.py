@@ -11,6 +11,34 @@ from scripts.stac.imagery.tests.generators import any_multihash_as_hex
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
+def test_create_item(subtests: SubTests) -> None:
+    fake_gdal_info: GdalInfo = cast(
+        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
+    )
+    current_datetime = any_epoch_datetime_string()
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        current_datetime,
+        fake_gdal_info,
+    )
+
+    with subtests.test(msg="properties.created"):
+        assert item.stac["properties"]["created"] == current_datetime
+
+    with subtests.test(msg="properties.updated"):
+        assert item.stac["properties"]["updated"] == current_datetime
+
+    with subtests.test(msg="assets.visual.created"):
+        assert item.stac["assets"]["visual"]["created"] == current_datetime
+
+    with subtests.test(msg="assets.visual.updated"):
+        assert item.stac["assets"]["visual"]["updated"] == current_datetime
+
+
 def test_create_item_with_derived_from(tmp_path: Path) -> None:
     derived_from_path = tmp_path / "derived_from_item.json"
     fake_item = {

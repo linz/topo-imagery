@@ -1,5 +1,5 @@
 import json
-import os
+from os import environ, path
 from typing import Any
 
 from linz_logger import get_log
@@ -108,9 +108,6 @@ def create_item(
     """
     item = create_base_item(asset_path, gdal_version, current_datetime, published_path)
 
-    if not gdalinfo_result:
-        gdalinfo_result = gdal_info(asset_path)
-
     if derived_from is not None:
         for derived in derived_from:
             derived_item_content = read(derived)
@@ -129,7 +126,7 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(*get_extents(gdalinfo_result))
+    item.update_spatial(*get_extents(gdalinfo_result or gdal_info(asset_path)))
     item.add_collection(collection_id)
 
     get_log().info("ImageryItem created", path=asset_path)
@@ -148,7 +145,7 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
         An ImageryItem with basic information.
     """
 
-    if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
+    if (topo_imagery_hash := environ.get("GIT_HASH")) is not None:
         commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
     else:
         commit_url = "GIT_HASH not specified"
@@ -157,7 +154,7 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
         **{
             "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
-            "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+            "processing:version": environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
     )
 
@@ -168,7 +165,7 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
     if published_path:
         # FIXME: make this try/catch nicer
         try:
-            existing_item_content = read(os.path.join(published_path, f"{id_}.json"))
+            existing_item_content = read(path.join(published_path, f"{id_}.json"))
             existing_item = json.loads(existing_item_content.decode("UTF-8"))
             created_datetime = existing_item["properties"]["created"]
             try:
@@ -193,7 +190,7 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
 
     stac_asset = STACAsset(
         **{
-            "href": os.path.join(".", os.path.basename(asset_path)),
+            "href": path.join(".", path.basename(asset_path)),
             "file:checksum": multihash_as_hex(file_content),
             "created": created_datetime,
             "updated": updated_datetime,
