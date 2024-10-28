@@ -30,8 +30,10 @@ def main(args: List[str] | None = None) -> None:
         collection_id = odr_collection["id"]
 
         if linz_slug := odr_collection["linz:slug"]:
-            with open("/tmp/linz_slug", "w", encoding="utf-8") as slug_file:
+            with open("/tmp/linz-slug", "w", encoding="utf-8") as slug_file:
                 slug_file.write(linz_slug)
+        else:
+            raise KeyError(f"linz:slug not found in collection: {odr_url}")
     else:
         collection_id = str(ULID())
 
