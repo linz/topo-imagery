@@ -65,6 +65,8 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
         "Placeholder",
         "--concurrency",
         "25",
+        "--linz-slug",
+        "this-is-a-pre-existing-slug_2021_1m",
     ]
     # Call script's main function
     main(args)
@@ -106,6 +108,8 @@ def test_should_fail_if_collection_has_no_matching_items(
         "Placeholder",
         "--concurrency",
         "25",
+        "--linz-slug",
+        "this-is-a-pre-existing-slug_2021_1m",
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -117,6 +121,33 @@ def test_should_fail_if_collection_has_no_matching_items(
         assert f"skipping: {item_collection_id} and {collection_id} do not match" in logs
 
     assert f"Collection {collection_id} has no items" in logs
+
+
+def test_should_fail_to_create_collection_file_without_linz_slug(capsys: CaptureFixture[str]) -> None:
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+    ]
+    # Call script's main function
+    with raises(SystemExit):
+        main(args)
+    assert "the following arguments are required: --linz-slug" in capsys.readouterr().err
 
 
 @mock_aws
@@ -159,6 +190,8 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "Placeholder",
         "--concurrency",
         "25",
+        "--linz-slug",
+        "this-is-a-pre-existing-slug_2021_1m",
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -199,6 +232,8 @@ def test_should_determine_dates_from_items(item: ImageryItem) -> None:
         "Placeholder",
         "--concurrency",
         "25",
+        "--linz-slug",
+        "this-is-a-pre-existing-slug_2021_1m",
     ]
     # Call script's main function
     main(args)
