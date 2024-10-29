@@ -53,25 +53,6 @@ def command_to_string(command: list[str]) -> str:
     return " ".join(command)
 
 
-def get_gdal_version() -> str:
-    """Return the GDAL version assuming all GDAL commands are in the same version of gdalinfo.
-
-    Raises:
-        GDALExecutionException: If the GDAL command fails.
-
-    Returns:
-        str: The GDAL version returned by GDAL.
-    """
-    gdal_env = os.environ.copy()
-    gdalinfo_version = ["gdalinfo", "--version"]
-    try:
-        proc = subprocess.run(gdalinfo_version, env=gdal_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        return proc.stdout.decode().strip()
-    except subprocess.CalledProcessError as cpe:
-        get_log().error("get_gdal_version_failed", command=command_to_string(gdalinfo_version), error=str(cpe.stderr, "utf-8"))
-        raise GDALExecutionException(f"GDAL {str(cpe.stderr, 'utf-8')}") from cpe
-
-
 def run_gdal(
     command: list[str],
     input_file: str | None = None,
