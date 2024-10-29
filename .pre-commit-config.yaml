@@ -8,7 +8,7 @@ repos:
         name: black
         entry: black
         language: system
-        stages: [commit]
+        stages: [pre-commit]
         types: [python]
 
       - id: gitlint
@@ -22,7 +22,7 @@ repos:
         name: isort
         entry: isort
         language: system
-        stages: [commit]
+        stages: [pre-commit]
         types: [python]
 
       - id: mypy
@@ -30,7 +30,7 @@ repos:
         entry: mypy
         args: [--no-incremental]
         language: system
-        stages: [commit]
+        stages: [pre-commit]
         types: [python]
         require_serial: true
 
@@ -38,7 +38,7 @@ repos:
         name: pylint
         entry: pylint
         language: system
-        stages: [commit]
+        stages: [pre-commit]
         types: [python]
         require_serial: true
 
@@ -46,11 +46,11 @@ repos:
     rev: a99a3fbe79a9d346cabd02a5e167ad0edafe616b # v2.3.0
     hooks:
       - id: prettier
-        stages: [commit]
+        stages: [pre-commit]
         exclude_types: [python]
 
   - repo: https://github.com/rhysd/actionlint
     rev: ea8102762106cdca9c88829f1295b39a544706f3 # frozen: v1.6.26
     hooks:
       - id: actionlint
-        stages: [commit]
+        stages: [pre-commit]
