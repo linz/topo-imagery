@@ -109,7 +109,6 @@ def main(args: List[str] | None = None) -> None:
     arguments = parse_args(args)
     uri = arguments.uri
     collection_id = arguments.collection_id
-    linz_slug = arguments.linz_slug
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
@@ -178,7 +177,7 @@ def main(args: List[str] | None = None) -> None:
 
     collection = create_collection(
         collection_id=collection_id,
-        linz_slug=linz_slug,
+        linz_slug=arguments.linz_slug,
         collection_metadata=collection_metadata,
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),

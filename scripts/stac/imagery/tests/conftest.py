@@ -7,7 +7,7 @@ import pytest
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def fake_collection_metadata() -> Iterator[CollectionMetadata]:
     collection_metadata: CollectionMetadata = {
         "category": "rural-aerial-photos",
@@ -23,6 +23,6 @@ def fake_collection_metadata() -> Iterator[CollectionMetadata]:
     yield collection_metadata
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def fake_linz_slug() -> str:
     return "somewhere-in-new-zealand_2021-2023_0.75m"
