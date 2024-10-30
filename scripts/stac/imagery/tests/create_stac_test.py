@@ -70,11 +70,11 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
 
 
-def test_create_collection(fake_collection_metadata: CollectionMetadata) -> None:
+def test_create_collection(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
     collection_id = "test_collection"
-
     collection = create_collection(
         collection_id=collection_id,
+        linz_slug=fake_linz_slug,
         collection_metadata=fake_collection_metadata,
         producers=[],
         licensors=[],

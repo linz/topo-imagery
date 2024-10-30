@@ -38,7 +38,7 @@ def setup() -> Iterator[ImageryItem]:
 
 
 @mock_aws
-def test_should_create_collection_file(item: ImageryItem) -> None:
+def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -66,7 +66,7 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
         "--concurrency",
         "25",
         "--linz-slug",
-        "this-is-a-pre-existing-slug_2021_1m",
+        fake_linz_slug,
     ]
     # Call script's main function
     main(args)
@@ -78,7 +78,7 @@ def test_should_create_collection_file(item: ImageryItem) -> None:
 
 @mock_aws
 def test_should_fail_if_collection_has_no_matching_items(
-    item: ImageryItem, capsys: CaptureFixture[str], subtests: SubTests
+    item: ImageryItem, fake_linz_slug: str, capsys: CaptureFixture[str], subtests: SubTests
 ) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
@@ -109,7 +109,7 @@ def test_should_fail_if_collection_has_no_matching_items(
         "--concurrency",
         "25",
         "--linz-slug",
-        "this-is-a-pre-existing-slug_2021_1m",
+        fake_linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -151,7 +151,7 @@ def test_should_fail_to_create_collection_file_without_linz_slug(capsys: Capture
 
 
 @mock_aws
-def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
+def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[str]) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     s3.create_bucket(Bucket="stacfiles")
@@ -168,7 +168,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "geographic_description": None,
         "historic_survey_number": None,
     }
-    existing_collection = ImageryCollection(metadata, utc_now, collection_id)
+    existing_collection = ImageryCollection(metadata, utc_now, fake_linz_slug, collection_id)
     write("s3://stacfiles/collection.json", dict_to_json_bytes(existing_collection.stac))
     # CLI arguments
     args = [
@@ -191,7 +191,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
         "--concurrency",
         "25",
         "--linz-slug",
-        "this-is-a-pre-existing-slug_2021_1m",
+        fake_linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -201,7 +201,7 @@ def test_should_not_add_if_not_item(capsys: CaptureFixture[str]) -> None:
 
 
 @mock_aws
-def test_should_determine_dates_from_items(item: ImageryItem) -> None:
+def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: str) -> None:
     # Mock AWS S3
     s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
     boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -233,7 +233,7 @@ def test_should_determine_dates_from_items(item: ImageryItem) -> None:
         "--concurrency",
         "25",
         "--linz-slug",
-        "this-is-a-pre-existing-slug_2021_1m",
+        fake_linz_slug,
     ]
     # Call script's main function
     main(args)
