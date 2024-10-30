@@ -21,6 +21,7 @@ from scripts.stac.util.media_type import StacMediaType
 # pylint: disable=too-many-arguments
 def create_collection(
     collection_id: str,
+    linz_slug: str,
     collection_metadata: CollectionMetadata,
     producers: list[str],
     licensors: list[str],
@@ -35,6 +36,7 @@ def create_collection(
 
     Args:
         collection_id: id of the collection
+        linz_slug: the linz:slug attribute for this collection
         collection_metadata: metadata of the collection
         producers: producers of the dataset
         licensors: licensors of the dataset
@@ -56,6 +58,7 @@ def create_collection(
     collection = ImageryCollection(
         metadata=collection_metadata,
         now=utc_now,
+        linz_slug=linz_slug,
         collection_id=collection_id,
         providers=providers,
         add_title_suffix=add_title_suffix,
