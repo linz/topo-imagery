@@ -1,8 +1,6 @@
 import json
 import os
 import tempfile
-from collections.abc import Callable
-from datetime import datetime, timezone
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -17,11 +15,12 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
+from scripts.stac.imagery.tests.generators import any_stac_processing, fixed_now_function
 from scripts.stac.util.stac_extensions import StacExtensions
-from scripts.tests.datetimes_test import any_epoch_datetime
+from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
 
 
 def test_title_description_id_created_on_init(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
@@ -103,21 +102,25 @@ def test_interval_updated_from_existing(fake_collection_metadata: CollectionMeta
     assert collection.stac["extent"]["temporal"]["interval"] == [["2021-01-27T00:00:00Z", "2021-02-20T00:00:00Z"]]
 
 
-def fixed_now_function(now: datetime) -> Callable[[], datetime]:
-    def func() -> datetime:
-        return now
-
-    return func
-
-
 def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     now = any_epoch_datetime()
-    now_function = fixed_now_function(now)
-    collection = ImageryCollection(fake_collection_metadata, now_function)
-    item_file_path = "./scripts/tests/data/empty.tiff"
-    modified_datetime = datetime(2001, 2, 3, hour=4, minute=5, second=6, tzinfo=timezone.utc)
-    os.utime(item_file_path, times=(any_epoch_datetime().timestamp(), modified_datetime.timestamp()))
-    item = ImageryItem("BR34_5000_0304", item_file_path, "any GDAL version", now_function)
+    now_string = format_rfc_3339_datetime_string(now)
+    collection = ImageryCollection(fake_collection_metadata, fixed_now_function(now))
+    asset_created_datetime = any_epoch_datetime_string()
+    asset_updated_datetime = any_epoch_datetime_string()
+    item = ImageryItem(
+        "BR34_5000_0304",
+        now_string,
+        STACAsset(
+            **{
+                "href": "any href",
+                "file:checksum": "any checksum",
+                "created": asset_created_datetime,
+                "updated": asset_updated_datetime,
+            }
+        ),
+        any_stac_processing(),
+    )
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
@@ -150,13 +153,16 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, subtests: SubTes
 
     for property_name in ["created", "updated"]:
         with subtests.test(msg=f"collection {property_name}"):
-            assert collection.stac[property_name] == format_rfc_3339_datetime_string(now)
+            assert collection.stac[property_name] == now_string
 
         with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == format_rfc_3339_datetime_string(now)
+            assert item.stac["properties"][property_name] == now_string
 
-        with subtests.test(msg=f"item assets.visual.{property_name}"):
-            assert item.stac["assets"]["visual"][property_name] == "2001-02-03T04:05:06Z"
+    with subtests.test(msg="item assets.visual.created"):
+        assert item.stac["assets"]["visual"]["created"] == asset_created_datetime
+
+    with subtests.test(msg="item assets.visual.updated"):
+        assert item.stac["assets"]["visual"]["updated"] == asset_updated_datetime
 
 
 def test_write_collection(fake_collection_metadata: CollectionMetadata) -> None:

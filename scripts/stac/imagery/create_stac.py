@@ -1,20 +1,23 @@
 import json
+import os
 from typing import Any
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 
-from scripts.datetimes import utc_now
+from scripts.datetimes import format_rfc_3339_datetime_string, utc_now
+from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import read
+from scripts.files.fs import modified, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
+from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
 
 
@@ -77,7 +80,7 @@ def create_collection(
 
 
 def create_item(
-    file: str,
+    asset_path: str,
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
@@ -88,7 +91,7 @@ def create_item(
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
     Args:
-        file: asset tiff file
+        asset_path: asset tiff file
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
@@ -99,14 +102,12 @@ def create_item(
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    id_ = get_file_name_from_path(file)
+    item = create_base_item(asset_path, gdal_version)
 
     if not gdalinfo_result:
-        gdalinfo_result = gdal_info(file)
+        gdalinfo_result = gdal_info(asset_path)
 
     geometry, bbox = get_extents(gdalinfo_result)
-
-    item = ImageryItem(id_, file, gdal_version, utc_now)
 
     if derived_from is not None:
         for derived in derived_from:
@@ -129,5 +130,45 @@ def create_item(
     item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
-    get_log().info("ImageryItem created", path=file)
+    get_log().info("ImageryItem created", path=asset_path)
     return item
+
+
+def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
+    """
+    Args:
+        asset_path: asset tiff file path
+        gdal_version: GDAL version string
+
+    Returns:
+        An ImageryItem with basic information.
+    """
+    id_ = get_file_name_from_path(asset_path)
+    file_content = fs.read(asset_path)
+    file_modified_datetime = format_rfc_3339_datetime_string(modified(asset_path))
+
+    stac_asset = STACAsset(
+        **{
+            "href": os.path.join(".", os.path.basename(asset_path)),
+            "file:checksum": checksum.multihash_as_hex(file_content),
+            "created": file_modified_datetime,
+            "updated": file_modified_datetime,
+        }
+    )
+
+    now_string = format_rfc_3339_datetime_string(utc_now())
+
+    if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
+        commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
+    else:
+        commit_url = "GIT_HASH not specified"
+
+    stac_processing = STACProcessing(
+        **{
+            "processing:datetime": now_string,
+            "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
+            "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+        }
+    )
+
+    return ImageryItem(id_, now_string, stac_asset, stac_processing)

@@ -1,53 +1,40 @@
-import os
-from collections.abc import Callable
-from datetime import datetime
-from os import environ
-from typing import Any
+from typing import Any, TypedDict
 
-from scripts.datetimes import format_rfc_3339_datetime_string
-from scripts.files import fs
-from scripts.files.fs import modified
 from scripts.stac.link import Link, Relation
-from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
+
+STACAsset = TypedDict("STACAsset", {"href": str, "file:checksum": str, "created": str, "updated": str})
+
+STACProcessingSoftware = TypedDict("STACProcessingSoftware", {"gdal": str, "linz/topo-imagery": str})
+"""STAC Processing extension LINZ specific fields"""
+
+STACProcessing = TypedDict(
+    "STACProcessing",
+    {
+        "processing:datetime": str,
+        "processing:software": STACProcessingSoftware,
+        "processing:version": str,
+    },
+)
+"""Some of the STAC processing extension fields are not declared in this TypedDict 
+(https://github.com/stac-extensions/processing?tab=readme-ov-file#fields)
+"""
 
 
 class ImageryItem:
     stac: dict[str, Any]
 
-    def __init__(self, id_: str, file: str, gdal_version: str, now: Callable[[], datetime]) -> None:
-        file_content = fs.read(file)
-        file_modified_datetime = format_rfc_3339_datetime_string(modified(file))
-        now_string = format_rfc_3339_datetime_string(now())
-        if (topo_imagery_hash := environ.get("GIT_HASH")) is not None:
-            commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
-        else:
-            commit_url = "GIT_HASH not specified"
-
+    def __init__(self, id_: str, now_string: str, stac_asset: STACAsset, stac_processing: STACProcessing) -> None:
         self.stac = {
             "type": "Feature",
             "stac_version": STAC_VERSION,
             "id": id_,
             "links": [Link(path=f"./{id_}.json", rel=Relation.SELF, media_type=StacMediaType.GEOJSON).stac],
-            "assets": {
-                "visual": {
-                    "href": os.path.join(".", os.path.basename(file)),
-                    "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-                    "file:checksum": checksum.multihash_as_hex(file_content),
-                    "created": file_modified_datetime,
-                    "updated": file_modified_datetime,
-                }
-            },
+            "assets": {"visual": {**stac_asset, "type": "image/tiff; application=geotiff; profile=cloud-optimized"}},
             "stac_extensions": [StacExtensions.file.value, StacExtensions.processing.value],
-            "properties": {
-                "created": now_string,
-                "updated": now_string,
-                "processing:datetime": now_string,
-                "processing:software": {"gdal": gdal_version, "linz/topo-imagery": commit_url},
-                "processing:version": environ.get("GIT_VERSION", "GIT_VERSION not specified"),
-            },
+            "properties": {"created": now_string, "updated": now_string, **stac_processing},
         }
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
