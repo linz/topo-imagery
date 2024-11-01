@@ -1,6 +1,5 @@
 import os
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import TYPE_CHECKING
 
 from boto3 import resource
 from linz_logger import get_log
@@ -8,11 +7,6 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 from scripts.stac.util.checksum import multihash_as_hex
-
-if TYPE_CHECKING:
-    pass
-else:
-    S3Client = dict
 
 
 def write(destination: str, source: bytes, content_type: str | None = None) -> str:
