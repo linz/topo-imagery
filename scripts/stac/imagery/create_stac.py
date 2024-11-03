@@ -91,7 +91,7 @@ def create_item(
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
     Args:
-        asset_path: asset tiff file
+        asset_path: path of the visual asset (TIFF)
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
