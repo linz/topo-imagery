@@ -137,7 +137,7 @@ def create_item(
 def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
     """
     Args:
-        asset_path: asset tiff file path
+        asset_path: path of the visual asset (TIFF)
         gdal_version: GDAL version string
 
     Returns:
