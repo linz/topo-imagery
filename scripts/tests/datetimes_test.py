@@ -64,3 +64,7 @@ def any_datetime_between(start: datetime, end: datetime) -> datetime:
     """
     range_in_seconds = (end - start).total_seconds()
     return start + timedelta(seconds=randint(0, int(range_in_seconds)))
+
+
+def any_epoch_datetime_string() -> str:
+    return format_rfc_3339_datetime_string(any_epoch_datetime())
