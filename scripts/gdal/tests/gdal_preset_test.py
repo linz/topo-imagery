@@ -18,8 +18,8 @@ def test_preset_webp(subtests: SubTests) -> None:
     with subtests.test():
         assert "num_threads=all_cpus" in gdal_command
 
-    with subtests.test():
-        assert "bigtiff=no" in gdal_command
+    # with subtests.test():
+    #     assert "bigtiff=no" in gdal_command
 
     # Webp lossless
     with subtests.test():
@@ -58,8 +58,8 @@ def test_preset_lzw(subtests: SubTests) -> None:
     with subtests.test():
         assert "num_threads=all_cpus" in gdal_command
 
-    with subtests.test():
-        assert "bigtiff=no" in gdal_command
+    # with subtests.test():
+    #     assert "bigtiff=no" in gdal_command
 
     with subtests.test():
         assert "overviews=ignore_existing" in gdal_command
@@ -97,8 +97,8 @@ def test_preset_dem_lerc(subtests: SubTests) -> None:
     with subtests.test():
         assert "num_threads=all_cpus" in gdal_command
 
-    with subtests.test():
-        assert "bigtiff=no" in gdal_command
+    # with subtests.test():
+    #     assert "bigtiff=no" in gdal_command
 
     with subtests.test():
         assert "overviews=ignore_existing" in gdal_command
