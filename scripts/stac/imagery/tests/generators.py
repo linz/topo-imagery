@@ -1,7 +1,5 @@
 import os
 from datetime import datetime
-from random import choice
-from string import printable
 from typing import Callable
 
 from scripts.stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
@@ -40,7 +38,3 @@ def any_stac_processing() -> STACProcessing:
 
 def any_multihash_as_hex() -> str:
     return multihash_as_hex(os.urandom(64))
-
-
-def any_gdal_version() -> str:
-    return "".join(choice(printable) for _ in range(10))
