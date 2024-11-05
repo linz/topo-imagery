@@ -7,13 +7,12 @@ from pytest_subtests import SubTests
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem
+from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
-from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
 from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
 
 
-def test_imagery_stac_item(subtests: SubTests) -> None:
+def test_imagery_stac_item(any_stac_asset: STACAsset, any_stac_processing: STACProcessing, subtests: SubTests) -> None:
     # mock functions that interact with files
     geometry = {
         "type": "Polygon",
@@ -28,11 +27,9 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
 
     git_hash = "any Git hash"
     git_version = "any Git version string"
-    asset = any_stac_asset()
     now_string = any_epoch_datetime_string()
-    stac_processing = any_stac_processing()
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, now_string, asset, stac_processing)
+        item = ImageryItem(id_, now_string, any_stac_asset, any_stac_processing)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
@@ -40,7 +37,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     with subtests.test():
         assert item.stac == {
             "assets": {
-                "visual": {**asset, "type": "image/tiff; application=geotiff; profile=cloud-optimized"},
+                "visual": {**any_stac_asset, "type": "image/tiff; application=geotiff; profile=cloud-optimized"},
             },
             "bbox": bbox,
             "geometry": geometry,
@@ -58,7 +55,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
                 "end_datetime": end_datetime,
                 "start_datetime": start_datetime,
                 "updated": now_string,
-                **stac_processing,
+                **any_stac_processing,
             },
             "stac_extensions": [
                 "https://stac-extensions.github.io/file/v2.0.0/schema.json",
@@ -70,7 +67,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(subtests: SubTests) -> None:
+def test_imagery_add_collection(any_stac_asset: STACAsset, any_stac_processing: STACProcessing, subtests: SubTests) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
@@ -87,7 +84,7 @@ def test_imagery_add_collection(subtests: SubTests) -> None:
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_epoch_datetime_string(), any_stac_asset(), any_stac_processing())
+    item = ImageryItem(id_, any_epoch_datetime_string(), any_stac_asset, any_stac_processing)
 
     item.add_collection(collection.stac["id"])
 
