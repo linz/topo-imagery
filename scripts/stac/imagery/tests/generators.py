@@ -1,5 +1,5 @@
-import os
 from datetime import datetime
+from os import urandom
 from typing import Callable
 
 from scripts.stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
@@ -37,4 +37,4 @@ def any_stac_processing() -> STACProcessing:
 
 
 def any_multihash_as_hex() -> str:
-    return multihash_as_hex(os.urandom(64))
+    return multihash_as_hex(urandom(64))
