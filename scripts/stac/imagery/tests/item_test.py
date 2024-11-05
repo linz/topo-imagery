@@ -70,7 +70,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(subtests: SubTests) -> None:
+def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
@@ -83,7 +83,7 @@ def test_imagery_add_collection(subtests: SubTests) -> None:
         "geographic_description": None,
     }
     ulid = "fake_ulid"
-    collection = ImageryCollection(metadata=metadata, now=any_epoch_datetime, collection_id=ulid)
+    collection = ImageryCollection(metadata=metadata, now=any_epoch_datetime, linz_slug=fake_linz_slug, collection_id=ulid)
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)

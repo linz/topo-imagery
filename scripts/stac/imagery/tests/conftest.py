@@ -7,7 +7,7 @@ import pytest
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def fake_collection_metadata() -> Iterator[CollectionMetadata]:
     collection_metadata: CollectionMetadata = {
         "category": "rural-aerial-photos",

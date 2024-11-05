@@ -64,6 +64,13 @@ def parse_args(args: List[str] | None) -> Namespace:
         choices=["under development", "preview", "ongoing", "completed", "deprecated"],
     )
     parser.add_argument(
+        "--linz-slug",
+        dest="linz_slug",
+        help="linz:slug attribute for this dataset. E.g. bay-of-plenty_2018-2019_0.1m",
+        type=str,
+        required=True,
+    )
+    parser.add_argument(
         "--producer",
         dest="producer",
         help="Imagery producer. Ignored if --producer-list passed with a semicolon delimited list.",
@@ -170,6 +177,7 @@ def main(args: List[str] | None = None) -> None:
 
     collection = create_collection(
         collection_id=collection_id,
+        linz_slug=arguments.linz_slug,
         collection_metadata=collection_metadata,
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),

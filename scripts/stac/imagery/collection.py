@@ -42,6 +42,7 @@ class ImageryCollection:
         self,
         metadata: CollectionMetadata,
         now: Callable[[], datetime],
+        linz_slug: str,
         collection_id: str | None = None,
         providers: list[Provider] | None = None,
         add_title_suffix: bool = True,
@@ -65,6 +66,7 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
+            "linz:slug": linz_slug,
             "created": now_string,
             "updated": now_string,
         }
