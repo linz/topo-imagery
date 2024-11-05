@@ -163,11 +163,14 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
     created_datetime = updated_datetime = current_datetime
 
     if published_path:
-        # FIXME: make this try/catch nicer
         try:
             existing_item_content = read(path.join(published_path, f"{id_}.json"))
             existing_item = json.loads(existing_item_content.decode("UTF-8"))
-            created_datetime = existing_item["properties"]["created"]
+            try:
+                created_datetime = existing_item["properties"]["created"]
+            except KeyError:
+                get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
+
             try:
                 if multihash_as_hex(file_content) == existing_item["assets"]["visual"]["file:checksum"]:
                     # Keep existing created time and processing properties
@@ -185,8 +188,6 @@ def create_base_item(asset_path: str, gdal_version: str, current_datetime: str, 
 
         except NoSuchFileError:
             get_log().info(f"No Item is published for ID: {id_}")
-        except KeyError:
-            get_log().info(f"Existing Item {id_} does not have 'properties.created' attribute")
 
     stac_asset = STACAsset(
         **{
