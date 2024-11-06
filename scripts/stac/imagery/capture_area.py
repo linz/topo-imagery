@@ -4,6 +4,7 @@ from typing import Any, Sequence
 
 from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
+from shapely.constructive import make_valid
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
@@ -67,7 +68,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
     oriented_union_simplified = orient(union_rounded, sign=1.0)
 
-    return oriented_union_simplified
+    return make_valid(oriented_union_simplified)
 
 
 def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: Decimal) -> dict[str, Any]:
