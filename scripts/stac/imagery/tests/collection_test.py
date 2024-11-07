@@ -9,11 +9,13 @@ from boto3 import resource
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest_subtests import SubTests
+from shapely.predicates import is_valid
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
+from scripts.stac.imagery.capture_area import merge_polygons
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
@@ -340,6 +342,27 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
+
+
+def test_should_make_valid_capture_area() -> None:
+    # Given two touching triangles
+    polygons = [
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [[[[0, 0], [0, 1], [1, 1], [0, 0]]]],
+            }
+        ),
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [[[[1, 0], [2, 2], [1, 2], [1, 0]]]],
+            }
+        ),
+    ]
+
+    capture_area = merge_polygons(polygons, 0.1)
+    assert is_valid(capture_area)
 
 
 def test_event_name_is_present(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
