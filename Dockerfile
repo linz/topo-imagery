@@ -5,9 +5,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ=Etc/UTC
 
-RUN apt-get update
 # Install pipx and build dependencies
-RUN apt-get install --assume-yes gcc libgeos-dev pipx python3-dev
+RUN apt-get update && apt-get install --assume-yes --fix-missing gcc libgeos-dev pipx python3-dev
 # Install Poetry with the bundle plugin
 RUN pipx install poetry
 RUN pipx inject poetry poetry-plugin-bundle
@@ -30,6 +29,8 @@ ARG GIT_VERSION
 ENV GIT_VERSION=$GIT_VERSION
 
 ENV TZ=Etc/UTC
+
+RUN apt-get update && apt-get install --assume-yes --fix-missing git
 
 # Copy just the bundle from the first stage
 COPY --from=builder /venv /venv
