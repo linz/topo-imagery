@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0](https://github.com/linz/topo-imagery/compare/v5.2.0...v6.0.0) (2024-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* add linz:slug to Collection TDE-1305 ([#1152](https://github.com/linz/topo-imagery/issues/1152))
+
+### Features
+
+* add linz:slug to Collection TDE-1305 ([#1152](https://github.com/linz/topo-imagery/issues/1152)) ([df5a746](https://github.com/linz/topo-imagery/commit/df5a746b6a0fac5c4d241ea948b376947f07332d))
+
+
+### Bug Fixes
+
+* Avoid deprecated stage name "commit" ([#1135](https://github.com/linz/topo-imagery/issues/1135)) ([e2d9e3d](https://github.com/linz/topo-imagery/commit/e2d9e3d161aa4267c74fd91dcd739af638964c4f))
+
 ## [5.2.0](https://github.com/linz/topo-imagery/compare/v5.1.0...v5.2.0) (2024-10-17)
 
 
