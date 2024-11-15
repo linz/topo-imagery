@@ -35,9 +35,9 @@ def test_title_description_id_created_on_init(
         assert collection.stac["title"] == "Hawke's Bay Forest Assessment 0.3m Rural Aerial Photos (2023)"
 
     with subtests.test():
-        assert (
-            collection.stac["description"]
-            == "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, published as a record of the Forest Assessment event."  # pylint: disable=line-too-long
+        assert collection.stac["description"] == (
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
+            "published as a record of the Forest Assessment event."
         )
 
     with subtests.test():
