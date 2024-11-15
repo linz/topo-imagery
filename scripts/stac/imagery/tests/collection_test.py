@@ -5,9 +5,10 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 import shapely.geometry
-from boto3 import resource
+from boto3 import client
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
+from mypy_boto3_s3 import S3Client
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
@@ -334,7 +335,8 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "1220ba57cd77defc7fa72e140f4faa0846e8905ae443de04aef99bf381d4650c17a0",  # geos 3.11 - geos 3.12 as yet untested
+            "1220ba57cd77defc7fa72e140f4faa0846e8905ae443de04aef99bf381d4650c17a0",
+            # geos 3.11 - geos 3.12 as yet untested
         )
 
     with subtests.test():
@@ -385,8 +387,8 @@ def test_linz_slug_is_present(fake_collection_metadata: CollectionMetadata, fake
 @mock_aws
 def test_capture_dates_added(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
     collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime, fake_linz_slug)
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="flat")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="flat")
     write("s3://flat/capture-dates.geojson", b"")
     collection.add_capture_dates("s3://flat")
     assert collection.stac["assets"]["capture_dates"] == {

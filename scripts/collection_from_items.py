@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 from argparse import Namespace
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import shapely.geometry
 import shapely.ops
@@ -16,6 +16,11 @@ from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multi
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.create_stac import create_collection
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+else:
+    S3Client = GetObjectOutputTypeDef = dict
 
 
 class NoItemsError(Exception):
@@ -114,7 +119,7 @@ def main(args: List[str] | None = None) -> None:
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
-    s3_client = client("s3")
+    s3_client: S3Client = client("s3")
 
     files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
 

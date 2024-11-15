@@ -4,8 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from boto3 import client, resource
-from botocore.exceptions import ClientError
+from boto3 import client
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import get_session, parse_path
@@ -32,17 +31,18 @@ def write(destination: str, source: bytes, content_type: str | None = None) -> N
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
     bucket, key = parse_path(destination)
-    s3 = resource("s3")
+    s3_client: S3Client = client("s3")
     multihash = checksum.multihash_as_hex(source)
 
     try:
-        s3_object = s3.Object(bucket, key)
         if content_type:
-            s3_object.put(Body=source, ContentType=content_type, Metadata={"multihash": multihash})
+            s3_client.put_object(
+                Bucket=bucket, Key=key, Body=source, ContentType=content_type, Metadata={"multihash": multihash}
+            )
         else:
-            s3_object.put(Body=source, Metadata={"multihash": multihash})
+            s3_client.put_object(Bucket=bucket, Key=key, Body=source, Metadata={"multihash": multihash})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
-    except ClientError as ce:
+    except s3_client.exceptions.ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
         raise ce
 
@@ -55,33 +55,33 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
         needs_credentials:  Tells if credentials are needed. Defaults to False.
 
     Raises:
-        ce: botocore ClientError
+        ClientError
 
     Returns:
         The file in bytes.
     """
     start_time = time_in_ms()
     bucket, key = parse_path(path)
-    s3 = resource("s3")
+    s3_client: S3Client = client("s3")
 
     try:
         if needs_credentials:
-            s3 = get_session(path).resource("s3")
+            s3_client = get_session(path).client("s3")
 
-        s3_object = s3.Object(bucket, key)
-        file: bytes = s3_object.get()["Body"].read()
-    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+        s3_object: GetObjectOutputTypeDef = s3_client.get_object(Bucket=bucket, Key=key)
+        file: bytes = s3_object["Body"].read()
+    except s3_client.exceptions.NoSuchBucket as nsb:
         get_log().error("s3_bucket_not_found", path=path, error=f"The specified bucket does not seem to exist: {nsb}")
-        raise nsb
-    except s3.meta.client.exceptions.NoSuchKey as nsk:
+        raise
+    except s3_client.exceptions.NoSuchKey as nsk:
         get_log().error("s3_key_not_found", path=path, error=f"The specified file does not seem to exist: {nsk}")
-        raise nsk
-    except s3.meta.client.exceptions.ClientError as ce:
+        raise
+    except s3_client.exceptions.ClientError as ce:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("read_s3_needs_credentials", path=path)
             return read(path, True)
-        raise ce
+        raise
 
     get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
     return file
@@ -95,36 +95,33 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
         needs_credentials: if acces to object needs credentials. Defaults to False.
 
     Raises:
-        ce: ClientError
+        ce: s3_client.exceptions.ClientError
         nsb: NoSuchBucket
 
     Returns:
         True if the S3 Object exists
     """
     bucket, key = parse_path(path)
-    s3 = resource("s3")
+    s3_client: S3Client = client("s3")
 
     try:
         if needs_credentials:
-            s3 = get_session(path).resource("s3")
+            s3_client = get_session(path).client("s3")
 
         if path.endswith("/"):
-            bucket = bucket_name_from_path(bucket)
-            bucket_object = s3.Bucket(bucket)
             # MaxKeys limits to 1 object in the response
-            objects = bucket_object.objects.filter(Prefix=key, MaxKeys=1)
-
+            objects = s3_client.list_objects_v2(Bucket=bucket, Prefix=key, MaxKeys=1)
             if len(list(objects)) > 0:
                 return True
             return False
 
-        # load() fetch the metadata, not the data. Calls a `head` behind the scene.
-        s3.Object(bucket, key).load()
+        s3_client.head_object(Bucket=bucket, Key=key)
+
         return True
-    except s3.meta.client.exceptions.NoSuchBucket as nsb:
+    except s3_client.exceptions.NoSuchBucket as nsb:
         get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
         return False
-    except s3.meta.client.exceptions.ClientError as ce:
+    except s3_client.exceptions.ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("read_s3_needs_credentials", path=path)
             return exists(path, True)
@@ -134,7 +131,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
             get_log().debug("s3_key_not_found", path=path, info=f"The specified key does not seem to exist: {ce}")
             return False
         get_log().error("s3_client_error", path=path, error=f"ClientError raised: {ce}")
-        raise ce
+        raise
 
 
 def bucket_name_from_path(path: str) -> str:

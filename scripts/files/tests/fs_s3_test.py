@@ -1,6 +1,6 @@
 import json
 
-from boto3 import client, resource
+from boto3 import client
 from botocore.exceptions import ClientError
 from moto import mock_aws
 from moto.core.models import DEFAULT_ACCOUNT_ID
@@ -18,13 +18,12 @@ from scripts.tests.datetimes_test import any_epoch_datetime
 
 @mock_aws
 def test_write(subtests: SubTests) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     write("s3://testbucket/test.file", b"test content")
 
-    resp = boto3_client.get_object(Bucket="testbucket", Key="test.file")
+    resp = s3_client.get_object(Bucket="testbucket", Key="test.file")
     with subtests.test():
         assert resp["Body"].read() == b"test content"
 
@@ -34,12 +33,11 @@ def test_write(subtests: SubTests) -> None:
 
 @mock_aws
 def test_write_content_type(subtests: SubTests) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
-    resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
+    resp = s3_client.get_object(Bucket="testbucket", Key="test.tiff")
     with subtests.test():
         assert resp["Body"].read() == b"test content"
 
@@ -49,12 +47,11 @@ def test_write_content_type(subtests: SubTests) -> None:
 
 @mock_aws
 def test_write_multihash_as_metadata(subtests: SubTests) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     write("s3://testbucket/test.tiff", b"test content", ContentType.GEOTIFF.value)
-    resp = boto3_client.get_object(Bucket="testbucket", Key="test.tiff")
+    resp = s3_client.get_object(Bucket="testbucket", Key="test.tiff")
 
     with subtests.test():
         assert resp["Metadata"]["multihash"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
@@ -62,10 +59,9 @@ def test_write_multihash_as_metadata(subtests: SubTests) -> None:
 
 @mock_aws
 def test_read() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
-    boto3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
 
     content = read("s3://testbucket/test.file")
 
@@ -84,8 +80,8 @@ def test_read_bucket_not_found(capsys: CaptureFixture[str]) -> None:
 
 @mock_aws
 def test_read_key_not_found(capsys: CaptureFixture[str]) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     with raises(ClientError):
         read("s3://testbucket/test.file")
@@ -96,10 +92,9 @@ def test_read_key_not_found(capsys: CaptureFixture[str]) -> None:
 
 @mock_aws
 def test_exists() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
-    boto3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
 
     file_exists = exists("s3://testbucket/test.file")
 
@@ -108,10 +103,9 @@ def test_exists() -> None:
 
 @mock_aws
 def test_directory_exists() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
-    boto3_client.put_object(Bucket="testbucket", Key="hello/test.file", Body=b"test content")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="hello/test.file", Body=b"test content")
 
     directory_exists = exists("s3://testbucket/hello/")
 
@@ -132,10 +126,9 @@ def test_exists_bucket_not_exists(capsys: CaptureFixture[str], subtests: SubTest
 
 @mock_aws
 def test_exists_object_not_exists() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
-    boto3_client.put_object(Bucket="testbucket", Key="hello/another.file", Body=b"test content")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="hello/another.file", Body=b"test content")
 
     file_exists = exists("s3://testbucket/test.file")
 
@@ -144,10 +137,9 @@ def test_exists_object_not_exists() -> None:
 
 @mock_aws
 def test_exists_object_starting_with_not_exists() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
-    boto3_client.put_object(Bucket="testbucket", Key="hello/another.file", Body=b"test content")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="hello/another.file", Body=b"test content")
 
     file_exists = exists("s3://testbucket/hello/another.fi")
 
@@ -157,14 +149,13 @@ def test_exists_object_starting_with_not_exists() -> None:
 @mock_aws
 def test_list_files_in_uri(subtests: SubTests) -> None:
     bucket_name = "testbucket"
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket=bucket_name)
-    boto3_client.put_object(Bucket=bucket_name, Key="data/collection.json", Body=b"")
-    boto3_client.put_object(Bucket=bucket_name, Key="data/image.tiff", Body=b"")
-    boto3_client.put_object(Bucket=bucket_name, Key="data/image_meta.xml", Body=b"")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket=bucket_name)
+    s3_client.put_object(Bucket=bucket_name, Key="data/collection.json", Body=b"")
+    s3_client.put_object(Bucket=bucket_name, Key="data/image.tiff", Body=b"")
+    s3_client.put_object(Bucket=bucket_name, Key="data/image_meta.xml", Body=b"")
 
-    files = list_files_in_uri(f"s3://{bucket_name}/data/", [".json", "_meta.xml"], boto3_client)
+    files = list_files_in_uri(f"s3://{bucket_name}/data/", [".json", "_meta.xml"], s3_client)
 
     with subtests.test():
         assert len(files) == 2

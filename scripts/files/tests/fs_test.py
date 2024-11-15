@@ -3,7 +3,7 @@ from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from boto3 import client, resource
+from boto3 import client
 from moto import mock_aws
 from moto.core.models import DEFAULT_ACCOUNT_ID
 from moto.s3.models import s3_backends
@@ -24,8 +24,8 @@ def test_read_key_not_found_local() -> None:
 
 @mock_aws
 def test_read_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     with raises(NoSuchFileError):
         read("s3://testbucket/test.file")
@@ -48,8 +48,8 @@ def test_write_sidecars_file_not_found_local(capsys: CaptureFixture[str]) -> Non
 
 @mock_aws
 def test_write_all_key_not_found_s3() -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     # Raises an exception as all files are not written
     with raises(Exception) as e:
@@ -60,8 +60,8 @@ def test_write_all_key_not_found_s3() -> None:
 
 @mock_aws
 def test_write_sidecars_key_not_found_s3(capsys: CaptureFixture[str]) -> None:
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="testbucket")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
 
     write_sidecars(["s3://testbucket/test.prj"], "/tmp")
 

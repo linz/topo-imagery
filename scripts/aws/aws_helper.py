@@ -1,7 +1,7 @@
 import json
 from os import environ
 from time import sleep
-from typing import Any, NamedTuple
+from typing import TYPE_CHECKING, Any, NamedTuple
 from urllib.parse import urlparse
 
 from boto3 import Session
@@ -10,6 +10,11 @@ from botocore.session import Session as BotocoreSession
 from linz_logger import get_log
 
 from scripts.aws.aws_credential_source import CredentialSource
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+else:
+    S3Client = dict
 
 S3Path = NamedTuple("S3Path", [("bucket", str), ("key", str)])
 
@@ -26,9 +31,9 @@ bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-confi
 
 def _init_roles() -> None:
     """Load bucket to roleArn mapping for LINZ internal buckets from SSM"""
-    s3 = session.resource("s3")
+    s3_client: S3Client = session.client("s3")
     bucket, key = parse_path(bucket_config_path)
-    content_object = s3.Object(bucket, key)
+    content_object = s3_client.Object(bucket, key)
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
 
