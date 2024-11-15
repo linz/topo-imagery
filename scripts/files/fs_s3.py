@@ -31,13 +31,12 @@ def write(destination: str, source: bytes, content_type: str | None = None) -> N
     if source is None:
         get_log().error("write_s3_source_none", path=destination, error="The 'source' is None.")
         raise Exception("The 'source' is None.")
-    s3_path = parse_path(destination)
-    key = s3_path.key
+    bucket, key = parse_path(destination)
     s3 = resource("s3")
     multihash = checksum.multihash_as_hex(source)
 
     try:
-        s3_object = s3.Object(s3_path.bucket, key)
+        s3_object = s3.Object(bucket, key)
         if content_type:
             s3_object.put(Body=source, ContentType=content_type, Metadata={"multihash": multihash})
         else:
@@ -62,15 +61,14 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
         The file in bytes.
     """
     start_time = time_in_ms()
-    s3_path = parse_path(path)
-    key = s3_path.key
+    bucket, key = parse_path(path)
     s3 = resource("s3")
 
     try:
         if needs_credentials:
             s3 = get_session(path).resource("s3")
 
-        s3_object = s3.Object(s3_path.bucket, key)
+        s3_object = s3.Object(bucket, key)
         file: bytes = s3_object.get()["Body"].read()
     except s3.meta.client.exceptions.NoSuchBucket as nsb:
         get_log().error("s3_bucket_not_found", path=path, error=f"The specified bucket does not seem to exist: {nsb}")
@@ -103,7 +101,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
     Returns:
         True if the S3 Object exists
     """
-    s3_path, key = parse_path(path)
+    bucket, key = parse_path(path)
     s3 = resource("s3")
 
     try:
@@ -111,17 +109,17 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
             s3 = get_session(path).resource("s3")
 
         if path.endswith("/"):
-            bucket_name = bucket_name_from_path(s3_path)
-            bucket = s3.Bucket(bucket_name)
+            bucket = bucket_name_from_path(bucket)
+            bucket_object = s3.Bucket(bucket)
             # MaxKeys limits to 1 object in the response
-            objects = bucket.objects.filter(Prefix=key, MaxKeys=1)
+            objects = bucket_object.objects.filter(Prefix=key, MaxKeys=1)
 
             if len(list(objects)) > 0:
                 return True
             return False
 
         # load() fetch the metadata, not the data. Calls a `head` behind the scene.
-        s3.Object(s3_path, key).load()
+        s3.Object(bucket, key).load()
         return True
     except s3.meta.client.exceptions.NoSuchBucket as nsb:
         get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")

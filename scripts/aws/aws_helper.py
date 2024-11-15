@@ -27,8 +27,8 @@ bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-confi
 def _init_roles() -> None:
     """Load bucket to roleArn mapping for LINZ internal buckets from SSM"""
     s3 = session.resource("s3")
-    config_path = parse_path(bucket_config_path)
-    content_object = s3.Object(config_path.bucket, config_path.key)
+    bucket, key = parse_path(bucket_config_path)
+    content_object = s3.Object(bucket, key)
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
 
