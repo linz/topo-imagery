@@ -1,7 +1,9 @@
 from datetime import datetime
+from os import urandom
 from typing import Callable
 
 from scripts.stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
+from scripts.stac.util.checksum import multihash_as_hex
 
 
 def fixed_now_function(now: datetime) -> Callable[[], datetime]:
@@ -32,3 +34,7 @@ def any_stac_processing() -> STACProcessing:
             "processing:version": "any processing version",
         }
     )
+
+
+def any_multihash_as_hex() -> str:
+    return multihash_as_hex(urandom(64))

@@ -5,10 +5,10 @@ from typing import Any
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 
-from scripts.datetimes import format_rfc_3339_datetime_string, utc_now
+from scripts.datetimes import utc_now
 from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import modified, read
+from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
@@ -88,8 +88,10 @@ def create_item(
     end_datetime: str,
     collection_id: str,
     gdal_version: str,
+    current_datetime: str,
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
+    odr_url: str | None = None,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -99,18 +101,19 @@ def create_item(
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
         gdal_version: GDAL version
+        current_datetime: date and time for setting consistent update and/or creation timestamp
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
+        odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    item = create_base_item(asset_path, gdal_version)
+    item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
+    base_stac = item.stac.copy()
 
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(asset_path)
-
-    geometry, bbox = get_extents(gdalinfo_result)
 
     if derived_from is not None:
         for derived in derived_from:
@@ -130,36 +133,34 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(geometry, bbox)
+    item.update_spatial(*get_extents(gdalinfo_result))
     item.add_collection(collection_id)
+
+    if item.stac != base_stac and item.stac["properties"]["updated"] != current_datetime:
+        item.stac["properties"][
+            "updated"
+        ] = current_datetime  # some of the metadata has changed, so we need to make sure the `updated` time is set correctly
 
     get_log().info("ImageryItem created", path=asset_path)
     return item
 
 
-def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
+def create_or_load_base_item(
+    asset_path: str, gdal_version: str, current_datetime: str, odr_url: str | None = None
+) -> ImageryItem:
     """
     Args:
-        asset_path: path of the visual asset (TIFF)
+        asset_path: path with filename of the visual asset (TIFF)
         gdal_version: GDAL version string
+        current_datetime: date and time used for setting consistent update and/or creation timestamp
+        odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
     Returns:
         An ImageryItem with basic information.
     """
     id_ = get_file_name_from_path(asset_path)
     file_content = fs.read(asset_path)
-    file_modified_datetime = format_rfc_3339_datetime_string(modified(asset_path))
-
-    stac_asset = STACAsset(
-        **{
-            "href": os.path.join(".", os.path.basename(asset_path)),
-            "file:checksum": checksum.multihash_as_hex(file_content),
-            "created": file_modified_datetime,
-            "updated": file_modified_datetime,
-        }
-    )
-
-    now_string = format_rfc_3339_datetime_string(utc_now())
+    file_content_checksum = checksum.multihash_as_hex(file_content)
 
     if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
         commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
@@ -168,10 +169,28 @@ def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
 
     stac_processing = STACProcessing(
         **{
-            "processing:datetime": now_string,
+            "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
     )
 
-    return ImageryItem(id_, now_string, stac_asset, stac_processing)
+    if odr_url:
+        try:
+            imagery_item = ImageryItem.from_file(os.path.join(odr_url, f"{id_}.json"))
+            imagery_item.set_checksum(file_content_checksum, stac_processing_data=stac_processing)
+            return imagery_item
+
+        except NoSuchFileError:
+            get_log().info(f"No Item is published for ID: {id_}")
+
+    stac_asset = STACAsset(
+        **{
+            "href": os.path.join(".", os.path.basename(asset_path)),
+            "file:checksum": file_content_checksum,
+            "created": current_datetime,
+            "updated": current_datetime,
+        }
+    )
+
+    return ImageryItem(id_, stac_asset, stac_processing)

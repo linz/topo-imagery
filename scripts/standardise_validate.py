@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from datetime import datetime
 
 from linz_logger import get_log
 
@@ -28,6 +29,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
+    )
+    parser.add_argument(
+        "--odr-url",
+        dest="odr_url",
+        help=(
+            "The s3 URL of the published dataset in ODR if this is a re-supply. "
+            "Example: 's3://nz-imagery/wellington/porirua_2024_0.1m/rgb/2193/'"
+        ),
+        required=False,
     )
     parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
     parser.add_argument(
@@ -59,6 +69,16 @@ def parse_args() -> argparse.Namespace:
         type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help=(
+            "The datetime to be used as current datetime in the metadata. "
+            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
+        ),
+        required=False,
+        default=format_rfc_3339_nz_midnight_datetime_string(datetime.today()),
+    )
     return parser.parse_args()
 
 
@@ -147,8 +167,10 @@ def main() -> None:
                 end_datetime,
                 arguments.collection_id,
                 gdal_version,
+                arguments.current_datetime,
                 file.get_gdalinfo(),
                 file.get_derived_from_paths(),
+                arguments.odr_url,
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)

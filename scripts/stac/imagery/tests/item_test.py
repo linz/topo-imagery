@@ -1,6 +1,9 @@
+import json
 from datetime import datetime
 from decimal import Decimal
 from os import environ
+from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 from pytest_subtests import SubTests
@@ -10,7 +13,9 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
+from scripts.stac.link import Relation
+from scripts.stac.util.media_type import StacMediaType
+from scripts.tests.datetimes_test import any_epoch_datetime
 
 
 def test_imagery_stac_item(subtests: SubTests) -> None:
@@ -29,10 +34,9 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     git_hash = "any Git hash"
     git_version = "any Git version string"
     asset = any_stac_asset()
-    now_string = any_epoch_datetime_string()
     stac_processing = any_stac_processing()
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, now_string, asset, stac_processing)
+        item = ImageryItem(id_, asset, stac_processing)
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
@@ -48,16 +52,16 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
             "links": [
                 {
                     "href": "./empty.json",
-                    "rel": "self",
-                    "type": "application/geo+json",
+                    "rel": Relation.SELF,
+                    "type": StacMediaType.GEOJSON,
                 },
             ],
             "properties": {
-                "created": now_string,
+                "created": asset["created"],
                 "datetime": None,
                 "end_datetime": end_datetime,
                 "start_datetime": start_datetime,
-                "updated": now_string,
+                "updated": asset["updated"],
                 **stac_processing,
             },
             "stac_extensions": [
@@ -67,6 +71,42 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
             "stac_version": "1.0.0",
             "type": "Feature",
         }
+
+
+def test_create_item_from_file(tmp_path: Path, fake_imagery_item_stac: dict[str, Any]) -> None:
+    temp_file = tmp_path / "existing_item.json"
+    temp_file.write_text(json.dumps(fake_imagery_item_stac))
+    imagery_item = ImageryItem.from_file(str(temp_file))
+
+    assert imagery_item.stac == fake_imagery_item_stac
+
+
+def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_item_stac: dict[str, Any]) -> None:
+    temp_file = tmp_path / "existing_item.json"
+    temp_file.write_text(json.dumps(fake_imagery_item_stac))
+
+    existing_checksum = fake_imagery_item_stac["assets"]["visual"]["file:checksum"]
+
+    new_stac_processing = any_stac_processing()
+    new_updated_date = new_stac_processing["processing:datetime"]
+    new_stac_properties = fake_imagery_item_stac["properties"].copy()
+    new_stac_properties.update(new_stac_processing)
+    new_checksum = "my_new_checksum"
+
+    imagery_item = ImageryItem.from_file(str(temp_file))
+
+    imagery_item.set_checksum(existing_checksum, new_stac_processing)
+    with subtests.test(msg="item.stac should not change when checksum did not change"):
+        assert imagery_item.stac == fake_imagery_item_stac
+
+    with subtests.test(msg="item.stac checksum changes to newly supplied checksum"):
+        imagery_item.set_checksum(new_checksum, new_stac_processing)
+        assert imagery_item.stac["assets"]["visual"]["file:checksum"] == new_checksum
+
+        assert imagery_item.stac["assets"]["visual"]["updated"] == new_updated_date
+        assert imagery_item.stac["properties"]["updated"] == new_updated_date
+
+        assert imagery_item.stac["properties"] == new_stac_properties
 
 
 # pylint: disable=duplicate-code
@@ -87,7 +127,7 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_epoch_datetime_string(), any_stac_asset(), any_stac_processing())
+    item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
 
     item.add_collection(collection.stac["id"])
 
