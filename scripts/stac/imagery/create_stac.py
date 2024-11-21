@@ -110,8 +110,6 @@ def create_item(
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(asset_path)
 
-    geometry, bbox = get_extents(gdalinfo_result)
-
     if derived_from is not None:
         for derived in derived_from:
             derived_item_content = read(derived)
@@ -130,7 +128,7 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(geometry, bbox)
+    item.update_spatial(*get_extents(gdalinfo_result))
     item.add_collection(collection_id)
 
     get_log().info("ImageryItem created", path=asset_path)
@@ -148,17 +146,8 @@ def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
     """
     id_ = get_file_name_from_path(asset_path)
     file_content = fs.read(asset_path)
+    file_content_checksum = checksum.multihash_as_hex(file_content)
     file_modified_datetime = format_rfc_3339_datetime_string(modified(asset_path))
-
-    stac_asset = STACAsset(
-        **{
-            "href": os.path.join(".", os.path.basename(asset_path)),
-            "file:checksum": checksum.multihash_as_hex(file_content),
-            "created": file_modified_datetime,
-            "updated": file_modified_datetime,
-        }
-    )
-
     now_string = format_rfc_3339_datetime_string(utc_now())
 
     if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
@@ -171,6 +160,15 @@ def create_base_item(asset_path: str, gdal_version: str) -> ImageryItem:
             "processing:datetime": now_string,
             "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+        }
+    )
+
+    stac_asset = STACAsset(
+        **{
+            "href": os.path.join(".", os.path.basename(asset_path)),
+            "file:checksum": file_content_checksum,
+            "created": file_modified_datetime,
+            "updated": file_modified_datetime,
         }
     )
 
