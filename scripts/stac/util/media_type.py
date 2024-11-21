@@ -11,3 +11,6 @@ class StacMediaType(str, Enum):
         
         For STAC Item 
     """
+
+    def __str__(self) -> str:
+        return self.value
