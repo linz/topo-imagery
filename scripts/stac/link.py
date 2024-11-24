@@ -15,6 +15,9 @@ class Relation(str, Enum):
     DERIVED_FROM = "derived_from"
     """ https://github.com/radiantearth/stac-spec/blob/master/best-practices.md#derived-from-relation-derived_from"""
 
+    def __str__(self) -> str:
+        return self.value
+
 
 # pylint: disable=too-few-public-methods
 class Link:
@@ -22,7 +25,7 @@ class Link:
 
     Attributes:
         path: A string that represents the actual link in the format of an URL.
-        rel: A string that represents the relationship that the link has to the object it will be added to.
+        rel: `Relation` that represents the relationship that the link has to the object it will be added to.
         media_type: `StacMediaType` of the link file.
         file_content: Optional. The content of the file that will be used to store the checksum in `file:checksum`.
         It assumes using the STAC `file` extension.
@@ -30,11 +33,11 @@ class Link:
 
     stac: dict[str, str]
 
-    def __init__(self, path: str, rel: str, media_type: StacMediaType, file_content: bytes | None = None) -> None:
+    def __init__(self, path: str, rel: Relation, media_type: StacMediaType, file_content: bytes | None = None) -> None:
         self.stac = {
             "href": path,
-            "rel": rel,
-            "type": media_type,
+            "rel": str(rel),
+            "type": str(media_type),
         }
 
         if file_content:

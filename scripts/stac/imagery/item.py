@@ -71,4 +71,11 @@ class ImageryItem:
         self.add_link(Link(path="./collection.json", rel=Relation.PARENT, media_type=StacMediaType.JSON))
 
     def add_link(self, link: Link) -> None:
-        self.stac["links"].append(link.stac)
+        if self.stac.get("links") and link.stac["rel"] in [
+            Relation.COLLECTION,
+            Relation.PARENT,
+            Relation.SELF,
+        ]:  # STAC specification prescribes there can be only one of these
+            self.stac["links"][:] = [l for l in self.stac["links"] if l.get("rel") != link.stac["rel"]]
+
+        self.stac.setdefault("links", []).append(link.stac)

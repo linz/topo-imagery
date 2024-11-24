@@ -111,8 +111,10 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
     now = any_epoch_datetime()
     now_string = format_rfc_3339_datetime_string(now)
     collection = ImageryCollection(fake_collection_metadata, fixed_now_function(now), fake_linz_slug)
-    asset_created_datetime = any_epoch_datetime_string()
-    asset_updated_datetime = any_epoch_datetime_string()
+    asset_datetimes = {
+        "created": any_epoch_datetime_string(),
+        "updated": any_epoch_datetime_string(),
+    }
     item = ImageryItem(
         "BR34_5000_0304",
         now_string,
@@ -120,8 +122,8 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
             **{
                 "href": "any href",
                 "file:checksum": "any checksum",
-                "created": asset_created_datetime,
-                "updated": asset_updated_datetime,
+                "created": asset_datetimes["created"],
+                "updated": asset_datetimes["updated"],
             }
         ),
         any_stac_processing(),
@@ -163,11 +165,8 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
         with subtests.test(msg=f"item properties.{property_name}"):
             assert item.stac["properties"][property_name] == now_string
 
-    with subtests.test(msg="item assets.visual.created"):
-        assert item.stac["assets"]["visual"]["created"] == asset_created_datetime
-
-    with subtests.test(msg="item assets.visual.updated"):
-        assert item.stac["assets"]["visual"]["updated"] == asset_updated_datetime
+        with subtests.test(msg=f"item assets.visual.{property_name}"):
+            assert item.stac["assets"]["visual"][property_name] == asset_datetimes[property_name]
 
 
 def test_write_collection(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
