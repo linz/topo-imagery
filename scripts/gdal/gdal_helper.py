@@ -66,7 +66,7 @@ def run_gdal(
         output_file: the output file path
 
     Raises:
-        cpe: CalledProcessError is raised if something goes wrong during the execution of the command
+        CalledProcessError is raised if something goes wrong during the execution of the command
 
     Returns:
         subprocess.CompletedProcess: the output process.

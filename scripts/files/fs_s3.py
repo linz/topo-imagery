@@ -95,8 +95,8 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
         needs_credentials: if acces to object needs credentials. Defaults to False.
 
     Raises:
-        ce: s3_client.exceptions.ClientError
-        nsb: NoSuchBucket
+        s3_client.exceptions.ClientError
+        NoSuchBucket
 
     Returns:
         True if the S3 Object exists
