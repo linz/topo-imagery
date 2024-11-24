@@ -6,13 +6,13 @@ from scripts.cli.cli_helper import is_argo
 
 def test_parse_path_s3(subtests: SubTests) -> None:
     s3_path = "s3://bucket-name/path/to/the/file.test"
-    path = parse_path(s3_path)
+    bucket, key = parse_path(s3_path)
 
     with subtests.test():
-        assert path.bucket == "bucket-name"
+        assert bucket == "bucket-name"
 
     with subtests.test():
-        assert path.key == "path/to/the/file.test"
+        assert key == "path/to/the/file.test"
 
 
 def test_parse_path_local() -> None:

@@ -1,11 +1,11 @@
 from datetime import datetime
 from decimal import Decimal
 from os import environ
-from typing import Iterator
+from typing import TYPE_CHECKING, Iterator
 from unittest.mock import patch
 
 import pytest
-from boto3 import client, resource
+from boto3 import client
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
@@ -20,6 +20,11 @@ from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
 from scripts.tests.datetimes_test import any_epoch_datetime_string
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
+else:
+    S3Client = GetObjectOutputTypeDef = dict
 
 
 @pytest.fixture(name="item", autouse=True)
@@ -42,9 +47,8 @@ def setup() -> Iterator[ImageryItem]:
 @mock_aws
 def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -> None:
     # Mock AWS S3
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="stacfiles")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
     # CLI arguments
@@ -74,7 +78,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
     main(args)
 
     # Verify collection.json has been created
-    resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
     assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
 
 
@@ -83,8 +87,8 @@ def test_should_fail_if_collection_has_no_matching_items(
     item: ImageryItem, fake_linz_slug: str, capsys: CaptureFixture[str], subtests: SubTests
 ) -> None:
     # Mock AWS S3
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="stacfiles")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
     item_collection_id = "abc"
     item.add_collection(item_collection_id)
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
@@ -155,8 +159,8 @@ def test_should_fail_to_create_collection_file_without_linz_slug(capsys: Capture
 @mock_aws
 def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[str]) -> None:
     # Mock AWS S3
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="stacfiles")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
     collection_id = "abc"
     # Create mocked "existing" Collection
     metadata: CollectionMetadata = {
@@ -205,9 +209,8 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
 @mock_aws
 def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: str) -> None:
     # Mock AWS S3
-    s3 = resource("s3", region_name=DEFAULT_REGION_NAME)
-    boto3_client = client("s3", region_name=DEFAULT_REGION_NAME)
-    s3.create_bucket(Bucket="stacfiles")
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
     write("s3://stacfiles/item_a.json", dict_to_json_bytes(item.stac))
     item.stac["properties"]["start_datetime"] = "2022-04-12T00:00:00Z"
@@ -241,5 +244,5 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: st
     main(args)
 
     # Verify collection.json has been created
-    resp = boto3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
     assert "(2021-2022)" in resp["Body"].read().decode("utf-8")

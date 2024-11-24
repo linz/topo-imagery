@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from boto3 import resource
+from boto3 import client
 from linz_logger import get_log
 
 from scripts.aws.aws_helper import is_s3
@@ -47,7 +47,7 @@ def read(path: str) -> bytes:
         try:
             return fs_s3.read(path)
         # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
-        except resource("s3").meta.client.exceptions.ClientError as ce:
+        except client("s3").exceptions.ClientError as ce:
             # Error Code can be found here:
             # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
             if ce.response["Error"]["Code"] == "NoSuchKey":
