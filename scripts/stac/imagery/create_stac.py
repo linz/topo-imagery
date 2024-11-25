@@ -178,7 +178,7 @@ def create_or_load_base_item(
     if odr_url:
         try:
             imagery_item = ImageryItem.from_file(os.path.join(odr_url, f"{id_}.json"))
-            imagery_item.set_checksum(file_content_checksum, stac_processing_data=stac_processing)
+            imagery_item.update_checksum_related_metadata(file_content_checksum, stac_processing_data=stac_processing)
             return imagery_item
 
         except NoSuchFileError:

@@ -51,8 +51,8 @@ class ImageryItem:
         """
         file_content = read(file_name)
         stac_dict_from_s3 = json.loads(file_content.decode("UTF-8"))
-        if "bbox" in stac_dict_from_s3:  # tuple() does not serialise well into json
-            stac_dict_from_s3["bbox"] = tuple(stac_dict_from_s3["bbox"])
+        if (bbox := stac_dict_from_s3.get("bbox")) is not None:
+            stac_dict_from_s3["bbox"] = tuple(bbox)
         new_item = cls(
             id_=stac_dict_from_s3["id"],
             stac_asset=stac_dict_from_s3["assets"]["visual"],
@@ -62,7 +62,7 @@ class ImageryItem:
 
         return new_item
 
-    def set_checksum(self, file_content_checksum: str, stac_processing_data: STACProcessing) -> None:
+    def update_checksum_related_metadata(self, file_content_checksum: str, stac_processing_data: STACProcessing) -> None:
         """Set the assets.visual.file:checksum attribute if it has changed.
         If the checksum has changed, this also updates the following attributes:
             assets.visual.updated
