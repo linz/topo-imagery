@@ -12,13 +12,13 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.collection_from_items import NoItemsError, main
-from scripts.datetimes import utc_now
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
+from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -70,6 +70,8 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
         "Placeholder",
         "--concurrency",
         "25",
+        "--current-datetime",
+        any_epoch_datetime_string(),
         "--linz-slug",
         fake_linz_slug,
     ]
@@ -113,6 +115,8 @@ def test_should_fail_if_collection_has_no_matching_items(
         "Placeholder",
         "--concurrency",
         "25",
+        "--current-datetime",
+        any_epoch_datetime_string(),
         "--linz-slug",
         fake_linz_slug,
     ]
@@ -173,7 +177,9 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
         "geographic_description": None,
         "historic_survey_number": None,
     }
-    existing_collection = ImageryCollection(metadata, utc_now, fake_linz_slug, collection_id)
+    existing_collection = ImageryCollection(
+        metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug, collection_id
+    )
     write("s3://stacfiles/collection.json", dict_to_json_bytes(existing_collection.stac))
     # CLI arguments
     args = [
@@ -195,6 +201,8 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
         "Placeholder",
         "--concurrency",
         "25",
+        "--current-datetime",
+        any_epoch_datetime_string(),
         "--linz-slug",
         fake_linz_slug,
     ]
@@ -236,6 +244,8 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: st
         "Placeholder",
         "--concurrency",
         "25",
+        "--current-datetime",
+        any_epoch_datetime_string(),
         "--linz-slug",
         fake_linz_slug,
     ]

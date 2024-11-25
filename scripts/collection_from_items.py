@@ -32,6 +32,12 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
+        "--odr-url",
+        dest="odr_url",
+        help="The path of the published dataset. Example: 's3://nz-imagery/wellington/porirua_2024_0.1m/rgb/2193/'",
+        required=False,
+    )
+    parser.add_argument(
         "--category",
         dest="category",
         help="Dataset category description",
@@ -103,6 +109,15 @@ def parse_args(args: List[str] | None) -> Namespace:
         action="store_true",
         help="Add a title suffix to the collection title based on the lifecycle. For example, '[TITLE] - Preview'",
         required=False,
+    )
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help=(
+            "The datetime that is used as current datetime in the metadata. "
+            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
+        ),
+        required=True,
     )
 
     return parser.parse_args(args)
@@ -184,6 +199,7 @@ def main(args: List[str] | None = None) -> None:
         collection_id=collection_id,
         linz_slug=arguments.linz_slug,
         collection_metadata=collection_metadata,
+        current_datetime=arguments.current_datetime,
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
         stac_items=items_to_add,
@@ -191,6 +207,7 @@ def main(args: List[str] | None = None) -> None:
         add_capture_dates=arguments.capture_dates,
         uri=uri,
         add_title_suffix=arguments.add_title_suffix,
+        odr_url=arguments.odr_url,
     )
 
     destination = os.path.join(uri, "collection.json")
