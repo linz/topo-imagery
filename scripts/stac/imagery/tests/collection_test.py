@@ -117,7 +117,6 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
     }
     item = ImageryItem(
         "BR34_5000_0304",
-        now_string,
         STACAsset(
             **{
                 "href": "any href",
@@ -163,7 +162,7 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
             assert collection.stac[property_name] == now_string
 
         with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == now_string
+            assert item.stac["properties"][property_name] == asset_datetimes[property_name]
 
         with subtests.test(msg=f"item assets.visual.{property_name}"):
             assert item.stac["assets"]["visual"][property_name] == asset_datetimes[property_name]

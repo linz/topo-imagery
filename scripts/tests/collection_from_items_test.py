@@ -19,7 +19,6 @@ from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -31,7 +30,7 @@ else:
 def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
     with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = ImageryItem("123", any_epoch_datetime_string(), any_stac_asset(), any_stac_processing())
+        item = ImageryItem("123", any_stac_asset(), any_stac_processing())
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
