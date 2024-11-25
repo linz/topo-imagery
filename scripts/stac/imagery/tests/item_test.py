@@ -95,12 +95,12 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
     imagery_item = ImageryItem.from_file(str(temp_file))
 
-    imagery_item.set_checksum(existing_checksum, new_stac_processing)
+    imagery_item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
     with subtests.test(msg="item.stac should not change when checksum did not change"):
         assert imagery_item.stac == fake_imagery_item_stac
 
     with subtests.test(msg="item.stac checksum changes to newly supplied checksum"):
-        imagery_item.set_checksum(new_checksum, new_stac_processing)
+        imagery_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
         assert imagery_item.stac["assets"]["visual"]["file:checksum"] == new_checksum
 
         assert imagery_item.stac["assets"]["visual"]["updated"] == new_updated_date
