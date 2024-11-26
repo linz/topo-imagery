@@ -1,7 +1,6 @@
 from collections.abc import Generator
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from boto3 import client
@@ -236,8 +235,3 @@ def get_object_parallel_multithreading(
                 yield key, future.result()
             else:
                 yield key, exception
-
-
-def modified(bucket_name: str, key: str, s3_client: S3Client | None) -> datetime:
-    s3_client = s3_client or client("s3")
-    return _get_object(bucket_name, key, s3_client)["LastModified"]

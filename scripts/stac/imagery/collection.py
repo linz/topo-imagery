@@ -1,6 +1,4 @@
 import os
-from collections.abc import Callable
-from datetime import datetime
 from typing import Any
 
 import ulid
@@ -41,7 +39,8 @@ class ImageryCollection:
     def __init__(
         self,
         metadata: CollectionMetadata,
-        now: Callable[[], datetime],
+        created_datetime: str,
+        updated_datetime: str,
         linz_slug: str,
         collection_id: str | None = None,
         providers: list[Provider] | None = None,
@@ -52,7 +51,6 @@ class ImageryCollection:
 
         self.metadata = metadata
 
-        now_string = format_rfc_3339_datetime_string(now())
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
@@ -67,8 +65,8 @@ class ImageryCollection:
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
             "linz:slug": linz_slug,
-            "created": now_string,
-            "updated": now_string,
+            "created": created_datetime,
+            "updated": updated_datetime,
         }
 
         # Optional metadata

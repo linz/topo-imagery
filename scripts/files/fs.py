@@ -1,8 +1,5 @@
 import os
 from concurrent.futures import Future, ThreadPoolExecutor
-from datetime import datetime
-from pathlib import Path
-from typing import TYPE_CHECKING
 
 from boto3 import client
 from linz_logger import get_log
@@ -10,11 +7,6 @@ from linz_logger import get_log
 from scripts.aws.aws_helper import is_s3
 from scripts.files import fs_local, fs_s3
 from scripts.stac.util.checksum import multihash_as_hex
-
-if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
-else:
-    S3Client = dict
 
 
 def write(destination: str, source: bytes, content_type: str | None = None) -> str:
@@ -85,13 +77,6 @@ def exists(path: str) -> bool:
     if is_s3(path):
         return fs_s3.exists(path)
     return fs_local.exists(path)
-
-
-def modified(path: str, s3_client: S3Client | None = None) -> datetime:
-    """Get modified datetime for S3 URL or local path"""
-    if is_s3(path):
-        return fs_s3.modified(fs_s3.bucket_name_from_path(path), fs_s3.prefix_from_path(path), s3_client)
-    return fs_local.modified(Path(path))
 
 
 def write_all(inputs: list[str], target: str, concurrency: int | None = 4, generate_name: bool | None = True) -> list[str]:

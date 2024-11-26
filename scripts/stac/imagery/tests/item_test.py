@@ -15,7 +15,7 @@ from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
 from scripts.stac.link import Relation
 from scripts.stac.util.media_type import StacMediaType
-from scripts.tests.datetimes_test import any_epoch_datetime
+from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
 def test_imagery_stac_item(subtests: SubTests) -> None:
@@ -123,7 +123,13 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
         "geographic_description": None,
     }
     ulid = "fake_ulid"
-    collection = ImageryCollection(metadata=metadata, now=any_epoch_datetime, linz_slug=fake_linz_slug, collection_id=ulid)
+    collection = ImageryCollection(
+        metadata=metadata,
+        created_datetime=any_epoch_datetime_string(),
+        updated_datetime=any_epoch_datetime_string(),
+        linz_slug=fake_linz_slug,
+        collection_id=ulid,
+    )
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)

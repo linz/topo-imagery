@@ -1,11 +1,10 @@
 import json
 import os
-from typing import Any
+from typing import Any, TypeAlias, cast
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 
-from scripts.datetimes import utc_now
 from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import NoSuchFileError, read
@@ -20,12 +19,16 @@ from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
 
+JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
+JSON_Dict: TypeAlias = dict[str, "JSON"]
+
 
 # pylint: disable=too-many-arguments
 def create_collection(
     collection_id: str,
     linz_slug: str,
     collection_metadata: CollectionMetadata,
+    current_datetime: str,
     producers: list[str],
     licensors: list[str],
     stac_items: list[dict[Any, Any]],
@@ -33,6 +36,7 @@ def create_collection(
     add_capture_dates: bool,
     uri: str,
     add_title_suffix: bool = False,
+    odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
@@ -41,6 +45,7 @@ def create_collection(
         collection_id: id of the collection
         linz_slug: the linz:slug attribute for this collection
         collection_metadata: metadata of the collection
+        current_datetime: datetime string that represents the current time when the item is created.
         producers: producers of the dataset
         licensors: licensors of the dataset
         stac_items: items to link to the collection
@@ -48,22 +53,22 @@ def create_collection(
         add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
         uri: path of the dataset
         add_title_suffix: whether to add a title suffix to the collection title based on the lifecycle
+        odr_url: path of the published dataset. Defaults to None.
 
     Returns:
         an ImageryCollection object
     """
-    providers: list[Provider] = []
-    for producer_name in producers:
-        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in licensors:
-        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+    existing_collection = {}
+    if odr_url:
+        existing_collection = get_published_file_contents(odr_url, "collection")
 
     collection = ImageryCollection(
         metadata=collection_metadata,
-        now=utc_now,
+        created_datetime=cast(str, existing_collection.get("created", current_datetime)),
+        updated_datetime=current_datetime,
         linz_slug=linz_slug,
         collection_id=collection_id,
-        providers=providers,
+        providers=get_providers(licensors, producers),
         add_title_suffix=add_title_suffix,
     )
 
@@ -80,6 +85,15 @@ def create_collection(
         )
 
     return collection
+
+
+def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
+    providers: list[Provider] = []
+    for producer_name in producers:
+        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
+    for licensor_name in licensors:
+        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
+    return providers
 
 
 def create_item(
@@ -194,3 +208,7 @@ def create_or_load_base_item(
     )
 
     return ImageryItem(id_, stac_asset, stac_processing)
+
+
+def get_published_file_contents(odr_url: str, filename: str) -> JSON_Dict:
+    return cast(JSON_Dict, json.loads(read(os.path.join(odr_url, f"{filename}.json")).decode("UTF-8")))
