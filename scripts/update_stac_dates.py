@@ -85,21 +85,28 @@ def update_item_dates(
     asset_filename = item_published["assets"]["visual"]["href"].lstrip("./")
     asset_path = f"{dataset_path}{asset_filename}"
 
-    item_published["properties"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]])
-    item_published["properties"]["updated"] = format_rfc_3339_datetime_string(
-        get_closest_date(
-            get_latest_version_modified_date(load_versions(item_path)),
-            collection_commit_dates,
-        )
+    item_updated = get_closest_date(
+        get_latest_version_modified_date(load_versions(item_path)),
+        collection_commit_dates,
     )
 
-    item_published["assets"]["visual"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]])
-    item_published["assets"]["visual"]["updated"] = format_rfc_3339_datetime_string(
-        get_closest_date(
-            get_latest_version_modified_date(load_versions(asset_path)),
-            collection_commit_dates,
-        )
+    item_created = items_dates[link["href"]]
+
+    item_published["properties"]["created"] = format_rfc_3339_datetime_string(item_created)
+    item_published["properties"]["updated"] = format_rfc_3339_datetime_string(
+        max(item_created, item_updated)
+    )  # some items have been published before the collection being merged to the git repo
+
+    asset_updated = get_closest_date(
+        get_latest_version_modified_date(load_versions(asset_path)),
+        collection_commit_dates,
     )
+
+    item_published["assets"]["visual"]["created"] = format_rfc_3339_datetime_string(item_created)
+    item_published["assets"]["visual"]["updated"] = format_rfc_3339_datetime_string(
+        max(item_created, asset_updated)
+    )  # some assets have been published before the collection being merged to the git repo
+
     item_content = dict_to_json_bytes(item_published)
 
     updated_link = link.copy()
