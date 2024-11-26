@@ -73,7 +73,7 @@ def update_item_dates(
     link: dict[str, Any],
     dataset_path: str,
     output_path: str,
-    items_dates: dict[str, Any],
+    items_dates: dict[str, datetime],
     collection_commit_dates: list[datetime],
 ) -> dict[str, Any]:
     if link["rel"] != "item":
@@ -85,7 +85,7 @@ def update_item_dates(
     asset_filename = item_published["assets"]["visual"]["href"].lstrip("./")
     asset_path = f"{dataset_path}{asset_filename}"
 
-    item_published["properties"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]]["created"])
+    item_published["properties"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]])
     item_published["properties"]["updated"] = format_rfc_3339_datetime_string(
         get_closest_date(
             get_latest_version_modified_date(load_versions(item_path)),
@@ -93,7 +93,7 @@ def update_item_dates(
         )
     )
 
-    item_published["assets"]["visual"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]]["created"])
+    item_published["assets"]["visual"]["created"] = format_rfc_3339_datetime_string(items_dates[link["href"]])
     item_published["assets"]["visual"]["updated"] = format_rfc_3339_datetime_string(
         get_closest_date(
             get_latest_version_modified_date(load_versions(asset_path)),
@@ -103,6 +103,7 @@ def update_item_dates(
     item_content = dict_to_json_bytes(item_published)
 
     updated_link = link.copy()
+    # TODO: discuss about should we add the checksum before doing this created and updated dates backfilling?
     updated_link["file:checksum"] = checksum.multihash_as_hex(item_content)
     write(f"{output_path}{item_filename}", item_content, content_type=ContentType.GEOJSON.value)
 
@@ -145,7 +146,7 @@ def main(args: list[str] | None = None) -> None:
 
     collection_path_in_repo = collection_published_path.replace(f"s3://{bucket_name}/", "stac/")
 
-    items_dates = {}
+    items_dates: dict[str, datetime] = {}
     collection_commit_dates = []
     # Add publishing date
     collection_commit_dates.append(initial_date)
@@ -175,7 +176,7 @@ def main(args: list[str] | None = None) -> None:
         if collection["id"] != collection_id:
             continue
 
-        if "feat: import" in str(commit.message):
+        if str(commit.message).startswith("feat: import"):
             import_dates.append(format_rfc_3339_datetime_string(commit.committed_datetime))
 
         if commit.committed_datetime >= initial_date:
@@ -187,9 +188,9 @@ def main(args: list[str] | None = None) -> None:
 
             if item_link["href"] not in items_dates:
                 item_created = max(commit.committed_datetime, initial_date)
-                items_dates[item_link["href"]] = {"created": item_created}
+                items_dates[item_link["href"]] = item_created
 
-    dataset_path = f"{collection_published_path.rsplit('/', 1)[0]}/"
+    dataset_path = collection_published_path.rstrip("collection.json")
     output_path = f"{arguments.output}{collection_path_in_repo.replace("stac/", "").rstrip("collection.json")}"
 
     # Update Items
