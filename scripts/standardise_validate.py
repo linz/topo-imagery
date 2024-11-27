@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from datetime import datetime, timezone
 
 from linz_logger import get_log
 
@@ -75,7 +76,8 @@ def parse_args() -> argparse.Namespace:
             "The datetime to be used as current datetime in the metadata. "
             "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
         ),
-        required=True,
+        required=False,
+        default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
     )
     return parser.parse_args()
 
