@@ -1,5 +1,18 @@
 # Changelog
 
+## [7.0.0](https://github.com/linz/topo-imagery/compare/v6.0.0...v7.0.0) (2024-11-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* set update-dates on STAC item TDE-1298 ([#1180](https://github.com/linz/topo-imagery/issues/1180))
+
+### Features
+
+* defaults for current-datetime argument TDE-1298 ([#1193](https://github.com/linz/topo-imagery/issues/1193)) ([fa003f8](https://github.com/linz/topo-imagery/commit/fa003f8cf1d794f9e109e787fb96d1520e2de3b1))
+* keep Collection properties.created date when resupplying ([#1160](https://github.com/linz/topo-imagery/issues/1160)) ([8af3e21](https://github.com/linz/topo-imagery/commit/8af3e2162a8d152c7fb8c8c29a4a0c5c468a4dfa))
+* set update-dates on STAC item TDE-1298 ([#1180](https://github.com/linz/topo-imagery/issues/1180)) ([9d95b02](https://github.com/linz/topo-imagery/commit/9d95b02f5adad033dfbc83b93a8d538bedef7686))
+
 ## [6.0.0](https://github.com/linz/topo-imagery/compare/v5.2.0...v6.0.0) (2024-11-12)
 
 
