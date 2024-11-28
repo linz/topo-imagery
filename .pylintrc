@@ -6,7 +6,7 @@ disable =
         missing-module-docstring,
         missing-function-docstring,
         broad-exception-raised,
-
+        too-many-positional-arguments
 [FORMAT]
 max-line-length=127
 [MISCELLANEOUS]
@@ -18,3 +18,4 @@ ignore-docstrings=yes
 ignore-imports=yes
 [DESIGN]
 max-args = 8
+
