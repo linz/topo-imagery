@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.1.0](https://github.com/linz/topo-imagery/compare/v7.0.0...v7.1.0) (2024-11-28)
+
+
+### Features
+
+* set default current-date for collection_from_items script TDE-1298 ([#1196](https://github.com/linz/topo-imagery/issues/1196)) ([e22bb66](https://github.com/linz/topo-imagery/commit/e22bb66e9767d8a45cecca4443f2dbcd8459a084))
+
+
+### Bug Fixes
+
+* Use client syntax for getting file contents ([#1194](https://github.com/linz/topo-imagery/issues/1194)) ([ab83041](https://github.com/linz/topo-imagery/commit/ab830416703245b6c45b543dfb2037619ba31e42))
+
 ## [7.0.0](https://github.com/linz/topo-imagery/compare/v6.0.0...v7.0.0) (2024-11-27)
 
 
