@@ -13,7 +13,9 @@ from scripts.aws.aws_credential_source import CredentialSource
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
+    from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 else:
+    GetObjectOutputTypeDef = dict
     S3Client = dict
 
 S3Path = NamedTuple("S3Path", [("bucket", str), ("key", str)])
@@ -33,8 +35,8 @@ def _init_roles() -> None:
     """Load bucket to roleArn mapping for LINZ internal buckets from SSM"""
     s3_client: S3Client = session.client("s3")
     bucket, key = parse_path(bucket_config_path)
-    content_object = s3_client.Object(bucket, key)
-    file_content = content_object.get()["Body"].read().decode("utf-8")
+    content_object: GetObjectOutputTypeDef = s3_client.get_object(Bucket=bucket, Key=key)
+    file_content = content_object["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
 
     get_log().trace("bucket_config_load", config=bucket_config_path)
