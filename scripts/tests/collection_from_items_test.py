@@ -70,8 +70,6 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
         "Placeholder",
         "--concurrency",
         "25",
-        "--current-datetime",
-        any_epoch_datetime_string(),
         "--linz-slug",
         fake_linz_slug,
     ]
