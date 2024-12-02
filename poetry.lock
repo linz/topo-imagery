@@ -648,13 +648,13 @@ files = [
 
 [[package]]
 name = "moto"
-version = "5.0.20"
+version = "5.0.22"
 description = ""
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "moto-5.0.20-py2.py3-none-any.whl", hash = "sha256:b6df0041255acb973f2adcb31e3dee1379770ece0253520d4d15986d22aa06cf"},
-    {file = "moto-5.0.20.tar.gz", hash = "sha256:24b1319cc66f81f40817a57ac80602a5f1862669bdd621f0d96ab989a6578255"},
+    {file = "moto-5.0.22-py3-none-any.whl", hash = "sha256:defae32e834ba5674f77cbbe996b41dc248dd81289af8032fa3e847284409b29"},
+    {file = "moto-5.0.22.tar.gz", hash = "sha256:daf47b8a1f5f190cd3eaa40018a643f38e542277900cf1db7f252cedbfed998f"},
 ]
 
 [package.dependencies]
