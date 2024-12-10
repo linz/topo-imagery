@@ -43,6 +43,7 @@ linz-logger = "*"
 py-multihash = "*"
 shapely = "*"
 tifffile = "*"
+gitpython = "^3.1.43"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
