@@ -33,7 +33,7 @@ authors = [
     "Paul Fouquet <pfouquet@linz.govt.nz>",
     "Alice Fage <afage@linz.govt.nz>",
     "Megan Davidson <mdavidson@linz.govt.nz>",
-    "Victor Engmark <vengmark@linz.govt.nz>",
+    "Tobias Schmidt <tschmidt@linz.govt.nz>",
 ]
 
 [tool.poetry.dependencies]
