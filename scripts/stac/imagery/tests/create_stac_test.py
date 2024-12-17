@@ -46,11 +46,27 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
     tiff_path = f"./scripts/tests/data/{item_name}.tiff"
+    derived_from_path = "./scripts/tests/data/fake_item.json"
     created_datetime = "created datetime"
     updated_datetime = "updated datetime"
+    links = [
+        {
+            "href": derived_from_path,
+            "rel": "derived_from",
+            "type": "application/geo+json",
+            "file:checksum": "1220f33d983b9c84d3d0c44f37f4a1b842295a960abcdd3889b898f42988f9e93604",
+        },
+        {
+            "href": "path/to/an/old/derived_from",
+            "rel": "derived_from",
+            "type": "application/geo+json",
+            "file:checksum": "123",
+        },
+    ]
     existing_item_content = {
         "type": "Feature",
         "id": item_name,
+        "links": links,
         "assets": {
             "visual": {
                 "href": tiff_path,
@@ -77,6 +93,7 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
         "any GDAL version",
         current_datetime,
         fake_gdal_info,
+        derived_from=[derived_from_path],
         odr_url=tmp_path.as_posix(),
     )
 
@@ -91,6 +108,9 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
 
     with subtests.test(msg="assets.visual.updated"):
         assert item.stac["assets"]["visual"]["updated"] == updated_datetime
+
+    with subtests.test(msg="links"):
+        assert len(item.stac["links"]) == 3
 
 
 def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_path: Path) -> None:

@@ -130,6 +130,9 @@ def create_item(
         gdalinfo_result = gdal_info(asset_path)
 
     if derived_from is not None:
+        # Remove existing derived_from links in case of resupply
+        item.stac["links"] = [link for link in item.stac["links"] if link["rel"] != "derived_from"]
+
         for derived in derived_from:
             derived_item_content = read(derived)
             derived_stac = json.loads(derived_item_content.decode("UTF-8"))
