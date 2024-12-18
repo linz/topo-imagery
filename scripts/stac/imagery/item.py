@@ -50,15 +50,15 @@ class ImageryItem:
             ImageryItem: The new ImageryItem.
         """
         file_content = read(file_name)
-        stac_dict_from_s3 = json.loads(file_content.decode("UTF-8"))
-        if (bbox := stac_dict_from_s3.get("bbox")) is not None:
-            stac_dict_from_s3["bbox"] = tuple(bbox)
+        stac_dict_from_file = json.loads(file_content.decode("UTF-8"))
+        if (bbox := stac_dict_from_file.get("bbox")) is not None:
+            stac_dict_from_file["bbox"] = tuple(bbox)
         new_item = cls(
-            id_=stac_dict_from_s3["id"],
-            stac_asset=stac_dict_from_s3["assets"]["visual"],
-            stac_processing=stac_dict_from_s3["properties"],
+            id_=stac_dict_from_file["id"],
+            stac_asset=stac_dict_from_file["assets"]["visual"],
+            stac_processing=stac_dict_from_file["properties"],
         )
-        new_item.stac = stac_dict_from_s3
+        new_item.stac = stac_dict_from_file
 
         return new_item
 
