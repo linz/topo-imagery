@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.1](https://github.com/linz/topo-imagery/compare/v7.1.0...v7.1.1) (2024-12-18)
+
+
+### Bug Fixes
+
+* handle existing derived_from links when Item is updated TDE-1356 ([#1220](https://github.com/linz/topo-imagery/issues/1220)) ([7dfa7e7](https://github.com/linz/topo-imagery/commit/7dfa7e7066b6ccaf664af8067645284076cd0edd))
+
 ## [7.1.0](https://github.com/linz/topo-imagery/compare/v7.0.0...v7.1.0) (2024-11-28)
 
 
