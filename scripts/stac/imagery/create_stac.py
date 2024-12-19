@@ -58,19 +58,20 @@ def create_collection(
     Returns:
         an ImageryCollection object
     """
-    existing_collection = {}
     if odr_url:
-        existing_collection = get_published_file_contents(odr_url, "collection")
-
-    collection = ImageryCollection(
-        metadata=collection_metadata,
-        created_datetime=cast(str, existing_collection.get("created", current_datetime)),
-        updated_datetime=current_datetime,
-        linz_slug=linz_slug,
-        collection_id=collection_id,
-        providers=get_providers(licensors, producers),
-        add_title_suffix=add_title_suffix,
-    )
+        collection = ImageryCollection.from_file(
+            os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
+        )
+    else:
+        collection = ImageryCollection(
+            metadata=collection_metadata,
+            created_datetime=current_datetime,
+            updated_datetime=current_datetime,
+            linz_slug=linz_slug,
+            collection_id=collection_id,
+            providers=get_providers(licensors, producers),
+            add_title_suffix=add_title_suffix,
+        )
 
     for item in stac_items:
         collection.add_item(item)

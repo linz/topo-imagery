@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any
 
@@ -92,6 +93,30 @@ class ImageryCollection:
 
         self.add_providers(merge_provider_roles(providers))
 
+    @classmethod
+    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
+        """Load an ImageryCollection from a Collection file.
+
+        Args:
+            file_name: The s3 URL or local path of the Collection file to load.
+
+        Returns:
+            The loaded ImageryCollection.
+        """
+        file_content = read(file_name)
+        stac_from_file = json.loads(file_content.decode("UTF-8"))
+        stac_from_file["updated"] = updated_datetime
+        collection = cls(
+            metadata=metadata,
+            created_datetime=stac_from_file["created"],
+            updated_datetime=stac_from_file["updated"],
+            linz_slug=stac_from_file["linz:slug"],
+        )
+        # Override STAC from the original collection
+        collection.stac = stac_from_file
+
+        return collection
+
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
@@ -165,14 +190,26 @@ class ImageryCollection:
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
-            self.stac["links"].append(
-                Link(
-                    path=item_self_link["href"],
-                    rel=Relation.ITEM,
-                    media_type=StacMediaType.GEOJSON,
-                    file_content=dict_to_json_bytes(item),
-                ).stac
-            )
+            link_to_add = Link(
+                path=item_self_link["href"],
+                rel=Relation.ITEM,
+                media_type=StacMediaType.GEOJSON,
+                file_content=dict_to_json_bytes(item),
+            ).stac
+
+            # Check if the Item to add already exists in the collection
+            exist = False
+            for link in self.stac["links"]:
+                if link["href"] == link_to_add["href"]:
+                    if link["file:checksum"] == link_to_add["file:checksum"]:
+                        exist = True
+                        break
+                    # If the item has been updated, remove the old link
+                    self.stac["links"].remove(link)
+                    break
+
+            if not exist:
+                self.stac["links"].append(link_to_add)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
