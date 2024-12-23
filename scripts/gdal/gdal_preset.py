@@ -32,7 +32,7 @@ BASE_COG = [
     # Do not create BIGTIFF
     # An error will be raise by GDAL if it fails creating a tiff > 4GB in size
     "-co",
-    "bigtiff=no",
+    "bigtiff=yes",
     # Always ignore existing overviews so they are not created from already compressed overviews
     "-co",
     "overviews=ignore_existing",
