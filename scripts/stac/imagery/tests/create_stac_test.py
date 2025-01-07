@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import cast
 
+from pystac import Link, MediaType, RelType
 from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
@@ -30,16 +31,16 @@ def test_create_item(subtests: SubTests) -> None:
     )
 
     with subtests.test(msg="properties.created"):
-        assert item.stac["properties"]["created"] == current_datetime
+        assert item.properties["created"] == current_datetime
 
     with subtests.test(msg="properties.updated"):
-        assert item.stac["properties"]["updated"] == current_datetime
+        assert item.properties["updated"] == current_datetime
 
     with subtests.test(msg="assets.visual.created"):
-        assert item.stac["assets"]["visual"]["created"] == current_datetime
+        assert item.assets["visual"]["created"] == current_datetime
 
     with subtests.test(msg="assets.visual.updated"):
-        assert item.stac["assets"]["visual"]["updated"] == current_datetime
+        assert item.assets["visual"]["updated"] == current_datetime
 
 
 def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
@@ -98,19 +99,19 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
     )
 
     with subtests.test(msg="properties.created"):
-        assert item.stac["properties"]["created"] == created_datetime
+        assert item.properties["created"] == created_datetime
 
     with subtests.test(msg="properties.updated"):
-        assert item.stac["properties"]["updated"] == current_datetime
+        assert item.properties["updated"] == current_datetime
 
     with subtests.test(msg="assets.visual.created"):
-        assert item.stac["assets"]["visual"]["created"] == created_datetime
+        assert item.assets["visual"].extra_fields["created"] == created_datetime
 
     with subtests.test(msg="assets.visual.updated"):
-        assert item.stac["assets"]["visual"]["updated"] == updated_datetime
+        assert item.assets["visual"].extra_fields["updated"] == updated_datetime
 
     with subtests.test(msg="links"):
-        assert len(item.stac["links"]) == 3
+        assert len(item.links) == 3
 
 
 def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_path: Path) -> None:
@@ -149,10 +150,10 @@ def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_
     )
 
     with subtests.test(msg="assets.visual.created"):
-        assert item.stac["assets"]["visual"]["created"] == created_datetime
+        assert item.assets["visual"].extra_fields["created"] == created_datetime
 
     with subtests.test(msg="assets.visual.updated"):
-        assert item.stac["assets"]["visual"]["updated"] == current_datetime
+        assert item.assets["visual"].extra_fields["updated"] == current_datetime
 
 
 def test_create_item_with_derived_from(tmp_path: Path) -> None:
@@ -178,12 +179,13 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         [derived_from_path.as_posix()],
     )
 
-    assert {
-        "href": derived_from_path.as_posix(),
-        "rel": "derived_from",
-        "type": "application/geo+json",
-        "file:checksum": "12209c3d50f21fdd739de5c76b3c7ca60ee7f5cf69c2cf92b1d0136308cf63d9c5d5",
-    } in item.stac["links"]
+    expected_link = Link(
+        derived_from_path.as_posix(),
+        RelType.DERIVED_FROM,
+        MediaType.JSON,
+        extra_fields={"file:checksum": "12209c3d50f21fdd739de5c76b3c7ca60ee7f5cf69c2cf92b1d0136308cf63d9c5d5"},
+    )
+    assert expected_link in item.links
 
 
 def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
@@ -216,8 +218,8 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
     )
 
-    assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
-    assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
+    assert item.properties["start_datetime"] == "1998-02-12T11:00:00Z"
+    assert item.properties["end_datetime"] == "2024-09-02T12:00:00Z"
 
 
 def test_create_collection(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests) -> None:
@@ -328,10 +330,10 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
         fake_gdal_info,
         odr_url=tmp_path.as_posix(),
     )
-    del item_from_odr_changed.stac["properties"]["start_datetime"]
-    del item_from_odr_changed.stac["properties"]["end_datetime"]
-    del item_from_scratch.stac["properties"]["start_datetime"]
-    del item_from_scratch.stac["properties"]["end_datetime"]
+    del item_from_odr_changed.properties["start_datetime"]
+    del item_from_odr_changed.properties["end_datetime"]
+    del item_from_scratch.properties["start_datetime"]
+    del item_from_scratch.properties["end_datetime"]
     assert item_from_odr_changed.stac == item_from_scratch.stac
 
 
@@ -353,10 +355,10 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
     )
 
     with subtests.test("created"):
-        assert item.stac["properties"]["created"] == current_datetime
+        assert item.properties["created"] == current_datetime
 
     with subtests.test("updated"):
-        assert item.stac["properties"]["updated"] == current_datetime
+        assert item.properties["updated"] == current_datetime
 
 
 def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests, tmp_path: Path) -> None:
@@ -395,7 +397,8 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
     )
 
     with subtests.test(msg="assets.visual.created"):
-        assert item.stac["assets"]["visual"]["created"] == created_datetime
+        assert item.assets["visual"]["created"] == created_datetime
 
     with subtests.test(msg="assets.visual.updated"):
-        assert item.stac["assets"]["visual"]["updated"] == current_datetime
+        assert item.assets["visual"]["updated"] == current_datetime
+        assert item.assets["visual"]["updated"] == current_datetime

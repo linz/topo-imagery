@@ -15,9 +15,10 @@ from shapely.predicates import is_valid
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
+from scripts.stac.imagery.asset import create_visual_asset
 from scripts.stac.imagery.capture_area import merge_polygons
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem, STACAsset
+from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.imagery.tests.generators import any_stac_processing
@@ -127,14 +128,12 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
     }
     item = ImageryItem(
         "BR34_5000_0304",
-        STACAsset(
-            **{
-                "href": "any href",
-                "file:checksum": "any checksum",
-                "created": asset_datetimes["created"],
-                "updated": asset_datetimes["updated"],
-            }
-        ),
+        create_visual_asset(href="any href", file_checksum="any checksum", created=asset_datetimes["created"]),
+        #     "href": "any href",
+        #     "file:checksum": "any checksum",
+        #     "created": asset_datetimes["created"],
+        #     "updated": asset_datetimes["updated"],
+        # }
         any_stac_processing(),
     )
     geometry = {
@@ -147,7 +146,7 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
 
-    collection.add_item(item.stac)
+    collection.add_item(item.to_dict())
 
     links = collection.stac["links"].copy()
 
@@ -172,10 +171,10 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
             assert collection.stac[property_name] == now_string
 
         with subtests.test(msg=f"item properties.{property_name}"):
-            assert item.stac["properties"][property_name] == asset_datetimes[property_name]
+            assert item.properties[property_name] == asset_datetimes[property_name]
 
         with subtests.test(msg=f"item assets.visual.{property_name}"):
-            assert item.stac["assets"]["visual"][property_name] == asset_datetimes[property_name]
+            assert item.assets["visual"].extra_fields[property_name] == asset_datetimes[property_name]
 
 
 def test_write_collection(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:

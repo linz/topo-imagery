@@ -3,6 +3,7 @@ import os
 from typing import Any, TypeAlias, cast
 
 from linz_logger import get_log
+from pystac import RelType
 from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
@@ -11,13 +12,12 @@ from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.stac.imagery.asset import create_visual_asset
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
+from scripts.stac.imagery.item import ImageryItem, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
-from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
-from scripts.stac.util.media_type import StacMediaType
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 JSON_Dict: TypeAlias = dict[str, "JSON"]
@@ -124,40 +124,29 @@ def create_item(
         a STAC Item wrapped in ImageryItem
     """
     item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
-    base_stac = item.stac.copy()
+    base_stac = item.clone()
 
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(asset_path)
 
-    if item.stac.get("links") is not None:
-        # Remove existing derived_from links in case of resupply
-        item.stac["links"] = [link for link in item.stac["links"] if link["rel"] != "derived_from"]
-
+    item.remove_links(RelType.DERIVED_FROM)
     if derived_from is not None:
         for derived in derived_from:
-            derived_item_content = read(derived)
-            derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            if not start_datetime or derived_stac["properties"]["start_datetime"] < start_datetime:
-                start_datetime = derived_stac["properties"]["start_datetime"]
-            if not end_datetime or derived_stac["properties"]["end_datetime"] > end_datetime:
-                end_datetime = derived_stac["properties"]["end_datetime"]
-            item.add_link(
-                Link(
-                    path=derived,
-                    rel=Relation.DERIVED_FROM,
-                    media_type=StacMediaType.GEOJSON,
-                    file_content=derived_item_content,
-                )
-            )
+            derived_from_item = ImageryItem.from_file(derived)
+            if not start_datetime or derived_from_item.properties["start_datetime"] < start_datetime:
+                start_datetime = derived_from_item.properties["start_datetime"]
+            if not end_datetime or derived_from_item.properties["end_datetime"] > end_datetime:
+                end_datetime = derived_from_item.properties["end_datetime"]
+            item.add_derived_from(derived_from_item)
 
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(*get_extents(gdalinfo_result))
     item.add_collection(collection_id)
 
-    if item.stac != base_stac and item.stac["properties"]["updated"] != current_datetime:
-        item.stac["properties"][
-            "updated"
-        ] = current_datetime  # some of the metadata has changed, so we need to make sure the `updated` time is set correctly
+    if item.to_dict() != base_stac.to_dict() and item.properties["updated"] != current_datetime:
+        item.properties["updated"] = (
+            current_datetime  # some of the metadata has changed, so we need to make sure the `updated` time is set correctly
+        )
 
     get_log().info("ImageryItem created", path=asset_path)
     return item
@@ -202,16 +191,13 @@ def create_or_load_base_item(
         except NoSuchFileError:
             get_log().info(f"No Item is published for ID: {id_}")
 
-    stac_asset = STACAsset(
-        **{
-            "href": os.path.join(".", os.path.basename(asset_path)),
-            "file:checksum": file_content_checksum,
-            "created": current_datetime,
-            "updated": current_datetime,
-        }
+    asset = create_visual_asset(
+        href=os.path.join(".", os.path.basename(asset_path)),
+        created=current_datetime,
+        checksum=file_content_checksum,
     )
 
-    return ImageryItem(id_, stac_asset, stac_processing)
+    return ImageryItem(id_, asset, stac_processing)
 
 
 def get_published_file_contents(odr_url: str, filename: str) -> JSON_Dict:
