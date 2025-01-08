@@ -1011,6 +1011,26 @@ spelling = ["pyenchant (>=3.2,<4.0)"]
 testutils = ["gitpython (>3)"]
 
 [[package]]
+name = "pystac"
+version = "1.11.0"
+description = "Python library for working with the SpatioTemporal Asset Catalog (STAC) specification"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "pystac-1.11.0-py3-none-any.whl", hash = "sha256:10ac7c7b4ea6c5ec8333829a09ec1a33b596f02d1a97ffbbd72cd1b6c10598c1"},
+    {file = "pystac-1.11.0.tar.gz", hash = "sha256:acb1e04be398a0cda2d8870ab5e90457783a8014a206590233171d8b2ae0d9e7"},
+]
+
+[package.dependencies]
+python-dateutil = ">=2.7.0"
+
+[package.extras]
+jinja2 = ["jinja2 (<4.0)"]
+orjson = ["orjson (>=3.5)"]
+urllib3 = ["urllib3 (>=1.26)"]
+validation = ["jsonschema (>=4.18,<5.0)"]
+
+[[package]]
 name = "pytest"
 version = "8.3.4"
 description = "pytest: simple powerful testing with Python"
@@ -1483,4 +1503,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12.3"
-content-hash = "11678d25e9494ac7384858577c2f3d861fd360fea67f1359c8cfb18da2a21d6c"
+content-hash = "9de299b59e8cae4ab8e395b99cddbd3bc925e3ef9f4fbd95a4e2449773b4902f"

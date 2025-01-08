@@ -123,7 +123,7 @@ def create_item(
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
+    item = create_or_load_base_item(asset_path, gdal_version, current_datetime, start_datetime, end_datetime, odr_url)
     base_stac = item.clone()
 
     if not gdalinfo_result:
@@ -153,7 +153,12 @@ def create_item(
 
 
 def create_or_load_base_item(
-    asset_path: str, gdal_version: str, current_datetime: str, odr_url: str | None = None
+    asset_path: str,
+    gdal_version: str,
+    current_datetime: str,
+    start_datetime: str,
+    end_datetime: str,
+    odr_url: str | None = None,
 ) -> ImageryItem:
     """
     Args:
@@ -197,7 +202,7 @@ def create_or_load_base_item(
         checksum=file_content_checksum,
     )
 
-    return ImageryItem(id_, asset, stac_processing)
+    return ImageryItem(id_, asset, stac_processing, start_datetime, end_datetime)
 
 
 def get_published_file_contents(odr_url: str, filename: str) -> JSON_Dict:

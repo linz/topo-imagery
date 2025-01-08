@@ -126,26 +126,21 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
         "created": any_epoch_datetime_string(),
         "updated": any_epoch_datetime_string(),
     }
+    start_datetime = "2021-02-01T00:00:00Z"
+    end_datetime = "2021-02-20T00:00:00Z"
     item = ImageryItem(
         "BR34_5000_0304",
-        create_visual_asset(href="any href", file_checksum="any checksum", created=asset_datetimes["created"]),
-        #     "href": "any href",
-        #     "file:checksum": "any checksum",
-        #     "created": asset_datetimes["created"],
-        #     "updated": asset_datetimes["updated"],
-        # }
+        create_visual_asset(href="any href", checksum="any checksum", created=asset_datetimes["created"]),
         any_stac_processing(),
+        start_datetime,
+        end_datetime,
     )
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27T00:00:00Z"
-    end_datetime = "2021-01-27T00:00:00Z"
     item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
-
     collection.add_item(item.to_dict())
 
     links = collection.stac["links"].copy()

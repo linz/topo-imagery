@@ -2,8 +2,9 @@ import json
 import typing
 from typing import Any, TypedDict
 
-from pystac import Asset, Item, Link, MediaType, RelType
+from pystac import Asset, Item, Link, MediaType, RelType, StacIO
 
+from scripts.datetimes import parse_rfc_3339_datetime
 from scripts.stac.link import create_link_with_checksum
 from scripts.stac.util.stac_extensions import StacExtensions
 
@@ -25,7 +26,14 @@ STACProcessing = TypedDict(
 
 class ImageryItem(Item):
 
-    def __init__(self, id_: str, asset: Asset, stac_processing: STACProcessing) -> None:
+    def __init__(
+        self,
+        id_: str,
+        asset: Asset,
+        stac_processing: STACProcessing,
+        start_datetime: str,
+        end_datetime: str,
+    ) -> None:
         stac_extensions = [StacExtensions.file.value, StacExtensions.processing.value]
         assets = {"visual": asset}
         properties = {"created": asset.extra_fields["created"], "updated": asset.extra_fields["updated"], **stac_processing}
@@ -37,7 +45,40 @@ class ImageryItem(Item):
             stac_extensions=stac_extensions,
             assets=assets,
             properties=properties,
+            start_datetime=parse_rfc_3339_datetime(start_datetime),
+            end_datetime=parse_rfc_3339_datetime(end_datetime),
         )
+
+        # Manually add the self link as pystac would force it to be absolute otherwise (requirement in STAC v1.1)
+        # pystac would have use the MediaType JSON for the self link, but we want to use the GeoJSON type
+        self.make_self_link_relative()
+
+    @classmethod
+    def from_file(cls, href: str, stac_io: StacIO | None = None) -> "ImageryItem":
+        # Use pystac.Item's from_file to parse the STAC file
+        item = Item.from_file(href, stac_io)
+        imagery_item = cls(
+            id_=item.id,
+            asset=item.assets["visual"],
+            stac_processing={
+                "processing:datetime": item.properties["processing:datetime"],
+                "processing:software": item.properties["processing:software"],
+                "processing:version": item.properties["processing:version"],
+            },
+            start_datetime=item.properties["start_datetime"],
+            end_datetime=item.properties["end_datetime"],
+        )
+        if item.collection_id:
+            imagery_item.add_collection(item.collection_id)
+        imagery_item.update_spatial(item.geometry, item.bbox)
+        imagery_item.make_self_link_relative()
+
+        return imagery_item
+
+    def make_self_link_relative(self) -> None:
+        """Make the self link relative"""
+        self.links = [l for l in self.links if l.rel != RelType.SELF]
+        self.add_link(Link(target=f"./{self.id}.json", rel=RelType.SELF, media_type=MediaType.GEOJSON))
 
     def update_checksum_related_metadata(self, file_content_checksum: str, stac_processing_data: STACProcessing) -> None:
         """Set the assets.visual.file:checksum attribute if it has changed.

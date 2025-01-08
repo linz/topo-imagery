@@ -23,7 +23,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
         "type": "Polygon",
         "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
+    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
@@ -35,9 +35,8 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     asset = any_visual_asset()
     stac_processing = any_stac_processing()
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, asset, stac_processing)
+        item = ImageryItem(id_, asset, stac_processing, start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
 
     # checks
     with subtests.test():
@@ -132,15 +131,15 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_visual_asset(), any_stac_processing())
+    item = ImageryItem(id_, any_visual_asset(), any_stac_processing(), "2022-02-02T00:00:00Z", "2022-02-02T00:00:00Z")
 
-    item.set_collection(collection.stac["id"])
+    item.add_collection(collection.stac["id"])
 
     with subtests.test():
         assert item.collection_id == ulid
 
     with subtests.test():
-        assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.to_dict()["links"]
 
     with subtests.test():
-        assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.to_dict()["links"]

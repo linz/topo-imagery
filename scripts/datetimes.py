@@ -23,7 +23,7 @@ def format_rfc_3339_datetime_string(datetime_object: datetime) -> str:
     return datetime_object.astimezone(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT)
 
 
-def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> str:
+def format_rfc_3339_nz_midnight_datetime(datetime_object: datetime) -> datetime:
     """Convert datetime to New Zealand midnight and format it to UTC"""
     naive_midnight_datetime_string = f"{datetime_object.strftime(RFC_3339_DATE_FORMAT)}T00:00:00.000"
 
@@ -34,9 +34,12 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
         raise Exception(f"Not a valid date: {err}") from err
 
     utc_tz = tz.gettz("UTC")
-    datetime_utc = nz_datetime.astimezone(utc_tz)
+    return nz_datetime.astimezone(utc_tz)
 
-    return format_rfc_3339_datetime_string(datetime_utc)
+
+def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> str:
+    """Convert datetime to New Zealand midnight and format it to UTC as string"""
+    return format_rfc_3339_datetime_string(format_rfc_3339_nz_midnight_datetime(datetime_object))
 
 
 class NaiveDatetimeError(Exception):
