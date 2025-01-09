@@ -23,7 +23,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
         "type": "Polygon",
         "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
+    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)

@@ -3,6 +3,7 @@ import typing
 from typing import Any, TypedDict
 
 from pystac import Asset, Item, Link, MediaType, RelType, StacIO
+from pystac.utils import HREF
 
 from scripts.datetimes import parse_rfc_3339_datetime
 from scripts.stac.link import create_link_with_checksum
@@ -54,7 +55,7 @@ class ImageryItem(Item):
         self.make_self_link_relative()
 
     @classmethod
-    def from_file(cls, href: str, stac_io: StacIO | None = None) -> "ImageryItem":
+    def from_file(cls, href: HREF, stac_io: StacIO | None = None) -> "ImageryItem":
         # Use pystac.Item's from_file to parse the STAC file
         item = Item.from_file(href, stac_io)
         imagery_item = cls(
@@ -70,15 +71,19 @@ class ImageryItem(Item):
         )
         if item.collection_id:
             imagery_item.add_collection(item.collection_id)
-        imagery_item.update_spatial(item.geometry, item.bbox)
+        if item.geometry and item.bbox:
+            imagery_item.update_spatial(item.geometry, item.bbox)
         imagery_item.make_self_link_relative()
 
         return imagery_item
 
     def make_self_link_relative(self) -> None:
         """Make the self link relative"""
-        self.links = [l for l in self.links if l.rel != RelType.SELF]
-        self.add_link(Link(target=f"./{self.id}.json", rel=RelType.SELF, media_type=MediaType.GEOJSON))
+        # FIXME: Should not need to remove `self` link as `add_link` already does that
+        # self.clear_links(RelType.SELF)
+        self_link = Link(target=f"./{self.id}.json", rel=RelType.SELF, media_type=MediaType.GEOJSON)
+        self_link.target = f"./{self.id}.json"
+        self.add_link(self_link)
 
     def update_checksum_related_metadata(self, file_content_checksum: str, stac_processing_data: STACProcessing) -> None:
         """Set the assets.visual.file:checksum attribute if it has changed.
@@ -111,16 +116,15 @@ class ImageryItem(Item):
         self.properties["end_datetime"] = end_datetime
         self.properties["datetime"] = None
 
+    # FIXME: why pystac uses list instead of tuple for bbox?
     def update_spatial(self, geometry: dict[str, Any], bbox: tuple[float, ...]) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
-
         Args:
             geometry: a geometry
             bbox: a bounding box
         """
         self.geometry = geometry
-        # FIXME: why pystac uses list instead of tuple?
-        self.bbox = list(bbox)
+        self.bbox = bbox
 
     def add_link(self, link: Link) -> None:
         if self.links and link.rel in [

@@ -34,7 +34,8 @@ def format_rfc_3339_nz_midnight_datetime(datetime_object: datetime) -> datetime:
         raise Exception(f"Not a valid date: {err}") from err
 
     utc_tz = tz.gettz("UTC")
-    return nz_datetime.astimezone(utc_tz)
+    nz_time: datetime = nz_datetime.astimezone(utc_tz)
+    return nz_time
 
 
 def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> str:
