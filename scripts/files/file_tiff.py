@@ -5,8 +5,8 @@ from enum import Enum
 from typing import Any
 from urllib.parse import unquote
 
+from scripts.gdal.gdal_commands import DEFAULT_NO_DATA_VALUE
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
-from scripts.gdal.gdal_preset import DEFAULT_NO_DATA_VALUE
 from scripts.gdal.gdal_presets import Preset
 from scripts.gdal.gdalinfo import GdalInfo
 

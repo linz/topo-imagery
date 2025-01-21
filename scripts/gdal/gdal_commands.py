@@ -4,7 +4,7 @@ from typing import Annotated
 from linz_logger import get_log
 
 from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_presets import Preset
+from scripts.gdal.gdal_presets import HillshadePreset, Preset
 from scripts.gdal.gdalinfo import GdalInfo
 
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
@@ -270,3 +270,33 @@ def get_ascii_translate_command() -> list[str]:
         "-co",
         "COMPRESS=lzw",
     ]
+
+
+def get_hillshade_command(preset: str) -> list[str]:
+    """Get a `gdaldem` command to create a hillshade.
+
+    Returns:
+        a list of arguments to run `gdaldem`
+    """
+
+    get_log().info("gdal_preset", preset=preset)
+    gdal_command: list[str] = [
+        "gdaldem",
+        "hillshade",
+        "-compute_edges",
+        "-co",
+        "compress=lerc",
+        "-of",
+        "COG",
+        "-co",
+        "MAX_Z_ERROR=0",
+    ]
+
+    if preset == HillshadePreset.MULTIDIRECTIONAL.value:
+        gdal_command.extend("-multidirectional")
+    elif preset == HillshadePreset.GREYSCALE.value:
+        gdal_command.extend(["-az", "315", "-alt", "45"])
+    elif preset == HillshadePreset.IGOR.value:
+        gdal_command.extend("-igor")
+
+    return gdal_command

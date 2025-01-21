@@ -10,8 +10,8 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import is_argo
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import read, write_all, write_sidecars
+from scripts.gdal.gdal_commands import get_ascii_translate_command
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdal_preset import get_ascii_translate_command
 from scripts.logging.time_helper import time_in_ms
 
 
