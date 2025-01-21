@@ -36,7 +36,7 @@ def create_hillshade(
     files: TileFiles,
     preset: str,
     target_output: str = "/tmp/",
-) -> str:
+) -> str | None:
     hillshade_file_name = files.output + ".tiff"
 
     hillshade_file_path = os.path.join(target_output, hillshade_file_name)
@@ -70,7 +70,7 @@ def run_create_hillshade(
     concurrency: int,
     gdal_version: str,
     target_output: str = "/tmp/",
-) -> None:
+) -> list[str]:
     """Run `create_hillshade()` in parallel (`concurrency`).
 
     Args:
@@ -109,7 +109,7 @@ def run_create_hillshade(
     return results
 
 
-def main():
+def main() -> None:
     arguments = parse_args()
 
     try:
