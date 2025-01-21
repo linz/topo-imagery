@@ -2,17 +2,21 @@ import argparse
 import os
 import sys
 import tempfile
+from datetime import datetime, timezone
 from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files
-from scripts.files.files_helper import ContentType, is_tiff
+from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files, valid_date
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
+from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
-from scripts.gdal.gdal_helper import run_gdal
+from scripts.gdal.gdal_helper import gdal_info, run_gdal
+from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
+from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
@@ -28,6 +32,29 @@ def parse_args() -> argparse.Namespace:
         help="Type of hillshade to generate. Example: 'multidirectional'",
     )
     parser.add_argument("--target", dest="target", required=True, help="The path to save the generated hillshade to.")
+    parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
+    parser.add_argument(
+        "--start-datetime",
+        dest="start_datetime",
+        help="Start datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
+    )
+    parser.add_argument(
+        "--end-datetime",
+        dest="end_datetime",
+        help="End datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
+    )
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help=(
+            "The datetime to be used as current datetime in the metadata. "
+            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
+        ),
+        required=False,
+        default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
+    )
 
     return parser.parse_args()
 
@@ -122,7 +149,25 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    run_create_hillshade(tile_files, arguments.preset, concurrency, os.environ["GDAL_VERSION"], arguments.target)
+    file_paths = run_create_hillshade(tile_files, arguments.preset, concurrency, os.environ["GDAL_VERSION"], arguments.target)
+
+    start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
+    end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
+    for path in file_paths:
+        if path is None:
+            continue
+        # Create STAC and save in target
+        item = create_item(
+            path,
+            start_datetime,
+            end_datetime,
+            arguments.collection_id,
+            os.environ["GDAL_VERSION"],
+            arguments.current_datetime,
+            gdal_info(path),
+        )
+        stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
+        write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
 
 
 if __name__ == "__main__":
