@@ -95,6 +95,8 @@ def main() -> None:
         standardized_file_path = os.path.join(arguments.target, standardized_file_name)
         stac_item_path = os.path.join(arguments.target, stac_item_name)
 
+        derived_from_paths = []
+
         if tile.includeDerived:
             # Transform the TIFF paths to JSON path to point to STAC Items,
             # assuming the STAC Items are in the same directory as the TIFF files
