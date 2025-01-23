@@ -70,7 +70,7 @@ WEBP_OVERVIEWS = [
     "-co",
     "overview_compress=webp",
     # When resampling overviews use lanczos
-    # see https://github.com/linz/basemaps/blob/master/docs/imagery/cog.quality.md
+    # see https://github.com/linz/basemaps/blob/master/docs/operator-guide/cog-quality.md
     "-co",
     "overview_resampling=lanczos",
     # Reduce quality of overviews to 90%
