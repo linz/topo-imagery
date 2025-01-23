@@ -63,3 +63,30 @@ def is_json(path: str) -> bool:
         False
     """
     return path.lower().endswith(".json")
+
+
+def convert_s3_paths(files_flat: list[str]) -> list[str]:
+    """
+    Convert a flat list of S3 paths into a flat list with appropriate /vsis3/ prefixes.
+
+    Parameters:
+    files_flat (list of str): Flat list containing S3 file paths.
+
+    Returns:
+    list of str: Flat list with converted /vsis3/ paths.
+    """
+
+    return [path.replace("s3://", "/vsis3/") for path in files_flat]
+
+
+def flatten_file_list(files_nested: list[list[str]]) -> list[str]:
+    """
+    Convert a nested list of paths into a flat list.
+
+    Parameters:
+    files_nested (list of list of str): Nested list containing file paths.
+
+    Returns:
+    list of str: Flattened list.
+    """
+    return [path for sublist in files_nested for path in sublist]
