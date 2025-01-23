@@ -1,6 +1,6 @@
 from pytest_subtests import SubTests
 
-from scripts.files.files_helper import is_tiff
+from scripts.files.files_helper import convert_s3_paths, flatten_file_list, is_tiff
 from scripts.gdal.gdal_helper import is_geotiff
 from scripts.gdal.tests.gdalinfo import fake_gdal_info
 
@@ -36,3 +36,31 @@ def test_is_geotiff(subtests: SubTests) -> None:
 
     with subtests.test():
         assert is_geotiff("file.tiff", gdalinfo_not_geotiff) is False
+
+
+def test_flatten_file_list_flattens_nested_list(subtests: SubTests) -> None:
+    nested_list = [["file1.tiff"], ["file2.json", "file3.geojson"]]
+    expected_output = ["file1.tiff", "file2.json", "file3.geojson"]
+    with subtests.test():
+        assert flatten_file_list(nested_list) == expected_output
+
+
+def test_flatten_file_list_handles_empty_lists(subtests: SubTests) -> None:
+    with subtests.test():
+        assert flatten_file_list([]) == []
+    with subtests.test():
+        assert flatten_file_list([[]]) == []
+    with subtests.test():
+        assert flatten_file_list([[], []]) == []
+
+
+def test_convert_s3_paths_converts_paths_correctly(subtests: SubTests) -> None:
+    flat_list = ["s3://bucket/file1.tiff", "s3://bucket/file2.json"]
+    expected_output = ["/vsis3/bucket/file1.tiff", "/vsis3/bucket/file2.json"]
+    with subtests.test():
+        assert convert_s3_paths(flat_list) == expected_output
+
+
+def test_convert_s3_paths_handles_empty_list(subtests: SubTests) -> None:
+    with subtests.test():
+        assert convert_s3_paths([]) == []
