@@ -98,7 +98,7 @@ def main() -> None:
         if tile.includeDerived:
             # Transform the TIFF paths to JSON path to point to STAC Items,
             # assuming the STAC Items are in the same directory as the TIFF files
-            derived_from_paths = [f"{os.path.splitext(path)[0]}.json" for path in paths_original]
+            derived_from_paths = [f"{os.path.splitext(path)[0]}.json" for path in tile.inputs]
 
         if not exists(stac_item_path):
 
