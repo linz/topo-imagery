@@ -78,7 +78,7 @@ jobs:
           empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
           [[ -n "$empty_target_directory" ]]
 
-      - uses: actions/upload-artifact@v3.1.3
+      - uses: actions/upload-artifact@v4.6.0
         with:
           name: gdal-output
           path: ${{ runner.temp }}/*.tiff
