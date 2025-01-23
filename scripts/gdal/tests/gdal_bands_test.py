@@ -1,5 +1,5 @@
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
-from scripts.gdal.gdal_presets import Preset
+from scripts.gdal.gdal_presets import CompressionPreset
 from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
 
 
@@ -26,7 +26,7 @@ def test_gdal_grey_bands_dem_detection() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Gray")
 
-    bands = get_gdal_band_offset("some_file.tiff", gdalinfo, Preset.DEM_LERC.value)
+    bands = get_gdal_band_offset("some_file.tiff", gdalinfo, CompressionPreset.DEM_LERC.value)
 
     assert " ".join(bands) == "-b 1"
 

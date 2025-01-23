@@ -7,7 +7,7 @@ from urllib.parse import unquote
 
 from scripts.gdal.gdal_commands import DEFAULT_NO_DATA_VALUE
 from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
-from scripts.gdal.gdal_presets import Preset
+from scripts.gdal.gdal_presets import CompressionPreset
 from scripts.gdal.gdalinfo import GdalInfo
 
 
@@ -51,7 +51,7 @@ class FileTiff:
         self._errors: list[dict[str, Any]] = []
         self._gdalinfo: GdalInfo | None = None
         self._srs: bytes | None = None
-        if preset == Preset.DEM_LERC.value:
+        if preset == CompressionPreset.DEM_LERC.value:
             self._tiff_type = FileTiffType.DEM
         else:
             self._tiff_type = FileTiffType.IMAGERY

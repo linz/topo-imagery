@@ -64,11 +64,21 @@ def create_hillshade(
     preset: str,
     target_output: str = "/tmp/",
 ) -> str | None:
+    """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
+
+    Args:
+        files: a TileFiles object with the input TIFFs and the output tile name.
+        preset: a `HillshadePreset` to use. See `gdal.gdal_presets.py`.
+        target_output: path where the output files need to be saved to. Defaults to "/tmp/".
+
+    Returns:
+        The filename of the hillshade TIFF file if created.
+    """
     hillshade_file_name = files.output + ".tiff"
 
     hillshade_file_path = os.path.join(target_output, hillshade_file_name)
 
-    # Already proccessed can skip processing
+    # Already processed can skip processing
     if exists(hillshade_file_path):
         get_log().info("hillshade_tiff_already_exists", path=hillshade_file_path)
         return None
@@ -76,18 +86,18 @@ def create_hillshade(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         hillshade_working_path = os.path.join(tmp_path, hillshade_file_name)
+
         source_files = write_all(files.inputs, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
 
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path)
 
-        command = get_hillshade_command(preset)
-
-        # Need GDAL to write to temporary location so no broken files end up in the done folder.
-        run_gdal(command, input_file=input_file, output_file=hillshade_working_path)
+        # Need GDAL to write to temporary location so no broken files end up in the final folder.
+        run_gdal(get_hillshade_command(preset), input_file=input_file, output_file=hillshade_working_path)
 
         write(hillshade_file_path, read(hillshade_working_path), content_type=ContentType.GEOTIFF.value)
+
         return hillshade_file_path
 
 
@@ -102,15 +112,14 @@ def run_create_hillshade(
 
     Args:
         todo: list of TileFiles (tile name and input files) to hillshade
-        preset: hillshade preset to use. See `gdal.gdal_preset.py`
+        preset: `HillshadePreset` to use. See `gdal.gdal_presets.py`
         concurrency: number of concurrent files to process
-        gdal_version: version of GDAL used for creating hillshades
+        gdal_version: version of GDAL used
         target_output: output directory path. Defaults to "/tmp/"
 
     Returns:
         Nothing
     """
-    # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
 
     get_log().info("create_hillshade_start", gdalVersion=gdal_version, fileCount=len(todo))
