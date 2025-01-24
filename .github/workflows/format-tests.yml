@@ -39,11 +39,13 @@ jobs:
           docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 30 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
           cmp --silent "${{ runner.temp }}/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
+          rm "${{ runner.temp }}/BK39_10000_0101.tiff"
 
       - name: End to end test - Hillshade Greyscale
         run: |
           docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset greyscale --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_greyscale.tiff
+          rm "${{ runner.temp }}/BK39_10000_0101.tiff"
 
       - name: End to end test - Hillshade Igor
         run: |
