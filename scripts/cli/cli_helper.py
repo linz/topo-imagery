@@ -1,14 +1,15 @@
 import argparse
 import json
-import os
 import warnings
 from datetime import datetime
 from decimal import Decimal
+from os import environ
 from typing import NamedTuple
 
 from linz_logger import get_log
 
 from scripts.datetimes import parse_rfc_3339_date
+from scripts.files.files_helper import SUFFIX_JSON
 from scripts.files.fs import read
 
 
@@ -58,18 +59,6 @@ def get_tile_files(source: str) -> list[TileFiles]:
     return source_json
 
 
-def get_derived_from_paths(paths: list[str]) -> list[str]:
-    """Get the path(s) of the STAC Items associated to the TIFF files from which the final output is derived.
-
-    Returns:
-        a list of STAC Item JSON file paths
-    """
-    # Transform the TIFF paths to JSON path to point to STAC Items,
-    # assuming the STAC Items are in the same directory as the TIFF files
-
-    return [f"{os.path.splitext(path)[0]}.json" for path in paths]
-
-
 def load_input_files(path: str) -> list[TileFiles]:
     """Load the TileFiles from a JSON input file containing a list of output and input files.
     Args:
@@ -89,7 +78,7 @@ def load_input_files(path: str) -> list[TileFiles]:
 
 
 def is_argo() -> bool:
-    return bool(os.environ.get("ARGO_TEMPLATE"))
+    return bool(environ.get("ARGO_TEMPLATE"))
 
 
 def valid_date(s: str) -> datetime:

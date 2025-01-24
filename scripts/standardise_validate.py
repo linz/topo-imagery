@@ -6,8 +6,8 @@ from datetime import datetime, timezone
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import (
-    get_derived_from_paths,
     InputParameterError,
+    get_derived_from_paths,
     is_argo,
     load_input_files,
     str_to_gsd,

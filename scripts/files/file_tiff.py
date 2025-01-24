@@ -30,7 +30,6 @@ class FileTiff:
         self,
         paths: list[str],
         preset: str | None = None,
-        include_derived: bool = False,
     ) -> None:
         paths_original = []
         for p in paths:
