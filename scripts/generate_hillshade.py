@@ -14,6 +14,7 @@ from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
 from scripts.gdal.gdal_helper import gdal_info, run_gdal
+from scripts.gdal.gdal_presets import HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.create_stac import create_item
@@ -29,7 +30,8 @@ def parse_args() -> argparse.Namespace:
         "--preset",
         dest="preset",
         required=True,
-        help="Type of hillshade to generate. Example: 'multidirectional'",
+        choices=[preset.value for preset in HillshadePreset],
+        help="Type of hillshade to generate.",
     )
     parser.add_argument("--target", dest="target", required=True, help="The path to save the generated hillshade to.")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
