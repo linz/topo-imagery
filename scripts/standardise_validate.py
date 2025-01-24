@@ -5,7 +5,14 @@ from datetime import datetime, timezone
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
+from scripts.cli.cli_helper import (
+    get_derived_from_paths,
+    InputParameterError,
+    is_argo,
+    load_input_files,
+    str_to_gsd,
+    valid_date,
+)
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
@@ -150,6 +157,7 @@ def main() -> None:
     srs = get_srs()
 
     for file in tiff_files:
+        derived_from_paths = []
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + SUFFIX_JSON
         if not exists(stac_item_path):
             file.set_srs(srs)
@@ -160,6 +168,11 @@ def main() -> None:
             else:
                 get_log().info("non_visual_qa_passed", path=file.get_path_standardised())
 
+            if tile.includeDerived:
+                # Transform the TIFF paths to JSON path to point to STAC Items,
+                # assuming the STAC Items are in the same directory as the TIFF files
+                derived_from_paths = get_derived_from_paths(tile.inputs)
+
             # Create STAC and save in target
             item = create_item(
                 file.get_path_standardised(),
@@ -169,7 +182,7 @@ def main() -> None:
                 gdal_version,
                 arguments.current_datetime,
                 file.get_gdalinfo(),
-                file.get_derived_from_paths(),
+                derived_from_paths,
                 arguments.odr_url,
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)

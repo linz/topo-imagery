@@ -5,7 +5,14 @@ from datetime import datetime, timezone
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
+from scripts.cli.cli_helper import (
+    get_derived_from_paths,
+    InputParameterError,
+    is_argo,
+    load_input_files,
+    str_to_gsd,
+    valid_date,
+)
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
@@ -90,20 +97,18 @@ def main() -> None:
     gdal_version = os.environ["GDAL_VERSION"]
 
     for tile in tile_files:
+        derived_from_paths = []
         standardized_file_name = tile.output + ".tiff"
         stac_item_name = tile.output + SUFFIX_JSON
         standardized_file_path = os.path.join(arguments.target, standardized_file_name)
         stac_item_path = os.path.join(arguments.target, stac_item_name)
 
-        derived_from_paths = []
-
         if tile.includeDerived:
             # Transform the TIFF paths to JSON path to point to STAC Items,
             # assuming the STAC Items are in the same directory as the TIFF files
-            derived_from_paths = [f"{os.path.splitext(path)[0]}.json" for path in tile.inputs]
+            derived_from_paths = get_derived_from_paths(tile.inputs)
 
         if not exists(stac_item_path):
-
             # Create STAC and save in target
             item = create_item(
                 standardized_file_path,
