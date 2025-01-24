@@ -222,10 +222,10 @@ def get_hillshade_command(preset: str) -> list[str]:
     ]
 
     if preset == HillshadePreset.MULTIDIRECTIONAL.value:
-        gdal_command.extend("-multidirectional")
+        gdal_command.extend(["-multidirectional"])
     elif preset == HillshadePreset.GREYSCALE.value:
         gdal_command.extend(["-az", "315", "-alt", "45"])
     elif preset == HillshadePreset.IGOR.value:
-        gdal_command.extend("-igor")
+        gdal_command.extend(["-igor"])
 
     return gdal_command
