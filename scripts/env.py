@@ -1,6 +1,7 @@
 import os
 
-from scripts.gdal.gdal_helper import gdal_info
+from scripts.gdal.gdal_commands import get_build_vrt_command
+from scripts.gdal.gdal_helper import gdal_info, run_gdal
 
 
 def main() -> None:
@@ -8,7 +9,12 @@ def main() -> None:
     # gdal_info = subprocess.run(
     #     ["gdalinfo", "/vsis3/nz-elevation/new-zealand/new-zealand/dem_1m/2193/BM35.tiff"], capture_output=True, check=True
     # )
-    gdalinfo = gdal_info("/vsis3/nz-elevation/new-zealand/new-zealand/dem_1m/2193/BM35.tiff")
+    run_gdal(
+        command=get_build_vrt_command(
+            files=["/vsis3/nz-elevation/new-zealand/new-zealand/dem_1m/2193/BM35.tiff"], output="/tmp/my.vrt"
+        )
+    )
+    gdalinfo = gdal_info("/tmp/my.vrt")
     print(gdalinfo)
 
 
