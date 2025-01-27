@@ -5,17 +5,10 @@ from datetime import datetime, timezone
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import (
-    InputParameterError,
-    get_derived_from_paths,
-    is_argo,
-    load_input_files,
-    str_to_gsd,
-    valid_date,
-)
+from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
-from scripts.files.files_helper import SUFFIX_JSON, ContentType
+from scripts.files.files_helper import SUFFIX_JSON, ContentType, get_derived_from_paths
 from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.json_codec import dict_to_json_bytes

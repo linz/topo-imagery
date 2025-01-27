@@ -1,7 +1,6 @@
 import os
 from enum import Enum
 
-
 # TODO: make a suffix class?
 SUFFIX_JSON = ".json"
 SUFFIX_FOOTPRINT = "_footprint.geojson"
@@ -15,7 +14,7 @@ class ContentType(str, Enum):
     """ https://www.iana.org/assignments/media-types/application/geo+json"""
     JPEG = "image/jpeg"
 
-# TODO: refactor to make one multi-purpose function
+
 def get_file_name_from_path(path: str) -> str:
     """Get the file name from a path.
 
@@ -30,6 +29,9 @@ def get_file_name_from_path(path: str) -> str:
         'file'
     """
     return os.path.splitext(os.path.basename(path))[0]
+
+
+# TODO: refactor to make one multi-purpose function
 
 
 def get_footprint_file_path(tile_output: str, target: str) -> str:

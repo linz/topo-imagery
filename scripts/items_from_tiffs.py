@@ -92,7 +92,7 @@ def main() -> None:
     for tile in tile_files:
         derived_from_paths = []
         stac_item_path = get_stac_item_path(tile.output, arguments.target)
-        standardized_file_path = get_standardized_file_path(tile.output, arguments.target)
+        standardized_file_path = get_standardised_file_path(tile.output, arguments.target)
 
         if tile.includeDerived:
             # Transform the TIFF paths to JSON path to point to STAC Items,
