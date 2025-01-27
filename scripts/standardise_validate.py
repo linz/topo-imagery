@@ -5,14 +5,12 @@ from datetime import datetime, timezone
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
+from scripts.cli.cli_helper import InputParameterError, is_argo, item_stac_wrapper, load_input_files, str_to_gsd, valid_date
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.file_tiff import FileTiff
-from scripts.files.files_helper import SUFFIX_JSON, ContentType, get_derived_from_paths
-from scripts.files.fs import exists, write
+from scripts.files.files_helper import SUFFIX_JSON
+from scripts.files.fs import exists
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
-from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import run_standardising
 
 
@@ -112,17 +110,6 @@ def main() -> None:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
-    # When standardising output includeDerived, start_datetime and end_datetime are optional
-    if arguments.start_datetime is None or arguments.end_datetime is None:
-        for tile in tile_files:
-            if not tile.includeDerived:
-                raise Exception("--start_datetime and --end_datetime are required if standardising non-derived files.")
-        start_datetime = ""
-        end_datetime = ""
-    else:
-        start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
-        end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
-
     concurrency: int = 1
     if is_argo():
         concurrency = 4
@@ -149,8 +136,8 @@ def main() -> None:
     # SRS needed for FileCheck (non visual QA)
     srs = get_srs()
 
+    # FIXME: get_path_standardised() now exists in two places
     for file in tiff_files:
-        derived_from_paths = []
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + SUFFIX_JSON
         if not exists(stac_item_path):
             file.set_srs(srs)
@@ -161,25 +148,7 @@ def main() -> None:
             else:
                 get_log().info("non_visual_qa_passed", path=file.get_path_standardised())
 
-            if tile.includeDerived:
-                # Transform the TIFF paths to JSON path to point to STAC Items,
-                # assuming the STAC Items are in the same directory as the TIFF files
-                derived_from_paths = get_derived_from_paths(tile.inputs)
-
-            # Create STAC and save in target
-            item = create_item(
-                file.get_path_standardised(),
-                start_datetime,
-                end_datetime,
-                arguments.collection_id,
-                gdal_version,
-                arguments.current_datetime,
-                file.get_gdalinfo(),
-                derived_from_paths,
-                arguments.odr_url,
-            )
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
-            get_log().info("stac_saved", path=stac_item_path)
+    item_stac_wrapper(tile_files, arguments)
 
 
 if __name__ == "__main__":

@@ -1,17 +1,11 @@
 import argparse
-import os
 import sys
 from datetime import datetime, timezone
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, valid_date
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
-from scripts.files.files_helper import ContentType, get_derived_from_paths, get_stac_item_path, get_standardised_file_path
-from scripts.files.fs import exists, write
-from scripts.gdal.gdal_helper import gdal_info
-from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.create_stac import create_item
+from scripts.cli.cli_helper import InputParameterError, item_stac_wrapper, load_input_files, valid_date
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 
 
 def str_to_bool(value: str) -> bool:
@@ -72,48 +66,7 @@ def main() -> None:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
-    # When standardising output includeDerived, start_datetime and end_datetime are optional
-    if arguments.start_datetime is None or arguments.end_datetime is None:
-        for tile in tile_files:
-            if not tile.includeDerived:
-                raise Exception("--start_datetime and --end_datetime are required if standardising non-derived files.")
-        start_datetime = ""
-        end_datetime = ""
-    else:
-        start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
-        end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
-
-    concurrency: int = 1
-    if is_argo():
-        concurrency = 4
-
-    gdal_version = os.environ["GDAL_VERSION"]
-
-    for tile in tile_files:
-        derived_from_paths = []
-        stac_item_path = get_stac_item_path(tile.output, arguments.target)
-        standardized_file_path = get_standardised_file_path(tile.output, arguments.target)
-
-        if tile.includeDerived:
-            # Transform the TIFF paths to JSON path to point to STAC Items,
-            # assuming the STAC Items are in the same directory as the TIFF files
-            derived_from_paths = get_derived_from_paths(tile.inputs)
-
-        if not exists(stac_item_path):
-            # Create STAC and save in target
-            item = create_item(
-                standardized_file_path,
-                start_datetime,
-                end_datetime,
-                arguments.collection_id,
-                gdal_version,
-                arguments.current_datetime,
-                gdal_info(standardized_file_path),
-                derived_from_paths,
-                arguments.odr_url,
-            )
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
-            get_log().info("stac_saved", path=stac_item_path)
+    item_stac_wrapper(tile_files, arguments)
 
 
 if __name__ == "__main__":
