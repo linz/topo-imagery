@@ -161,6 +161,9 @@ def item_stac_wrapper(tile_files: list[TileFiles], arguments: argparse.Namespace
         derived_from_paths = []
         stac_item_path = get_stac_item_path(tile.output, arguments.target)
         standardized_file_path = get_standardised_file_path(tile.output, arguments.target)
+        if not exists(standardized_file_path):
+            get_log().info("Skipping STAC creation for empty output image", path=standardized_file_path)
+            continue
 
         if tile.includeDerived:
             # Transform the TIFF paths to JSON path to point to STAC Items,
