@@ -21,7 +21,7 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
@@ -46,6 +46,7 @@ def parse_args() -> argparse.Namespace:
         help="Do not create STAC Item Documents. Default to False.",
         action="store_true",
     )
+    parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection")
     parser.add_argument(
         "--start-datetime",
         dest="start_datetime",
@@ -69,7 +70,7 @@ def parse_args() -> argparse.Namespace:
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
     )
 
-    return parser.parse_args()
+    return parser.parse_args(), parser
 
 
 def create_hillshade(
@@ -159,7 +160,14 @@ def run_create_hillshade(
 
 def main() -> None:
     start_time = time_in_ms()
-    arguments = parse_args()
+    arguments, parser = parse_args()
+
+    if not arguments.no_stac and (not arguments.start_datetime or not arguments.end_datetime or not arguments.collection_id):
+        parser.error(
+            f"Missing required arguments for STAC creation: --collection-id={arguments.collection_id}, "
+            f"--start-datetime={arguments.start_datetime}, --end-datetime={arguments.end_datetime}. "
+            "Use --no-stac to skip STAC creation.",
+        )
 
     try:
         tile_files = load_input_files(arguments.from_file)
