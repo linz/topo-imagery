@@ -92,4 +92,3 @@ class HillshadePreset(str, Enum):
 
     GREYSCALE = "greyscale"  # Standard/default hillshade
     IGOR = "igor"  # Whiter hillshade (see http://maperitive.net/docs/Commands/GenerateReliefImageIgor.html)
-    MULTIDIRECTIONAL = "multidirectional"

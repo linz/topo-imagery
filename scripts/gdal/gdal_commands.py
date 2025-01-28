@@ -221,9 +221,7 @@ def get_hillshade_command(preset: str) -> list[str]:
         "MAX_Z_ERROR=0",
     ]
 
-    if preset == HillshadePreset.MULTIDIRECTIONAL.value:
-        gdal_command.extend(["-multidirectional"])
-    elif preset == HillshadePreset.GREYSCALE.value:
+    if preset == HillshadePreset.GREYSCALE.value:
         gdal_command.extend(["-az", "315", "-alt", "45"])
     elif preset == HillshadePreset.IGOR.value:
         gdal_command.extend(["-igor"])

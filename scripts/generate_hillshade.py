@@ -8,17 +8,8 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import (
-    InputParameterError,
-    TileFiles,
-    is_argo,
-    load_input_files,
-    valid_date,
-)
-from scripts.datetimes import (
-    RFC_3339_DATETIME_FORMAT,
-    format_rfc_3339_nz_midnight_datetime_string,
-)
+from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files, valid_date
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
@@ -133,7 +124,7 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
-) -> list[str]:
+) -> list[tuple[str, list[str]]]:
     """Run `create_hillshade()` in parallel (`concurrency`).
 
     Args:
@@ -175,6 +166,7 @@ def main() -> None:
     except InputParameterError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
+
     gdal_version = os.environ["GDAL_VERSION"]
     get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
 
