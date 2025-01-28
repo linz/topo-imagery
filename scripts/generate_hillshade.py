@@ -118,12 +118,12 @@ def run_create_hillshade(
     target_output: str = "/tmp/",
     force: bool = False,
 ) -> list[tuple[str, list[str]]]:
-    """Run `create_hillshade()` in parallel (`concurrency`).
+    """Run `create_hillshade()` in parallel (see `concurrency`).
 
     Args:
         todo: list of TileFiles (tile name and input files) to hillshade
         preset: `HillshadePreset` to use. See `gdal.gdal_presets.py`
-        concurrency: number of concurrent files to process
+        concurrency: number of concurrent tiles to process
         target_output: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
 

@@ -90,5 +90,5 @@ class CompressionPreset(str, Enum):
 class HillshadePreset(str, Enum):
     """Enum for the different type of hillshade available for generating from a DEM."""
 
-    GREYSCALE = "greyscale"  # Standard/default hillshade
+    GREYSCALE = "greyscale"  # Standard/default mono-directional hillshade
     IGOR = "igor"  # Whiter hillshade (see http://maperitive.net/docs/Commands/GenerateReliefImageIgor.html)
