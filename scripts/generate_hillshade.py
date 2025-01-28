@@ -8,8 +8,8 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files, valid_date
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
+from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
@@ -24,7 +24,11 @@ from scripts.standardising import create_vrt
 def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
+        "--from-file",
+        dest="from_file",
+        required=True,
+        help="Specify the path to a json file containing the input tiffs. "
+        "Format: [{'output': 'tile1', 'inputs': ['path/input1.tiff', 'path/input2.tiff']}]",
     )
     parser.add_argument(
         "--preset",
@@ -33,37 +37,25 @@ def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
         choices=[preset.value for preset in HillshadePreset],
         help="Type of hillshade to generate.",
     )
-    parser.add_argument("--target", dest="target", required=True, help="The path to save the generated hillshade to.")
+    parser.add_argument("--target", dest="target", required=True, help="Specify the path to save the generated hillshade to.")
     parser.add_argument(
         "--force",
         dest="force",
-        help="Regenerate the hillshade TIFF file if already exists. Defaults to False.",
+        help="Regenerate the hillshade TIFF files if already exist. Defaults to False.",
         action="store_true",
     )
     parser.add_argument(
         "--no-stac",
         dest="no_stac",
-        help="Do not create STAC Item Documents. Default to False.",
+        help="Bypass STAC Item Documents creation. Default to False.",
         action="store_true",
     )
-    parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection")
-    parser.add_argument(
-        "--start-datetime",
-        dest="start_datetime",
-        help="Start datetime in format YYYY-MM-DD. Only optional if includeDerived.",
-        type=valid_date,
-    )
-    parser.add_argument(
-        "--end-datetime",
-        dest="end_datetime",
-        help="End datetime in format YYYY-MM-DD. Only optional if includeDerived.",
-        type=valid_date,
-    )
+    parser.add_argument("--collection-id", dest="collection_id", help="Specify the unique ID of the parent STAC Collection.")
     parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
         help=(
-            "The datetime to be used as current datetime in the metadata. "
+            "Specify the datetime to be used as current datetime in the STAC metadata. "
             "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
         ),
         required=False,
@@ -162,10 +154,9 @@ def main() -> None:
     start_time = time_in_ms()
     arguments, parser = parse_args()
 
-    if not arguments.no_stac and (not arguments.start_datetime or not arguments.end_datetime or not arguments.collection_id):
+    if not arguments.no_stac and not arguments.collection_id:
         parser.error(
-            f"Missing required arguments for STAC creation: --collection-id={arguments.collection_id}, "
-            f"--start-datetime={arguments.start_datetime}, --end-datetime={arguments.end_datetime}. "
+            f"Missing required argument for STAC creation: --collection-id={arguments.collection_id}. "
             "Use --no-stac to skip STAC creation.",
         )
 
@@ -185,17 +176,14 @@ def main() -> None:
     file_paths = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
 
     if not arguments.no_stac:
-        start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
-        end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
-
         for path, derived_from_tiffs in file_paths:
             if path is None:
                 continue
             # Create STAC and save in target
             item = create_item(
                 path,
-                start_datetime,
-                end_datetime,
+                "",
+                "",
                 arguments.collection_id,
                 gdal_version,
                 arguments.current_datetime,
