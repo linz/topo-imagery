@@ -21,7 +21,7 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
-def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
+def get_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--from-file",
@@ -62,7 +62,7 @@ def parse_args() -> tuple[argparse.Namespace, argparse.ArgumentParser]:
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
     )
 
-    return parser.parse_args(), parser
+    return parser
 
 
 def create_hillshade(
@@ -152,7 +152,8 @@ def run_create_hillshade(
 
 def main() -> None:
     start_time = time_in_ms()
-    arguments, parser = parse_args()
+    parser = get_args_parser()
+    arguments = parser.parse_args()
 
     if not arguments.no_stac and not arguments.collection_id:
         parser.error(
