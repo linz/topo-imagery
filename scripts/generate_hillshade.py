@@ -2,26 +2,22 @@ import argparse
 import os
 import sys
 import tempfile
-from datetime import datetime, timezone
 from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT
-from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
+from scripts.files.files_helper import ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
-from scripts.gdal.gdal_helper import gdal_info, run_gdal
+from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_presets import HillshadePreset
-from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
-def get_args_parser() -> argparse.ArgumentParser:
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--from-file",
@@ -44,25 +40,8 @@ def get_args_parser() -> argparse.ArgumentParser:
         help="Regenerate the hillshade TIFF files if already exist. Defaults to False.",
         action="store_true",
     )
-    parser.add_argument(
-        "--no-stac",
-        dest="no_stac",
-        help="Bypass STAC Item Documents creation. Default to False.",
-        action="store_true",
-    )
-    parser.add_argument("--collection-id", dest="collection_id", help="Specify the unique ID of the parent STAC Collection.")
-    parser.add_argument(
-        "--current-datetime",
-        dest="current_datetime",
-        help=(
-            "Specify the datetime to be used as current datetime in the STAC metadata. "
-            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
-        ),
-        required=False,
-        default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
-    )
 
-    return parser
+    return parser.parse_args()
 
 
 def create_hillshade(
@@ -70,7 +49,7 @@ def create_hillshade(
     preset: str,
     target_output: str = "/tmp/",
     force: bool = False,
-) -> tuple[str, list[str]] | None:
+) -> str | None:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
     Args:
@@ -80,7 +59,7 @@ def create_hillshade(
         force: overwrite existing output file. Defaults to False.
 
     Returns:
-        The filename of the hillshade TIFF file if created and the path of the input files used to create it.
+        The filename of the hillshade TIFF file if created.
     """
     hillshade_file_name = tile.output + ".tiff"
 
@@ -108,7 +87,7 @@ def create_hillshade(
 
         write(hillshade_file_path, read(hillshade_working_path), content_type=ContentType.GEOTIFF.value)
 
-        return hillshade_file_path, tile.inputs
+        return hillshade_file_path
 
 
 def run_create_hillshade(
@@ -117,7 +96,7 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
-) -> list[tuple[str, list[str]]]:
+) -> list[str]:
     """Run `create_hillshade()` in parallel (see `concurrency`).
 
     Args:
@@ -128,7 +107,7 @@ def run_create_hillshade(
         force: overwrite existing files. Defaults to False.
 
     Returns:
-        the list of generated hillshade TIFF paths with their input files.
+        the list of generated hillshade TIFF paths.
     """
     with Pool(concurrency) as p:
         results = [
@@ -152,14 +131,7 @@ def run_create_hillshade(
 
 def main() -> None:
     start_time = time_in_ms()
-    parser = get_args_parser()
-    arguments = parser.parse_args()
-
-    if not arguments.no_stac and not arguments.collection_id:
-        parser.error(
-            f"Missing required argument for STAC creation: --collection-id={arguments.collection_id}. "
-            "Use --no-stac to skip STAC creation.",
-        )
+    arguments = parse_args()
 
     try:
         tile_files = load_input_files(arguments.from_file)
@@ -167,32 +139,15 @@ def main() -> None:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
-    gdal_version = os.environ["GDAL_VERSION"]
-    get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
+    get_log().info(
+        "generate_hillshade_start", gdalVersion=os.environ["GDAL_VERSION"], fileCount=len(tile_files), preset=arguments.preset
+    )
 
     concurrency: int = 1
     if is_argo():
         concurrency = 4
 
     file_paths = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
-
-    if not arguments.no_stac:
-        for path, derived_from_tiffs in file_paths:
-            if path is None:
-                continue
-            # Create STAC and save in target
-            item = create_item(
-                path,
-                "",
-                "",
-                arguments.collection_id,
-                gdal_version,
-                arguments.current_datetime,
-                gdal_info(path),
-                [url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
-            )
-            stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
 
     get_log().info(
         "generate_hillshade_end", duration=time_in_ms() - start_time, fileCount=len(file_paths), path=arguments.target
