@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from linz_logger import get_log
 
 from scripts.gdal.gdal_bands import get_gdal_band_offset
@@ -71,22 +73,29 @@ def get_cutline_command(cutline: str | None) -> list[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: list[str], output: str = "output.vrt", add_alpha: bool = False) -> list[str]:
+def get_build_vrt_command(
+    files: list[str], output: str = "output.vrt", add_alpha: bool = False, resolution: list[int] | None = None
+) -> list[str]:
     """Build a VRT from a list of tiff files.
 
     Args:
         files: list of tiffs to build the vrt from
         output: the name of the VRT generated. Defaults to "output.vrt".
         add_alpha: use `-addalpha`. Defaults to False.
+        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]
 
     Returns:
         The GDAL command to build the VRT.
     """
     # `-allow_projection_difference` is passed to workaround different coordinate system descriptions within the same EPSG
     # Having the same EPSG code for all images is already checked by `linz/argo-tasks` `tile-index-validate`
-    gdal_command = ["gdalbuildvrt", "-resolution", "highest", "-strict", "-allow_projection_difference"]
+    gdal_command = ["gdalbuildvrt", "-strict", "-allow_projection_difference"]
     if add_alpha:
         gdal_command.append("-addalpha")
+    if resolution is not None:
+        gdal_command.extend(["-resolution", "user", "-tr"])
+        gdal_command.extend(str(xy) for xy in resolution)
+
     gdal_command.append(output)
     gdal_command += files
 
