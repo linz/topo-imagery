@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from decimal import Decimal
+
 from linz_logger import get_log
 
 from scripts.gdal.gdal_bands import get_gdal_band_offset
@@ -74,7 +76,7 @@ def get_cutline_command(cutline: str | None) -> list[str]:
 
 
 def get_build_vrt_command(
-    files: list[str], output: str = "output.vrt", add_alpha: bool = False, resolution: list[int] | None = None
+    files: list[str], output: str = "output.vrt", add_alpha: bool = False, resolution: list[Decimal] | None = None
 ) -> list[str]:
     """Build a VRT from a list of tiff files.
 

@@ -87,7 +87,9 @@ def run_standardising(
     return standardized_tiffs
 
 
-def create_vrt(source_tiffs: list[str], target_path: str, add_alpha: bool = False, resolution: list[int] | None = None) -> str:
+def create_vrt(
+    source_tiffs: list[str], target_path: str, add_alpha: bool = False, resolution: list[Decimal] | None = None
+) -> str:
     """Create a VRT from a list of tiffs files
 
     Args:
@@ -140,6 +142,7 @@ def standardising(
     footprint_file_path = os.path.join(target_output, footprint_file_name)
     tiff = FileTiff(files.inputs, preset, files.includeDerived)
     tiff.set_path_standardised(standardized_file_path)
+    resolution = [gsd, gsd]
 
     # Already proccessed can skip processing
     if exists(standardized_file_path):
@@ -170,7 +173,7 @@ def standardising(
                 vrt_add_alpha = False
 
         # Start from base VRT
-        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha)
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha, resolution=resolution)
 
         # Apply cutline
         if cutline:
