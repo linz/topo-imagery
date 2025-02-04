@@ -12,8 +12,11 @@ from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
     DATA_CATEGORIES,
     DEM,
+    DEM_HILLSHADE,
+    DEM_HILLSHADE_IGOR,
     DSM,
     HUMAN_READABLE_REGIONS,
+    LIFECYCLE_SUFFIXES,
     RURAL_AERIAL_PHOTOS,
     SATELLITE_IMAGERY,
     SCANNED_AERIAL_PHOTOS,
@@ -278,7 +281,7 @@ class ImageryCollection:
           https://github.com/linz/elevation/blob/master/docs/naming.md
 
         Args:
-            add_suffix: Weither to add a suffix based on the lifecycle. For example, " - Preview". Defaults to True.
+            add_suffix: Whether to add a suffix based on the lifecycle. For example, " - Preview". Defaults to True.
 
         Raises:
             MissingMetadataError: if required metadata is missing
@@ -359,6 +362,16 @@ class ImageryCollection:
                 ]
                 if value is not None
             )
+
+        if self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
+            gsd_based_title = ""
+            if self.metadata["gsd"] == 8:
+                gsd_based_title = f" 8m"
+            gdal_options_title = ""
+            if self.metadata["category"] == DEM_HILLSHADE_IGOR:
+                gdal_options_title = " - Igor"
+            return f"New Zealand{gsd_based_title} DEM Hillshade{gdal_options_title}"
+
         raise SubtypeParameterError(self.metadata["category"])
 
     def _description(self) -> str:
@@ -367,6 +380,9 @@ class ImageryCollection:
           Orthophotography within the [Region] region captured in the [year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
+        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
+          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
+          Gaps filled with lower resolution elevation data (8m contour) as needed.
         Satellite Imagery / Scanned Aerial Photos:
           [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
 
@@ -391,6 +407,24 @@ class ImageryCollection:
             desc = f"Digital Elevation Model within the {region} region captured in {date}"
         elif self.metadata["category"] == DSM:
             desc = f"Digital Surface Model within the {region} region captured in {date}"
+        elif self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
+            gsd_based_desc = "New Zealand Contour-Derived 8m DEM"
+            if self.metadata["gsd"] != 8:
+                gsd_based_desc = (
+                    f"New Zealand LiDAR {self.metadata["gsd"]}m DEM and {gsd_based_desc} "
+                    f"(where no {self.metadata["gsd"]}m DEM data exists)"
+                )
+
+            gdal_options_desc = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
+            if self.metadata["category"] == DEM_HILLSHADE_IGOR:
+                gdal_options_desc = (
+                    "the -igor option in GDAL. This renders a softer hillshade that tries to "
+                    "minimize effects on other map features"
+                )
+
+            desc = f"Hillshade generated from the {gsd_based_desc} using {gdal_options_desc}"
+
+        # elif self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
         else:
             raise SubtypeParameterError(self.metadata["category"])
 

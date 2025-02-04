@@ -46,6 +46,8 @@ SATELLITE_IMAGERY = "satellite-imagery"
 URBAN_AERIAL_PHOTOS = "urban-aerial-photos"
 DEM = "dem"
 DSM = "dsm"
+DEM_HILLSHADE = "dem-hillshade"
+DEM_HILLSHADE_IGOR = "dem-hillshade-igor"
 
 DATA_CATEGORIES = {
     AERIAL_PHOTOS: "Aerial Photos",
@@ -55,8 +57,9 @@ DATA_CATEGORIES = {
     URBAN_AERIAL_PHOTOS: "Urban Aerial Photos",
     DEM: "DEM",
     DSM: "DSM",
+    DEM_HILLSHADE: "DEM Hillshade",
+    DEM_HILLSHADE_IGOR: "DEM Hillshade Igor",
 }
-
 
 HUMAN_READABLE_REGIONS = {
     "antarctica": "Antarctica",
@@ -79,4 +82,9 @@ HUMAN_READABLE_REGIONS = {
     "waikato": "Waikato",
     "wellington": "Wellington",
     "west-coast": "West Coast",
+}
+
+LIFECYCLE_SUFFIXES = {
+    "preview": "- Preview",
+    "ongoing": "- Draft",
 }
