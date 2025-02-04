@@ -197,19 +197,11 @@ class ImageryCollection:
                 file_content=dict_to_json_bytes(item),
             ).stac
 
-            # Check if the Item to add already exists in the collection
-            exist = False
-            for link in self.stac["links"]:
-                if link["href"] == link_to_add["href"]:
-                    if link["file:checksum"] == link_to_add["file:checksum"]:
-                        exist = True
-                        break
-                    # If the item has been updated, remove the old link
-                    self.stac["links"].remove(link)
-                    break
+            # Remove old link if it exists
+            self.stac["links"] = [link for link in self.stac["links"] if link["href"] != link_to_add["href"]]
+            # Add the new link
+            self.stac["links"].append(link_to_add)
 
-            if not exist:
-                self.stac["links"].append(link_to_add)
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
