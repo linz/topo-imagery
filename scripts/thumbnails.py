@@ -10,8 +10,8 @@ from linz_logger import get_log
 from scripts.files.files_helper import ContentType, get_file_name_from_path, is_tiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal import gdal_helper
+from scripts.gdal.gdal_commands import get_thumbnail_command
 from scripts.gdal.gdal_helper import is_geotiff, run_gdal
-from scripts.gdal.gdal_preset import get_thumbnail_command
 from scripts.logging.time_helper import time_in_ms
 
 
