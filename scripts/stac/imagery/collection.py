@@ -294,85 +294,66 @@ class ImageryCollection:
         geographic_description = self.metadata.get("geographic_description")
         historic_survey_number = self.metadata.get("historic_survey_number")
 
-        # format date for metadata
-        if (start_year := self.metadata["start_datetime"].year) == (end_year := self.metadata["end_datetime"].year):
-            date = str(start_year)
-        else:
-            date = f"{start_year}-{end_year}"
-
-        # determine dataset name
+        # format region
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
-        if geographic_description:
-            imagery_name = geographic_description
-            elevation_description = f"- {geographic_description}"
-        else:
-            imagery_name = region
-            elevation_description = None
 
-        # determine if the dataset title requires a suffix based on its lifecycle
-        lifecycle_suffix = None
-        if add_suffix:
-            if self.metadata.get("lifecycle") == "preview":
-                lifecycle_suffix = "- Preview"
-            elif self.metadata.get("lifecycle") == "ongoing":
-                lifecycle_suffix = "- Draft"
+        # format date
+        start_year = self.metadata["start_datetime"].year
+        end_year = self.metadata["end_datetime"].year
+        date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
 
-        if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
+        # format gsd
+        gsd_str = f"{self.metadata['gsd']}{GSD_UNIT}"
+
+        # determine suffix based on its lifecycle
+        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.metadata.get("lifecycle", "")) if add_suffix else None
+
+        category = self.metadata["category"]
+
+        if category == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
-            return " ".join(
-                value
-                for value in [
-                    imagery_name,
-                    f"{self.metadata['gsd']}{GSD_UNIT}",
-                    historic_survey_number,
-                    f"({date})",
-                    lifecycle_suffix,
-                ]
-                if value is not None
-            )
+            components = [
+                geographic_description or region,
+                gsd_str,
+                historic_survey_number,
+                date,
+                lifecycle_suffix,
+            ]
 
-        if self.metadata["category"] in [
-            SATELLITE_IMAGERY,
-            URBAN_AERIAL_PHOTOS,
-            RURAL_AERIAL_PHOTOS,
-        ]:
-            return " ".join(
-                value
-                for value in [
-                    imagery_name,
-                    f"{self.metadata['gsd']}{GSD_UNIT}",
-                    DATA_CATEGORIES[self.metadata["category"]],
-                    f"({date})",
-                    lifecycle_suffix,
-                ]
-                if value is not None
-            )
-        if self.metadata["category"] in [DEM, DSM]:
-            return " ".join(
-                value
-                for value in [
-                    region,
-                    elevation_description,
-                    "LiDAR",
-                    f"{self.metadata['gsd']}{GSD_UNIT}",
-                    DATA_CATEGORIES[self.metadata["category"]],
-                    f"({date})",
-                    lifecycle_suffix,
-                ]
-                if value is not None
-            )
+        elif category in {SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
+            components = [
+                geographic_description or region,
+                gsd_str,
+                DATA_CATEGORIES[category],
+                date,
+                lifecycle_suffix,
+            ]
 
-        if self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
-            gsd_based_title = ""
-            if self.metadata["gsd"] == 8:
-                gsd_based_title = f" 8m"
-            gdal_options_title = ""
-            if self.metadata["category"] == DEM_HILLSHADE_IGOR:
-                gdal_options_title = " - Igor"
-            return f"New Zealand{gsd_based_title} DEM Hillshade{gdal_options_title}"
+        elif category in {DEM, DSM}:
+            components = [
+                region,
+                "-" if geographic_description else None,
+                geographic_description,
+                "LiDAR",
+                gsd_str,
+                DATA_CATEGORIES[category],
+                date,
+                lifecycle_suffix,
+            ]
 
-        raise SubtypeParameterError(self.metadata["category"])
+        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR}:
+            components = [
+                region,
+                gsd_str if self.metadata["gsd"] == 8 else None,
+                "DEM Hillshade",
+                "- Igor" if category == DEM_HILLSHADE_IGOR else None,
+            ]
+
+        else:
+            raise SubtypeParameterError(self.metadata["category"])
+
+        return " ".join(filter(None, components))
 
     def _description(self) -> str:
         """Generates the descriptions for imagery and elevation datasets.
@@ -389,49 +370,66 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
-        # format date for metadata
-        if (start_year := self.metadata["start_datetime"].year) == (end_year := self.metadata["end_datetime"].year):
-            date = str(start_year)
-        else:
-            date = f"{start_year}-{end_year}"
+        # format date
+        start_year = self.metadata["start_datetime"].year
+        end_year = self.metadata["end_datetime"].year
+        date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
 
+        # format region
         region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
 
-        if self.metadata["category"] == SCANNED_AERIAL_PHOTOS:
-            desc = f"Scanned aerial imagery within the {region} region captured in {date}"
-        elif self.metadata["category"] == SATELLITE_IMAGERY:
-            desc = f"Satellite imagery within the {region} region captured in {date}"
-        elif self.metadata["category"] in [URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS]:
-            desc = f"Orthophotography within the {region} region captured in the {date} flying season"
-        elif self.metadata["category"] == DEM:
-            desc = f"Digital Elevation Model within the {region} region captured in {date}"
-        elif self.metadata["category"] == DSM:
-            desc = f"Digital Surface Model within the {region} region captured in {date}"
-        elif self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
-            gsd_based_desc = "New Zealand Contour-Derived 8m DEM"
-            if self.metadata["gsd"] != 8:
-                gsd_based_desc = (
-                    f"New Zealand LiDAR {self.metadata["gsd"]}m DEM and {gsd_based_desc} "
-                    f"(where no {self.metadata["gsd"]}m DEM data exists)"
-                )
+        category = self.metadata["category"]
+        if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
+            date = f"the {date} flying season"
 
-            gdal_options_desc = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
-            if self.metadata["category"] == DEM_HILLSHADE_IGOR:
-                gdal_options_desc = (
-                    "the -igor option in GDAL. This renders a softer hillshade that tries to "
-                    "minimize effects on other map features"
-                )
+        base_descriptions = {
+            SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
+            SATELLITE_IMAGERY: "Satellite imagery",
+            URBAN_AERIAL_PHOTOS: "Orthophotography",
+            RURAL_AERIAL_PHOTOS: "Orthophotography",
+            DEM: "Digital Elevation Model",
+            DSM: "Digital Surface Model",
+        }
 
-            desc = f"Hillshade generated from the {gsd_based_desc} using {gdal_options_desc}"
-
-        # elif self.metadata["category"] in [DEM_HILLSHADE, DEM_HILLSHADE_IGOR]:
+        if category in base_descriptions:
+            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
+        elif category.startswith(DEM_HILLSHADE):
+            desc = self._hillshade_description()
         else:
-            raise SubtypeParameterError(self.metadata["category"])
+            raise SubtypeParameterError(category)
 
         if event := self.metadata.get("event_name"):
-            desc = desc + f", published as a record of the {event} event"
+            desc = f"{desc}, published as a record of the {event} event."
+        else:
+            desc = f"{desc}."
 
-        return desc + "."
+        return desc
+
+    def _hillshade_description(self) -> str:
+        """Generates the description for hillshade datasets."""
+
+        region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
+        category = self.metadata["category"]
+        gsd_str = f"{self.metadata["gsd"]}{GSD_UNIT}"
+
+        if category == DEM_HILLSHADE_IGOR:
+            shading_option = (
+                "the -igor option in GDAL. "
+                "This renders a softer hillshade that tries to minimize effects on other map features"
+            )
+        else:
+            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
+
+        compontents = [
+            "Hillshade generated from the",
+            f"{region} LiDAR {gsd_str} DEM and" if gsd_str != "8m" else None,
+            f"{region} Contour-Derived 8m DEM",
+            f"(where no {self.metadata["gsd"]}m DEM data exists)" if gsd_str != "8m" else None,
+            "using",
+            shading_option,
+        ]
+
+        return " ".join(filter(None, compontents))
 
 
 GSD_UNIT = "m"
