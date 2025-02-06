@@ -1,5 +1,22 @@
 # Changelog
 
+## [7.2.0](https://github.com/linz/topo-imagery/compare/v7.1.1...v7.2.0) (2025-02-06)
+
+
+### Features
+
+* generate hillshade TDE-1369 ([#1253](https://github.com/linz/topo-imagery/issues/1253)) ([e4f2bc4](https://github.com/linz/topo-imagery/commit/e4f2bc40bb4c41fa9b8b99918c996384a5cd9198))
+
+
+### Bug Fixes
+
+* deprecated artifact action TDE-1379 ([#1258](https://github.com/linz/topo-imagery/issues/1258)) ([7b0f43a](https://github.com/linz/topo-imagery/commit/7b0f43aec1340b4ac877d6a2983cc452faa90cc5))
+
+
+### Documentation
+
+* update cog-quality link ([#1256](https://github.com/linz/topo-imagery/issues/1256)) ([fbf92be](https://github.com/linz/topo-imagery/commit/fbf92be5d1fc47a5056360a802467f3fcefd26c8))
+
 ## [7.1.1](https://github.com/linz/topo-imagery/compare/v7.1.0...v7.1.1) (2024-12-18)
 
 
