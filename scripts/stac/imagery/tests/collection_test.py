@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from decimal import Decimal
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -9,6 +10,7 @@ from boto3 import client
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
+from pytest import mark
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
@@ -59,6 +61,70 @@ def test_title_description_id_created_on_init(
 
     with subtests.test():
         assert collection.stac["linz:geospatial_category"] == "rural-aerial-photos"
+
+
+@mark.parametrize(
+    "category, gsd, expected_title, expected_description",
+    [
+        (
+            "dem-hillshade",
+            Decimal(8),
+            "New Zealand 8m DEM Hillshade",
+            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using GDAL’s "
+            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+        ),
+        (
+            "dem-hillshade-igor",
+            Decimal(8),
+            "New Zealand 8m DEM Hillshade - Igor",
+            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using the -igor option in GDAL. "
+            "This renders a softer hillshade that tries to minimize effects on other map features.",
+        ),
+        (
+            "dem-hillshade",
+            Decimal(1),
+            "New Zealand DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM and New Zealand Contour-Derived 8m DEM (where no "
+            "1m DEM data exists) using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+        ),
+        (
+            "dem-hillshade-igor",
+            Decimal(1),
+            "New Zealand DEM Hillshade - Igor",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM and New Zealand Contour-Derived 8m DEM (where no "
+            "1m DEM data exists) using the -igor option in GDAL. This renders a softer hillshade that tries to "
+            "minimize effects on other map features.",
+        ),
+        (
+            "dem-hillshade",
+            Decimal(0.25),
+            "New Zealand DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 0.25m DEM and New Zealand Contour-Derived 8m DEM (where no "
+            "0.25m DEM data exists) using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+        ),
+    ],
+)
+def test_hillshade_title_and_description(
+    fake_collection_metadata: CollectionMetadata,
+    fake_linz_slug: str,
+    subtests: SubTests,
+    category: str,
+    gsd: Decimal,
+    expected_title: str,
+    expected_description: str,
+) -> None:
+    fake_collection_metadata["region"] = "new-zealand"
+    fake_collection_metadata["category"] = category
+    fake_collection_metadata["gsd"] = gsd
+    collection = ImageryCollection(
+        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
+    )
+
+    with subtests.test(msg=f"{gsd}m DEM Hillshade Title"):
+        assert collection.stac["title"] == expected_title
+
+    with subtests.test(msg=f"{gsd}m DEM Hillshade Description"):
+        assert collection.stac["description"] == expected_description
 
 
 def test_id_parsed_on_init(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
