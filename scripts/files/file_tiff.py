@@ -1,5 +1,4 @@
 import json
-import os
 from decimal import Decimal
 from enum import Enum
 from typing import Any
@@ -30,7 +29,6 @@ class FileTiff:
         self,
         paths: list[str],
         preset: str | None = None,
-        include_derived: bool = False,
     ) -> None:
         paths_original = []
         for p in paths:
@@ -40,11 +38,6 @@ class FileTiff:
             paths_original.append(unquote(p))
 
         self._paths_original = paths_original
-        self._derived_from_paths = None
-        if include_derived:
-            # Transform the TIFF paths to JSON path to point to STAC Items,
-            # assuming the STAC Items are in the same directory as the TIFF files
-            self._derived_from_paths = [f"{os.path.splitext(path)[0]}.json" for path in paths_original]
 
         self._path_standardised = ""
         self._errors: list[dict[str, Any]] = []
@@ -164,14 +157,6 @@ class FileTiff:
             a list of file path
         """
         return self._paths_original
-
-    def get_derived_from_paths(self) -> list[str] | None:
-        """Get the path(s) of the STAC Items associated to the TIFF files from which the final output is derived.
-
-        Returns:
-            a list of STAC Item JSON file paths or None if not derived from other files.
-        """
-        return self._derived_from_paths
 
     def get_path_standardised(self) -> str:
         """Get the path of the standardised file.
