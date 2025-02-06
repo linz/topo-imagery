@@ -1,44 +1,12 @@
-from enum import Enum
+from pystac import Link, MediaType, RelType
 
 from scripts.stac.util import checksum
-from scripts.stac.util.media_type import StacMediaType
 
 
-class Relation(str, Enum):
-    """https://github.com/radiantearth/stac-spec/blob/master/commons/links.md#hierarchical-relations"""
-
-    SELF = "self"
-    ROOT = "root"
-    PARENT = "parent"
-    COLLECTION = "collection"
-    ITEM = "item"
-    DERIVED_FROM = "derived_from"
-    """ https://github.com/radiantearth/stac-spec/blob/master/best-practices.md#derived-from-relation-derived_from"""
-
-    def __str__(self) -> str:
-        return self.value
-
-
-# pylint: disable=too-few-public-methods
-class Link:
-    """Represents a STAC Link Object (https://github.com/radiantearth/stac-spec/blob/master/commons/links.md#link-object).
-
-    Attributes:
-        path: A string that represents the actual link in the format of an URL.
-        rel: `Relation` that represents the relationship that the link has to the object it will be added to.
-        media_type: `StacMediaType` of the link file.
-        file_content: Optional. The content of the file that will be used to store the checksum in `file:checksum`.
-        It assumes using the STAC `file` extension.
-    """
-
-    stac: dict[str, str]
-
-    def __init__(self, path: str, rel: Relation, media_type: StacMediaType, file_content: bytes | None = None) -> None:
-        self.stac = {
-            "href": path,
-            "rel": str(rel),
-            "type": str(media_type),
-        }
-
-        if file_content:
-            self.stac["file:checksum"] = checksum.multihash_as_hex(file_content)
+def create_link_with_checksum(path: str, rel: RelType, media_type: MediaType, file_content: bytes) -> Link:
+    return Link(
+        target=path,
+        rel=rel,
+        media_type=media_type,
+        extra_fields={"file:checksum": checksum.multihash_as_hex(file_content)},
+    )

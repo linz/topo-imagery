@@ -2,6 +2,7 @@ import os
 from typing import Any
 
 import ulid
+from pystac import MediaType, RelType
 from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
@@ -23,10 +24,9 @@ from scripts.stac.imagery.metadata_constants import (
     SubtypeParameterError,
 )
 from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
-from scripts.stac.link import Link, Relation
+from scripts.stac.link import create_link_with_checksum
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
-from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
@@ -166,12 +166,12 @@ class ImageryCollection:
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
             self.stac["links"].append(
-                Link(
+                create_link_with_checksum(
                     path=item_self_link["href"],
-                    rel=Relation.ITEM,
-                    media_type=StacMediaType.GEOJSON,
+                    rel=RelType.ITEM,
+                    media_type=MediaType.GEOJSON,
                     file_content=dict_to_json_bytes(item),
-                ).stac
+                ).to_dict()
             )
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
