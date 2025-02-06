@@ -30,7 +30,7 @@ The scripts have been implemented to be run inside the Docker container only. Th
 docker build --tag=topo-imagery .
 ```
 
-- Running `standardising_validate.py` script
+- Example: running `standardising_validate.py` script
 
 This script standardises TIFF files to [COGs](https://www.cogeo.org/) with a creation of a [STAC](https://stacspec.org/) Item file per TIFF containing the metadata.
 The input TIFF file paths have to be passed through a `json` file in the following format:
