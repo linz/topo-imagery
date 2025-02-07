@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from linz_logger import get_log
 
@@ -22,6 +23,15 @@ def str_to_bool(value: str) -> bool:
     if value == "false":
         return False
     raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
+
+
+def str_to_list_or_none(values: str) -> list[Decimal] | None:
+    if values is None or values == "":
+        return None
+    result = [Decimal(val) for val in values.split(",")]
+    if len(result) != 2:
+        raise argparse.ArgumentTypeError(f"Invalid list (must be blank or exactly 2 values): {values}")
+    return result
 
 
 def parse_args() -> argparse.Namespace:
@@ -78,6 +88,14 @@ def parse_args() -> argparse.Namespace:
         ),
         required=False,
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
+    )
+    parser.add_argument(
+        "--scale-to-resolution",
+        dest="scale_to_resolution",
+        type=str_to_list_or_none,
+        nargs="?",
+        help="Scale to x,y resolution (leave blank for no scaling)",
+        required=False,
     )
     return parser.parse_args()
 
@@ -140,6 +158,7 @@ def main() -> None:
         arguments.create_footprints,
         gdal_version,
         arguments.target,
+        arguments.scale_to_resolution,
     )
 
     if len(tiff_files) == 0:

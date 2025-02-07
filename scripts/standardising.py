@@ -39,6 +39,7 @@ def run_standardising(
     create_footprints: bool,
     gdal_version: str,
     target_output: str = "/tmp/",
+    scale_to_resolution: list[Decimal] | None = None,
 ) -> list[FileTiff]:
     """Run `standardising()` in parallel (`concurrency`).
 
@@ -52,6 +53,8 @@ def run_standardising(
         gsd: Ground Sample Distance in meters
         gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
+        scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
+
 
     Returns:
         a list of FileTiff wrapper
@@ -74,6 +77,7 @@ def run_standardising(
                     gsd=gsd,
                     create_footprints=create_footprints,
                     cutline=cutline,
+                    scale_to_resolution=scale_to_resolution,
                 ),
                 todo,
             )
@@ -96,7 +100,7 @@ def create_vrt(
         source_tiffs: list of tiffs to create the VRT from
         target_path: path of the generated VRT
         add_alpha: add alpha band to the VRT. Defaults to False.
-        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]
+        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
     Returns:
         the path to the VRT created
@@ -109,6 +113,7 @@ def create_vrt(
 
 # pylint: disable-msg=too-many-locals
 # pylint: disable-msg=too-many-statements
+# pylint: disable-msg=too-many-arguments
 def standardising(
     files: TileFiles,
     preset: str,
@@ -118,6 +123,7 @@ def standardising(
     create_footprints: bool,
     cutline: str | None,
     target_output: str = "/tmp/",
+    scale_to_resolution: list[Decimal] | None = None,
 ) -> FileTiff | None:
     """Apply transformations using GDAL to the source file and create a footprint sidecar file.
 
@@ -129,6 +135,7 @@ def standardising(
         gsd: Ground Sample Distance in meters
         cutline: path to the cutline. Must be `.fgb` or `.geojson`
         target_output: output directory path. Defaults to "/tmp/"
+        scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
 
     Raises:
         Exception: if cutline is not a .fgb or .geojson file
@@ -142,7 +149,6 @@ def standardising(
     footprint_file_path = os.path.join(target_output, footprint_file_name)
     tiff = FileTiff(files.inputs, preset, files.includeDerived)
     tiff.set_path_standardised(standardized_file_path)
-    resolution = [gsd, gsd]
 
     # Already proccessed can skip processing
     if exists(standardized_file_path):
@@ -173,7 +179,7 @@ def standardising(
                 vrt_add_alpha = False
 
         # Start from base VRT
-        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha, resolution=resolution)
+        input_file = create_vrt(source_tiffs, tmp_path, add_alpha=vrt_add_alpha, resolution=scale_to_resolution)
 
         # Apply cutline
         if cutline:

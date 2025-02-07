@@ -84,7 +84,7 @@ def get_build_vrt_command(
         files: list of tiffs to build the vrt from
         output: the name of the VRT generated. Defaults to "output.vrt".
         add_alpha: use `-addalpha`. Defaults to False.
-        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]
+        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
     Returns:
         The GDAL command to build the VRT.
