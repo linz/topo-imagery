@@ -1,13 +1,14 @@
 import json
 import os
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 from linz_logger import get_log
+from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import NoSuchFileError, read
+from scripts.files.fs import NoSuchFileError, exists, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
@@ -24,6 +25,7 @@ JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
 def create_collection(
     collection_id: str,
     linz_slug: str,
@@ -58,19 +60,24 @@ def create_collection(
     Returns:
         an ImageryCollection object
     """
-    existing_collection = {}
     if odr_url:
-        existing_collection = get_published_file_contents(odr_url, "collection")
-
-    collection = ImageryCollection(
-        metadata=collection_metadata,
-        created_datetime=cast(str, existing_collection.get("created", current_datetime)),
-        updated_datetime=current_datetime,
-        linz_slug=linz_slug,
-        collection_id=collection_id,
-        providers=get_providers(licensors, producers),
-        add_title_suffix=add_title_suffix,
-    )
+        collection = ImageryCollection.from_file(
+            os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
+        )
+        capture_area_path = os.path.join(odr_url, "capture-area.geojson")
+        if exists(capture_area_path):
+            capture_area = json.loads(read(capture_area_path))
+            item_polygons.append(shape(capture_area["geometry"]))
+    else:
+        collection = ImageryCollection(
+            metadata=collection_metadata,
+            created_datetime=current_datetime,
+            updated_datetime=current_datetime,
+            linz_slug=linz_slug,
+            collection_id=collection_id,
+            providers=get_providers(licensors, producers),
+            add_title_suffix=add_title_suffix,
+        )
 
     for item in stac_items:
         collection.add_item(item)
@@ -212,7 +219,3 @@ def create_or_load_base_item(
     )
 
     return ImageryItem(id_, stac_asset, stac_processing)
-
-
-def get_published_file_contents(odr_url: str, filename: str) -> JSON_Dict:
-    return cast(JSON_Dict, json.loads(read(os.path.join(odr_url, f"{filename}.json")).decode("UTF-8")))

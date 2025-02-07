@@ -258,6 +258,7 @@ def test_create_collection_resupply(
         "type": "Collection",
         "stac_version": STAC_VERSION,
         "id": collection_id,
+        "linz:slug": fake_linz_slug,
         "created": created_datetime_string,
         "updated": created_datetime_string,
     }
@@ -285,6 +286,85 @@ def test_create_collection_resupply(
 
     with subtests.test("updated datetime"):
         assert collection.stac["updated"] == updated_datetime_string
+
+
+def test_create_collection_resupply_add_items(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, tmp_path: Path
+) -> None:
+    collection_id = "test_collection"
+    created_datetime = any_epoch_datetime()
+    created_datetime_string = format_rfc_3339_datetime_string(created_datetime)
+    existing_item_link = {
+        "rel": "item",
+        "href": "./item_a.json",
+        "type": "application/geo+json",
+        "file:checksum": "1220559708896b75aebab2bbadbc184f6b9ce22708adbb725e93bf3f08a38d2bc71e",
+    }
+
+    existing_collection_content = {
+        "type": "Collection",
+        "stac_version": STAC_VERSION,
+        "id": collection_id,
+        "linz:slug": fake_linz_slug,
+        "links": [
+            {
+                "rel": "root",
+                "href": "https://nz-imagery.s3.ap-southeast-2.amazonaws.com/catalog.json",
+                "type": "application/json",
+            },
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
+            existing_item_link,
+        ],
+        "created": created_datetime_string,
+        "updated": created_datetime_string,
+    }
+    existing_collection_path = tmp_path / "collection.json"
+    existing_collection_path.write_text(json.dumps(existing_collection_content))
+
+    item_to_add = {
+        "type": "Feature",
+        "id": "item_b",
+        "links": [
+            {"href": "./item_b.json", "rel": "self", "type": "application/geo+json"},
+            {"href": "./collection.json", "rel": "collection", "type": "application/json"},
+            {"href": "./collection.json", "rel": "parent", "type": "application/json"},
+        ],
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "bbox": [171.8256487, -34.3559317, 172.090076, -34.0291036],
+    }
+
+    item_to_add_link = {
+        "rel": "item",
+        "href": "./item_b.json",
+        "type": "application/geo+json",
+        "file:checksum": "12203040c94dda3807c4430b312e9b400604188a639f22cc8067136084662fc2618d",
+    }
+
+    updated_datetime_string = format_rfc_3339_datetime_string(created_datetime + timedelta(days=1))
+
+    collection = create_collection(
+        collection_id=collection_id,
+        linz_slug=fake_linz_slug,
+        collection_metadata=fake_collection_metadata,
+        current_datetime=updated_datetime_string,
+        producers=[],
+        licensors=[],
+        stac_items=[item_to_add],
+        item_polygons=[],
+        add_capture_dates=False,
+        uri="test",
+        odr_url=tmp_path.as_posix(),
+    )
+
+    with subtests.test("created datetime"):
+        assert collection.stac["created"] == existing_collection_content["created"]
+
+    with subtests.test("updated datetime"):
+        assert collection.stac["updated"] == updated_datetime_string
+
+    with subtests.test("links"):
+        assert item_to_add_link in collection.stac["links"]
+        assert existing_item_link in collection.stac["links"]
 
 
 def test_create_item_with_odr_url(tmp_path: Path) -> None:
