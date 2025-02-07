@@ -3,6 +3,7 @@ import os
 from typing import Any, TypeAlias, cast
 
 from linz_logger import get_log
+from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
@@ -62,6 +63,8 @@ def create_collection(
         collection = ImageryCollection.from_file(
             os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
         )
+        capture_area = json.loads(read(os.path.join(odr_url, "capture-area.geojson")))
+        item_polygons.append(shape(capture_area["geometry"]))
     else:
         collection = ImageryCollection(
             metadata=collection_metadata,
