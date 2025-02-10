@@ -121,7 +121,7 @@ def get_alpha_command() -> list[str]:
     ]
 
 
-def get_transform_srs_command(source_epsg: str, target_epsg: str) -> list[str]:
+def get_transform_srs_command(source_epsg: int, target_epsg: int) -> list[str]:
     """Get a `gdalwarp` command to transform the srs.
 
     Args:

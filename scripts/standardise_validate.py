@@ -14,7 +14,7 @@ from scripts.files.fs import exists, write
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.create_stac import create_item
-from scripts.standardising import run_standardising
+from scripts.standardising import StandardisingConfig, run_standardising
 
 
 def str_to_bool(value: str) -> bool:
@@ -30,7 +30,7 @@ def str_to_list_or_none(values: str) -> list[Decimal] | None:
         return None
     result = [Decimal(val) for val in values.split(",")]
     if len(result) != 2:
-        raise argparse.ArgumentTypeError(f"Invalid list (must be blank or exactly 2 values): {values}")
+        raise argparse.ArgumentTypeError(f"Invalid list - must be blank or exactly 2 values x,y. Received: {values}")
     return result
 
 
@@ -49,10 +49,13 @@ def parse_args() -> argparse.Namespace:
         ),
         required=False,
     )
-    parser.add_argument("--source-epsg", dest="source_epsg", required=True, help="The EPSG code of the source imagery")
+    parser.add_argument(
+        "--source-epsg", dest="source_epsg", type=int, required=True, help="The EPSG code of the source imagery"
+    )
     parser.add_argument(
         "--target-epsg",
         dest="target_epsg",
+        type=int,
         required=True,
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
@@ -124,6 +127,16 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 def main() -> None:
     arguments = parse_args()
 
+    standardising_config = StandardisingConfig(
+        gdal_preset=arguments.preset,
+        source_epsg=arguments.source_epsg,
+        target_epsg=arguments.target_epsg,
+        gsd=arguments.gsd,
+        create_footprints=arguments.create_footprints,
+        cutline=arguments.cutline,
+        scale_to_resolution=arguments.scale_to_resolution,
+    )
+
     try:
         tile_files = load_input_files(arguments.from_file)
     except InputParameterError as e:
@@ -149,16 +162,10 @@ def main() -> None:
 
     tiff_files = run_standardising(
         tile_files,
-        arguments.preset,
-        arguments.cutline,
+        standardising_config,
         concurrency,
-        arguments.source_epsg,
-        arguments.target_epsg,
-        arguments.gsd,
-        arguments.create_footprints,
         gdal_version,
         arguments.target,
-        arguments.scale_to_resolution,
     )
 
     if len(tiff_files) == 0:
