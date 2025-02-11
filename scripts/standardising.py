@@ -52,11 +52,11 @@ class StandardisingConfig:
         if self.cutline is not None and not self.cutline.endswith((".fgb", ".geojson")):
             raise ValueError(f"Only .fgb or .geojson cutlines are supported: {self.cutline}")
         if self.scale_to_resolution is not None and len(self.scale_to_resolution) != 2:
-            raise ValueError(f"Scale_to_resolution must be exactly two items [xres, yres]: {self.scale_to_resolution}")
+            raise ValueError(f"scale_to_resolution must be exactly two items [xres, yres]: {self.scale_to_resolution}")
 
 
 def run_standardising(
-    files_to_process: list[TileFiles],
+    tiles_to_process: list[TileFiles],
     standardising_config: StandardisingConfig,
     concurrency: int,
     gdal_version: str,
@@ -65,7 +65,7 @@ def run_standardising(
     """Run `standardising()` in parallel (`concurrency`).
 
     Args:
-        files_to_process: list of TileFiles (tile name and input files) to standardise
+        tiles_to_process: list of TileFiles (tile name and input files) to standardise
         standardising_config: a StandardisingConfig dictionary, containing
             gdal_preset: gdal preset to use. See `gdal.gdal_preset.py`
             source_epsg: current EPSG code of the source file
@@ -84,7 +84,7 @@ def run_standardising(
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
 
-    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(files_to_process))
+    get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(tiles_to_process))
 
     with Pool(concurrency) as p:
         standardized_tiffs = [
@@ -95,7 +95,7 @@ def run_standardising(
                     config=standardising_config,
                     target_output=target_output,
                 ),
-                files_to_process,
+                tiles_to_process,
             )
             if entry is not None
         ]
@@ -167,8 +167,8 @@ def standardising(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
 
-        # Handle sidecar files and copy source TIFFs to tmp_path
-        generate_prj_tfw_sidecars(tiff, f"{tmp_path}/source/")
+        # Copy source TIFFs and any .prj or .tfw sidecar files to tmp_path
+        get_prj_tfw_sidecars(tiff, f"{tmp_path}/source/")
         source_files = write_all(tiff.get_paths_original(), f"{tmp_path}/source/")
 
         # Determine if VRT needs alpha
@@ -212,8 +212,8 @@ def standardising(
     return tiff
 
 
-def generate_prj_tfw_sidecars(tiff: FileTiff, target_path: str) -> list[str]:
-    """Generate sidecar files (prj, tfw) for the TIFF files."""
+def get_prj_tfw_sidecars(tiff: FileTiff, target_path: str) -> list[str]:
+    """Get any .prj and .tfw sidecar files that have the same basename as the TIFF file."""
     sidecars = [
         f"{os.path.splitext(file_input)[0]}{extension}"
         for extension in [".prj", ".tfw"]
@@ -300,7 +300,7 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
 
 
 def check_tiff_empty(current_working_file: str) -> bool:
-    """Validate if the TIFF output is empty."""
+    """Check whether the TIFF output is empty."""
     with TiffFile(current_working_file) as file_handle:
         return all(tile_byte_count == 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value)
 

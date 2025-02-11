@@ -26,9 +26,9 @@ def str_to_bool(value: str) -> bool:
 
 
 def str_to_list_or_none(values: str) -> list[Decimal] | None:
-    if values is None or values == "":
+    if not values:
         return None
-    result = [Decimal(val) for val in values.split(",")]
+    result = [Decimal(value) for value in values.split(",")]
     if len(result) != 2:
         raise argparse.ArgumentTypeError(f"Invalid list - must be blank or exactly 2 values x,y. Received: {values}")
     return result
@@ -160,13 +160,7 @@ def main() -> None:
 
     gdal_version = os.environ["GDAL_VERSION"]
 
-    tiff_files = run_standardising(
-        tile_files,
-        standardising_config,
-        concurrency,
-        gdal_version,
-        arguments.target,
-    )
+    tiff_files = run_standardising(tile_files, standardising_config, concurrency, gdal_version, arguments.target)
 
     if len(tiff_files) == 0:
         get_log().info("no_tiff_to_process", action="standardise_validate", reason="skipped")
