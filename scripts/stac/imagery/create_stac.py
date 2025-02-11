@@ -7,11 +7,12 @@ from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
-from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import NoSuchFileError, exists, read
+from scripts.files.files_helper import ContentType, get_file_name_from_path
+from scripts.files.fs import NoSuchFileError, read, write
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
@@ -64,10 +65,7 @@ def create_collection(
         collection = ImageryCollection.from_file(
             os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
         )
-        capture_area_path = os.path.join(odr_url, "capture-area.geojson")
-        if exists(capture_area_path):
-            capture_area = json.loads(read(capture_area_path))
-            item_polygons.append(shape(capture_area["geometry"]))
+
     else:
         collection = ImageryCollection(
             metadata=collection_metadata,

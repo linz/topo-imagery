@@ -3,11 +3,13 @@ import os
 from typing import Any
 
 import ulid
+from shapely import to_geojson
+from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import read, write
+from scripts.files.fs import exists, read, write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
@@ -36,6 +38,8 @@ CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 
 class ImageryCollection:
     stac: dict[str, Any]
+    capture_area: dict[str, Any] | None = None
+    published_location: str | None = None
 
     def __init__(
         self,
@@ -115,10 +119,17 @@ class ImageryCollection:
         # Override STAC from the original collection
         collection.stac = stac_from_file
 
+        collection.published_location = os.path.dirname(file_name)
+        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+        # Some published datasets may not have a capture-area.geojson file (TDE-988)
+        if exists(capture_area_path):
+            collection.capture_area = json.loads(read(capture_area_path))
+
         return collection
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
+        If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
@@ -127,7 +138,9 @@ class ImageryCollection:
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
-
+        # If published dataset update, merge the existing capture area with the new one
+        if self.capture_area:
+            polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, self.metadata["gsd"])
         capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
@@ -184,6 +197,8 @@ class ImageryCollection:
 
     def add_item(self, item: dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
+        If updating an existing Collection, if the Item already existed in the Collection, it will be removed and replaced.
+        The capture area will be updated if the Item already existed in the Collection.
 
         Args:
             item: STAC Item to add
@@ -196,6 +211,18 @@ class ImageryCollection:
                 media_type=StacMediaType.GEOJSON,
                 file_content=dict_to_json_bytes(item),
             ).stac
+
+            # Remove existing item from the capture-area
+            existing_item = next((link for link in self.stac["links"] if link["href"] == link_to_add["href"]), None)
+            if existing_item and self.capture_area and self.published_location:
+                existing_item_stac = json.loads(
+                    read(os.path.join(self.published_location, os.path.basename(existing_item["href"])))
+                )
+                existing_item_geometry = shape(existing_item_stac["geometry"])
+                capture_area_geometry = shape(self.capture_area["geometry"])
+                updated_capture_area_geometry = capture_area_geometry.difference(existing_item_geometry)
+
+                self.capture_area["geometry"] = json.loads(to_geojson(updated_capture_area_geometry))
 
             # Remove old link if it exists
             self.stac["links"] = [link for link in self.stac["links"] if link["href"] != link_to_add["href"]]
