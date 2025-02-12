@@ -3,18 +3,21 @@ import os
 from typing import Any, TypeAlias
 
 from linz_logger import get_log
-from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
-from scripts.files.files_helper import ContentType, get_file_name_from_path
-from scripts.files.fs import NoSuchFileError, read, write
+from scripts.files.files_helper import get_file_name_from_path
+from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
+from scripts.stac.imagery.item import (
+    ImageryItem,
+    STACAsset,
+    STACProcessing,
+    STACProcessingSoftware,
+)
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
