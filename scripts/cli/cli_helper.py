@@ -81,6 +81,7 @@ def is_argo() -> bool:
 
 
 def valid_date(s: str) -> datetime | None:
+    print(s)
     if not s:
         return None
     try:

@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd
+from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
@@ -73,11 +73,13 @@ def parse_args() -> argparse.Namespace:
         "--start-datetime",
         dest="start_datetime",
         help="Start datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
     )
     parser.add_argument(
         "--end-datetime",
         dest="end_datetime",
         help="End datetime in format YYYY-MM-DD. Only optional if includeDerived.",
+        type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     parser.add_argument(
