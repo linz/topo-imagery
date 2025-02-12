@@ -49,7 +49,7 @@ class StandardisingConfig:
     scale_to_resolution: list[Decimal] | None = None
 
     def __post_init__(self) -> None:
-        if self.cutline is not None and not self.cutline.endswith((".fgb", ".geojson")):
+        if self.cutline and not self.cutline.endswith((".fgb", ".geojson")):
             raise ValueError(f"Only .fgb or .geojson cutlines are supported: {self.cutline}")
         if self.scale_to_resolution is not None and len(self.scale_to_resolution) != 2:
             raise ValueError(f"scale_to_resolution must be exactly two items [xres, yres]: {self.scale_to_resolution}")
