@@ -12,12 +12,7 @@ from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.item import (
-    ImageryItem,
-    STACAsset,
-    STACProcessing,
-    STACProcessingSoftware,
-)
+from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
