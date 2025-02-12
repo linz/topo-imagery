@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from decimal import Decimal
+
 from linz_logger import get_log
 
 from scripts.gdal.gdal_bands import get_gdal_band_offset
@@ -8,7 +12,8 @@ from scripts.gdal.gdal_presets import (
     DEM_LERC,
     SCALE_254_ADD_NO_DATA,
     WEBP_OVERVIEWS,
-    Preset,
+    CompressionPreset,
+    HillshadePreset,
 )
 from scripts.gdal.gdalinfo import GdalInfo
 
@@ -30,16 +35,16 @@ def get_gdal_command(preset: str, epsg: int) -> list[str]:
     # Force the source projection to an input EPSG
     gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
 
-    if preset == Preset.LZW.value:
+    if preset == CompressionPreset.LZW.value:
         gdal_command.extend(SCALE_254_ADD_NO_DATA)
         gdal_command.extend(COMPRESS_LZW)
         gdal_command.extend(WEBP_OVERVIEWS)
 
-    elif preset == Preset.WEBP.value:
+    elif preset == CompressionPreset.WEBP.value:
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
         gdal_command.extend(WEBP_OVERVIEWS)
 
-    elif preset == Preset.DEM_LERC.value:
+    elif preset == CompressionPreset.DEM_LERC.value:
         gdal_command.extend(DEM_LERC)
 
     return gdal_command
@@ -71,13 +76,16 @@ def get_cutline_command(cutline: str | None) -> list[str]:
     return gdal_command
 
 
-def get_build_vrt_command(files: list[str], output: str = "output.vrt", add_alpha: bool = False) -> list[str]:
+def get_build_vrt_command(
+    files: list[str], output: str = "output.vrt", add_alpha: bool = False, resolution: list[Decimal] | None = None
+) -> list[str]:
     """Build a VRT from a list of tiff files.
 
     Args:
         files: list of tiffs to build the vrt from
         output: the name of the VRT generated. Defaults to "output.vrt".
         add_alpha: use `-addalpha`. Defaults to False.
+        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
     Returns:
         The GDAL command to build the VRT.
@@ -87,6 +95,10 @@ def get_build_vrt_command(files: list[str], output: str = "output.vrt", add_alph
     gdal_command = ["gdalbuildvrt", "-strict", "-allow_projection_difference"]
     if add_alpha:
         gdal_command.append("-addalpha")
+    if resolution is not None:
+        gdal_command.extend(["-resolution", "user", "-tr"])
+        gdal_command.extend(str(xy) for xy in resolution)
+
     gdal_command.append(output)
     gdal_command += files
 
@@ -110,7 +122,7 @@ def get_alpha_command() -> list[str]:
     ]
 
 
-def get_transform_srs_command(source_epsg: str, target_epsg: str) -> list[str]:
+def get_transform_srs_command(source_epsg: int, target_epsg: int) -> list[str]:
     """Get a `gdalwarp` command to transform the srs.
 
     Args:
@@ -195,3 +207,38 @@ def get_ascii_translate_command() -> list[str]:
         "-co",
         "COMPRESS=lzw",
     ]
+
+
+def get_hillshade_command(preset: str) -> list[str]:
+    """Get a `gdaldem` command to create a hillshade based on the provided HillshadePreset.
+
+    Args:
+        preset: a HillshadePreset
+
+    Returns:
+        a `gdaldem` command
+    """
+    gdal_command: list[str] = [
+        "gdaldem",
+        "hillshade",
+        "-compute_edges",
+        "-of",
+        "COG",
+        "-co",
+        "COMPRESS=lerc",
+        "-co",
+        "OVERVIEW_COMPRESS=lerc",
+        "-co",
+        "MAX_Z_ERROR_OVERVIEW=0",
+        "-co",
+        "NUM_THREADS=ALL_CPUS",
+        "-co",
+        "MAX_Z_ERROR=0",
+    ]
+
+    if preset == HillshadePreset.GREYSCALE.value:
+        gdal_command.extend(["-az", "315", "-alt", "45"])
+    elif preset == HillshadePreset.IGOR.value:
+        gdal_command.extend(["-igor"])
+
+    return gdal_command
