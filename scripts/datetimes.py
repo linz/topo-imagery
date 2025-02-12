@@ -31,7 +31,7 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
     try:
         nz_datetime = parser.parse(naive_midnight_datetime_string).replace(tzinfo=nz_tz)
     except parser.ParserError as err:
-        raise Exception(f"Not a valid date: {err}") from err
+        raise Exception(f"Not a valid date FIXME: {err}") from err
 
     utc_tz = tz.gettz("UTC")
     datetime_utc = nz_datetime.astimezone(utc_tz)

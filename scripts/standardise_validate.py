@@ -73,13 +73,11 @@ def parse_args() -> argparse.Namespace:
         "--start-datetime",
         dest="start_datetime",
         help="Start datetime in format YYYY-MM-DD. Only optional if includeDerived.",
-        # type=valid_date,
     )
     parser.add_argument(
         "--end-datetime",
         dest="end_datetime",
         help="End datetime in format YYYY-MM-DD. Only optional if includeDerived.",
-        # type=valid_date,
     )
     parser.add_argument("--target", dest="target", help="Target output", required=True)
     parser.add_argument(
@@ -126,7 +124,7 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 
 def main() -> None:
     arguments = parse_args()
-    print(arguments)
+    print(arguments.start_datetime, arguments.end_datetime)
 
     standardising_config = StandardisingConfig(
         gdal_preset=arguments.preset,
