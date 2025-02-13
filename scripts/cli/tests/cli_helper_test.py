@@ -1,6 +1,9 @@
+from datetime import datetime
+
+from pytest import raises
 from pytest_subtests import SubTests
 
-from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list
+from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list, valid_date
 
 
 def test_get_tile_files(subtests: SubTests) -> None:
@@ -71,3 +74,17 @@ def test_coalesce_nothing() -> None:
     single_item = ""
     coalesced_list = coalesce_multi_single(multi_items, single_item)
     assert coalesced_list == []
+
+
+def test_valid_date_empty_string() -> None:
+    assert valid_date("") is None
+
+
+def test_valid_date_valid_string() -> None:
+    assert isinstance(valid_date("2024-11-21"), datetime)
+
+
+def test_valid_date_invalid_string() -> None:
+    with raises(Exception) as e:
+        valid_date("foo")
+        assert str(e.value) == "not a valid date: foo"
