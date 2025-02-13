@@ -81,13 +81,16 @@ def is_argo() -> bool:
 
 
 def valid_date(s: str) -> datetime | None:
+    print("before")
     print(s)
+    print("after")
     if not s:
+        print("inside if statement")
         return None
     try:
         return parse_rfc_3339_date(s)
     except ValueError as e:
-        msg = f"not a valid date: {s}"
+        msg = f"valid_date: not a valid date: {s}"
         raise argparse.ArgumentTypeError(msg) from e
 
 
