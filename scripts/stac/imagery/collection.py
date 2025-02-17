@@ -215,7 +215,10 @@ class ImageryCollection:
                 file_content=dict_to_json_bytes(item),
             ).stac
 
-            # Remove existing item from the capture-area
+            # Remove existing item geometry from the capture-area:
+            # the item geometry is covering its asset footprint, by removing it
+            # we ensure that if the new footprint changes in a way it's covering less surface
+            # the capture area is updated accordingly
             existing_item = next((link for link in self.stac["links"] if link["href"] == link_to_add["href"]), None)
             if existing_item and self.capture_area and self.published_location:
                 existing_item_stac = json.loads(

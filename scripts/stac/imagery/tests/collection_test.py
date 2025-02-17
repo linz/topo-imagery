@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 from decimal import Decimal
+from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -244,6 +245,115 @@ def test_add_item(fake_collection_metadata: CollectionMetadata, fake_linz_slug: 
             assert item.stac["assets"]["visual"][property_name] == asset_datetimes[property_name]
 
 
+def test_add_existing_item(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, tmp_path: Path
+) -> None:
+    now_string = any_epoch_datetime_string()
+    collection = ImageryCollection(fake_collection_metadata, now_string, now_string, fake_linz_slug)
+    collection.stac["links"].append(
+        {
+            "rel": "item",
+            "href": "./BQ31.json",
+            "type": "application/geo+json",
+        }
+    )
+    collection.stac["links"].append({"rel": "item", "href": "./BQ32.json", "type": "application/geo+json"})
+    collection.stac["start_datetime"] = "2012-12-31T11:00:00Z"
+    collection.stac["end_datetime"] = "2023-04-15T12:00:00Z"
+    collection.published_location = tmp_path.as_posix()
+
+    # capture-area of BQ31 + BQ32
+    collection.capture_area = {
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [174.8593132, -41.1583333],
+                    [174.5733776, -41.1625951],
+                    [174.5811963, -41.4867503],
+                    [174.8685509, -41.4824399],
+                    [175.1558379, -41.4774122],
+                    [175.1451823, -41.1533623],
+                    [174.8593132, -41.1583333],
+                ]
+            ],
+        },
+        "type": "Feature",
+        "properties": {},
+    }
+    asset_datetimes = {
+        "created": any_epoch_datetime_string(),
+        "updated": any_epoch_datetime_string(),
+    }
+    existing_item = ImageryItem(
+        "BQ31",
+        STACAsset(
+            **{
+                "href": "any href",
+                "file:checksum": "any checksum",
+                "created": asset_datetimes["created"],
+                "updated": asset_datetimes["updated"],
+            }
+        ),
+        any_stac_processing(),
+    )
+
+    geometry = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [174.5733776, -41.1625951],
+                [174.5811963, -41.4867503],
+                [174.8685509, -41.4824399],
+                [174.8593132, -41.1583333],
+                [174.5733776, -41.1625951],
+            ]
+        ],
+    }
+    bbox = (174.5733776, -41.4867503, 174.8685509, -41.1583333)
+    existing_item.update_spatial(geometry, bbox)
+    existing_item_path = tmp_path / "BQ31.json"
+    existing_item_path.write_text(json.dumps(existing_item.stac))
+
+    new_item = ImageryItem(
+        "BQ31",
+        STACAsset(
+            **{
+                "href": "any href",
+                "file:checksum": "any checksum",
+                "created": asset_datetimes["created"],
+                "updated": asset_datetimes["updated"],
+            }
+        ),
+        any_stac_processing(),
+    )
+    start_datetime = "2012-12-31T11:00:00Z"
+    end_datetime = "2023-04-15T12:00:00Z"
+    new_item.update_spatial(geometry, bbox)
+    new_item.update_datetime(start_datetime, end_datetime)
+
+    collection.add_item(new_item.stac)
+
+    links = collection.stac["links"].copy()
+
+    with subtests.test(msg="same number of items"):
+        assert len(links) == 3
+
+    with subtests.test(msg="BQ31 has been removed from the original capture-area"):
+        assert collection.capture_area["geometry"] == {
+            "coordinates": [
+                [
+                    [175.1451823, -41.1533623],
+                    [175.1558379, -41.4774122],
+                    [174.8685509, -41.4824399],
+                    [174.8593132, -41.1583333],
+                    [175.1451823, -41.1533623],
+                ]
+            ],
+            "type": "Polygon",
+        }
+
+
 def test_write_collection(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
     target = mkdtemp()
     collectionObj = ImageryCollection(
@@ -431,7 +541,7 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "1220ba57cd77defc7fa72e140f4faa0846e8905ae443de04aef99bf381d4650c17a0",
+            "122034b3784053040f611c1c8f2543d699f252229648fca60200089ff499e53f84d9",
             # geos 3.11 - geos 3.12 as yet untested
         )
 
