@@ -99,4 +99,4 @@ def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: Decimal) -> dic
         duration=time_in_ms() - start_time,
     )
 
-    return to_feature(merged_polygons)
+    return to_feature(merged_polygons.normalize())
