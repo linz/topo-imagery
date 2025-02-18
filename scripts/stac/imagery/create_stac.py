@@ -63,6 +63,8 @@ def create_collection(
         collection = ImageryCollection.from_file(
             os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
         )
+        published_items = collection.get_items_stac()
+        stac_items = prepare_resupply(collection, published_items, stac_items)
 
     else:
         collection = ImageryCollection(
@@ -88,6 +90,52 @@ def create_collection(
         )
 
     return collection
+
+
+def get_items_to_replace(supplied_items: list[dict[str, Any]], published_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Get the items that need to be replaced in the published Collection.
+
+    Args:
+        supplied_items: Items that have been supplied
+        published_items: Items already published
+
+    Returns:
+        a list of Items to replace
+    """
+    published_items_dict = {item["id"]: item for item in published_items}
+    items_to_replace = [
+        published_items_dict[supplied_item["id"]]
+        for supplied_item in supplied_items
+        if supplied_item["id"] in published_items_dict
+    ]
+    return items_to_replace
+
+
+def prepare_resupply(
+    collection: ImageryCollection, published_items: list[dict[str, Any]], supplied_items: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Prepare the STAC Collection for resupply and merge the existing Items with the resupply Items into a single list.
+
+    Args:
+        collection: a published Collection
+        published_items: already published items of the Collection
+        supplied_items: items that have been supplied
+
+    Returns:
+        merged list of Items to add to the Collection
+    """
+    items_to_replace = get_items_to_replace(supplied_items, published_items)
+
+    for item_to_remove in items_to_replace:
+        collection.remove_item_geometry_from_capture_area(item_to_remove)
+        published_items.remove(item_to_remove)
+
+    # Remove all Item links
+    collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
+    # Remove extents so they can be recalculated
+    collection.stac.pop("extent", None)
+
+    return supplied_items + published_items
 
 
 def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:

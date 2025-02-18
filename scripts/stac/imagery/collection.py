@@ -3,6 +3,7 @@ import os
 from typing import Any
 
 import ulid
+from linz_logger import get_log
 from shapely import to_geojson
 from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
@@ -37,6 +38,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
+GSD_UNIT = "m"
 
 
 class ImageryCollection:
@@ -200,8 +202,7 @@ class ImageryCollection:
 
     def add_item(self, item: dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
-        If updating an existing Collection, if the Item already existed in the Collection, it will be removed and replaced.
-        The capture area will be updated if the Item already existed in the Collection.
+        Update the spatial and temporal extent of the `Collection` based on the `Item` bounding box and datetime.
 
         Args:
             item: STAC Item to add
@@ -215,24 +216,6 @@ class ImageryCollection:
                 file_content=dict_to_json_bytes(item),
             ).stac
 
-            # Remove existing item geometry from the capture-area:
-            # the item geometry is covering its asset footprint, by removing it
-            # we ensure that if the new footprint changes in a way it's covering less surface
-            # the capture area is updated accordingly
-            existing_item = next((link for link in self.stac["links"] if link["href"] == link_to_add["href"]), None)
-            if existing_item and self.capture_area and self.published_location:
-                existing_item_stac = json.loads(
-                    read(os.path.join(self.published_location, os.path.basename(existing_item["href"])))
-                )
-                existing_item_geometry = shape(existing_item_stac["geometry"])
-                capture_area_geometry = shape(self.capture_area["geometry"])
-                updated_capture_area_geometry = capture_area_geometry.difference(existing_item_geometry)
-
-                self.capture_area["geometry"] = json.loads(to_geojson(updated_capture_area_geometry))
-
-            # Remove old link if it exists
-            self.stac["links"] = [link for link in self.stac["links"] if link["href"] != link_to_add["href"]]
-            # Add the new link
             self.stac["links"].append(link_to_add)
 
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
@@ -323,6 +306,28 @@ class ImageryCollection:
             self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
             self.stac["extent"]["temporal"]["interval"] = [interval]
+
+    def get_items_stac(self) -> list[dict[str, Any]]:
+        """Get the STAC Items from the Collection.
+
+        Returns:
+            a list of STAC Items
+        """
+        if not self.published_location:
+            get_log().info("Collection is not published.")
+            return []
+        items_stac = []
+        for link in self.stac.get("links", []):
+            if link["rel"] != Relation.ITEM:
+                continue
+            item_path = os.path.join(self.published_location, os.path.basename(link["href"]))
+            if not exists(item_path):
+                # TODO: should we raise an error here?
+                get_log().warn(f"Item not found: {item_path}")
+                continue
+            existing_item_stac = json.loads(read(item_path))
+            items_stac.append(existing_item_stac)
+        return items_stac
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
@@ -490,5 +495,20 @@ class ImageryCollection:
 
         return " ".join(filter(None, compontents))
 
+    def remove_item_geometry_from_capture_area(self, item: dict[str, Any]) -> None:
+        """Remove the geometry of an Item from the capture area of the Collection.
 
-GSD_UNIT = "m"
+        Args:
+            item: an Item to remove from the capture area
+        """
+        if not self.capture_area:
+            get_log().warn(
+                "No capture area found",
+                action="remove_item_geometry_from_capture_area",
+                reason="skip",
+            )
+            return
+        item_geometry = shape(item["geometry"])
+        capture_area_geometry = shape(self.capture_area["geometry"])
+        updated_capture_area_geometry = capture_area_geometry.difference(item_geometry)
+        self.capture_area["geometry"] = json.loads(to_geojson(updated_capture_area_geometry))
