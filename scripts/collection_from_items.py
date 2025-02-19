@@ -103,7 +103,6 @@ def parse_args(args: List[str] | None) -> Namespace:
         help="Add a capture-dates.geojson.gz file to the collection assets",
         type=str_to_bool,
         required=False,
-        default=False,
     )
     parser.add_argument(
         "--add-title-suffix",
@@ -111,7 +110,6 @@ def parse_args(args: List[str] | None) -> Namespace:
         help="Add a title suffix to the collection title based on the lifecycle. For example, '[TITLE] - Preview'",
         type=str_to_bool,
         required=False,
-        default=False,
     )
     parser.add_argument(
         "--current-datetime",
@@ -131,7 +129,6 @@ def parse_args(args: List[str] | None) -> Namespace:
 def main(args: List[str] | None = None) -> None:
     start_time = time_in_ms()
     arguments = parse_args(args)
-    print("capture dates:", arguments.capture_dates)
     uri = arguments.uri
     collection_id = arguments.collection_id
 
