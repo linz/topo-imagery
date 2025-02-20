@@ -64,9 +64,11 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
     union_simplified = union_unbuffered.simplify(buffer_distance)
     union_rounded = wkt.loads(wkt.dumps(union_simplified, rounding_precision=8))
+    # Normalize the geometry in order to have consistent geometry
+    # when existing geometry is being modified but not "changed".
     # Apply right-hand rule winding order (exterior rings should be counter-clockwise) to the geometry
     # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
-    oriented_union_simplified = orient(union_rounded, sign=1.0)
+    oriented_union_simplified = orient(union_rounded.normalize(), sign=1.0)
 
     return make_valid(oriented_union_simplified)
 
