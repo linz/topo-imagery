@@ -2,8 +2,8 @@ from decimal import Decimal
 from sys import float_info
 from typing import cast
 
-from shapely import get_exterior_ring, is_ccw
-from shapely.geometry import MultiPolygon, Polygon, shape
+from shapely import MultiPolygon, get_exterior_ring, is_ccw
+from shapely.geometry import Polygon, shape
 
 from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
@@ -15,7 +15,7 @@ def test_merge_polygons() -> None:
     polygons = []
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     polygons.append(Polygon([(1.0, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.0, 1.0)]))
-    expected_merged_polygon = Polygon([(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (1.0, 1.0), (0.0, 1.0), (0.0, 0.0)])
+    expected_merged_polygon = Polygon([(0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (0.0, 1.0), (0.0, 0.0)])
     merged_polygons = merge_polygons(polygons, 0)
 
     print(f"Polygon A: {to_feature(polygons[0])}")
@@ -229,3 +229,25 @@ def test_capture_area_rounding_decimal_places() -> None:
     }
     capture_area = generate_capture_area(polygons, Decimal("1"))
     assert capture_area == capture_area_expected
+
+
+def test_ensure_consistent_geometry() -> None:
+    """Test to ensure removing a polygon from a geometry and putting it back gives the same result."""
+    polygons = []
+    poly_a = Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)])
+    poly_b = Polygon([(2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.0, 1.0), (2.0, 1.0)])
+    polygons.append(poly_a)
+    polygons.append(poly_b)
+    merged_polygons = merge_polygons(polygons, 0)
+
+    print(f"Polygon A: {to_feature(polygons[0])}")
+    print(f"Polygon B: {to_feature(polygons[1])}")
+    print(f"Merged: {to_feature(merged_polygons)}")
+
+    merged_polygons_without_poly_b = merged_polygons.difference(poly_b)
+    print(f"GeoJSON merged_polygons_without_poly_b: {to_feature(merged_polygons_without_poly_b)}")
+    merged_polygons_with_poly_b_back = merge_polygons([poly_b, merged_polygons_without_poly_b], 0)
+    print(f"GeoJSON result: {to_feature(merged_polygons_with_poly_b_back)}")
+
+    assert merged_polygons_with_poly_b_back.equals_exact(merged_polygons, tolerance=0.0)
+    assert merged_polygons_with_poly_b_back.equals_exact(merged_polygons, tolerance=0.0)
