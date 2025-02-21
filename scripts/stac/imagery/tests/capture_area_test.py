@@ -250,4 +250,3 @@ def test_ensure_consistent_geometry() -> None:
     print(f"GeoJSON result: {to_feature(merged_polygons_with_poly_b_back)}")
 
     assert merged_polygons_with_poly_b_back.equals_exact(merged_polygons, tolerance=0.0)
-    assert merged_polygons_with_poly_b_back.equals_exact(merged_polygons, tolerance=0.0)
