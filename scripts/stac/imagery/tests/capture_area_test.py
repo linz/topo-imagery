@@ -5,11 +5,7 @@ from typing import cast
 from shapely import MultiPolygon, get_exterior_ring, is_ccw
 from shapely.geometry import Polygon, shape
 
-from scripts.stac.imagery.capture_area import (
-    generate_capture_area,
-    merge_polygons,
-    to_feature,
-)
+from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
 # In the following tests, the expected and result GeoJSON documents are printed if the test fails.
 # This allows to visualize the geometry for debugging purpose.
