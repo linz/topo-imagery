@@ -5,7 +5,11 @@ from typing import cast
 from shapely import MultiPolygon, get_exterior_ring, is_ccw
 from shapely.geometry import Polygon, shape
 
-from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
+from scripts.stac.imagery.capture_area import (
+    generate_capture_area,
+    merge_polygons,
+    to_feature,
+)
 
 # In the following tests, the expected and result GeoJSON documents are printed if the test fails.
 # This allows to visualize the geometry for debugging purpose.
@@ -240,8 +244,8 @@ def test_ensure_consistent_geometry() -> None:
     polygons.append(poly_b)
     merged_polygons = merge_polygons(polygons, 0)
 
-    print(f"Polygon A: {to_feature(polygons[0])}")
-    print(f"Polygon B: {to_feature(polygons[1])}")
+    print(f"Polygon A: {to_feature(poly_a)}")
+    print(f"Polygon B: {to_feature(poly_b)}")
     print(f"Merged: {to_feature(merged_polygons)}")
 
     merged_polygons_without_poly_b = merged_polygons.difference(poly_b)
