@@ -178,6 +178,7 @@ def list_files_in_uri(uri: str, suffixes: list[str], s3_client: S3Client | None)
     Returns:
         a list of file paths
     """
+    get_log().info(f"Getting file listing for {suffixes=} in {uri=}", uri=uri, suffixes=suffixes)
     s3_client = s3_client or client("s3")
     files = []
     paginator = s3_client.get_paginator("list_objects_v2")
