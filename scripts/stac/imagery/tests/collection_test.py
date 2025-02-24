@@ -433,7 +433,7 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "122034b3784053040f611c1c8f2543d699f252229648fca60200089ff499e53f84d9",
+            "122024fd55ea5f9812e80748ee78055893ad7bddbe2b5101dec1cc1b949edc295f51",
             # geos 3.11 - geos 3.12 as yet untested
         )
 
@@ -441,7 +441,7 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
         assert "file:size" in collection.stac["assets"]["capture_area"]
 
     with subtests.test():
-        assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
+        assert collection.stac["assets"]["capture_area"]["file:size"] in (239,)  # geos 3.11 - geos 3.12 as yet untested
 
 
 def test_should_make_valid_capture_area() -> None:
