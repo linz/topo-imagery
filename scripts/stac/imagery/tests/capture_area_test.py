@@ -2,8 +2,8 @@ from decimal import Decimal
 from sys import float_info
 from typing import cast
 
-from shapely import MultiPolygon, get_exterior_ring, is_ccw
-from shapely.geometry import Polygon, shape
+from shapely import get_exterior_ring, is_ccw
+from shapely.geometry import MultiPolygon, Polygon, shape
 
 from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
