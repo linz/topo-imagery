@@ -3,8 +3,7 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
-from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
-from shapely.constructive import make_valid
+from shapely import BufferCapStyle, BufferJoinStyle, make_valid, to_geojson, union_all, wkt
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
@@ -58,7 +57,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     for poly in polygons:
         # Buffer each polygon to round up to the `buffer_distance`
         buffered_poly = poly.buffer(buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
-        buffered_polygons.append(orient(buffered_poly.normalize()))
+        buffered_polygons.append(orient(make_valid(buffered_poly).normalize()))
     union_buffered = union_all(buffered_polygons)
     # Negative buffer back in the polygons
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
@@ -66,13 +65,14 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     union_rounded = wkt.loads(wkt.dumps(union_simplified, rounding_precision=8))
     # Normalize the geometry in order to store consistent geometry.
     # Shapely.normalize() reorders the exterior ring based on the lexicographically smallest point (lowest (x, y)),
-    # but this reordering may still keep it CW in some cases.
+    # but also make the coordinates of exterior rings following a clockwise orientation and interior rings having a
+    # counter-clockwise orientation
     # Because of the above, we need to apply right-hand rule winding order
     # (exterior rings should be counter-clockwise) to the geometry
     # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
-    oriented_union_simplified = orient(union_rounded.normalize(), sign=1.0)
+    oriented_union_simplified = orient(make_valid(union_rounded).normalize(), sign=1.0)
 
-    return make_valid(oriented_union_simplified)
+    return oriented_union_simplified
 
 
 def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: Decimal) -> dict[str, Any]:
