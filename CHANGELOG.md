@@ -1,5 +1,27 @@
 # Changelog
 
+## [7.2.0](https://github.com/linz/topo-imagery/compare/v7.1.1...v7.2.0) (2025-02-25)
+
+
+### Features
+
+* add resolution argument to gdalbuildvrt TDE-1383 ([#1269](https://github.com/linz/topo-imagery/issues/1269)) ([78dfc31](https://github.com/linz/topo-imagery/commit/78dfc31049a4a271cb875ff9982db752131571e1))
+* generate hillshade TDE-1369 ([#1253](https://github.com/linz/topo-imagery/issues/1253)) ([e4f2bc4](https://github.com/linz/topo-imagery/commit/e4f2bc40bb4c41fa9b8b99918c996384a5cd9198))
+* normalize capture-area geometry TDE-1359 ([#1288](https://github.com/linz/topo-imagery/issues/1288)) ([0a061ba](https://github.com/linz/topo-imagery/commit/0a061ba3910a2ed60aecf8b9ad1ec5ebc5cf80df))
+* titles and descriptions for hillshade products TDE-1378 ([#1274](https://github.com/linz/topo-imagery/issues/1274)) ([7415614](https://github.com/linz/topo-imagery/commit/7415614e062de9dcf8ca5ff032d076fc8d314c9f))
+
+
+### Bug Fixes
+
+* deprecated artifact action TDE-1379 ([#1258](https://github.com/linz/topo-imagery/issues/1258)) ([7b0f43a](https://github.com/linz/topo-imagery/commit/7b0f43aec1340b4ac877d6a2983cc452faa90cc5))
+* should not raise error when cutline is empty TDE-1392 ([#1284](https://github.com/linz/topo-imagery/issues/1284)) ([0b021e4](https://github.com/linz/topo-imagery/commit/0b021e47e970e8e4148d569adeae8330668bc57e))
+* **standardise-validate:** allow empty string from Argo for start and end dates TDE-1346 ([#1286](https://github.com/linz/topo-imagery/issues/1286)) ([b96c851](https://github.com/linz/topo-imagery/commit/b96c85155db7970d97002cc5896a5a0f50382ffc))
+
+
+### Documentation
+
+* update cog-quality link ([#1256](https://github.com/linz/topo-imagery/issues/1256)) ([fbf92be](https://github.com/linz/topo-imagery/commit/fbf92be5d1fc47a5056360a802467f3fcefd26c8))
+
 ## [7.1.1](https://github.com/linz/topo-imagery/compare/v7.1.0...v7.1.1) (2024-12-18)
 
 
