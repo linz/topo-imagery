@@ -8,7 +8,7 @@ from pytest_subtests import SubTests
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, prepare_resupply
+from scripts.stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, merge_item_list_for_resupply
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_multihash_as_hex
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -530,7 +530,9 @@ def test_get_items_to_replace() -> None:
     ]
 
 
-def test_prepare_resupply(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests) -> None:
+def test_merge_item_list_for_resupply(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests
+) -> None:
     published_items = [
         {"type": "Feature", "id": "item_a"},
         {"type": "Feature", "id": "item_b"},
@@ -555,7 +557,7 @@ def test_prepare_resupply(fake_collection_metadata: CollectionMetadata, fake_lin
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )
     collection.stac["links"] = links
-    merged_items = prepare_resupply(collection, published_items, supplied_items)
+    merged_items = merge_item_list_for_resupply(collection, published_items, supplied_items)
 
     with subtests.test("merged items"):
         assert merged_items == [
@@ -573,4 +575,5 @@ def test_prepare_resupply(fake_collection_metadata: CollectionMetadata, fake_lin
         assert collection.stac["links"] == [{"rel": "self", "href": "./collection.json"}]
 
     with subtests.test("extent"):
-        assert "extent" not in collection.stac
+        assert collection.stac["extent"]["spatial"]["bbox"] is None
+        assert collection.stac["extent"]["temporal"]["interval"] is None

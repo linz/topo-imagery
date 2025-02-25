@@ -64,7 +64,7 @@ def create_collection(
             os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
         )
         published_items = collection.get_items_stac()
-        stac_items = prepare_resupply(collection, published_items, stac_items)
+        stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 
     else:
         collection = ImageryCollection(
@@ -111,10 +111,11 @@ def get_items_to_replace(supplied_items: list[dict[str, Any]], published_items: 
     return items_to_replace
 
 
-def prepare_resupply(
+def merge_item_list_for_resupply(
     collection: ImageryCollection, published_items: list[dict[str, Any]], supplied_items: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
-    """Prepare the STAC Collection for resupply and merge the existing Items with the resupply Items into a single list.
+    """Merge the existing Items with the resupply Items into a single list.
+    Prepare the Collection for resupply by removing the Items that need to be replaced.
 
     Args:
         collection: a published Collection
@@ -132,8 +133,8 @@ def prepare_resupply(
 
     # Remove all Item links
     collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
-    # Remove extents so they can be recalculated
-    collection.stac.pop("extent", None)
+    # Empty extents so they can be recalculated
+    collection.reset_extent()
 
     return supplied_items + published_items
 
