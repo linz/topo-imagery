@@ -196,10 +196,7 @@ class ImageryCollection:
         Args:
             item_bbox: bounding box of an item added to the Collection
         """
-        if "extent" not in self.stac:
-            self.update_extent(bbox=item_bbox)
-            return
-        if self.stac["extent"]["spatial"]["bbox"] == [None]:
+        if not self.stac.get("extent", {}).get("spatial", {}).get("bbox"):
             self.update_extent(bbox=item_bbox)
             return
 
@@ -219,10 +216,7 @@ class ImageryCollection:
             item_start_datetime: start date of an item added to the Collection
             item_end_datetime: end date of an item added to the Collection
         """
-        if "extent" not in self.stac:
-            self.update_extent(interval=[item_start_datetime, item_end_datetime])
-            return
-        if self.stac["extent"]["temporal"]["interval"] == [None]:
+        if not self.stac.get("extent", {}).get("temporal", {}).get("interval"):
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
 
@@ -253,17 +247,16 @@ class ImageryCollection:
             interval: datetime interval. Defaults to None.
         """
         if "extent" not in self.stac:
-            self.stac["extent"] = {
-                "spatial": {
-                    "bbox": [bbox],
-                },
-                "temporal": {"interval": [interval]},
-            }
-            return
+            self.reset_extent()
         if bbox:
             self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
             self.stac["extent"]["temporal"]["interval"] = [interval]
+
+    def reset_extent(self) -> None:
+        """Reset the spatial and temporal extents of the Collection."""
+        self.stac.setdefault("extent", {}).setdefault("spatial", {})["bbox"] = None
+        self.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = None
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
