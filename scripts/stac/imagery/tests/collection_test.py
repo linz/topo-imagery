@@ -508,12 +508,12 @@ def test_capture_dates_added(fake_collection_metadata: CollectionMetadata, fake_
     }
 
 
-def test_reset_extents(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
+def test_reset_extent(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )
     collection.update_temporal_extent("2021-01-27T00:00:00Z", "2021-01-27T00:00:00Z")
     collection.update_spatial_extent([1799667.5, 5815977.0, 1800422.5, 5814986.0])
-    collection.reset_extents()
+    collection.reset_extent()
     assert collection.stac["extent"]["spatial"]["bbox"] is None
     assert collection.stac["extent"]["temporal"]["interval"] is None

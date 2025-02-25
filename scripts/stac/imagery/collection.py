@@ -247,13 +247,13 @@ class ImageryCollection:
             interval: datetime interval. Defaults to None.
         """
         if "extent" not in self.stac:
-            self.reset_extents()
+            self.reset_extent()
         if bbox:
             self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
             self.stac["extent"]["temporal"]["interval"] = [interval]
 
-    def reset_extents(self) -> None:
+    def reset_extent(self) -> None:
         """Reset the spatial and temporal extents of the Collection."""
         self.stac.setdefault("extent", {}).setdefault("spatial", {})["bbox"] = None
         self.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = None
