@@ -1,12 +1,16 @@
+import json
 import os
 from typing import Any
 
 import ulid
+from linz_logger import get_log
+from shapely import to_geojson
+from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
 from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
-from scripts.files.fs import read, write
+from scripts.files.fs import exists, read, write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.metadata_constants import (
@@ -34,10 +38,13 @@ from scripts.stac.util.stac_extensions import StacExtensions
 
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
+GSD_UNIT = "m"
 
 
 class ImageryCollection:
     stac: dict[str, Any]
+    capture_area: dict[str, Any] | None = None
+    published_location: str | None = None
 
     def __init__(
         self,
@@ -95,8 +102,39 @@ class ImageryCollection:
 
         self.add_providers(merge_provider_roles(providers))
 
+    @classmethod
+    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
+        """Load an ImageryCollection from a Collection file.
+
+        Args:
+            file_name: The s3 URL or local path of the Collection file to load.
+
+        Returns:
+            The loaded ImageryCollection.
+        """
+        file_content = read(file_name)
+        stac_from_file = json.loads(file_content.decode("UTF-8"))
+        stac_from_file["updated"] = updated_datetime
+        collection = cls(
+            metadata=metadata,
+            created_datetime=stac_from_file["created"],
+            updated_datetime=stac_from_file["updated"],
+            linz_slug=stac_from_file["linz:slug"],
+        )
+        # Override STAC from the original collection
+        collection.stac = stac_from_file
+
+        collection.published_location = os.path.dirname(file_name)
+        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+        # Some published datasets may not have a capture-area.geojson file (TDE-988)
+        if exists(capture_area_path):
+            collection.capture_area = json.loads(read(capture_area_path))
+
+        return collection
+
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
+        If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
@@ -105,7 +143,9 @@ class ImageryCollection:
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
-
+        # If published dataset update, merge the existing capture area with the new one
+        if self.capture_area:
+            polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, self.metadata["gsd"])
         capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
@@ -162,20 +202,22 @@ class ImageryCollection:
 
     def add_item(self, item: dict[Any, Any]) -> None:
         """Add an `Item` to the `links` of the `Collection`.
+        Update the spatial and temporal extent of the `Collection` based on the `Item` bounding box and datetime.
 
         Args:
             item: STAC Item to add
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
-            self.stac["links"].append(
-                Link(
-                    path=item_self_link["href"],
-                    rel=Relation.ITEM,
-                    media_type=StacMediaType.GEOJSON,
-                    file_content=dict_to_json_bytes(item),
-                ).stac
-            )
+            link_to_add = Link(
+                path=item_self_link["href"],
+                rel=Relation.ITEM,
+                media_type=StacMediaType.GEOJSON,
+                file_content=dict_to_json_bytes(item),
+            ).stac
+
+            self.stac["links"].append(link_to_add)
+
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
 
@@ -196,10 +238,7 @@ class ImageryCollection:
         Args:
             item_bbox: bounding box of an item added to the Collection
         """
-        if "extent" not in self.stac:
-            self.update_extent(bbox=item_bbox)
-            return
-        if self.stac["extent"]["spatial"]["bbox"] == [None]:
+        if not self.stac.get("extent", {}).get("spatial", {}).get("bbox"):
             self.update_extent(bbox=item_bbox)
             return
 
@@ -219,10 +258,7 @@ class ImageryCollection:
             item_start_datetime: start date of an item added to the Collection
             item_end_datetime: end date of an item added to the Collection
         """
-        if "extent" not in self.stac:
-            self.update_extent(interval=[item_start_datetime, item_end_datetime])
-            return
-        if self.stac["extent"]["temporal"]["interval"] == [None]:
+        if not self.stac.get("extent", {}).get("temporal", {}).get("interval"):
             self.update_extent(interval=[item_start_datetime, item_end_datetime])
             return
 
@@ -253,17 +289,38 @@ class ImageryCollection:
             interval: datetime interval. Defaults to None.
         """
         if "extent" not in self.stac:
-            self.stac["extent"] = {
-                "spatial": {
-                    "bbox": [bbox],
-                },
-                "temporal": {"interval": [interval]},
-            }
-            return
+            self.reset_extent()
         if bbox:
             self.stac["extent"]["spatial"]["bbox"] = [bbox]
         if interval:
             self.stac["extent"]["temporal"]["interval"] = [interval]
+
+    def reset_extent(self) -> None:
+        """Reset the spatial and temporal extents of the Collection."""
+        self.stac.setdefault("extent", {}).setdefault("spatial", {})["bbox"] = None
+        self.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = None
+
+    def get_items_stac(self) -> list[dict[str, Any]]:
+        """Get the STAC Items from the Collection.
+
+        Returns:
+            a list of STAC Items
+        """
+        if not self.published_location:
+            get_log().info("Collection is not published.")
+            return []
+        items_stac = []
+        for link in self.stac.get("links", []):
+            if link["rel"] != Relation.ITEM:
+                continue
+            item_path = os.path.join(self.published_location, os.path.basename(link["href"]))
+            if not exists(item_path):
+                # TODO: should we raise an error here?
+                get_log().warn(f"Item not found: {item_path}")
+                continue
+            existing_item_stac = json.loads(read(item_path))
+            items_stac.append(existing_item_stac)
+        return items_stac
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
@@ -431,5 +488,20 @@ class ImageryCollection:
 
         return " ".join(filter(None, compontents))
 
+    def remove_item_geometry_from_capture_area(self, item: dict[str, Any]) -> None:
+        """Remove the geometry of an Item from the capture area of the Collection.
 
-GSD_UNIT = "m"
+        Args:
+            item: an Item to remove from the capture area
+        """
+        if not self.capture_area:
+            get_log().warn(
+                "No capture area found",
+                action="remove_item_geometry_from_capture_area",
+                reason="skip",
+            )
+            return
+        item_geometry = shape(item["geometry"])
+        capture_area_geometry = shape(self.capture_area["geometry"])
+        updated_capture_area_geometry = capture_area_geometry.difference(item_geometry)
+        self.capture_area["geometry"] = json.loads(to_geojson(updated_capture_area_geometry))
