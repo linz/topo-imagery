@@ -139,6 +139,21 @@ def str_to_gsd(value: str) -> Decimal:
 
 
 def str_to_bool(value: str) -> bool:
+    """Transform a string to a boolean value
+
+    Example:
+        >>> str_to_bool("true")
+        True
+
+    Args:
+        str: string representing a boolean value
+
+    Raises:
+        ArgumentTypeError: if the string is not "true" or "false"
+
+    Returns:
+        bool: True if "true", False if "false"
+    """
     if value == "true":
         return True
     if value == "false":
@@ -147,6 +162,23 @@ def str_to_bool(value: str) -> bool:
 
 
 def str_to_list_or_none(values: str) -> list[Decimal] | None:
+    """Transform a string to an empty list of list with 2 values. Return None if the string is empty.
+
+    Example:
+        >>> str_to_list_or_none('2,4')
+        [Decimal('2'), Decimal('4')]
+        >>> str_to_list_or_none('') is None
+        True
+
+    Args:
+        str: string representing a list or an empty string
+
+    Raises:
+        ArgumentTypeError: if the string is not empty and does not contain exactly 2 values
+
+    Returns:
+        None or a list of 2 values
+    """
     if not values:
         return None
     result = [Decimal(value) for value in values.split(",")]
