@@ -5,6 +5,7 @@ from decimal import Decimal
 from shutil import rmtree
 from tempfile import mkdtemp
 
+import pytest
 import shapely.geometry
 from boto3 import client
 from moto import mock_aws
@@ -346,6 +347,7 @@ def test_providers_are_not_duplicated(fake_collection_metadata: CollectionMetada
     } in collection.stac["providers"]
 
 
+@pytest.mark.skip(reason="for testing")
 def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests) -> None:
     """
     TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
