@@ -3,7 +3,14 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
-from shapely import BufferCapStyle, BufferJoinStyle, make_valid, to_geojson, union_all, wkt
+from shapely import (
+    BufferCapStyle,
+    BufferJoinStyle,
+    make_valid,
+    to_geojson,
+    union_all,
+    wkt,
+)
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
@@ -57,7 +64,7 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     for poly in polygons:
         # Buffer each polygon to round up to the `buffer_distance`
         buffered_poly = poly.buffer(buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
-        buffered_polygons.append(orient(make_valid(buffered_poly).normalize()))
+        buffered_polygons.append(buffered_poly)
     union_buffered = union_all(buffered_polygons)
     # Negative buffer back in the polygons
     union_unbuffered = union_buffered.buffer(-buffer_distance, cap_style=BufferCapStyle.flat, join_style=BufferJoinStyle.mitre)
