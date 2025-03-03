@@ -135,20 +135,34 @@ def create_item(
 
     if derived_from is not None:
         for derived in derived_from:
-            derived_item_content = read(derived)
-            derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            if not start_datetime or derived_stac["properties"]["start_datetime"] < start_datetime:
-                start_datetime = derived_stac["properties"]["start_datetime"]
-            if not end_datetime or derived_stac["properties"]["end_datetime"] > end_datetime:
-                end_datetime = derived_stac["properties"]["end_datetime"]
-            item.add_link(
-                Link(
-                    path=derived,
-                    rel=Relation.DERIVED_FROM,
-                    media_type=StacMediaType.GEOJSON,
-                    file_content=derived_item_content,
+            derived_from_item_file_content = read(derived)
+            derived_from_item_stac = json.loads(derived_from_item_file_content.decode("UTF-8"))
+            if not start_datetime or derived_from_item_stac["properties"]["start_datetime"] < start_datetime:
+                start_datetime = derived_from_item_stac["properties"]["start_datetime"]
+            if not end_datetime or derived_from_item_stac["properties"]["end_datetime"] > end_datetime:
+                end_datetime = derived_from_item_stac["properties"]["end_datetime"]
+            added_derived_links = False
+            for link in derived_from_item_stac.get("links", []):
+                if link["rel"] == Relation.DERIVED_FROM:
+                    added_derived_links = True
+                    item.stac["links"].append(link)
+                    # derived_link = Link(
+                    #     path=link["href"],
+                    #     rel=link["rel"],
+                    #     media_type=link["type"],
+                    # )
+                    # derived_link.stac["file:checksum"] = link["file:checksum"]
+                    # item.add_link(derived_link)
+                    get_log().info(f"Existing derived_from {link['href']}", href=link["href"])
+            if not added_derived_links:
+                item.add_link(
+                    Link(
+                        path=derived,
+                        rel=Relation.DERIVED_FROM,
+                        media_type=StacMediaType.GEOJSON,
+                        file_content=derived_from_item_file_content,
+                    )
                 )
-            )
 
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(*get_extents(gdalinfo_result))
