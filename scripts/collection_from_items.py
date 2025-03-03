@@ -10,7 +10,7 @@ import shapely.ops
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, str_to_gsd
+from scripts.cli.cli_helper import coalesce_multi_single, str_to_bool, str_to_gsd
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, parse_rfc_3339_datetime
 from scripts.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
@@ -100,15 +100,15 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--capture-dates",
         dest="capture_dates",
-        action="store_true",
         help="Add a capture-dates.geojson.gz file to the collection assets",
+        type=str_to_bool,
         required=False,
     )
     parser.add_argument(
         "--add-title-suffix",
         dest="add_title_suffix",
-        action="store_true",
         help="Add a title suffix to the collection title based on the lifecycle. For example, '[TITLE] - Preview'",
+        type=str_to_bool,
         required=False,
     )
     parser.add_argument(

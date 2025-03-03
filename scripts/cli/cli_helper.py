@@ -136,3 +136,20 @@ def str_to_gsd(value: str) -> Decimal:
         )
 
     return Decimal(number_value)
+
+
+def str_to_bool(value: str) -> bool:
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
+
+
+def str_to_list_or_none(values: str) -> list[Decimal] | None:
+    if not values:
+        return None
+    result = [Decimal(value) for value in values.split(",")]
+    if len(result) != 2:
+        raise argparse.ArgumentTypeError(f"Invalid list - must be blank or exactly 2 values x,y. Received: {values}")
+    return result

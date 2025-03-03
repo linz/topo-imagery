@@ -2,11 +2,18 @@ import argparse
 import os
 import sys
 from datetime import datetime, timezone
-from decimal import Decimal
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo, load_input_files, str_to_gsd, valid_date
+from scripts.cli.cli_helper import (
+    InputParameterError,
+    is_argo,
+    load_input_files,
+    str_to_bool,
+    str_to_gsd,
+    str_to_list_or_none,
+    valid_date,
+)
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
@@ -15,23 +22,6 @@ from scripts.gdal.gdal_helper import get_srs, get_vfs_path
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import StandardisingConfig, run_standardising
-
-
-def str_to_bool(value: str) -> bool:
-    if value == "true":
-        return True
-    if value == "false":
-        return False
-    raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
-
-
-def str_to_list_or_none(values: str) -> list[Decimal] | None:
-    if not values:
-        return None
-    result = [Decimal(value) for value in values.split(",")]
-    if len(result) != 2:
-        raise argparse.ArgumentTypeError(f"Invalid list - must be blank or exactly 2 values x,y. Received: {values}")
-    return result
 
 
 def parse_args() -> argparse.Namespace:

@@ -42,12 +42,12 @@ jobs:
 
       - name: End to end test - Hillshade Greyscale
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset greyscale --target /tmp/ --force
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade --target /tmp/ --force
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_greyscale.tiff
 
       - name: End to end test - Hillshade Igor
         run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset igor --target /tmp/ --force
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade-igor --target /tmp/ --force
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_igor.tiff
 
       - name: End to end test - Historical Aerial Imagery
