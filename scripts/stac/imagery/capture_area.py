@@ -3,14 +3,7 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
-from shapely import (
-    BufferCapStyle,
-    BufferJoinStyle,
-    make_valid,
-    to_geojson,
-    union_all,
-    wkt,
-)
+from shapely import BufferCapStyle, BufferJoinStyle, make_valid, to_geojson, union_all, wkt
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
