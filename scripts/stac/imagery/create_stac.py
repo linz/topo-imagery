@@ -24,7 +24,6 @@ JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
 # pylint: disable=too-many-arguments
-# pylint: disable=too-many-locals
 def create_collection(
     collection_id: str,
     linz_slug: str,
