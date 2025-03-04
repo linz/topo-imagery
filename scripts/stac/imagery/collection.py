@@ -489,15 +489,15 @@ class ImageryCollection:
 
     def remove_item_geometry_from_capture_area(self, item: dict[str, Any]) -> None:
         """Remove the geometry of an Item from the capture area of the Collection.
+        The Item's geometry, usually tile shape (covering total or more of the footprint),
+        is removed from the capture area in case of the resupplied Item footprint is not covering the former Item's footprint.
 
         Args:
             item: an Item to remove from the capture area
         """
         if not self.capture_area:
             get_log().warn(
-                "No capture area found",
-                action="remove_item_geometry_from_capture_area",
-                reason="skip",
+                "Published Collection has no capture-area.",
             )
             return
         item_geometry = shape(item["geometry"])
