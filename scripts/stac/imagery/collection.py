@@ -301,13 +301,13 @@ class ImageryCollection:
         self.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = None
 
     def get_items_stac(self) -> list[dict[str, Any]]:
-        """Get the STAC Items from the Collection.
+        """Get the STAC Items content from the Collection links.
 
         Returns:
-            a list of STAC Items
+            a list of STAC Item contents
         """
         if not self.published_location:
-            get_log().info("Collection is not published.")
+            get_log().info("Collection is not published: no STAC Item to load.")
             return []
         items_stac = []
         for link in self.stac.get("links", []):
@@ -315,9 +315,8 @@ class ImageryCollection:
                 continue
             item_path = os.path.join(self.published_location, os.path.basename(link["href"]))
             if not exists(item_path):
-                # TODO: should we raise an error here?
-                get_log().warn(f"Item not found: {item_path}")
-                continue
+                get_log().error(f"STAC Item not found: {item_path}")
+                raise FileNotFoundError(item_path)
             existing_item_stac = json.loads(read(item_path))
             items_stac.append(existing_item_stac)
         return items_stac
