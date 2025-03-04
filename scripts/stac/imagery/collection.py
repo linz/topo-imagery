@@ -209,14 +209,14 @@ class ImageryCollection:
         """
         item_self_link = next((feat for feat in item["links"] if feat["rel"] == "self"), None)
         if item_self_link:
-            link_to_add = Link(
-                path=item_self_link["href"],
-                rel=Relation.ITEM,
-                media_type=StacMediaType.GEOJSON,
-                file_content=dict_to_json_bytes(item),
-            ).stac
-
-            self.stac["links"].append(link_to_add)
+            self.stac["links"].append(
+                Link(
+                    path=item_self_link["href"],
+                    rel=Relation.ITEM,
+                    media_type=StacMediaType.GEOJSON,
+                    file_content=dict_to_json_bytes(item),
+                ).stac
+            )
 
             self.update_temporal_extent(item["properties"]["start_datetime"], item["properties"]["end_datetime"])
             self.update_spatial_extent(item["bbox"])
