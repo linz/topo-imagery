@@ -236,7 +236,7 @@ def get_hillshade_command(preset: str) -> list[str]:
         "MAX_Z_ERROR=0",
     ]
 
-    if preset == HillshadePreset.GREYSCALE.value:
+    if preset == HillshadePreset.DEFAULT.value:
         gdal_command.extend(["-az", "315", "-alt", "45"])
     elif preset == HillshadePreset.IGOR.value:
         gdal_command.extend(["-igor"])
