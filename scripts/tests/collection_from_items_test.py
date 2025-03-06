@@ -17,7 +17,7 @@ from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
-from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
+from scripts.stac.imagery.tests.generators import any_stac_processing, any_visual_asset
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 if TYPE_CHECKING:
@@ -30,16 +30,14 @@ else:
 def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
     with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
-        item = ImageryItem("123", any_stac_asset(), any_stac_processing())
+        item = ImageryItem("123", any_visual_asset(), any_stac_processing(), "2021-01-27T00:00:00Z", "2021-01-27T00:00:00Z")
     geometry = {
         "type": "Polygon",
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27T00:00:00Z"
-    end_datetime = "2021-01-27T00:00:00Z"
+
     item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
     yield item
 
 
@@ -49,7 +47,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
-    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.to_dict()))
     # CLI arguments
     args = [
         "--uri",
@@ -90,7 +88,7 @@ def test_should_fail_if_collection_has_no_matching_items(
     s3_client.create_bucket(Bucket="stacfiles")
     item_collection_id = "abc"
     item.add_collection(item_collection_id)
-    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.to_dict()))
     # CLI arguments
     # collection ID is `def` <> `abc`
     collection_id = "def"
@@ -217,10 +215,10 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: st
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
-    write("s3://stacfiles/item_a.json", dict_to_json_bytes(item.stac))
-    item.stac["properties"]["start_datetime"] = "2022-04-12T00:00:00Z"
-    item.stac["properties"]["end_datetime"] = "2022-04-12T00:00:00Z"
-    write("s3://stacfiles/item_b.json", dict_to_json_bytes(item.stac))
+    write("s3://stacfiles/item_a.json", dict_to_json_bytes(item.to_dict()))
+    item.properties["start_datetime"] = "2022-04-12T00:00:00Z"
+    item.properties["end_datetime"] = "2022-04-12T00:00:00Z"
+    write("s3://stacfiles/item_b.json", dict_to_json_bytes(item.to_dict()))
 
     # CLI arguments
     args = [

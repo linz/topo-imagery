@@ -6,15 +6,14 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from pystac import MediaType, RelType
 from pytest_subtests import SubTests
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
-from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.stac.link import Relation
-from scripts.stac.util.media_type import StacMediaType
+from scripts.stac.imagery.tests.generators import any_stac_processing, any_visual_asset
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
@@ -33,18 +32,17 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
 
     git_hash = "any Git hash"
     git_version = "any Git version string"
-    asset = any_stac_asset()
+    asset = any_visual_asset()
     stac_processing = any_stac_processing()
     with patch.dict(environ, {"GIT_HASH": git_hash, "GIT_VERSION": git_version}):
-        item = ImageryItem(id_, asset, stac_processing)
+        item = ImageryItem(id_, asset, stac_processing, start_datetime, end_datetime)
     item.update_spatial(geometry, bbox)
-    item.update_datetime(start_datetime, end_datetime)
 
     # checks
     with subtests.test():
-        assert item.stac == {
+        assert item.to_dict() == {
             "assets": {
-                "visual": {**asset, "type": "image/tiff; application=geotiff; profile=cloud-optimized"},
+                "visual": asset,
             },
             "bbox": bbox,
             "geometry": geometry,
@@ -52,16 +50,16 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
             "links": [
                 {
                     "href": "./empty.json",
-                    "rel": Relation.SELF,
-                    "type": StacMediaType.GEOJSON,
+                    "rel": RelType.SELF,
+                    "type": MediaType.GEOJSON,
                 },
             ],
             "properties": {
-                "created": asset["created"],
+                "created": asset.extra_fields["created"],
                 "datetime": None,
                 "end_datetime": end_datetime,
                 "start_datetime": start_datetime,
-                "updated": asset["updated"],
+                "updated": asset.extra_fields["updated"],
                 **stac_processing,
             },
             "stac_extensions": [
@@ -78,7 +76,7 @@ def test_create_item_from_file(tmp_path: Path, fake_imagery_item_stac: dict[str,
     temp_file.write_text(json.dumps(fake_imagery_item_stac))
     imagery_item = ImageryItem.from_file(str(temp_file))
 
-    assert imagery_item.stac == fake_imagery_item_stac
+    assert imagery_item.to_dict() == fake_imagery_item_stac
 
 
 def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_item_stac: dict[str, Any]) -> None:
@@ -97,16 +95,16 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
     imagery_item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
     with subtests.test(msg="item.stac should not change when checksum did not change"):
-        assert imagery_item.stac == fake_imagery_item_stac
+        assert imagery_item.to_dict() == fake_imagery_item_stac
 
     with subtests.test(msg="item.stac checksum changes to newly supplied checksum"):
         imagery_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
-        assert imagery_item.stac["assets"]["visual"]["file:checksum"] == new_checksum
+        assert imagery_item.assets["visual"].extra_fields["file:checksum"] == new_checksum
 
-        assert imagery_item.stac["assets"]["visual"]["updated"] == new_updated_date
-        assert imagery_item.stac["properties"]["updated"] == new_updated_date
+        assert imagery_item.assets["visual"].extra_fields["updated"] == new_updated_date
+        assert imagery_item.properties["updated"] == new_updated_date
 
-        assert imagery_item.stac["properties"] == new_stac_properties
+        assert imagery_item.properties == new_stac_properties
 
 
 # pylint: disable=duplicate-code
@@ -133,15 +131,15 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
+    item = ImageryItem(id_, any_visual_asset(), any_stac_processing(), "2022-02-02T00:00:00Z", "2022-02-02T00:00:00Z")
 
     item.add_collection(collection.stac["id"])
 
     with subtests.test():
-        assert item.stac["collection"] == ulid
+        assert item.collection_id == ulid
 
     with subtests.test():
-        assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.to_dict()["links"]
 
     with subtests.test():
-        assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
+        assert {"rel": "parent", "href": "./collection.json", "type": "application/json"} in item.to_dict()["links"]
