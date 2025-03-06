@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, TypeAlias, cast
+from typing import Any, TypeAlias
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
@@ -58,19 +58,23 @@ def create_collection(
     Returns:
         an ImageryCollection object
     """
-    existing_collection = {}
     if odr_url:
-        existing_collection = get_published_file_contents(odr_url, "collection")
+        collection = ImageryCollection.from_file(
+            os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
+        )
+        published_items = collection.get_items_stac()
+        stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 
-    collection = ImageryCollection(
-        metadata=collection_metadata,
-        created_datetime=cast(str, existing_collection.get("created", current_datetime)),
-        updated_datetime=current_datetime,
-        linz_slug=linz_slug,
-        collection_id=collection_id,
-        providers=get_providers(licensors, producers),
-        add_title_suffix=add_title_suffix,
-    )
+    else:
+        collection = ImageryCollection(
+            metadata=collection_metadata,
+            created_datetime=current_datetime,
+            updated_datetime=current_datetime,
+            linz_slug=linz_slug,
+            collection_id=collection_id,
+            providers=get_providers(licensors, producers),
+            add_title_suffix=add_title_suffix,
+        )
 
     for item in stac_items:
         collection.add_item(item)
@@ -85,6 +89,53 @@ def create_collection(
         )
 
     return collection
+
+
+def get_items_to_replace(supplied_items: list[dict[str, Any]], published_items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Get the items that need to be replaced in the published Collection.
+
+    Args:
+        supplied_items: Items that have been supplied
+        published_items: Items already published
+
+    Returns:
+        a list of Items to replace
+    """
+    published_items_dict = {item["id"]: item for item in published_items}
+    items_to_replace = [
+        published_items_dict[supplied_item["id"]]
+        for supplied_item in supplied_items
+        if supplied_item["id"] in published_items_dict
+    ]
+    return items_to_replace
+
+
+def merge_item_list_for_resupply(
+    collection: ImageryCollection, published_items: list[dict[str, Any]], supplied_items: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Merge the existing Items with the resupply Items into a single list.
+    Prepare the Collection for resupply by removing the Items that need to be replaced.
+
+    Args:
+        collection: a published Collection
+        published_items: already published items of the Collection
+        supplied_items: items that have been supplied
+
+    Returns:
+        merged list of Items to add to the Collection
+    """
+    items_to_replace = get_items_to_replace(supplied_items, published_items)
+
+    for item_to_remove in items_to_replace:
+        collection.remove_item_geometry_from_capture_area(item_to_remove)
+        published_items.remove(item_to_remove)
+
+    # Remove all Item links
+    collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
+    # Empty extents so they can be recalculated
+    collection.reset_extent()
+
+    return supplied_items + published_items
 
 
 def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
@@ -212,7 +263,3 @@ def create_or_load_base_item(
     )
 
     return ImageryItem(id_, stac_asset, stac_processing)
-
-
-def get_published_file_contents(odr_url: str, filename: str) -> JSON_Dict:
-    return cast(JSON_Dict, json.loads(read(os.path.join(odr_url, f"{filename}.json")).decode("UTF-8")))
