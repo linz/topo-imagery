@@ -1,13 +1,14 @@
 import json
 from datetime import timedelta
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.create_stac import create_collection, create_item
+from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, merge_item_list_for_resupply
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_multihash_as_hex
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -258,6 +259,7 @@ def test_create_collection_resupply(
         "type": "Collection",
         "stac_version": STAC_VERSION,
         "id": collection_id,
+        "linz:slug": fake_linz_slug,
         "created": created_datetime_string,
         "updated": created_datetime_string,
     }
@@ -285,6 +287,98 @@ def test_create_collection_resupply(
 
     with subtests.test("updated datetime"):
         assert collection.stac["updated"] == updated_datetime_string
+
+
+def test_create_collection_resupply_add_items(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, tmp_path: Path
+) -> None:
+    collection_id = "test_collection"
+    created_datetime_string = any_epoch_datetime_string()
+
+    existing_item_path = tmp_path / "item_a.json"
+    existing_item = {
+        "type": "Feature",
+        "id": "item_a",
+        "links": [
+            {"href": "./item_a.json", "rel": "self", "type": "application/geo+json"},
+            {"href": "./collection.json", "rel": "collection", "type": "application/json"},
+            {"href": "./collection.json", "rel": "parent", "type": "application/json"},
+        ],
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "bbox": [171.8256487, -34.3559317, 172.090076, -34.0291036],
+    }
+    existing_item_path.write_text(json.dumps(existing_item))
+    existing_item_link = {
+        "rel": "item",
+        "href": "./item_a.json",
+        "type": "application/geo+json",
+        "file:checksum": "122089598255c76fa1304eb9bfeba4ff6008f183c3c8ca9a31129b934fa8339d8f6b",
+    }
+
+    existing_collection_content = {
+        "type": "Collection",
+        "stac_version": STAC_VERSION,
+        "id": collection_id,
+        "linz:slug": fake_linz_slug,
+        "links": [
+            {
+                "rel": "root",
+                "href": "https://nz-imagery.s3.ap-southeast-2.amazonaws.com/catalog.json",
+                "type": "application/json",
+            },
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
+            existing_item_link,
+        ],
+        "created": created_datetime_string,
+        "updated": created_datetime_string,
+    }
+    existing_collection_path = tmp_path / "collection.json"
+    existing_collection_path.write_text(json.dumps(existing_collection_content))
+
+    item_to_add = {
+        "type": "Feature",
+        "id": "item_b",
+        "links": [
+            {"href": "./item_b.json", "rel": "self", "type": "application/geo+json"},
+            {"href": "./collection.json", "rel": "collection", "type": "application/json"},
+            {"href": "./collection.json", "rel": "parent", "type": "application/json"},
+        ],
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "bbox": [171.8256487, -34.3559317, 172.090076, -34.0291036],
+    }
+
+    item_to_add_link = {
+        "rel": "item",
+        "href": "./item_b.json",
+        "type": "application/geo+json",
+        "file:checksum": "12203040c94dda3807c4430b312e9b400604188a639f22cc8067136084662fc2618d",
+    }
+
+    updated_datetime_string = any_epoch_datetime_string()
+
+    collection = create_collection(
+        collection_id=collection_id,
+        linz_slug=fake_linz_slug,
+        collection_metadata=fake_collection_metadata,
+        current_datetime=updated_datetime_string,
+        producers=[],
+        licensors=[],
+        stac_items=[item_to_add],
+        item_polygons=[],
+        add_capture_dates=False,
+        uri="test",
+        odr_url=tmp_path.as_posix(),
+    )
+
+    with subtests.test("created datetime"):
+        assert collection.stac["created"] == existing_collection_content["created"]
+
+    with subtests.test("updated datetime"):
+        assert collection.stac["updated"] == updated_datetime_string
+
+    with subtests.test("links"):
+        assert item_to_add_link in collection.stac["links"]
+        assert existing_item_link in collection.stac["links"]
 
 
 def test_create_item_with_odr_url(tmp_path: Path) -> None:
@@ -399,3 +493,87 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
 
     with subtests.test(msg="assets.visual.updated"):
         assert item.stac["assets"]["visual"]["updated"] == current_datetime
+
+
+def test_get_items_to_replace() -> None:
+    published_items = [
+        {
+            "type": "Feature",
+            "id": "item_a",
+        },
+        {
+            "type": "Feature",
+            "id": "item_b",
+        },
+        {
+            "type": "Feature",
+            "id": "item_c",
+        },
+    ]
+    supplied_item = [
+        {
+            "type": "Feature",
+            "id": "item_d",
+        },
+        {
+            "type": "Feature",
+            "id": "item_b",
+        },
+    ]
+
+    items_to_replace = get_items_to_replace(published_items, supplied_item)
+    assert items_to_replace == [
+        {
+            "type": "Feature",
+            "id": "item_b",
+        }
+    ]
+
+
+def test_merge_item_list_for_resupply(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests
+) -> None:
+    published_items = [
+        {"type": "Feature", "id": "item_a"},
+        {"type": "Feature", "id": "item_b"},
+        {"type": "Feature", "id": "item_c"},
+    ]
+    supplied_items: list[dict[str, Any]] = [
+        {"type": "Feature", "id": "item_d"},
+        {
+            "type": "Feature",
+            "id": "item_b",
+            "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        },
+    ]
+    links = [
+        {"rel": "item", "href": "./item_a.json"},
+        {"rel": "item", "href": "./item_b.json"},
+        {"rel": "item", "href": "./item_c.json"},
+        {"rel": "self", "href": "./collection.json"},
+    ]
+
+    collection = ImageryCollection(
+        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
+    )
+    collection.stac["links"] = links
+    merged_items = merge_item_list_for_resupply(collection, published_items, supplied_items)
+
+    with subtests.test("merged items"):
+        assert merged_items == [
+            {"type": "Feature", "id": "item_d"},
+            {
+                "type": "Feature",
+                "id": "item_b",
+                "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+            },
+            {"type": "Feature", "id": "item_a"},
+            {"type": "Feature", "id": "item_c"},
+        ]
+
+    with subtests.test("links"):
+        assert collection.stac["links"] == [{"rel": "self", "href": "./collection.json"}]
+
+    with subtests.test("extent"):
+        assert collection.stac["extent"]["spatial"]["bbox"] is None
+        assert collection.stac["extent"]["temporal"]["interval"] is None

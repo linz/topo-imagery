@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 from decimal import Decimal
+from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -10,7 +11,7 @@ from boto3 import client
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
-from pytest import mark
+from pytest import CaptureFixture, mark
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
@@ -18,11 +19,12 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
 from scripts.stac.imagery.capture_area import merge_polygons
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.imagery.tests.generators import any_stac_processing
+from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
@@ -442,6 +444,56 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
+def test_should_not_add_capture_area(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, capsys: CaptureFixture[str]
+) -> None:
+    """
+    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
+    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
+    below.
+    """
+    collection = ImageryCollection(
+        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
+    )
+    file_name = "capture-area.geojson"
+
+    polygons = [
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ]
+                ],
+            }
+        )
+    ]
+
+    with tempfile.TemporaryDirectory() as tmp_path:
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.published_location = "s3://bucket/dataset/collection.json"
+        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        logs = json.loads(capsys.readouterr().out)
+        assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
+        file_target = os.path.join(tmp_path, file_name)
+        file_artifact = os.path.join(artifact_path, file_name)
+        with subtests.test():
+            assert not os.path.isfile(file_target)
+
+        with subtests.test():
+            assert not os.path.isfile(file_artifact)
+
+    with subtests.test():
+        assert "capture_area" not in collection.stac.get("assets", {})
+
+
 def test_should_make_valid_capture_area() -> None:
     # Given two touching triangles
     polygons = [
@@ -517,3 +569,102 @@ def test_reset_extent(fake_collection_metadata: CollectionMetadata, fake_linz_sl
     collection.reset_extent()
     assert collection.stac["extent"]["spatial"]["bbox"] is None
     assert collection.stac["extent"]["temporal"]["interval"] is None
+
+
+def test_get_items_from_collection(tmp_path: Path, fake_linz_slug: str, fake_collection_metadata: CollectionMetadata) -> None:
+    collection_id = "test_collection"
+    current_datetime = any_epoch_datetime_string()
+    created_datetime = any_epoch_datetime_string()
+
+    existing_item_path = tmp_path / "item_a.json"
+    existing_item = {
+        "type": "Feature",
+        "id": "item_a",
+    }
+    existing_item_path.write_text(json.dumps(existing_item))
+    existing_item_link = {
+        "rel": "item",
+        "href": "./item_a.json",
+        "type": "application/geo+json",
+    }
+
+    existing_collection_content = {
+        "type": "Collection",
+        "stac_version": STAC_VERSION,
+        "id": collection_id,
+        "linz:slug": fake_linz_slug,
+        "links": [
+            {
+                "rel": "root",
+                "href": "https://nz-imagery.s3.ap-southeast-2.amazonaws.com/catalog.json",
+                "type": "application/json",
+            },
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
+            existing_item_link,
+        ],
+        "created": created_datetime,
+        "updated": created_datetime,
+    }
+    existing_collection_path = tmp_path / "collection.json"
+    existing_collection_path.write_text(json.dumps(existing_collection_content))
+
+    collection = ImageryCollection.from_file(existing_collection_path.as_posix(), fake_collection_metadata, current_datetime)
+    collection_items = collection.get_items_stac()
+    assert len(collection_items) == 1
+    assert collection_items[0] == existing_item
+
+
+def test_remove_item_geometry_from_capture_area(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
+    collection = ImageryCollection(
+        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
+    )
+    collection.capture_area = {
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [174.8593132, -41.1583333],
+                    [174.5733776, -41.1625951],
+                    [174.5811963, -41.4867503],
+                    [174.8685509, -41.4824399],
+                    [175.1558379, -41.4774122],
+                    [175.1451823, -41.1533623],
+                    [174.8593132, -41.1583333],
+                ]
+            ],
+        },
+        "type": "Feature",
+        "properties": {},
+    }
+
+    item_to_remove = {
+        "type": "Feature",
+        "id": "item_a",
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [174.5733776, -41.1625951],
+                    [174.5811963, -41.4867503],
+                    [174.8685509, -41.4824399],
+                    [174.8593132, -41.1583333],
+                    [174.5733776, -41.1625951],
+                ]
+            ],
+        },
+    }
+
+    collection.remove_item_geometry_from_capture_area(item_to_remove)
+
+    assert collection.capture_area["geometry"] == {
+        "coordinates": [
+            [
+                [175.1451823, -41.1533623],
+                [175.1558379, -41.4774122],
+                [174.8685509, -41.4824399],
+                [174.8593132, -41.1583333],
+                [175.1451823, -41.1533623],
+            ]
+        ],
+        "type": "Polygon",
+    }
