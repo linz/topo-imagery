@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.3.0](https://github.com/linz/topo-imagery/compare/v7.2.0...v7.3.0) (2025-03-10)
+
+
+### Features
+
+* update existing Collection TDE-1359 ([#1224](https://github.com/linz/topo-imagery/issues/1224)) ([f8cdfba](https://github.com/linz/topo-imagery/commit/f8cdfba898c5b8ef8f2f38961ce9744b10fc70ee))
+
+
+### Bug Fixes
+
+* update hillshade preset enum values TDE-1371 ([#1294](https://github.com/linz/topo-imagery/issues/1294)) ([841bef8](https://github.com/linz/topo-imagery/commit/841bef8d2db8fff491c59f776d6aab702f1d1ba0))
+
 ## [7.2.0](https://github.com/linz/topo-imagery/compare/v7.1.1...v7.2.0) (2025-03-05)
 
 
