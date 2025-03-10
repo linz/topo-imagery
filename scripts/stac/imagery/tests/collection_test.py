@@ -11,7 +11,7 @@ from boto3 import client
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
-from pytest import mark
+from pytest import CaptureFixture, mark
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
@@ -19,7 +19,7 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
 from scripts.stac.imagery.capture_area import merge_polygons
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
@@ -442,6 +442,56 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 
     with subtests.test():
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
+
+
+def test_should_not_add_capture_area(
+    fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, capsys: CaptureFixture[str]
+) -> None:
+    """
+    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
+    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
+    below.
+    """
+    collection = ImageryCollection(
+        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
+    )
+    file_name = "capture-area.geojson"
+
+    polygons = [
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ]
+                ],
+            }
+        )
+    ]
+
+    with tempfile.TemporaryDirectory() as tmp_path:
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.published_location = "s3://bucket/dataset/collection.json"
+        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        logs = json.loads(capsys.readouterr().out)
+        assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
+        file_target = os.path.join(tmp_path, file_name)
+        file_artifact = os.path.join(artifact_path, file_name)
+        with subtests.test():
+            assert not os.path.isfile(file_target)
+
+        with subtests.test():
+            assert not os.path.isfile(file_artifact)
+
+    with subtests.test():
+        assert "capture_area" not in collection.stac.get("assets", {})
 
 
 def test_should_make_valid_capture_area() -> None:

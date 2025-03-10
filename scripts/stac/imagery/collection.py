@@ -39,6 +39,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 GSD_UNIT = "m"
+WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 
 
 class ImageryCollection:
@@ -143,6 +144,11 @@ class ImageryCollection:
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
+        if not self.capture_area and self.published_location:
+            get_log().warn(
+                f"{WARN_NO_PUBLISHED_CAPTURE_AREA}: a new capture-area can't be generated.",
+            )
+            return
         # If published dataset update, merge the existing capture area with the new one
         if self.capture_area:
             polygons.append(shape(self.capture_area["geometry"]))
@@ -497,7 +503,7 @@ class ImageryCollection:
         """
         if not self.capture_area:
             get_log().warn(
-                "Published Collection has no capture-area.",
+                WARN_NO_PUBLISHED_CAPTURE_AREA,
             )
             return
         item_geometry = shape(item["geometry"])
