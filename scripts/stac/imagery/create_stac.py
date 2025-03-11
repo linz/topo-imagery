@@ -147,6 +147,7 @@ def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
     return providers
 
 
+# pylint: disable=too-many-locals
 def create_item(
     asset_path: str,
     start_datetime: str,
@@ -157,6 +158,7 @@ def create_item(
     gdalinfo_result: GdalInfo | None = None,
     derived_from: list[str] | None = None,
     odr_url: str | None = None,
+    keep_derived_from_links: bool = False,
 ) -> ImageryItem:
     """Create an ImageryItem (STAC) to be linked to a Collection.
 
@@ -170,6 +172,7 @@ def create_item(
         gdalinfo_result: result of the gdalinfo command. Defaults to None.
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
         odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
+        keep_derived_from_links: whether to keep the existing derived_from links. Defaults to False.
 
     Returns:
         a STAC Item wrapped in ImageryItem
@@ -186,20 +189,28 @@ def create_item(
 
     if derived_from is not None:
         for derived in derived_from:
-            derived_item_content = read(derived)
-            derived_stac = json.loads(derived_item_content.decode("UTF-8"))
-            if not start_datetime or derived_stac["properties"]["start_datetime"] < start_datetime:
-                start_datetime = derived_stac["properties"]["start_datetime"]
-            if not end_datetime or derived_stac["properties"]["end_datetime"] > end_datetime:
-                end_datetime = derived_stac["properties"]["end_datetime"]
-            item.add_link(
-                Link(
-                    path=derived,
-                    rel=Relation.DERIVED_FROM,
-                    media_type=StacMediaType.GEOJSON,
-                    file_content=derived_item_content,
+            derived_from_item_file_content = read(derived)
+            derived_from_item_stac = json.loads(derived_from_item_file_content.decode("UTF-8"))
+            if not start_datetime or derived_from_item_stac["properties"]["start_datetime"] < start_datetime:
+                start_datetime = derived_from_item_stac["properties"]["start_datetime"]
+            if not end_datetime or derived_from_item_stac["properties"]["end_datetime"] > end_datetime:
+                end_datetime = derived_from_item_stac["properties"]["end_datetime"]
+            current_derived_links = [
+                link for link in derived_from_item_stac.get("links", []) if link["rel"] == Relation.DERIVED_FROM
+            ]
+            if keep_derived_from_links and current_derived_links:
+                item.stac["links"].extend(current_derived_links)
+                get_log().info(f"Kept existing derived_from from {derived}", source=derived)
+            else:  # if there are no derived_from links in the source item, add link to source item
+                item.add_link(
+                    Link(
+                        path=derived,
+                        rel=Relation.DERIVED_FROM,
+                        media_type=StacMediaType.GEOJSON,
+                        file_content=derived_from_item_file_content,
+                    )
                 )
-            )
+                get_log().info(f"Added new derived_from to {derived}", href=derived)
 
     item.update_datetime(start_datetime, end_datetime)
     item.update_spatial(*get_extents(gdalinfo_result))
