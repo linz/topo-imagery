@@ -40,10 +40,10 @@ jobs:
           cmp --silent "${{ runner.temp }}/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
           cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
 
-      - name: End to end test - Hillshade Greyscale
+      - name: End to end test - Hillshade Default
         run: |
           docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade --target /tmp/ --force
-          cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_greyscale.tiff
+          cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_default.tiff
 
       - name: End to end test - Hillshade Igor
         run: |
