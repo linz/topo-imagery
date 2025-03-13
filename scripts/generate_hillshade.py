@@ -70,8 +70,8 @@ def create_hillshade(
     tile: TileFiles,
     preset: str,
     target_output: str = "/tmp/",
-    gsd: Decimal | None = None,
     force: bool = False,
+    gsd: Decimal | None = None,
 ) -> tuple[str, list[str]] | None:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
@@ -79,8 +79,8 @@ def create_hillshade(
         tile: a TileFiles object with the input TIFFs and the output tile name.
         preset: a `HillshadePreset` to use. See `gdal.gdal_presets.py`.
         target_output: path where the output files need to be saved to. Defaults to "/tmp/".
-        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
         force: overwrite existing output file. Defaults to False.
+        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         The filename of the hillshade TIFF file if created and the path of the input files used to create it.
@@ -132,6 +132,7 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
+    gsd: Decimal | None = None,
 ) -> list[tuple[str, list[str]]]:
     """Run `create_hillshade()` in parallel (see `concurrency`).
 
@@ -141,6 +142,7 @@ def run_create_hillshade(
         concurrency: number of concurrent tiles to process
         target_output: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
+        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         the list of generated hillshade TIFF paths with their input files.
@@ -153,6 +155,7 @@ def run_create_hillshade(
                     create_hillshade,
                     preset=preset,
                     target_output=target_output,
+                    gsd=gsd,
                     force=force,
                 ),
                 todo,
@@ -187,7 +190,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
+    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force, arguments.gsd)
 
     if arguments.collection_id:
         for path, derived_from_tiffs in tiles:
