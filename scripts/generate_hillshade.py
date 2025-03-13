@@ -14,7 +14,7 @@ from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdal_presets import HillshadePreset
+from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.create_stac import create_item
@@ -81,6 +81,7 @@ def create_hillshade(
         The filename of the hillshade TIFF file if created and the path of the input files used to create it.
     """
     hillshade_file_name = tile.output + ".tiff"
+    hillshade_with_stats_file_name = tile.output + "_w_stats.tiff"
 
     hillshade_file_path = os.path.join(target_output, hillshade_file_name)
 
@@ -94,6 +95,7 @@ def create_hillshade(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         hillshade_working_path = os.path.join(tmp_path, hillshade_file_name)
+        hillshade_with_stats_working_path = os.path.join(tmp_path, hillshade_with_stats_file_name)
 
         source_files = write_all(tile.inputs, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
@@ -104,7 +106,11 @@ def create_hillshade(
         # Need GDAL to write to temporary location so no broken files end up in the final folder.
         run_gdal(get_hillshade_command(preset), input_file=input_file, output_file=hillshade_working_path)
 
-        write(hillshade_file_path, read(hillshade_working_path), content_type=ContentType.GEOTIFF.value)
+        # Add statistics to the TIFF and force COGifying the output
+        gdal_translate_command = ["gdal_translate", "-co", "compress=lerc"] + BASE_COG  # BASE_COG contains `-stats`
+        run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
+
+        write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
         return hillshade_file_path, tile.inputs
 
