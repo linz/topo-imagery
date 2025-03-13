@@ -447,10 +447,9 @@ def test_capture_area_added(fake_collection_metadata: CollectionMetadata, fake_l
 def test_should_not_add_capture_area(
     fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests, capsys: CaptureFixture[str]
 ) -> None:
-    """
-    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
-    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
-    below.
+    """Verify that if an already published dataset does not have a capture-area
+    (older datasets haven't been processed with this feature),
+    the capture-area is not created as it may miss existing Item footprints.
     """
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
