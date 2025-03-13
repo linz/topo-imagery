@@ -173,6 +173,9 @@ def main() -> None:
             if path is None:
                 continue
             # Create STAC and save in target
+            # FIXME(perfs): it is currently providing the asset path from the target directory,
+            # meaning that the asset may have to be downloaded from an external location.
+            # The gdalinfo could be done on the temporary file created in `create_hillshade()` instead.
             item = create_item(
                 asset_path=path,
                 start_datetime="",
