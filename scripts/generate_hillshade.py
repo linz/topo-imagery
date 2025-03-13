@@ -16,7 +16,7 @@ from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdal_presets import HillshadePreset
+from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.create_stac import create_item
@@ -98,6 +98,7 @@ def create_hillshade(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         hillshade_working_path = os.path.join(tmp_path, hillshade_file_name)
+        hillshade_with_stats_working_path = os.path.join(tmp_path, tile.output + "_w_stats.tiff")
 
         source_files = write_all(tile.inputs, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
@@ -108,13 +109,19 @@ def create_hillshade(
         # Need GDAL to write to temporary location so no broken files end up in the final folder.
         run_gdal(get_hillshade_command(preset), input_file=input_file, output_file=hillshade_working_path)
 
-        write(hillshade_file_path, read(hillshade_working_path), content_type=ContentType.GEOTIFF.value)
+        # Add statistics to the TIFF and force COGifying the output
+        gdal_translate_command = ["gdal_translate", "-co", "compress=lerc"] + BASE_COG  # BASE_COG contains `-stats`
+        run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
+
+        write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
         if gsd:
-            footprint_tmp_path = create_footprint(hillshade_working_path, target_output, gsd)  # noqa: F821
-            footprint_file_name = tile.output + SUFFIX_FOOTPRINT
-            footprint_file_path = os.path.join(target_output, footprint_file_name)
-            write(footprint_file_path, read(footprint_tmp_path), content_type=ContentType.GEOJSON.value)
+            footprint_tmp_path = create_footprint(hillshade_working_path, target_output, gsd)
+            write(
+                os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
+                read(footprint_tmp_path),
+                content_type=ContentType.GEOJSON.value,
+            )
 
         return hillshade_file_path, tile.inputs
 
@@ -197,8 +204,7 @@ def main() -> None:
                 gdalinfo_result=None,
                 derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
             )
-            stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+            write(path.rsplit(".", 1)[0] + SUFFIX_JSON, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
     else:
         get_log().warning("No collection ID provided. Skipping STAC creation.")
 
