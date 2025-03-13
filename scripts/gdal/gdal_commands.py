@@ -5,6 +5,7 @@ from decimal import Decimal
 from linz_logger import get_log
 
 from scripts.gdal.gdal_bands import get_gdal_band_offset
+from scripts.gdal.gdal_helper import EpsgNumber
 from scripts.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
@@ -16,6 +17,7 @@ from scripts.gdal.gdal_presets import (
     HillshadePreset,
 )
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.stac.imagery.capture_area import get_buffer_distance
 
 
 def get_gdal_command(preset: str, epsg: int) -> list[str]:
@@ -242,3 +244,17 @@ def get_hillshade_command(preset: str) -> list[str]:
         gdal_command.extend(["-igor"])
 
     return gdal_command
+
+
+def get_footprint_command(gsd: Decimal) -> list[str]:
+    return [
+        "gdal_footprint",
+        "-t_srs",
+        f"EPSG:{EpsgNumber.WGS_1984.value}",
+        "-max_points",
+        "unlimited",
+        "-lco",
+        "COORDINATE_PRECISION=8",
+        "-simplify",
+        str(get_buffer_distance(gsd)),
+    ]

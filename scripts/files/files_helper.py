@@ -2,7 +2,6 @@ import os
 from enum import Enum
 
 SUFFIX_JSON = ".json"
-SUFFIX_FOOTPRINT = "_footprint.geojson"
 
 
 class ContentType(str, Enum):
