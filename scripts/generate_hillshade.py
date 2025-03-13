@@ -116,7 +116,7 @@ def create_hillshade(
         write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
         if gsd:
-            footprint_tmp_path = create_footprint(hillshade_working_path, target_output, gsd)
+            footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd)
             write(
                 os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
                 read(footprint_tmp_path),
