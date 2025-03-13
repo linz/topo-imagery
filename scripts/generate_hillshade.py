@@ -12,7 +12,7 @@ from scripts.files.files_helper import ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdal_presets import HillshadePreset
+from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
 from scripts.logging.time_helper import time_in_ms
 from scripts.standardising import create_vrt
 
@@ -87,10 +87,9 @@ def create_hillshade(
         # Need GDAL to write to temporary location so no broken files end up in the final folder.
         run_gdal(get_hillshade_command(preset), input_file=input_file, output_file=hillshade_working_path)
 
-        # Add statistics to the TIFF
-        run_gdal(
-            ["gdal_translate", "-stats"], input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path
-        )
+        # Add statistics to the TIFF and force COGifying the output
+        gdal_translate_command = ["gdal_translate", "-co", "compress=lerc"] + BASE_COG  # BASE_COG contains `-stats`
+        run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
 
         write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
