@@ -173,15 +173,15 @@ def main() -> None:
     arguments_parser = get_args_parser()
     arguments = arguments_parser.parse_args()
 
-    if arguments.collection_id and not arguments.gsd:
-        arguments_parser.error("--gsd is required when --collection-id is provided, in order to generate Item footprints.")
-
     try:
         tile_files = load_input_files(arguments.from_file)
     except InputParameterError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
+    gdal_version = os.environ["GDAL_VERSION"]
+
+    get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
     gdal_version = os.environ["GDAL_VERSION"]
 
     get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
