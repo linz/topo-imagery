@@ -3,16 +3,18 @@ import os
 import sys
 import tempfile
 from datetime import datetime, timezone
+from decimal import Decimal
 from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files
+from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files, str_to_gsd
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
+from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
@@ -21,7 +23,7 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
-def parse_args() -> argparse.Namespace:
+def get_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--from-file",
@@ -42,6 +44,7 @@ def parse_args() -> argparse.Namespace:
         dest="collection_id",
         help="Unique id of the Collection. If not provided, STAC Items won't be created.",
     )
+    parser.add_argument("--gsd", dest="gsd", type=str_to_gsd, required=False, help="GSD of imagery Dataset, for example 1")
     parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
@@ -60,7 +63,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
     )
 
-    return parser.parse_args()
+    return parser
 
 
 def create_hillshade(
@@ -68,6 +71,7 @@ def create_hillshade(
     preset: str,
     target_output: str = "/tmp/",
     force: bool = False,
+    gsd: Decimal | None = None,
 ) -> tuple[str, list[str]] | None:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
@@ -76,13 +80,12 @@ def create_hillshade(
         preset: a `HillshadePreset` to use. See `gdal.gdal_presets.py`.
         target_output: path where the output files need to be saved to. Defaults to "/tmp/".
         force: overwrite existing output file. Defaults to False.
+        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         The filename of the hillshade TIFF file if created and the path of the input files used to create it.
     """
     hillshade_file_name = tile.output + ".tiff"
-    hillshade_with_stats_file_name = tile.output + "_w_stats.tiff"
-
     hillshade_file_path = os.path.join(target_output, hillshade_file_name)
 
     # Already processed can skip processing
@@ -95,7 +98,7 @@ def create_hillshade(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         hillshade_working_path = os.path.join(tmp_path, hillshade_file_name)
-        hillshade_with_stats_working_path = os.path.join(tmp_path, hillshade_with_stats_file_name)
+        hillshade_with_stats_working_path = os.path.join(tmp_path, tile.output + "_w_stats.tiff")
 
         source_files = write_all(tile.inputs, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
@@ -112,6 +115,14 @@ def create_hillshade(
 
         write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
+        if gsd:
+            footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd)
+            write(
+                os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
+                read(footprint_tmp_path),
+                content_type=ContentType.GEOJSON.value,
+            )
+
         return hillshade_file_path, tile.inputs
 
 
@@ -121,6 +132,7 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
+    gsd: Decimal | None = None,
 ) -> list[tuple[str, list[str]]]:
     """Run `create_hillshade()` in parallel (see `concurrency`).
 
@@ -130,6 +142,7 @@ def run_create_hillshade(
         concurrency: number of concurrent tiles to process
         target_output: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
+        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         the list of generated hillshade TIFF paths with their input files.
@@ -142,6 +155,7 @@ def run_create_hillshade(
                     create_hillshade,
                     preset=preset,
                     target_output=target_output,
+                    gsd=gsd,
                     force=force,
                 ),
                 todo,
@@ -156,7 +170,8 @@ def run_create_hillshade(
 
 def main() -> None:
     start_time = time_in_ms()
-    arguments = parse_args()
+    arguments_parser = get_args_parser()
+    arguments = arguments_parser.parse_args()
 
     try:
         tile_files = load_input_files(arguments.from_file)
@@ -167,21 +182,21 @@ def main() -> None:
     gdal_version = os.environ["GDAL_VERSION"]
 
     get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
+    gdal_version = os.environ["GDAL_VERSION"]
+
+    get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
 
     concurrency: int = 1
     if is_argo():
         concurrency = 4
 
-    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
+    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force, arguments.gsd)
 
     if arguments.collection_id:
         for path, derived_from_tiffs in tiles:
             if path is None:
                 continue
             # Create STAC and save in target
-            # FIXME(perfs): it is currently providing the asset path from the target directory,
-            # meaning that the asset may have to be downloaded from an external location.
-            # The gdalinfo could be done on the temporary file created in `create_hillshade()` instead.
             item = create_item(
                 asset_path=path,
                 start_datetime="",
@@ -192,8 +207,7 @@ def main() -> None:
                 gdalinfo_result=None,
                 derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
             )
-            stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
-            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+            write(path.rsplit(".", 1)[0] + SUFFIX_JSON, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
     else:
         get_log().warning("No collection ID provided. Skipping STAC creation.")
 

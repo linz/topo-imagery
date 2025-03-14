@@ -13,7 +13,7 @@ from tifffile import TiffFile
 from scripts.aws.aws_helper import is_s3
 from scripts.cli.cli_helper import TileFiles
 from scripts.files.file_tiff import FileTiff, FileTiffType
-from scripts.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
+from scripts.files.files_helper import ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_commands import (
@@ -23,9 +23,9 @@ from scripts.gdal.gdal_commands import (
     get_gdal_command,
     get_transform_srs_command,
 )
-from scripts.gdal.gdal_helper import EpsgNumber, gdal_info, run_gdal
+from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
+from scripts.gdal.gdal_helper import gdal_info, run_gdal
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.capture_area import get_buffer_distance
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 
@@ -202,7 +202,7 @@ def standardising(
             return None
 
         if config.create_footprints:
-            temp_footprint = create_footprint(current_working_file, config, tmp_path)
+            temp_footprint = create_footprint(current_working_file, tmp_path, config.gsd)
             footprint_file_path = os.path.join(target_output, f"{files.output}{SUFFIX_FOOTPRINT}")
             write(footprint_file_path, read(temp_footprint), content_type=ContentType.GEOJSON.value)
 
@@ -303,24 +303,3 @@ def check_tiff_empty(current_working_file: str) -> bool:
     """Check whether the TIFF output is empty."""
     with TiffFile(current_working_file) as file_handle:
         return all(tile_byte_count == 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value)
-
-
-def create_footprint(current_working_file: str, config: StandardisingConfig, tmp_path: str) -> str:
-    """Create the footprint from the standardized TIFF."""
-    footprint_tmp_path = os.path.join(tmp_path, f"footprint{SUFFIX_FOOTPRINT}")
-    run_gdal(
-        [
-            "gdal_footprint",
-            "-t_srs",
-            f"EPSG:{EpsgNumber.WGS_1984.value}",
-            "-max_points",
-            "unlimited",
-            "-lco",
-            "COORDINATE_PRECISION=8",
-            "-simplify",
-            str(get_buffer_distance(config.gsd)),
-        ],
-        current_working_file,
-        footprint_tmp_path,
-    )
-    return footprint_tmp_path
