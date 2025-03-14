@@ -2,18 +2,22 @@ import argparse
 import os
 import sys
 import tempfile
+from datetime import datetime, timezone
 from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files
-from scripts.files.files_helper import ContentType, is_tiff
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT
+from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_hillshade_command
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
+from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
+from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
@@ -33,6 +37,21 @@ def parse_args() -> argparse.Namespace:
         choices=[preset.value for preset in HillshadePreset],
         help="Type of hillshade to generate.",
     )
+    parser.add_argument(
+        "--collection-id",
+        dest="collection_id",
+        help="Unique id of the Collection. If not provided, STAC Items won't be created.",
+    )
+    parser.add_argument(
+        "--current-datetime",
+        dest="current_datetime",
+        help=(
+            "The datetime to be used as current datetime in the metadata. "
+            "Format: RFC 3339 UTC datetime, `YYYY-MM-DDThh:mm:ssZ`."
+        ),
+        required=False,
+        default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
+    )
     parser.add_argument("--target", dest="target", required=True, help="Specify the path to save the generated hillshade to.")
     parser.add_argument(
         "--force",
@@ -49,7 +68,7 @@ def create_hillshade(
     preset: str,
     target_output: str = "/tmp/",
     force: bool = False,
-) -> str | None:
+) -> tuple[str, list[str]] | None:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
     Args:
@@ -59,7 +78,7 @@ def create_hillshade(
         force: overwrite existing output file. Defaults to False.
 
     Returns:
-        The filename of the hillshade TIFF file if created.
+        The filename of the hillshade TIFF file if created and the path of the input files used to create it.
     """
     hillshade_file_name = tile.output + ".tiff"
     hillshade_with_stats_file_name = tile.output + "_w_stats.tiff"
@@ -93,7 +112,7 @@ def create_hillshade(
 
         write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
-        return hillshade_file_path
+        return hillshade_file_path, tile.inputs
 
 
 def run_create_hillshade(
@@ -102,7 +121,7 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
-) -> list[str]:
+) -> list[tuple[str, list[str]]]:
     """Run `create_hillshade()` in parallel (see `concurrency`).
 
     Args:
@@ -113,7 +132,7 @@ def run_create_hillshade(
         force: overwrite existing files. Defaults to False.
 
     Returns:
-        the list of generated hillshade TIFF paths.
+        the list of generated hillshade TIFF paths with their input files.
     """
     with Pool(concurrency) as p:
         results = [
@@ -145,19 +164,40 @@ def main() -> None:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
-    get_log().info(
-        "generate_hillshade_start", gdalVersion=os.environ["GDAL_VERSION"], fileCount=len(tile_files), preset=arguments.preset
-    )
+    gdal_version = os.environ["GDAL_VERSION"]
+
+    get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
 
     concurrency: int = 1
     if is_argo():
         concurrency = 4
 
-    file_paths = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
+    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
 
-    get_log().info(
-        "generate_hillshade_end", duration=time_in_ms() - start_time, fileCount=len(file_paths), path=arguments.target
-    )
+    if arguments.collection_id:
+        for path, derived_from_tiffs in tiles:
+            if path is None:
+                continue
+            # Create STAC and save in target
+            # FIXME(perfs): it is currently providing the asset path from the target directory,
+            # meaning that the asset may have to be downloaded from an external location.
+            # The gdalinfo could be done on the temporary file created in `create_hillshade()` instead.
+            item = create_item(
+                asset_path=path,
+                start_datetime="",
+                end_datetime="",
+                collection_id=arguments.collection_id,
+                gdal_version=gdal_version,
+                current_datetime=arguments.current_datetime,
+                gdalinfo_result=None,
+                derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
+            )
+            stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
+            write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+    else:
+        get_log().warning("No collection ID provided. Skipping STAC creation.")
+
+    get_log().info("generate_hillshade_end", duration=time_in_ms() - start_time, fileCount=len(tiles), path=arguments.target)
 
 
 if __name__ == "__main__":
