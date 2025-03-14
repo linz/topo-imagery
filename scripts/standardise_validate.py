@@ -90,6 +90,14 @@ def parse_args() -> argparse.Namespace:
         help="Scale to x,y resolution (leave blank for no scaling)",
         required=False,
     )
+    parser.add_argument(
+        "--keep-derived-from-links",
+        dest="keep_derived_from_links",
+        help="Keep derived_from links from source items ('true' / 'false')",
+        type=str_to_bool,
+        required=False,
+        default=False,
+    )
     return parser.parse_args()
 
 
@@ -178,9 +186,10 @@ def main() -> None:
                 arguments.collection_id,
                 gdal_version,
                 arguments.current_datetime,
-                file.get_gdalinfo(),
-                file.get_derived_from_paths(),
-                arguments.odr_url,
+                gdalinfo_result=file.get_gdalinfo(),
+                derived_from=file.get_derived_from_paths(),
+                odr_url=arguments.odr_url,
+                keep_derived_from_links=arguments.keep_derived_from_links,
             )
             write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             get_log().info("stac_saved", path=stac_item_path)
