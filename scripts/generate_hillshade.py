@@ -197,6 +197,8 @@ def main() -> None:
                     derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
                 )
                 write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+            else:
+                get_log().info("Skipping: STAC already exists.", path=stac_item_path)
     else:
         get_log().warning("No collection ID provided. Skipping STAC creation.")
 
