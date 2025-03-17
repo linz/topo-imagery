@@ -72,7 +72,7 @@ def create_hillshade(
     target_output: str = "/tmp/",
     force: bool = False,
     gsd: Decimal | None = None,
-) -> tuple[str, list[str]] | None:
+) -> tuple[str, list[str]]:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
     Args:
@@ -92,7 +92,7 @@ def create_hillshade(
     if exists(hillshade_file_path):
         if not force:
             get_log().info("Skipping: hillshade TIFF already exists.", path=hillshade_file_path)
-            return None
+            return hillshade_file_path, tile.inputs
         get_log().info("Overwriting: hillshade TIFF already exists.", path=hillshade_file_path)
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
@@ -148,20 +148,9 @@ def run_create_hillshade(
         the list of generated hillshade TIFF paths with their input files.
     """
     with Pool(concurrency) as p:
-        results = [
-            entry
-            for entry in p.map(
-                partial(
-                    create_hillshade,
-                    preset=preset,
-                    target_output=target_output,
-                    gsd=gsd,
-                    force=force,
-                ),
-                todo,
-            )
-            if entry is not None
-        ]
+        results = list(
+            p.map(partial(create_hillshade, preset=preset, target_output=target_output, gsd=gsd, force=force), todo)
+        )
         p.close()
         p.join()
 
@@ -194,20 +183,20 @@ def main() -> None:
 
     if arguments.collection_id:
         for path, derived_from_tiffs in tiles:
-            if path is None:
-                continue
-            # Create STAC and save in target
-            item = create_item(
-                asset_path=path,
-                start_datetime="",
-                end_datetime="",
-                collection_id=arguments.collection_id,
-                gdal_version=gdal_version,
-                current_datetime=arguments.current_datetime,
-                gdalinfo_result=None,
-                derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
-            )
-            write(path.rsplit(".", 1)[0] + SUFFIX_JSON, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
+            stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
+            if not exists(stac_item_path):
+                # Create STAC and save in target
+                item = create_item(
+                    asset_path=path,
+                    start_datetime="",
+                    end_datetime="",
+                    collection_id=arguments.collection_id,
+                    gdal_version=gdal_version,
+                    current_datetime=arguments.current_datetime,
+                    gdalinfo_result=None,
+                    derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
+                )
+                write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
     else:
         get_log().warning("No collection ID provided. Skipping STAC creation.")
 
