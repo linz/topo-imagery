@@ -36,6 +36,7 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
+COLLECTION_FILE_NAME = "collection.json"
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 GSD_UNIT = "m"
