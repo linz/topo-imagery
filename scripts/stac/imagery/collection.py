@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass
 from typing import Any
 
 import ulid
@@ -42,6 +43,12 @@ GSD_UNIT = "m"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 
 
+@dataclass
+class CollectionIdentifiers:
+    linz_slug: str
+    collection_id: str | None = None
+
+
 class ImageryCollection:
     stac: dict[str, Any]
     capture_area: dict[str, Any] | None = None
@@ -52,20 +59,19 @@ class ImageryCollection:
         metadata: CollectionMetadata,
         created_datetime: str,
         updated_datetime: str,
-        linz_slug: str,
-        collection_id: str | None = None,
+        identifiers: CollectionIdentifiers,
         providers: list[Provider] | None = None,
         add_title_suffix: bool = True,
     ) -> None:
-        if not collection_id:
-            collection_id = str(ulid.ULID())
+        if not identifiers.collection_id:
+            identifiers.collection_id = str(ulid.ULID())
 
         self.metadata = metadata
 
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
-            "id": collection_id,
+            "id": identifiers.collection_id,
             "title": self._title(add_title_suffix),
             "description": self._description(),
             "license": "CC-BY-4.0",
@@ -75,7 +81,7 @@ class ImageryCollection:
             "linz:geospatial_category": metadata["category"],
             "linz:region": metadata["region"],
             "linz:security_classification": "unclassified",
-            "linz:slug": linz_slug,
+            "linz:slug": identifiers.linz_slug,
             "created": created_datetime,
             "updated": updated_datetime,
         }
@@ -120,7 +126,7 @@ class ImageryCollection:
             metadata=metadata,
             created_datetime=stac_from_file["created"],
             updated_datetime=stac_from_file["updated"],
-            linz_slug=stac_from_file["linz:slug"],
+            identifiers=CollectionIdentifiers(linz_slug=stac_from_file["linz:slug"], collection_id=stac_from_file["id"]),
         )
         # Override STAC from the original collection
         collection.stac = stac_from_file
