@@ -194,7 +194,7 @@ def main() -> None:
                     gdal_version=gdal_version,
                     current_datetime=arguments.current_datetime,
                     gdalinfo_result=None,
-                    derived_from=[url_derived_from.rsplit(".", 1)[0] + ".json" for url_derived_from in derived_from_tiffs],
+                    derived_from=[url_derived_from.rsplit(".", 1)[0] + SUFFIX_JSON for url_derived_from in derived_from_tiffs],
                 )
                 write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             else:
