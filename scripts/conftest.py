@@ -3,8 +3,9 @@ from string import ascii_lowercase
 
 import pytest
 
+from scripts.stac.imagery.collection import CollectionIdentifiers
 
-@pytest.fixture
+
 def fake_linz_slug() -> str:
     random_string = "".join(choice(ascii_lowercase) for _ in range(6))
     start_year = randint(2000, 2009)
@@ -12,3 +13,12 @@ def fake_linz_slug() -> str:
     gsd = choice([0.75, 0.3, 1, 0.075])
 
     return f"a-random-slug-{random_string}_{start_year}-{end_year}_{gsd}m"
+
+
+@pytest.fixture
+def fake_collection_identifiers() -> CollectionIdentifiers:
+
+    return CollectionIdentifiers(
+        collection_id="a-random-collection-id",
+        linz_slug=fake_linz_slug(),
+    )

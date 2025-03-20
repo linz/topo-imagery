@@ -9,7 +9,7 @@ from unittest.mock import patch
 from pytest_subtests import SubTests
 
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection import CollectionIdentifiers, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
@@ -110,7 +110,7 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None:
+def test_imagery_add_collection(fake_collection_identifiers: CollectionIdentifiers, subtests: SubTests) -> None:
     metadata: CollectionMetadata = {
         "category": "urban-aerial-photos",
         "region": "auckland",
@@ -122,13 +122,11 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
         "historic_survey_number": None,
         "geographic_description": None,
     }
-    ulid = "fake_ulid"
     collection = ImageryCollection(
         metadata=metadata,
         created_datetime=any_epoch_datetime_string(),
         updated_datetime=any_epoch_datetime_string(),
-        linz_slug=fake_linz_slug,
-        collection_id=ulid,
+        identifiers=fake_collection_identifiers,
     )
 
     path = "./scripts/tests/data/empty.tiff"
@@ -138,7 +136,7 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
     item.add_collection(collection.stac["id"])
 
     with subtests.test():
-        assert item.stac["collection"] == ulid
+        assert item.stac["collection"] == fake_collection_identifiers.collection_id
 
     with subtests.test():
         assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
