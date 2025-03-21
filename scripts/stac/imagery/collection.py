@@ -462,10 +462,7 @@ class ImageryCollection:
         else:
             raise SubtypeParameterError(category)
 
-        if event := self.metadata.event_name:
-            desc = f"{desc}, published as a record of the {event} event."
-        else:
-            desc = f"{desc}."
+        desc += f", published as a record of the {self.metadata.event_name} event." if self.metadata.event_name else "."
 
         return desc
 
