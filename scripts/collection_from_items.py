@@ -186,17 +186,17 @@ def main(args: List[str] | None = None) -> None:
         )
         raise NoItemsError(f"Collection {collection_id} has no items")
 
-    collection_metadata: CollectionMetadata = {
-        "category": arguments.category,
-        "region": arguments.region,
-        "gsd": arguments.gsd,
-        "start_datetime": parse_rfc_3339_datetime(start_datetime),
-        "end_datetime": parse_rfc_3339_datetime(end_datetime),
-        "lifecycle": arguments.lifecycle,
-        "geographic_description": arguments.geographic_description,
-        "event_name": arguments.event,
-        "historic_survey_number": arguments.historic_survey_number,
-    }
+    collection_metadata = CollectionMetadata(
+        category=arguments.category,
+        region=arguments.region,
+        gsd=arguments.gsd,
+        start_datetime=parse_rfc_3339_datetime(start_datetime),
+        end_datetime=parse_rfc_3339_datetime(end_datetime),
+        lifecycle=arguments.lifecycle,
+        geographic_description=arguments.geographic_description,
+        event_name=arguments.event,
+        historic_survey_number=arguments.historic_survey_number,
+    )
 
     collection = create_collection(
         collection_id=collection_id,

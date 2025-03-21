@@ -32,8 +32,8 @@ from scripts.tests.datetimes_test import any_epoch_datetime_string
 def test_title_description_id_created_on_init(
     fake_collection_metadata: CollectionMetadata, fake_linz_slug: str, subtests: SubTests
 ) -> None:
-    fake_collection_metadata["event_name"] = "Forest Assessment"
-    fake_collection_metadata["geographic_description"] = "Hawke's Bay Forest Assessment"
+    fake_collection_metadata.event_name = "Forest Assessment"
+    fake_collection_metadata.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )
@@ -115,9 +115,9 @@ def test_hillshade_title_and_description(
     expected_title: str,
     expected_description: str,
 ) -> None:
-    fake_collection_metadata["region"] = "new-zealand"
-    fake_collection_metadata["category"] = category
-    fake_collection_metadata["gsd"] = gsd
+    fake_collection_metadata.region = "new-zealand"
+    fake_collection_metadata.category = category
+    fake_collection_metadata.gsd = gsd
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )
@@ -515,7 +515,7 @@ def test_should_make_valid_capture_area() -> None:
 
 
 def test_event_name_is_present(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
-    fake_collection_metadata["event_name"] = "Forest Assessment"
+    fake_collection_metadata.event_name = "Forest Assessment"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )
@@ -523,7 +523,7 @@ def test_event_name_is_present(fake_collection_metadata: CollectionMetadata, fak
 
 
 def test_geographic_description_is_present(fake_collection_metadata: CollectionMetadata, fake_linz_slug: str) -> None:
-    fake_collection_metadata["geographic_description"] = "Hawke's Bay Forest Assessment"
+    fake_collection_metadata.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug
     )

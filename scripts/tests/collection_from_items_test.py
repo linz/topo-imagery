@@ -164,17 +164,14 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
     s3_client.create_bucket(Bucket="stacfiles")
     collection_id = "abc"
     # Create mocked "existing" Collection
-    metadata: CollectionMetadata = {
-        "category": "urban-aerial-photos",
-        "region": "hawkes-bay",
-        "gsd": Decimal("1"),
-        "start_datetime": datetime(2023, 9, 20),
-        "end_datetime": datetime(2023, 9, 20),
-        "lifecycle": "ongoing",
-        "event_name": None,
-        "geographic_description": None,
-        "historic_survey_number": None,
-    }
+    metadata = CollectionMetadata(
+        category="urban-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("1"),
+        start_datetime=datetime(2023, 9, 20),
+        end_datetime=datetime(2023, 9, 20),
+        lifecycle="ongoing",
+    )
     existing_collection = ImageryCollection(
         metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug, collection_id
     )
