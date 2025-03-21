@@ -71,9 +71,9 @@ class ImageryCollection:
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
-            "linz:lifecycle": metadata["lifecycle"],
-            "linz:geospatial_category": metadata["category"],
-            "linz:region": metadata["region"],
+            "linz:lifecycle": metadata.lifecycle,
+            "linz:geospatial_category": metadata.category,
+            "linz:region": metadata.region,
             "linz:security_classification": "unclassified",
             "linz:slug": linz_slug,
             "created": created_datetime,
@@ -81,9 +81,9 @@ class ImageryCollection:
         }
 
         # Optional metadata
-        if event_name := metadata.get("event_name"):
+        if event_name := metadata.event_name:
             self.stac["linz:event_name"] = event_name
-        if geographic_description := metadata.get("geographic_description"):
+        if geographic_description := metadata.geographic_description:
             self.stac["linz:geographic_description"] = geographic_description
 
         # If the providers passed has already a LINZ provider: add its default roles to it
@@ -155,7 +155,7 @@ class ImageryCollection:
         if self.capture_area:
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
-        capture_area_document = generate_capture_area(polygons, self.metadata["gsd"])
+        capture_area_document = generate_capture_area(polygons, self.metadata.gsd)
         capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {
@@ -355,24 +355,24 @@ class ImageryCollection:
             Dataset Title
         """
         # format optional metadata
-        geographic_description = self.metadata.get("geographic_description")
-        historic_survey_number = self.metadata.get("historic_survey_number")
+        geographic_description = self.metadata.geographic_description
+        historic_survey_number = self.metadata.historic_survey_number
 
         # format region
-        region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
+        region = HUMAN_READABLE_REGIONS[self.metadata.region]
 
         # format date
-        start_year = self.metadata["start_datetime"].year
-        end_year = self.metadata["end_datetime"].year
+        start_year = self.metadata.start_datetime.year
+        end_year = self.metadata.end_datetime.year
         date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
 
         # format gsd
-        gsd_str = f"{self.metadata['gsd']}{GSD_UNIT}"
+        gsd_str = f"{self.metadata.gsd}{GSD_UNIT}"
 
         # determine suffix based on its lifecycle
-        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.metadata.get("lifecycle", "")) if add_suffix else None
+        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.metadata.lifecycle, "") if add_suffix else None
 
-        category = self.metadata["category"]
+        category = self.metadata.category
 
         if category == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
@@ -409,13 +409,13 @@ class ImageryCollection:
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR}:
             components = [
                 region,
-                gsd_str if self.metadata["gsd"] == 8 else None,
+                gsd_str if self.metadata.gsd == 8 else None,
                 "DEM Hillshade",
                 "- Igor" if category == DEM_HILLSHADE_IGOR else None,
             ]
 
         else:
-            raise SubtypeParameterError(self.metadata["category"])
+            raise SubtypeParameterError(self.metadata.category)
 
         return " ".join(filter(None, components))
 
@@ -435,14 +435,14 @@ class ImageryCollection:
             Dataset Description
         """
         # format date
-        start_year = self.metadata["start_datetime"].year
-        end_year = self.metadata["end_datetime"].year
+        start_year = self.metadata.start_datetime.year
+        end_year = self.metadata.end_datetime.year
         date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
 
         # format region
-        region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
+        region = HUMAN_READABLE_REGIONS[self.metadata.region]
 
-        category = self.metadata["category"]
+        category = self.metadata.category
         if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
             date = f"the {date} flying season"
 
@@ -462,19 +462,16 @@ class ImageryCollection:
         else:
             raise SubtypeParameterError(category)
 
-        if event := self.metadata.get("event_name"):
-            desc = f"{desc}, published as a record of the {event} event."
-        else:
-            desc = f"{desc}."
+        desc += f", published as a record of the {self.metadata.event_name} event." if self.metadata.event_name else "."
 
         return desc
 
     def _hillshade_description(self) -> str:
         """Generates the description for hillshade datasets."""
 
-        region = HUMAN_READABLE_REGIONS[self.metadata["region"]]
-        category = self.metadata["category"]
-        gsd_str = f"{self.metadata["gsd"]}{GSD_UNIT}"
+        region = HUMAN_READABLE_REGIONS[self.metadata.region]
+        category = self.metadata.category
+        gsd_str = f"{self.metadata.gsd}{GSD_UNIT}"
 
         if category == DEM_HILLSHADE_IGOR:
             shading_option = (
@@ -488,7 +485,7 @@ class ImageryCollection:
             "Hillshade generated from the",
             f"{region} LiDAR {gsd_str} DEM and" if gsd_str != "8m" else None,
             f"{region} Contour-Derived 8m DEM",
-            f"(where no {self.metadata["gsd"]}m DEM data exists)" if gsd_str != "8m" else None,
+            f"(where no {self.metadata.gsd}m DEM data exists)" if gsd_str != "8m" else None,
             "using",
             shading_option,
         ]

@@ -1,9 +1,10 @@
+from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
-from typing import TypedDict
 
 
-class CollectionMetadata(TypedDict):
+@dataclass
+class CollectionMetadata:  # pylint:disable=too-many-instance-attributes
     """
     Used to generate dataset collection titles and descriptions.
 
@@ -24,9 +25,9 @@ class CollectionMetadata(TypedDict):
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
-    geographic_description: str | None
-    event_name: str | None
-    historic_survey_number: str | None
+    geographic_description: str | None = None
+    event_name: str | None = None
+    historic_survey_number: str | None = None
 
 
 class SubtypeParameterError(Exception):
