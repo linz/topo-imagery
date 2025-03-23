@@ -6,17 +6,20 @@ from decimal import Decimal
 @dataclass
 class CollectionMetadata:  # pylint:disable=too-many-instance-attributes
     """
-    Used to generate dataset collection titles and descriptions.
+    Holds the Collection metadata.
 
-    region: Region of Dataset
-    gsd: Dataset Ground Sample Distance
-    start_date: Dataset capture start date
-    end_date: Dataset capture end date
-    lifecycle: Dataset status
-    Optional:
-        geographic_description: Optional geographic_description of dataset, e.g. Hutt City
-        event: Optional details of capture event, e.g. Cyclone Gabrielle
-        historic_survey_number: Optional historic imagery survey number, e.g. SNC88445
+    Attributes:
+        category: The category of the dataset.
+        region: The region the dataset is from.
+        gsd: The Ground Sample Distance of the dataset.
+        start_datetime: The start datetime of the dataset.
+        end_datetime: The end datetime of the dataset.
+        lifecycle: The lifecycle of the dataset.
+        linz_slug: The LINZ slug of the dataset.
+        collection_id: The collection ID.
+        geographic_description: The geographic description of the dataset.
+        event_name: The event name of the dataset.
+        historic_survey_number: The historic survey number of the dataset.
     """
 
     category: str
@@ -25,6 +28,8 @@ class CollectionMetadata:  # pylint:disable=too-many-instance-attributes
     start_datetime: datetime
     end_datetime: datetime
     lifecycle: str
+    linz_slug: str
+    collection_id: str | None = None
     geographic_description: str | None = None
     event_name: str | None = None
     historic_survey_number: str | None = None

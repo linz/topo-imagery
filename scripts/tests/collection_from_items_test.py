@@ -1,5 +1,3 @@
-from datetime import datetime
-from decimal import Decimal
 from os import environ
 from typing import TYPE_CHECKING, Iterator
 from unittest.mock import patch
@@ -44,7 +42,7 @@ def setup() -> Iterator[ImageryItem]:
 
 
 @mock_aws
-def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -> None:
+def test_should_create_collection_file(item: ImageryItem, fake_collection_metadata: CollectionMetadata) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
@@ -71,7 +69,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
         "--concurrency",
         "25",
         "--linz-slug",
-        fake_linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     main(args)
@@ -83,7 +81,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_linz_slug: str) -
 
 @mock_aws
 def test_should_fail_if_collection_has_no_matching_items(
-    item: ImageryItem, fake_linz_slug: str, capsys: CaptureFixture[str], subtests: SubTests
+    item: ImageryItem, fake_collection_metadata: CollectionMetadata, capsys: CaptureFixture[str], subtests: SubTests
 ) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -116,7 +114,7 @@ def test_should_fail_if_collection_has_no_matching_items(
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -158,30 +156,20 @@ def test_should_fail_to_create_collection_file_without_linz_slug(capsys: Capture
 
 
 @mock_aws
-def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[str]) -> None:
+def test_should_not_add_if_not_item(fake_collection_metadata: CollectionMetadata, capsys: CaptureFixture[str]) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
-    collection_id = "abc"
     # Create mocked "existing" Collection
-    metadata = CollectionMetadata(
-        category="urban-aerial-photos",
-        region="hawkes-bay",
-        gsd=Decimal("1"),
-        start_datetime=datetime(2023, 9, 20),
-        end_datetime=datetime(2023, 9, 20),
-        lifecycle="ongoing",
-    )
-    existing_collection = ImageryCollection(
-        metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_linz_slug, collection_id
-    )
+    existing_collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string())
     write("s3://stacfiles/collection.json", dict_to_json_bytes(existing_collection.stac))
+    assert fake_collection_metadata.collection_id is not None
     # CLI arguments
     args = [
         "--uri",
         "s3://stacfiles/",
         "--collection-id",
-        collection_id,
+        fake_collection_metadata.collection_id,
         "--category",
         "urban-aerial-photos",
         "--region",
@@ -199,7 +187,7 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -209,7 +197,7 @@ def test_should_not_add_if_not_item(fake_linz_slug: str, capsys: CaptureFixture[
 
 
 @mock_aws
-def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: str) -> None:
+def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_metadata: CollectionMetadata) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
@@ -242,7 +230,7 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_linz_slug: st
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     main(args)

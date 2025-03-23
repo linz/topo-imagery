@@ -53,20 +53,18 @@ class ImageryCollection:
         metadata: CollectionMetadata,
         created_datetime: str,
         updated_datetime: str,
-        linz_slug: str,
-        collection_id: str | None = None,
         providers: list[Provider] | None = None,
         add_title_suffix: bool = True,
     ) -> None:
-        if not collection_id:
-            collection_id = str(ulid.ULID())
+        if not metadata.collection_id:
+            metadata.collection_id = str(ulid.ULID())
 
         self.metadata = metadata
 
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
-            "id": collection_id,
+            "id": metadata.collection_id,
             "title": self._title(add_title_suffix),
             "description": self._description(),
             "license": "CC-BY-4.0",
@@ -76,7 +74,7 @@ class ImageryCollection:
             "linz:geospatial_category": metadata.category,
             "linz:region": metadata.region,
             "linz:security_classification": "unclassified",
-            "linz:slug": linz_slug,
+            "linz:slug": metadata.linz_slug,
             "created": created_datetime,
             "updated": updated_datetime,
         }
@@ -117,11 +115,18 @@ class ImageryCollection:
         file_content = read(file_name)
         stac_from_file = json.loads(file_content.decode("UTF-8"))
         stac_from_file["updated"] = updated_datetime
+        if metadata.collection_id != stac_from_file["id"]:
+            raise ValueError(f"Collection ID mismatch: {metadata.collection_id} != {stac_from_file['id']}")
+        if metadata.linz_slug != stac_from_file["linz:slug"]:
+            get_log().warn(
+                f"Collection LINZ slug mismatch: {metadata.linz_slug} != {stac_from_file['linz:slug']}."
+                "Existing Collection linz_slug will be used."
+            )
+            metadata.linz_slug = stac_from_file["linz:slug"]
         collection = cls(
             metadata=metadata,
             created_datetime=stac_from_file["created"],
             updated_datetime=stac_from_file["updated"],
-            linz_slug=stac_from_file["linz:slug"],
         )
         # Override STAC from the original collection
         collection.stac = stac_from_file

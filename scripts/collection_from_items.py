@@ -17,7 +17,7 @@ from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multi
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
-from scripts.stac.imagery.create_stac import create_collection
+from scripts.stac.imagery.create_stac import CreateCollectionOptions, create_collection
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 
 if TYPE_CHECKING:
@@ -194,23 +194,24 @@ def main(args: List[str] | None = None) -> None:
         start_datetime=parse_rfc_3339_datetime(start_datetime),
         end_datetime=parse_rfc_3339_datetime(end_datetime),
         lifecycle=arguments.lifecycle,
+        linz_slug=arguments.linz_slug,
+        collection_id=collection_id,
         geographic_description=arguments.geographic_description,
         event_name=arguments.event,
         historic_survey_number=arguments.historic_survey_number,
     )
 
     collection = create_collection(
-        collection_id=collection_id,
-        linz_slug=arguments.linz_slug,
         collection_metadata=collection_metadata,
         current_datetime=arguments.current_datetime,
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
         stac_items=items_to_add,
         item_polygons=polygons,
-        add_capture_dates=arguments.capture_dates,
+        options=CreateCollectionOptions(
+            add_capture_dates=arguments.capture_dates, add_title_suffix=arguments.add_title_suffix
+        ),
         uri=uri,
-        add_title_suffix=arguments.add_title_suffix,
         odr_url=arguments.odr_url,
     )
 

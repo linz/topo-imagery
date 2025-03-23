@@ -1,6 +1,4 @@
 import json
-from datetime import datetime
-from decimal import Decimal
 from os import environ
 from pathlib import Path
 from typing import Any
@@ -110,23 +108,12 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None:
-    metadata = CollectionMetadata(
-        category="urban-aerial-photos",
-        region="auckland",
-        gsd=Decimal("0.3"),
-        start_datetime=datetime(2022, 2, 2),
-        end_datetime=datetime(2022, 2, 2),
-        lifecycle="completed",
-    )
+def test_imagery_add_collection(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
 
-    ulid = "fake_ulid"
     collection = ImageryCollection(
-        metadata=metadata,
+        metadata=fake_collection_metadata,
         created_datetime=any_epoch_datetime_string(),
         updated_datetime=any_epoch_datetime_string(),
-        linz_slug=fake_linz_slug,
-        collection_id=ulid,
     )
 
     path = "./scripts/tests/data/empty.tiff"
@@ -136,7 +123,7 @@ def test_imagery_add_collection(fake_linz_slug: str, subtests: SubTests) -> None
     item.add_collection(collection.stac["id"])
 
     with subtests.test():
-        assert item.stac["collection"] == ulid
+        assert item.stac["collection"] == fake_collection_metadata.collection_id
 
     with subtests.test():
         assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]

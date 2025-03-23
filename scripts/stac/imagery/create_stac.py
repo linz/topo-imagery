@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from linz_logger import get_log
@@ -23,36 +24,41 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
-# pylint: disable=too-many-arguments
-def create_collection(
-    collection_id: str,
-    linz_slug: str,
+@dataclass
+class CreateCollectionOptions:
+    """Options to be used to create a Collection.
+    add_capture_dates: Link a `capture-dates.geojson` file to the Collection
+    add_title_suffix: Add suffix to the Collection `title`
+    """
+
+    add_capture_dates: bool = False
+    add_title_suffix: bool = False
+
+
+def create_collection(  # pylint: disable=too-many-arguments
     collection_metadata: CollectionMetadata,
     current_datetime: str,
     producers: list[str],
     licensors: list[str],
     stac_items: list[dict[Any, Any]],
     item_polygons: list[BaseGeometry],
-    add_capture_dates: bool,
+    options: CreateCollectionOptions,
     uri: str,
-    add_title_suffix: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
 
     Args:
-        collection_id: id of the collection
-        linz_slug: the linz:slug attribute for this collection
+        collection_identifiers: identifiers of the collection
         collection_metadata: metadata of the collection
         current_datetime: datetime string that represents the current time when the item is created.
         producers: producers of the dataset
         licensors: licensors of the dataset
         stac_items: items to link to the collection
         item_polygons: polygons of the items linked to the collection
-        add_capture_dates: whether to add a capture-dates.geojson.gz file to the collection assets
+        options: options to be used to create a Collection
         uri: path of the dataset
-        add_title_suffix: whether to add a title suffix to the collection title based on the lifecycle
         odr_url: path of the published dataset. Defaults to None.
 
     Returns:
@@ -70,16 +76,14 @@ def create_collection(
             metadata=collection_metadata,
             created_datetime=current_datetime,
             updated_datetime=current_datetime,
-            linz_slug=linz_slug,
-            collection_id=collection_id,
             providers=get_providers(licensors, producers),
-            add_title_suffix=add_title_suffix,
+            add_title_suffix=options.add_title_suffix,
         )
 
     for item in stac_items:
         collection.add_item(item)
 
-    if add_capture_dates:
+    if options.add_capture_dates:
         collection.add_capture_dates(uri)
 
     if item_polygons:
@@ -147,7 +151,7 @@ def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
     return providers
 
 
-def create_item(
+def create_item(  # pylint: disable=too-many-arguments
     asset_path: str,
     start_datetime: str,
     end_datetime: str,
