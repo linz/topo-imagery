@@ -12,7 +12,7 @@ from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, CollectionIdentifiers, ImageryCollection
+from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
@@ -36,7 +36,6 @@ class CreateCollectionOptions:
 
 
 def create_collection(  # pylint: disable=too-many-arguments
-    collection_identifiers: CollectionIdentifiers,
     collection_metadata: CollectionMetadata,
     current_datetime: str,
     producers: list[str],
@@ -77,7 +76,6 @@ def create_collection(  # pylint: disable=too-many-arguments
             metadata=collection_metadata,
             created_datetime=current_datetime,
             updated_datetime=current_datetime,
-            identifiers=collection_identifiers,
             providers=get_providers(licensors, producers),
             add_title_suffix=options.add_title_suffix,
         )

@@ -1,5 +1,3 @@
-from datetime import datetime
-from decimal import Decimal
 from os import environ
 from typing import TYPE_CHECKING, Iterator
 from unittest.mock import patch
@@ -14,7 +12,7 @@ from pytest_subtests import SubTests
 from scripts.collection_from_items import NoItemsError, main
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.collection import CollectionIdentifiers, ImageryCollection
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
@@ -44,7 +42,7 @@ def setup() -> Iterator[ImageryItem]:
 
 
 @mock_aws
-def test_should_create_collection_file(item: ImageryItem, fake_collection_identifiers: CollectionIdentifiers) -> None:
+def test_should_create_collection_file(item: ImageryItem, fake_collection_metadata: CollectionMetadata) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
@@ -71,7 +69,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_collection_identi
         "--concurrency",
         "25",
         "--linz-slug",
-        fake_collection_identifiers.linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     main(args)
@@ -83,7 +81,7 @@ def test_should_create_collection_file(item: ImageryItem, fake_collection_identi
 
 @mock_aws
 def test_should_fail_if_collection_has_no_matching_items(
-    item: ImageryItem, fake_collection_identifiers: CollectionIdentifiers, capsys: CaptureFixture[str], subtests: SubTests
+    item: ImageryItem, fake_collection_metadata: CollectionMetadata, capsys: CaptureFixture[str], subtests: SubTests
 ) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
@@ -116,7 +114,7 @@ def test_should_fail_if_collection_has_no_matching_items(
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_collection_identifiers.linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -158,30 +156,20 @@ def test_should_fail_to_create_collection_file_without_linz_slug(capsys: Capture
 
 
 @mock_aws
-def test_should_not_add_if_not_item(fake_collection_identifiers: CollectionIdentifiers, capsys: CaptureFixture[str]) -> None:
+def test_should_not_add_if_not_item(fake_collection_metadata: CollectionMetadata, capsys: CaptureFixture[str]) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
     # Create mocked "existing" Collection
-    metadata = CollectionMetadata(
-        category="urban-aerial-photos",
-        region="hawkes-bay",
-        gsd=Decimal("1"),
-        start_datetime=datetime(2023, 9, 20),
-        end_datetime=datetime(2023, 9, 20),
-        lifecycle="ongoing",
-    )
-    existing_collection = ImageryCollection(
-        metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
-    )
+    existing_collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string())
     write("s3://stacfiles/collection.json", dict_to_json_bytes(existing_collection.stac))
-    assert fake_collection_identifiers.collection_id is not None
+    assert fake_collection_metadata.collection_id is not None
     # CLI arguments
     args = [
         "--uri",
         "s3://stacfiles/",
         "--collection-id",
-        fake_collection_identifiers.collection_id,
+        fake_collection_metadata.collection_id,
         "--category",
         "urban-aerial-photos",
         "--region",
@@ -199,7 +187,7 @@ def test_should_not_add_if_not_item(fake_collection_identifiers: CollectionIdent
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_collection_identifiers.linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     with raises(NoItemsError):
@@ -209,7 +197,7 @@ def test_should_not_add_if_not_item(fake_collection_identifiers: CollectionIdent
 
 
 @mock_aws
-def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_identifiers: CollectionIdentifiers) -> None:
+def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_metadata: CollectionMetadata) -> None:
     # Mock AWS S3
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="stacfiles")
@@ -242,7 +230,7 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_id
         "--current-datetime",
         any_epoch_datetime_string(),
         "--linz-slug",
-        fake_collection_identifiers.linz_slug,
+        fake_collection_metadata.linz_slug,
     ]
     # Call script's main function
     main(args)

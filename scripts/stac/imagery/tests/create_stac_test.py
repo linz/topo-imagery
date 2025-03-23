@@ -7,7 +7,7 @@ from pytest_subtests import SubTests
 
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.collection import CollectionIdentifiers, ImageryCollection
+from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.create_stac import (
     CreateCollectionOptions,
     create_collection,
@@ -227,13 +227,10 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
     assert item.stac["properties"]["end_datetime"] == "2024-09-02T12:00:00Z"
 
 
-def test_create_collection(
-    fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers, subtests: SubTests
-) -> None:
+def test_create_collection(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     current_datetime = any_epoch_datetime_string()
 
     collection = create_collection(
-        collection_identifiers=fake_collection_identifiers,
         collection_metadata=fake_collection_metadata,
         current_datetime=current_datetime,
         producers=[],
@@ -245,7 +242,7 @@ def test_create_collection(
     )
 
     with subtests.test("collection ID"):
-        assert collection.stac["id"] == fake_collection_identifiers.collection_id
+        assert collection.stac["id"] == fake_collection_metadata.collection_id
 
     with subtests.test("created datetime"):
         assert collection.stac["created"] == current_datetime
@@ -256,7 +253,6 @@ def test_create_collection(
 
 def test_create_collection_resupply(
     fake_collection_metadata: CollectionMetadata,
-    fake_collection_identifiers: CollectionIdentifiers,
     subtests: SubTests,
     tmp_path: Path,
 ) -> None:
@@ -265,8 +261,8 @@ def test_create_collection_resupply(
     existing_collection_content = {
         "type": "Collection",
         "stac_version": STAC_VERSION,
-        "id": fake_collection_identifiers.collection_id,
-        "linz:slug": fake_collection_identifiers.linz_slug,
+        "id": fake_collection_metadata.collection_id,
+        "linz:slug": fake_collection_metadata.linz_slug,
         "created": created_datetime_string,
         "updated": created_datetime_string,
     }
@@ -276,7 +272,6 @@ def test_create_collection_resupply(
     updated_datetime_string = format_rfc_3339_datetime_string(created_datetime + timedelta(days=1))
 
     collection = create_collection(
-        collection_identifiers=fake_collection_identifiers,
         collection_metadata=fake_collection_metadata,
         current_datetime=updated_datetime_string,
         producers=[],
@@ -297,7 +292,6 @@ def test_create_collection_resupply(
 
 def test_create_collection_resupply_add_items(
     fake_collection_metadata: CollectionMetadata,
-    fake_collection_identifiers: CollectionIdentifiers,
     subtests: SubTests,
     tmp_path: Path,
 ) -> None:
@@ -326,8 +320,8 @@ def test_create_collection_resupply_add_items(
     existing_collection_content = {
         "type": "Collection",
         "stac_version": STAC_VERSION,
-        "id": fake_collection_identifiers.collection_id,
-        "linz:slug": fake_collection_identifiers.linz_slug,
+        "id": fake_collection_metadata.collection_id,
+        "linz:slug": fake_collection_metadata.linz_slug,
         "links": [
             {
                 "rel": "root",
@@ -365,7 +359,6 @@ def test_create_collection_resupply_add_items(
     updated_datetime_string = any_epoch_datetime_string()
 
     collection = create_collection(
-        collection_identifiers=fake_collection_identifiers,
         collection_metadata=fake_collection_metadata,
         current_datetime=updated_datetime_string,
         producers=[],
@@ -537,9 +530,7 @@ def test_get_items_to_replace() -> None:
     ]
 
 
-def test_merge_item_list_for_resupply(
-    fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers, subtests: SubTests
-) -> None:
+def test_merge_item_list_for_resupply(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
     published_items = [
         {"type": "Feature", "id": "item_a"},
         {"type": "Feature", "id": "item_b"},
@@ -560,9 +551,7 @@ def test_merge_item_list_for_resupply(
         {"rel": "self", "href": "./collection.json"},
     ]
 
-    collection = ImageryCollection(
-        fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
-    )
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.stac["links"] = links
     merged_items = merge_item_list_for_resupply(collection, published_items, supplied_items)
 

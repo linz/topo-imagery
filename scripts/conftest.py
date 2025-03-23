@@ -1,9 +1,12 @@
+from datetime import datetime
+from decimal import Decimal
 from random import choice, randint
 from string import ascii_lowercase
+from typing import Iterator
 
 import pytest
 
-from scripts.stac.imagery.collection import CollectionIdentifiers
+from scripts.stac.imagery.metadata_constants import CollectionMetadata
 
 
 def fake_linz_slug() -> str:
@@ -16,9 +19,14 @@ def fake_linz_slug() -> str:
 
 
 @pytest.fixture
-def fake_collection_identifiers() -> CollectionIdentifiers:
-
-    return CollectionIdentifiers(
-        collection_id="a-random-collection-id",
+def fake_collection_metadata() -> Iterator[CollectionMetadata]:
+    yield CollectionMetadata(
+        category="rural-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2023, 1, 1),
+        end_datetime=datetime(2023, 2, 2),
+        lifecycle="completed",
         linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
     )
