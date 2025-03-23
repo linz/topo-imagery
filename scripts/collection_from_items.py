@@ -17,6 +17,7 @@ from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multi
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import CollectionIdentifiers
+from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
 from scripts.stac.imagery.create_stac import CreateCollectionOptions, create_collection
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 
@@ -187,17 +188,17 @@ def main(args: List[str] | None = None) -> None:
         )
         raise NoItemsError(f"Collection {collection_id} has no items")
 
-    collection_metadata: CollectionMetadata = {
-        "category": arguments.category,
-        "region": arguments.region,
-        "gsd": arguments.gsd,
-        "start_datetime": parse_rfc_3339_datetime(start_datetime),
-        "end_datetime": parse_rfc_3339_datetime(end_datetime),
-        "lifecycle": arguments.lifecycle,
-        "geographic_description": arguments.geographic_description,
-        "event_name": arguments.event,
-        "historic_survey_number": arguments.historic_survey_number,
-    }
+    collection_metadata = CollectionMetadata(
+        category=arguments.category,
+        region=arguments.region,
+        gsd=arguments.gsd,
+        start_datetime=parse_rfc_3339_datetime(start_datetime),
+        end_datetime=parse_rfc_3339_datetime(end_datetime),
+        lifecycle=arguments.lifecycle,
+        geographic_description=arguments.geographic_description,
+        event_name=arguments.event,
+        historic_survey_number=arguments.historic_survey_number,
+    )
 
     collection = create_collection(
         collection_identifiers=CollectionIdentifiers(arguments.linz_slug, collection_id),
@@ -214,7 +215,7 @@ def main(args: List[str] | None = None) -> None:
         odr_url=arguments.odr_url,
     )
 
-    destination = os.path.join(uri, "collection.json")
+    destination = os.path.join(uri, COLLECTION_FILE_NAME)
     collection.write_to(destination)
 
     get_log().info(

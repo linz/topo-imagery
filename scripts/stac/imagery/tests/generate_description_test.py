@@ -16,7 +16,7 @@ def test_generate_description_imagery(
 def test_generate_description_elevation(
     fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers
 ) -> None:
-    fake_collection_metadata["category"] = "dem"
+    fake_collection_metadata.category = "dem"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
     )
@@ -27,8 +27,8 @@ def test_generate_description_elevation(
 def test_generate_description_elevation_geographic_description_input(
     fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers
 ) -> None:
-    fake_collection_metadata["category"] = "dem"
-    fake_collection_metadata["geographic_description"] = "Central"
+    fake_collection_metadata.category = "dem"
+    fake_collection_metadata.geographic_description = "Central"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
     )
@@ -39,7 +39,7 @@ def test_generate_description_elevation_geographic_description_input(
 def test_generate_description_satellite_imagery(
     fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers
 ) -> None:
-    fake_collection_metadata["category"] = "satellite-imagery"
+    fake_collection_metadata.category = "satellite-imagery"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
     )
@@ -50,8 +50,8 @@ def test_generate_description_satellite_imagery(
 def test_generate_description_historic_imagery(
     fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers
 ) -> None:
-    fake_collection_metadata["category"] = "scanned-aerial-photos"
-    fake_collection_metadata["historic_survey_number"] = "SNC8844"
+    fake_collection_metadata.category = "scanned-aerial-photos"
+    fake_collection_metadata.historic_survey_number = "SNC8844"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
     )
@@ -62,7 +62,7 @@ def test_generate_description_historic_imagery(
 def test_generate_description_event(
     fake_collection_metadata: CollectionMetadata, fake_collection_identifiers: CollectionIdentifiers
 ) -> None:
-    fake_collection_metadata["event_name"] = "Cyclone Gabrielle"
+    fake_collection_metadata.event_name = "Cyclone Gabrielle"
     collection = ImageryCollection(
         fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string(), fake_collection_identifiers
     )

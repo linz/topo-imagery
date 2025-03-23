@@ -111,17 +111,15 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(fake_collection_identifiers: CollectionIdentifiers, subtests: SubTests) -> None:
-    metadata: CollectionMetadata = {
-        "category": "urban-aerial-photos",
-        "region": "auckland",
-        "gsd": Decimal("0.3"),
-        "start_datetime": datetime(2022, 2, 2),
-        "end_datetime": datetime(2022, 2, 2),
-        "lifecycle": "completed",
-        "event_name": None,
-        "historic_survey_number": None,
-        "geographic_description": None,
-    }
+    metadata = CollectionMetadata(
+        category="urban-aerial-photos",
+        region="auckland",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2022, 2, 2),
+        end_datetime=datetime(2022, 2, 2),
+        lifecycle="completed",
+    )
+
     collection = ImageryCollection(
         metadata=metadata,
         created_datetime=any_epoch_datetime_string(),

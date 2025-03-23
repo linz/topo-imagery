@@ -12,7 +12,7 @@ from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.collection import CollectionIdentifiers, ImageryCollection
+from scripts.stac.imagery.collection import CollectionIdentifiers, COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
@@ -67,7 +67,7 @@ def create_collection(  # pylint: disable=too-many-arguments
     """
     if odr_url:
         collection = ImageryCollection.from_file(
-            os.path.join(odr_url, "collection.json"), collection_metadata, current_datetime
+            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime
         )
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
