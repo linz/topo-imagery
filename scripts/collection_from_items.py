@@ -16,8 +16,7 @@ from scripts.files.files_helper import SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.collection import CollectionIdentifiers
-from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
+from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, CollectionIdentifiers
 from scripts.stac.imagery.create_stac import CreateCollectionOptions, create_collection
 from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 
