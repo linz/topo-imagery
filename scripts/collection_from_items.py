@@ -114,6 +114,14 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
     )
     parser.add_argument(
+        "--delete-all-existing-items",
+        dest="delete_all_existing_items",
+        help="Delete all existing Items in the collection before adding new Items. "
+        "To use in the case of re-creating an existing dataset.",
+        type=str_to_bool,
+        required=False,
+    )
+    parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
         help=(
@@ -209,7 +217,9 @@ def main(args: List[str] | None = None) -> None:
         stac_items=items_to_add,
         item_polygons=polygons,
         options=CreateCollectionOptions(
-            add_capture_dates=arguments.capture_dates, add_title_suffix=arguments.add_title_suffix
+            add_capture_dates=arguments.capture_dates,
+            add_title_suffix=arguments.add_title_suffix,
+            delete_existing_items=arguments.delete_all_existing_items,
         ),
         uri=uri,
         odr_url=arguments.odr_url,

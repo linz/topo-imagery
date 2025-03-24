@@ -569,6 +569,18 @@ def test_get_items_from_collection(tmp_path: Path, fake_collection_metadata: Col
     assert collection_items[0] == existing_item
 
 
+def test_reset_items_in_collection(fake_collection_metadata: CollectionMetadata) -> None:
+    collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string())
+    links = [
+        {"rel": "item", "href": "./item_a.json"},
+        {"rel": "item", "href": "./item_b.json"},
+        {"rel": "item", "href": "./item_c.json"},
+    ]
+    collection.stac["links"] = links
+    collection.reset_items()
+    assert [link for link in collection.stac["links"] if link.get("rel") == "item"] == []
+
+
 def test_remove_item_geometry_from_capture_area(fake_collection_metadata: CollectionMetadata) -> None:
     collection = ImageryCollection(fake_collection_metadata, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.capture_area = {

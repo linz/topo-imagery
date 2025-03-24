@@ -103,11 +103,16 @@ class ImageryCollection:
         self.add_providers(merge_provider_roles(providers))
 
     @classmethod
-    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
+    def from_file(
+        cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str, delete_existing_items: bool = False
+    ) -> "ImageryCollection":
         """Load an ImageryCollection from a Collection file.
 
         Args:
             file_name: The s3 URL or local path of the Collection file to load.
+            metadata: The metadata of the Collection.
+            updated_datetime: The updated datetime of the Collection.
+            delete_existing_items: Whether to delete existing items in the Collection. Defaults to False.
 
         Returns:
             The loaded ImageryCollection.
@@ -131,11 +136,12 @@ class ImageryCollection:
         # Override STAC from the original collection
         collection.stac = stac_from_file
 
-        collection.published_location = os.path.dirname(file_name)
-        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
-        # Some published datasets may not have a capture-area.geojson file (TDE-988)
-        if exists(capture_area_path):
-            collection.capture_area = json.loads(read(capture_area_path))
+        if not delete_existing_items:
+            collection.published_location = os.path.dirname(file_name)
+            capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+            # Some published datasets may not have a capture-area.geojson file (TDE-988)
+            if exists(capture_area_path):
+                collection.capture_area = json.loads(read(capture_area_path))
 
         return collection
 
@@ -334,6 +340,10 @@ class ImageryCollection:
             existing_item_stac = json.loads(read(item_path))
             items_stac.append(existing_item_stac)
         return items_stac
+
+    def reset_items(self) -> None:
+        """Reset the STAC Item links list in the Collection links."""
+        self.stac["links"] = [link for link in self.stac["links"] if link.get("rel") != "item"]
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
