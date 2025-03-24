@@ -13,20 +13,12 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import coalesce_multi_single, str_to_bool, str_to_gsd
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, parse_rfc_3339_datetime
 from scripts.files.files_helper import SUFFIX_JSON
-from scripts.files.fs_s3 import (
-    bucket_name_from_path,
-    get_object_parallel_multithreading,
-    list_files_in_uri,
-)
+from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
 from scripts.stac.imagery.create_stac import CreateCollectionOptions, create_collection
-from scripts.stac.imagery.metadata_constants import (
-    DATA_CATEGORIES,
-    HUMAN_READABLE_REGIONS,
-    CollectionMetadata,
-)
+from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
