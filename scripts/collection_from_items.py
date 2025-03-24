@@ -114,6 +114,14 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
     )
     parser.add_argument(
+        "--keep-title-and-description",
+        dest="keep_title_and_description",
+        help="Keep the title and description from the existing collection.json file",
+        type=str_to_bool,
+        default=False,
+        required=False,
+    )
+    parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
         help=(
