@@ -69,8 +69,11 @@ def create_collection(  # pylint: disable=too-many-arguments
         an ImageryCollection object
     """
     if odr_url:
+        load_capture_area = True
+        if options.delete_existing_items:
+            load_capture_area = False
         collection = ImageryCollection.from_file(
-            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime, options.delete_existing_items
+            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime, load_capture_area
         )
         if not options.delete_existing_items:
             published_items = collection.get_items_stac()

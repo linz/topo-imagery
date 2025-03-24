@@ -445,6 +445,7 @@ def test_should_not_add_capture_area(
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.published_location = "s3://bucket/dataset/collection.json"
+        collection.publish_capture_area = False
         collection.add_capture_area(polygons, tmp_path, artifact_path)
         logs = json.loads(capsys.readouterr().out)
         assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
