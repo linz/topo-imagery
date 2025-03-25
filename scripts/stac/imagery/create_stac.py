@@ -136,8 +136,6 @@ def merge_item_list_for_resupply(
 
     # Remove all Item links
     collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
-    # Empty extents so they can be recalculated
-    collection.reset_extent()
 
     return supplied_items + published_items
 

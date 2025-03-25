@@ -621,3 +621,52 @@ def test_remove_item_geometry_from_capture_area(fake_collection_metadata: Collec
         ],
         "type": "Polygon",
     }
+
+
+def test_overwrite_metadata(tmp_path: Path, fake_collection_metadata: CollectionMetadata) -> None:
+    current_datetime = any_epoch_datetime_string()
+    created_datetime = any_epoch_datetime_string()
+
+    existing_item_path = tmp_path / "item_a.json"
+    existing_item = {
+        "type": "Feature",
+        "id": "item_a",
+    }
+    existing_item_path.write_text(json.dumps(existing_item))
+    existing_item_link = {
+        "rel": "item",
+        "href": "./item_a.json",
+        "type": "application/geo+json",
+    }
+
+    existing_collection_content = {
+        "type": "Collection",
+        "stac_version": STAC_VERSION,
+        "id": fake_collection_metadata.collection_id,
+        "title": "test title",
+        "description": "test description",
+        "linz:region": "test region",
+        "linz:slug": fake_collection_metadata.linz_slug,
+        "linz:lifecycle": "test lifecycle",
+        "links": [
+            {
+                "rel": "root",
+                "href": "https://nz-imagery.s3.ap-southeast-2.amazonaws.com/catalog.json",
+                "type": "application/json",
+            },
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
+            existing_item_link,
+        ],
+        "created": created_datetime,
+        "updated": created_datetime,
+    }
+    existing_collection_path = tmp_path / "collection.json"
+    existing_collection_path.write_text(json.dumps(existing_collection_content))
+
+    collection = ImageryCollection.from_file(existing_collection_path.as_posix(), fake_collection_metadata, current_datetime)
+    assert collection.stac["title"] == "Hawke's Bay 0.3m Rural Aerial Photos (2023)"
+    assert (
+        collection.stac["description"] == "Orthophotography within the Hawke's Bay region captured in the 2023 flying season."
+    )
+    assert collection.stac["linz:region"] == fake_collection_metadata.region
+    assert collection.stac["linz:lifecycle"] == fake_collection_metadata.lifecycle
