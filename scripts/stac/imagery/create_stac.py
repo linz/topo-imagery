@@ -27,12 +27,16 @@ JSON_Dict: TypeAlias = dict[str, "JSON"]
 @dataclass
 class CreateCollectionOptions:
     """Options to be used to create a Collection.
-    add_capture_dates: Link a `capture-dates.geojson` file to the Collection
-    add_title_suffix: Add suffix to the Collection `title`
+
+    Attributes:
+        add_capture_dates: Link a `capture-dates.geojson` file to the Collection
+        add_title_suffix: Add suffix to the Collection `title`
+        delete_existing_items: Delete existing Items in the Collection
     """
 
     add_capture_dates: bool = False
     add_title_suffix: bool = False
+    delete_existing_items: bool = False
 
 
 def create_collection(  # pylint: disable=too-many-arguments
@@ -65,11 +69,20 @@ def create_collection(  # pylint: disable=too-many-arguments
         an ImageryCollection object
     """
     if odr_url:
+        load_capture_area = True
+        if options.delete_existing_items:
+            load_capture_area = False
         collection = ImageryCollection.from_file(
-            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime
+            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime, load_capture_area
         )
-        published_items = collection.get_items_stac()
-        stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
+        if not options.delete_existing_items:
+            published_items = collection.get_items_stac()
+            stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
+
+        # Remove all Item links
+        collection.reset_items()
+        # Empty extents so they can be recalculated
+        collection.reset_extent()
 
     else:
         collection = ImageryCollection(
@@ -133,11 +146,6 @@ def merge_item_list_for_resupply(
     for item_to_remove in items_to_replace:
         collection.remove_item_geometry_from_capture_area(item_to_remove)
         published_items.remove(item_to_remove)
-
-    # Remove all Item links
-    collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
-    # Empty extents so they can be recalculated
-    collection.reset_extent()
 
     return supplied_items + published_items
 

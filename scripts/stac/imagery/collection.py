@@ -46,6 +46,7 @@ WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 class ImageryCollection:
     stac: dict[str, Any]
     capture_area: dict[str, Any] | None = None
+    publish_capture_area = True
     published_location: str | None = None
 
     def __init__(
@@ -103,11 +104,16 @@ class ImageryCollection:
         self.add_providers(merge_provider_roles(providers))
 
     @classmethod
-    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
+    def from_file(
+        cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str, load_capture_area: bool = False
+    ) -> "ImageryCollection":
         """Load an ImageryCollection from a Collection file.
 
         Args:
             file_name: The s3 URL or local path of the Collection file to load.
+            metadata: The metadata of the Collection.
+            updated_datetime: The updated datetime of the Collection.
+            load_capture_area: Whether to load the capture area of the Collection. Defaults to False.
 
         Returns:
             The loaded ImageryCollection.
@@ -130,12 +136,18 @@ class ImageryCollection:
         )
         # Override STAC from the original collection
         collection.stac = stac_from_file
-
         collection.published_location = os.path.dirname(file_name)
-        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
-        # Some published datasets may not have a capture-area.geojson file (TDE-988)
-        if exists(capture_area_path):
-            collection.capture_area = json.loads(read(capture_area_path))
+
+        if load_capture_area:
+            capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+            # Some published datasets may not have a capture-area.geojson file (TDE-988)
+            if exists(capture_area_path):
+                collection.capture_area = json.loads(read(capture_area_path))
+            else:
+                collection.publish_capture_area = False
+                get_log().warn(
+                    f"{WARN_NO_PUBLISHED_CAPTURE_AREA}: {capture_area_path} not found.",
+                )
 
         return collection
 
@@ -152,7 +164,7 @@ class ImageryCollection:
         """
         # If published dataset does not have a capture-area,
         # system should skip its creation as it may miss existing Item footprints
-        if self.published_location and not self.capture_area:
+        if not self.publish_capture_area:
             get_log().warn(
                 f"{WARN_NO_PUBLISHED_CAPTURE_AREA}: a new capture-area can't be generated.",
             )
@@ -334,6 +346,10 @@ class ImageryCollection:
             existing_item_stac = json.loads(read(item_path))
             items_stac.append(existing_item_stac)
         return items_stac
+
+    def reset_items(self) -> None:
+        """Reset the STAC Item links list in the Collection links."""
+        self.stac["links"] = [link for link in self.stac["links"] if link.get("rel") != "item"]
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
