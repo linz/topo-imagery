@@ -1,5 +1,24 @@
 # Changelog
 
+## [7.4.0](https://github.com/linz/topo-imagery/compare/v7.3.0...v7.4.0) (2025-03-23)
+
+
+### Features
+
+* compute and store stats into hillshade TIFFs TDE-1439 ([#1300](https://github.com/linz/topo-imagery/issues/1300)) ([1e6d45b](https://github.com/linz/topo-imagery/commit/1e6d45b179e376a97250f86e09384a7edaf8d0eb))
+* create hillshade footprints TDE-1441 ([#1301](https://github.com/linz/topo-imagery/issues/1301)) ([6ce42f1](https://github.com/linz/topo-imagery/commit/6ce42f15a7b5694e2d55413c144f855400720b8c))
+* create STAC Items for hillshade TIFFs TDE-1438 ([#1298](https://github.com/linz/topo-imagery/issues/1298)) ([d31966a](https://github.com/linz/topo-imagery/commit/d31966a4df864c69be70607ad52f1ae3d4f614a6))
+
+
+### Bug Fixes
+
+* hillshade STAC is not created when TIFF already exists TDE-1445 ([#1302](https://github.com/linz/topo-imagery/issues/1302)) ([44dfa0d](https://github.com/linz/topo-imagery/commit/44dfa0d06dd9e29e6af95134faf2f97beb312854))
+
+
+### Documentation
+
+* update test_should_not_add_capture_area comment ([#1297](https://github.com/linz/topo-imagery/issues/1297)) ([67e56d5](https://github.com/linz/topo-imagery/commit/67e56d5e67f3a9f7878a2e00d58614cc950a904c))
+
 ## [7.3.0](https://github.com/linz/topo-imagery/compare/v7.2.0...v7.3.0) (2025-03-10)
 
 
