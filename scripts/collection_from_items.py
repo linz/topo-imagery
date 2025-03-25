@@ -114,6 +114,14 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
     )
     parser.add_argument(
+        "--keep-title-and-description",
+        dest="keep_title_and_description",
+        help="Keep the title and description from the existing collection.json file",
+        type=str_to_bool,
+        default=False,
+        required=False,
+    )
+    parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
         help=(
@@ -209,7 +217,9 @@ def main(args: List[str] | None = None) -> None:
         stac_items=items_to_add,
         item_polygons=polygons,
         options=CreateCollectionOptions(
-            add_capture_dates=arguments.capture_dates, add_title_suffix=arguments.add_title_suffix
+            add_capture_dates=arguments.capture_dates,
+            add_title_suffix=arguments.add_title_suffix,
+            keep_title_and_description=arguments.keep_title_and_description,
         ),
         uri=uri,
         odr_url=arguments.odr_url,

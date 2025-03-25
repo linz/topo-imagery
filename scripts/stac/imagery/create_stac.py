@@ -29,10 +29,12 @@ class CreateCollectionOptions:
     """Options to be used to create a Collection.
     add_capture_dates: Link a `capture-dates.geojson` file to the Collection
     add_title_suffix: Add suffix to the Collection `title`
+    keep_title_and_description: Keep the `title` and `description` of the Collection
     """
 
     add_capture_dates: bool = False
     add_title_suffix: bool = False
+    keep_title_and_description: bool = False
 
 
 def create_collection(  # pylint: disable=too-many-arguments

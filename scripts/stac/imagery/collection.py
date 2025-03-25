@@ -103,7 +103,9 @@ class ImageryCollection:
         self.add_providers(merge_provider_roles(providers))
 
     @classmethod
-    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
+    def from_file(
+        cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str, keep_title_and_description: bool = False
+    ) -> "ImageryCollection":
         """Load an ImageryCollection from a Collection file.
 
         Args:
@@ -130,6 +132,9 @@ class ImageryCollection:
         )
         # Override STAC from the original collection
         collection.stac = stac_from_file
+        if not keep_title_and_description:
+            collection.stac["title"] = collection._title()
+            collection.stac["description"] = collection._description()
 
         collection.published_location = os.path.dirname(file_name)
         capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
