@@ -128,8 +128,9 @@ class ImageryCollection:
             created_datetime=stac_from_file["created"],
             updated_datetime=stac_from_file["updated"],
         )
-        # Override STAC from the original collection
-        collection.stac = stac_from_file
+
+        # Override some of the STAC from the original collection
+        collection.stac["links"] = stac_from_file.get("links", [])
 
         collection.published_location = os.path.dirname(file_name)
         capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)

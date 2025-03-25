@@ -569,7 +569,3 @@ def test_merge_item_list_for_resupply(fake_collection_metadata: CollectionMetada
 
     with subtests.test("links"):
         assert collection.stac["links"] == [{"rel": "self", "href": "./collection.json"}]
-
-    with subtests.test("extent"):
-        assert collection.stac["extent"]["spatial"]["bbox"] is None
-        assert collection.stac["extent"]["temporal"]["interval"] is None
