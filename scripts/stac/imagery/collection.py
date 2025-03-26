@@ -116,6 +116,11 @@ class ImageryCollection:
         stac_from_file = json.loads(file_content.decode("UTF-8"))
         collection = cls.__new__(cls)
         collection.stac = stac_from_file
+        collection.published_location = os.path.dirname(path)
+        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+        # Some published datasets may not have a capture-area.geojson file (TDE-988)
+        if exists(capture_area_path):
+            collection.capture_area = json.loads(read(capture_area_path))
         return collection
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:

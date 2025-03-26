@@ -8,11 +8,11 @@ from shapely.geometry.base import BaseGeometry
 
 from scripts.files import fs
 from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import NoSuchFileError, exists, read
+from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.collection import CAPTURE_AREA_FILE_NAME, COLLECTION_FILE_NAME, ImageryCollection
+from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.provider import Provider, ProviderRole
@@ -79,11 +79,6 @@ def create_collection(  # pylint: disable=too-many-arguments
                 "Keeping existing Collection linz_slug."
             )
         collection.stac["updated"] = current_datetime
-        collection.published_location = os.path.dirname(existing_collection_path)
-        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
-        # Some published datasets may not have a capture-area.geojson file (TDE-988)
-        if exists(capture_area_path):
-            collection.capture_area = json.loads(read(capture_area_path))
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 
