@@ -45,7 +45,6 @@ WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 
 class ImageryCollection:
     stac: dict[str, Any]
-    metadata: CollectionMetadata
     capture_area: dict[str, Any] | None = None
     published_location: str | None = None
 
@@ -104,12 +103,11 @@ class ImageryCollection:
         self.add_providers(merge_provider_roles(providers))
 
     @classmethod
-    def from_file(cls, path: str, metadata: CollectionMetadata) -> "ImageryCollection":
+    def from_file(cls, path: str) -> "ImageryCollection":
         """Load an ImageryCollection object from a STAC Collection file.
 
         Args:
             path: The path to the STAC Collection file to load.
-            metadata: The metadata of the Collection.
 
         Returns:
             The ImageryCollection loaded from the file.
@@ -117,16 +115,7 @@ class ImageryCollection:
         file_content = read(path)
         stac_from_file = json.loads(file_content.decode("UTF-8"))
         collection = cls.__new__(cls)
-        if metadata.collection_id != stac_from_file["id"]:
-            raise ValueError(f"Collection ID mismatch: input={metadata.collection_id} != existing={stac_from_file['id']}")
-        if metadata.linz_slug != stac_from_file["linz:slug"]:
-            get_log().warn(
-                f"Collection LINZ slug mismatch: input={metadata.linz_slug} != "
-                f"existing={stac_from_file['linz:slug']}."
-                "Keeping existing Collection linz_slug."
-            )
         collection.stac = stac_from_file
-        collection.metadata = metadata
         collection.published_location = os.path.dirname(path)
         capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
         # Some published datasets may not have a capture-area.geojson file (TDE-988)

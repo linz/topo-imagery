@@ -67,7 +67,17 @@ def create_collection(  # pylint: disable=too-many-arguments
     if odr_url:
         existing_collection_path = os.path.join(odr_url, COLLECTION_FILE_NAME)
         get_log().info("Retrieving existing Collection", path=existing_collection_path)
-        collection = ImageryCollection.from_file(existing_collection_path, collection_metadata)
+        collection = ImageryCollection.from_file(existing_collection_path)
+        if collection_metadata.collection_id != collection.stac["id"]:
+            raise ValueError(
+                f"Collection ID mismatch: input={collection_metadata.collection_id} != existing={collection.stac['id']}"
+            )
+        if collection_metadata.linz_slug != collection.stac["linz:slug"]:
+            get_log().warn(
+                f"Collection LINZ slug mismatch: input={collection_metadata.linz_slug} != "
+                f"existing={collection.stac['linz:slug']}."
+                "Keeping existing Collection linz_slug."
+            )
         collection.stac["updated"] = current_datetime
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
