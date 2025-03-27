@@ -45,6 +45,7 @@ WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 
 class ImageryCollection:
     stac: dict[str, Any]
+    metadata: CollectionMetadata
     capture_area: dict[str, Any] | None = None
     published_location: str | None = None
 
@@ -103,40 +104,25 @@ class ImageryCollection:
         self.add_providers(merge_provider_roles(providers))
 
     @classmethod
-    def from_file(cls, file_name: str, metadata: CollectionMetadata, updated_datetime: str) -> "ImageryCollection":
-        """Load an ImageryCollection from a Collection file.
+    def from_file(cls, path: str) -> "ImageryCollection":
+        """Load an ImageryCollection object from a STAC Collection file.
 
         Args:
-            file_name: The s3 URL or local path of the Collection file to load.
+            path: The path to the STAC Collection file to load.
+            metadata: The metadata of the Collection.
 
         Returns:
-            The loaded ImageryCollection.
+            The ImageryCollection loaded from the file.
         """
-        file_content = read(file_name)
+        file_content = read(path)
         stac_from_file = json.loads(file_content.decode("UTF-8"))
-        stac_from_file["updated"] = updated_datetime
-        if metadata.collection_id != stac_from_file["id"]:
-            raise ValueError(f"Collection ID mismatch: {metadata.collection_id} != {stac_from_file['id']}")
-        if metadata.linz_slug != stac_from_file["linz:slug"]:
-            get_log().warn(
-                f"Collection LINZ slug mismatch: {metadata.linz_slug} != {stac_from_file['linz:slug']}."
-                "Existing Collection linz_slug will be used."
-            )
-            metadata.linz_slug = stac_from_file["linz:slug"]
-        collection = cls(
-            metadata=metadata,
-            created_datetime=stac_from_file["created"],
-            updated_datetime=stac_from_file["updated"],
-        )
-        # Override STAC from the original collection
+        collection = cls.__new__(cls)
         collection.stac = stac_from_file
-
-        collection.published_location = os.path.dirname(file_name)
+        collection.published_location = os.path.dirname(path)
         capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
         # Some published datasets may not have a capture-area.geojson file (TDE-988)
         if exists(capture_area_path):
             collection.capture_area = json.loads(read(capture_area_path))
-
         return collection
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:

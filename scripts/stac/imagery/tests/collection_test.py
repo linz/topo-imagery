@@ -528,7 +528,6 @@ def test_reset_extent(fake_collection_metadata: CollectionMetadata) -> None:
 
 
 def test_get_items_from_collection(tmp_path: Path, fake_collection_metadata: CollectionMetadata) -> None:
-    current_datetime = any_epoch_datetime_string()
     created_datetime = any_epoch_datetime_string()
 
     existing_item_path = tmp_path / "item_a.json"
@@ -563,7 +562,7 @@ def test_get_items_from_collection(tmp_path: Path, fake_collection_metadata: Col
     existing_collection_path = tmp_path / "collection.json"
     existing_collection_path.write_text(json.dumps(existing_collection_content))
 
-    collection = ImageryCollection.from_file(existing_collection_path.as_posix(), fake_collection_metadata, current_datetime)
+    collection = ImageryCollection.from_file(existing_collection_path.as_posix())
     collection_items = collection.get_items_stac()
     assert len(collection_items) == 1
     assert collection_items[0] == existing_item
