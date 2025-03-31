@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.1](https://github.com/linz/topo-imagery/compare/v7.4.0...v7.4.1) (2025-03-31)
+
+
+### Bug Fixes
+
+* allow to pass ODR URL to `generate_hillshade.py` TDE-1452 ([#1310](https://github.com/linz/topo-imagery/issues/1310)) ([6802113](https://github.com/linz/topo-imagery/commit/68021134c005fa3312923eb1a32e714063bdf056))
+
 ## [7.4.0](https://github.com/linz/topo-imagery/compare/v7.3.0...v7.4.0) (2025-03-23)
 
 
