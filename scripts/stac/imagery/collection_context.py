@@ -28,19 +28,25 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     This class acts as a structured container for user-provided metadata when
     initializing an `ImageryCollection`. It does not represent a full STAC
     Collection but provides necessary information to generate one.
+    It is used to generate titles and descriptions for datasets based on their metadata.
+    It also provides a method to get the providers associated with the dataset.
+
 
     Attributes:
-        category: The category of the dataset.
-        region: The region the dataset is from.
-        gsd: The Ground Sample Distance of the dataset.
-        start_datetime: The start datetime of the dataset.
-        end_datetime: The end datetime of the dataset.
-        lifecycle: The lifecycle of the dataset.
-        linz_slug: The LINZ slug of the dataset.
-        collection_id: The collection ID.
-        geographic_description: The geographic description of the dataset.
-        event_name: The event name of the dataset.
-        historic_survey_number: The historic survey number of the dataset.
+        category (str): The category of the dataset (e.g., "satellite-imagery").
+        region (str): The region of the dataset (e.g., "auckland").
+        gsd (Decimal): Ground Sample Distance in meters.
+        start_datetime (datetime): Start date and time of the dataset.
+        end_datetime (datetime): End date and time of the dataset.
+        lifecycle (str): Lifecycle status of the dataset (e.g., "completed").
+        linz_slug (str): LINZ slug for the dataset.
+        producers (list[str]): List of producers for the dataset.
+        licensors (list[str]): List of licensors for the dataset.
+        collection_id (str | None): Collection ID, if applicable.
+        geographic_description (str | None): Geographic description of the dataset.
+        event_name (str | None): Event name, if applicable.
+        historic_survey_number (str | None): Historic survey number, if applicable.
+        add_title_suffix (bool): Whether to add a suffix based on lifecycle status.
     """
 
     category: str
@@ -75,9 +81,6 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
           https://github.com/linz/imagery/blob/master/docs/naming.md
         DEM / DSM:
           https://github.com/linz/elevation/blob/master/docs/naming.md
-
-        Args:
-            add_suffix: Whether to add a suffix based on the lifecycle. For example, " - Preview". Defaults to True.
 
         Raises:
             MissingMetadataError: if required metadata is missing
