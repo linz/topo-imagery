@@ -1,6 +1,5 @@
 import json
 import os
-from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from linz_logger import get_log
@@ -21,15 +20,6 @@ from scripts.stac.util.media_type import StacMediaType
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 JSON_Dict: TypeAlias = dict[str, "JSON"]
-
-
-@dataclass
-class CreateCollectionOptions:
-    """Options to be used to create a Collection.
-    add_capture_dates: Link a `capture-dates.geojson` file to the Collection
-    """
-
-    add_capture_dates: bool = False
 
 
 def create_collection(  # pylint: disable=too-many-arguments
