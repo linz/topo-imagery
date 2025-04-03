@@ -22,6 +22,7 @@ from scripts.stac.imagery.capture_area import merge_polygons
 from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset
+from scripts.stac.imagery.provider import ProviderRole
 from scripts.stac.imagery.tests.generators import any_stac_processing
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
@@ -554,3 +555,9 @@ def test_remove_item_geometry_from_capture_area(fake_collection_context: Collect
         ],
         "type": "Polygon",
     }
+
+
+def test_add_providers_roles_order_sorted(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.add_providers([{"name": "Maxar", "roles": [ProviderRole.PRODUCER, ProviderRole.LICENSOR]}])
+    assert {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]} in collection.stac["providers"]
