@@ -1,5 +1,6 @@
 import json
 import os
+from decimal import Decimal
 from typing import Any
 
 import ulid
@@ -13,23 +14,8 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import exists, read, write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
-from scripts.stac.imagery.metadata_constants import (
-    DATA_CATEGORIES,
-    DEM,
-    DEM_HILLSHADE,
-    DEM_HILLSHADE_IGOR,
-    DSM,
-    HUMAN_READABLE_REGIONS,
-    LIFECYCLE_SUFFIXES,
-    RURAL_AERIAL_PHOTOS,
-    SATELLITE_IMAGERY,
-    SCANNED_AERIAL_PHOTOS,
-    URBAN_AERIAL_PHOTOS,
-    CollectionMetadata,
-    MissingMetadataError,
-    SubtypeParameterError,
-)
-from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
+from scripts.stac.imagery.collection_context import CollectionContext
+from scripts.stac.imagery.provider import Provider
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
@@ -39,69 +25,51 @@ from scripts.stac.util.stac_extensions import StacExtensions
 COLLECTION_FILE_NAME = "collection.json"
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
-GSD_UNIT = "m"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 
 
 class ImageryCollection:
     stac: dict[str, Any]
-    metadata: CollectionMetadata
+    gsd: Decimal
     capture_area: dict[str, Any] | None = None
     published_location: str | None = None
 
     def __init__(
         self,
-        metadata: CollectionMetadata,
+        context: CollectionContext,
         created_datetime: str,
         updated_datetime: str,
-        providers: list[Provider] | None = None,
-        add_title_suffix: bool = True,
     ) -> None:
-        if not metadata.collection_id:
-            metadata.collection_id = str(ulid.ULID())
+        if not context.collection_id:
+            context.collection_id = str(ulid.ULID())
 
-        self.metadata = metadata
+        self.gsd = context.gsd
 
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
-            "id": metadata.collection_id,
-            "title": self._title(add_title_suffix),
-            "description": self._description(),
+            "id": context.collection_id,
+            "title": context.get_title(),
+            "description": context.get_description(),
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
-            "linz:lifecycle": metadata.lifecycle,
-            "linz:geospatial_category": metadata.category,
-            "linz:region": metadata.region,
+            "linz:lifecycle": context.lifecycle,
+            "linz:geospatial_category": context.category,
+            "linz:region": context.region,
             "linz:security_classification": "unclassified",
-            "linz:slug": metadata.linz_slug,
+            "linz:slug": context.linz_slug,
             "created": created_datetime,
             "updated": updated_datetime,
         }
 
-        # Optional metadata
-        if event_name := metadata.event_name:
+        # Optional metadata - if not provided, the field will not be added to the Collection
+        if event_name := context.event_name:
             self.stac["linz:event_name"] = event_name
-        if geographic_description := metadata.geographic_description:
+        if geographic_description := context.geographic_description:
             self.stac["linz:geographic_description"] = geographic_description
 
-        # If the providers passed has already a LINZ provider: add its default roles to it
-        has_linz = False
-        if providers:
-            linz = next((p for p in providers if p["name"] == "Toitū Te Whenua Land Information New Zealand"), None)
-            if linz:
-                linz["roles"].extend([ProviderRole.HOST, ProviderRole.PROCESSOR])
-                has_linz = True
-        else:
-            providers = []
-
-        if not has_linz:
-            providers.append(
-                {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]}
-            )
-
-        self.add_providers(merge_provider_roles(providers))
+        self.add_providers(context.get_providers())
 
     @classmethod
     def from_file(cls, path: str) -> "ImageryCollection":
@@ -147,7 +115,7 @@ class ImageryCollection:
         if self.capture_area:
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
-        capture_area_document = generate_capture_area(polygons, self.metadata.gsd)
+        capture_area_document = generate_capture_area(polygons, self.gsd)
         capture_area_content: bytes = dict_to_json_bytes(capture_area_document)
         file_checksum = checksum.multihash_as_hex(capture_area_content)
         capture_area = {
@@ -328,161 +296,6 @@ class ImageryCollection:
             destination: path of the destination
         """
         write(destination, dict_to_json_bytes(self.stac), content_type=ContentType.JSON.value)
-
-    def _title(self, add_suffix: bool = True) -> str:
-        """Generates the title for imagery and elevation datasets.
-        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
-          https://github.com/linz/imagery/blob/master/docs/naming.md
-        DEM / DSM:
-          https://github.com/linz/elevation/blob/master/docs/naming.md
-
-        Args:
-            add_suffix: Whether to add a suffix based on the lifecycle. For example, " - Preview". Defaults to True.
-
-        Raises:
-            MissingMetadataError: if required metadata is missing
-            SubtypeParameterError: if category is not recognised
-
-        Returns:
-            Dataset Title
-        """
-        # format optional metadata
-        geographic_description = self.metadata.geographic_description
-        historic_survey_number = self.metadata.historic_survey_number
-
-        # format region
-        region = HUMAN_READABLE_REGIONS[self.metadata.region]
-
-        # format date
-        start_year = self.metadata.start_datetime.year
-        end_year = self.metadata.end_datetime.year
-        date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
-
-        # format gsd
-        gsd_str = f"{self.metadata.gsd}{GSD_UNIT}"
-
-        # determine suffix based on its lifecycle
-        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.metadata.lifecycle, "") if add_suffix else None
-
-        category = self.metadata.category
-
-        if category == SCANNED_AERIAL_PHOTOS:
-            if not historic_survey_number:
-                raise MissingMetadataError("historic_survey_number")
-            components = [
-                geographic_description or region,
-                gsd_str,
-                historic_survey_number,
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
-            components = [
-                geographic_description or region,
-                gsd_str,
-                DATA_CATEGORIES[category],
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {DEM, DSM}:
-            components = [
-                region,
-                "-" if geographic_description else None,
-                geographic_description,
-                "LiDAR",
-                gsd_str,
-                DATA_CATEGORIES[category],
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR}:
-            components = [
-                region,
-                gsd_str if self.metadata.gsd == 8 else None,
-                "DEM Hillshade",
-                "- Igor" if category == DEM_HILLSHADE_IGOR else None,
-            ]
-
-        else:
-            raise SubtypeParameterError(self.metadata.category)
-
-        return " ".join(filter(None, components))
-
-    def _description(self) -> str:
-        """Generates the descriptions for imagery and elevation datasets.
-        Urban Aerial Photos / Rural Aerial Photos:
-          Orthophotography within the [Region] region captured in the [year(s)] flying season.
-        DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
-        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
-          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
-          Gaps filled with lower resolution elevation data (8m contour) as needed.
-        Satellite Imagery / Scanned Aerial Photos:
-          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
-
-        Returns:
-            Dataset Description
-        """
-        # format date
-        start_year = self.metadata.start_datetime.year
-        end_year = self.metadata.end_datetime.year
-        date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
-
-        # format region
-        region = HUMAN_READABLE_REGIONS[self.metadata.region]
-
-        category = self.metadata.category
-        if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
-            date = f"the {date} flying season"
-
-        base_descriptions = {
-            SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
-            SATELLITE_IMAGERY: "Satellite imagery",
-            URBAN_AERIAL_PHOTOS: "Orthophotography",
-            RURAL_AERIAL_PHOTOS: "Orthophotography",
-            DEM: "Digital Elevation Model",
-            DSM: "Digital Surface Model",
-        }
-
-        if category in base_descriptions:
-            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
-        elif category.startswith(DEM_HILLSHADE):
-            desc = self._hillshade_description()
-        else:
-            raise SubtypeParameterError(category)
-
-        desc += f", published as a record of the {self.metadata.event_name} event." if self.metadata.event_name else "."
-
-        return desc
-
-    def _hillshade_description(self) -> str:
-        """Generates the description for hillshade datasets."""
-
-        region = HUMAN_READABLE_REGIONS[self.metadata.region]
-        category = self.metadata.category
-        gsd_str = f"{self.metadata.gsd}{GSD_UNIT}"
-
-        if category == DEM_HILLSHADE_IGOR:
-            shading_option = (
-                "the -igor option in GDAL. "
-                "This renders a softer hillshade that tries to minimize effects on other map features"
-            )
-        else:
-            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
-
-        compontents = [
-            "Hillshade generated from the",
-            f"{region} LiDAR {gsd_str} DEM and" if gsd_str != "8m" else None,
-            f"{region} Contour-Derived 8m DEM",
-            f"(where no {self.metadata.gsd}m DEM data exists)" if gsd_str != "8m" else None,
-            "using",
-            shading_option,
-        ]
-
-        return " ".join(filter(None, compontents))
 
     def remove_item_geometry_from_capture_area(self, item: dict[str, Any]) -> None:
         """Remove the geometry of an Item from the capture area of the Collection.

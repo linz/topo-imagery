@@ -17,8 +17,9 @@ from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multi
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
-from scripts.stac.imagery.create_stac import CreateCollectionOptions, create_collection
-from scripts.stac.imagery.metadata_constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS, CollectionMetadata
+from scripts.stac.imagery.collection_context import CollectionContext
+from scripts.stac.imagery.constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS
+from scripts.stac.imagery.create_stac import create_collection
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -187,7 +188,7 @@ def main(args: List[str] | None = None) -> None:
         )
         raise NoItemsError(f"Collection {collection_id} has no items")
 
-    collection_metadata = CollectionMetadata(
+    collection_context = CollectionContext(
         category=arguments.category,
         region=arguments.region,
         gsd=arguments.gsd,
@@ -199,19 +200,18 @@ def main(args: List[str] | None = None) -> None:
         geographic_description=arguments.geographic_description,
         event_name=arguments.event,
         historic_survey_number=arguments.historic_survey_number,
+        producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
+        licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
+        add_title_suffix=arguments.add_title_suffix,
     )
 
     collection = create_collection(
-        collection_metadata=collection_metadata,
+        collection_context=collection_context,
         current_datetime=arguments.current_datetime,
-        producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
-        licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
         stac_items=items_to_add,
         item_polygons=polygons,
-        options=CreateCollectionOptions(
-            add_capture_dates=arguments.capture_dates, add_title_suffix=arguments.add_title_suffix
-        ),
         uri=uri,
+        add_capture_dates=arguments.capture_dates,
         odr_url=arguments.odr_url,
     )
 
