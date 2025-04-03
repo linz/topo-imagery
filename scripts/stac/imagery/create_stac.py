@@ -22,7 +22,7 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
-def create_collection(  # pylint: disable=too-many-arguments
+def create_collection(
     collection_context: CollectionContext,
     current_datetime: str,
     stac_items: list[dict[Any, Any]],
