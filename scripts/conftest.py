@@ -6,7 +6,7 @@ from typing import Iterator
 
 import pytest
 
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
+from scripts.stac.imagery.collection_context import CollectionContext
 
 
 def fake_linz_slug() -> str:
@@ -19,8 +19,8 @@ def fake_linz_slug() -> str:
 
 
 @pytest.fixture
-def fake_collection_metadata() -> Iterator[CollectionMetadata]:
-    yield CollectionMetadata(
+def fake_collection_context() -> Iterator[CollectionContext]:
+    yield CollectionContext(
         category="rural-aerial-photos",
         region="hawkes-bay",
         gsd=Decimal("0.3"),

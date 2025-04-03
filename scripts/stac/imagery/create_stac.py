@@ -1,6 +1,5 @@
 import json
 import os
-from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from linz_logger import get_log
@@ -13,9 +12,8 @@ from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
+from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
-from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
@@ -24,26 +22,13 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
-@dataclass
-class CreateCollectionOptions:
-    """Options to be used to create a Collection.
-    add_capture_dates: Link a `capture-dates.geojson` file to the Collection
-    add_title_suffix: Add suffix to the Collection `title`
-    """
-
-    add_capture_dates: bool = False
-    add_title_suffix: bool = False
-
-
-def create_collection(  # pylint: disable=too-many-arguments
-    collection_metadata: CollectionMetadata,
+def create_collection(
+    collection_context: CollectionContext,
     current_datetime: str,
-    producers: list[str],
-    licensors: list[str],
     stac_items: list[dict[Any, Any]],
     item_polygons: list[BaseGeometry],
-    options: CreateCollectionOptions,
     uri: str,
+    add_capture_dates: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
@@ -68,34 +53,32 @@ def create_collection(  # pylint: disable=too-many-arguments
         existing_collection_path = os.path.join(odr_url, COLLECTION_FILE_NAME)
         get_log().info("Retrieving existing Collection", path=existing_collection_path)
         collection = ImageryCollection.from_file(existing_collection_path)
-        if collection_metadata.collection_id != collection.stac["id"]:
+        if collection_context.collection_id != collection.stac["id"]:
             raise ValueError(
-                f"Collection ID mismatch: input={collection_metadata.collection_id} != existing={collection.stac['id']}"
+                f"Collection ID mismatch: input={collection_context.collection_id} != existing={collection.stac['id']}"
             )
-        if collection_metadata.linz_slug != collection.stac["linz:slug"]:
+        if collection_context.linz_slug != collection.stac["linz:slug"]:
             get_log().warn(
-                f"Collection LINZ slug mismatch: input={collection_metadata.linz_slug} != "
+                f"Collection LINZ slug mismatch: input={collection_context.linz_slug} != "
                 f"existing={collection.stac['linz:slug']}."
                 "Keeping existing Collection linz_slug."
             )
-        collection.metadata = collection_metadata
+        collection.gsd = collection_context.gsd
         collection.stac["updated"] = current_datetime
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 
     else:
         collection = ImageryCollection(
-            metadata=collection_metadata,
+            context=collection_context,
             created_datetime=current_datetime,
             updated_datetime=current_datetime,
-            providers=get_providers(licensors, producers),
-            add_title_suffix=options.add_title_suffix,
         )
 
     for item in stac_items:
         collection.add_item(item)
 
-    if options.add_capture_dates:
+    if add_capture_dates:
         collection.add_capture_dates(uri)
 
     if item_polygons:
@@ -152,15 +135,6 @@ def merge_item_list_for_resupply(
     collection.reset_extent()
 
     return supplied_items + published_items
-
-
-def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
-    providers: list[Provider] = []
-    for producer_name in producers:
-        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in licensors:
-        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
-    return providers
 
 
 def create_item(  # pylint: disable=too-many-arguments
