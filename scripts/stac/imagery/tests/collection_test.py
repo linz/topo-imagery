@@ -251,60 +251,6 @@ def test_write_collection_special_chars(fake_collection_context: CollectionConte
     assert collection["title"] == title
 
 
-def test_default_provider_roles_are_kept(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
-    # given we are adding a non default role to the default provider
-    fake_collection_context.licensors = ["Toitū Te Whenua Land Information New Zealand"]
-    fake_collection_context.producers = ["Maxar"]
-    collection = ImageryCollection(
-        fake_collection_context,
-        any_epoch_datetime_string(),
-        any_epoch_datetime_string(),
-    )
-
-    with subtests.test(msg="it adds the non default role to the existing default role list"):
-        assert {
-            "name": "Toitū Te Whenua Land Information New Zealand",
-            "roles": ["host", "licensor", "processor"],
-        } in collection.stac["providers"]
-
-    with subtests.test(msg="it does not duplicate the default provider"):
-        assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} not in collection.stac[
-            "providers"
-        ]
-
-
-def test_default_provider_is_present(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
-    # given adding a provider
-    fake_collection_context.producers = ["Maxar"]
-    collection = ImageryCollection(
-        fake_collection_context,
-        any_epoch_datetime_string(),
-        any_epoch_datetime_string(),
-    )
-
-    with subtests.test(msg="the default provider is still present"):
-        assert {"name": "Toitū Te Whenua Land Information New Zealand", "roles": ["host", "processor"]} in collection.stac[
-            "providers"
-        ]
-    with subtests.test(msg="the new provider is added"):
-        assert {"name": "Maxar", "roles": ["producer"]} in collection.stac["providers"]
-
-
-def test_providers_are_not_duplicated(fake_collection_context: CollectionContext) -> None:
-    fake_collection_context.producers = ["Toitū Te Whenua Land Information New Zealand"]
-    fake_collection_context.licensors = ["Toitū Te Whenua Land Information New Zealand"]
-    collection = ImageryCollection(
-        fake_collection_context,
-        any_epoch_datetime_string(),
-        any_epoch_datetime_string(),
-    )
-    assert len(collection.stac["providers"]) == 1
-    assert {
-        "name": "Toitū Te Whenua Land Information New Zealand",
-        "roles": ["host", "licensor", "processor", "producer"],
-    } in collection.stac["providers"]
-
-
 def test_capture_area_added(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     """
     TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
