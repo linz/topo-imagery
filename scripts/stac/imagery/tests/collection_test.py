@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from shutil import rmtree
@@ -15,6 +16,7 @@ from pytest import CaptureFixture, mark
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
+from scripts.conftest import fake_linz_slug
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
@@ -561,3 +563,28 @@ def test_add_providers_roles_order_sorted(fake_collection_context: CollectionCon
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.add_providers([{"name": "Maxar", "roles": [ProviderRole.PRODUCER, ProviderRole.LICENSOR]}])
     assert {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]} in collection.stac["providers"]
+
+
+def test_update_metadata(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    old_slug = collection.stac["linz:slug"]
+    new_metadata = CollectionContext(
+        category="rural-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2025, 1, 1),
+        end_datetime=datetime(2025, 2, 2),
+        lifecycle="ongoing",
+        linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
+        producers=["Maxar"],
+        licensors=["Maxar"],
+    )
+    collection.update(new_metadata, "2025-01-01T00:00:00Z")
+    assert collection.stac["linz:lifecycle"] == "ongoing"
+    assert collection.stac["providers"] == [
+        {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]},
+        {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]},
+    ]
+    assert collection.stac["linz:slug"] == old_slug  # TODO: we should not update the existing slug?
+    assert collection.stac["title"] == "Hawke's Bay 0.3m Rural Aerial Photos (2025) - Draft"

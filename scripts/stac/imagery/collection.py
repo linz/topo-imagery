@@ -93,6 +93,36 @@ class ImageryCollection:
             collection.capture_area = json.loads(read(capture_area_path))
         return collection
 
+    def update(self, context: CollectionContext, updated_datetime: str, keep_title_desc: bool = False) -> None:
+        """Update the Collection with new metadata.
+
+        Args:
+            context: The context containing the updated metadata.
+            updated_datetime: The updated datetime of the Collection.
+            keep_title_desc: Whether to keep the original title and description.
+        """
+        if context.lifecycle:
+            self.stac["linz:lifecycle"] = context.lifecycle
+        if context.category:
+            self.stac["linz:geospatial_category"] = context.category
+        if context.region:
+            self.stac["linz:region"] = context.region
+        if context.geographic_description:
+            self.stac["linz:geographic_description"] = context.geographic_description
+        if context.event_name:
+            self.stac["linz:event_name"] = context.event_name
+        if context.historic_survey_number:
+            self.stac["linz:historic_survey_number"] = context.historic_survey_number
+        if context.producers or context.licensors:
+            self.stac["providers"] = []
+            self.add_providers(context.get_providers())
+        if not keep_title_desc:
+            self.stac["title"] = context.get_title()
+            self.stac["description"] = context.get_description()
+
+        self.stac["updated"] = updated_datetime
+        self.gsd = context.gsd
+
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
         If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.

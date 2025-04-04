@@ -63,8 +63,7 @@ def create_collection(
                 f"existing={collection.stac['linz:slug']}."
                 "Keeping existing Collection linz_slug."
             )
-        collection.gsd = collection_context.gsd
-        collection.stac["updated"] = current_datetime
+        collection.update(collection_context, current_datetime)
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 
