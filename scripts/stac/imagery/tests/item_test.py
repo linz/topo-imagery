@@ -8,8 +8,8 @@ from pytest_subtests import SubTests
 
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
+from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
 from scripts.stac.link import Relation
 from scripts.stac.util.media_type import StacMediaType
@@ -108,10 +108,10 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
 
 
 # pylint: disable=duplicate-code
-def test_imagery_add_collection(fake_collection_metadata: CollectionMetadata, subtests: SubTests) -> None:
+def test_imagery_add_collection(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
 
     collection = ImageryCollection(
-        metadata=fake_collection_metadata,
+        context=fake_collection_context,
         created_datetime=any_epoch_datetime_string(),
         updated_datetime=any_epoch_datetime_string(),
     )
@@ -123,7 +123,7 @@ def test_imagery_add_collection(fake_collection_metadata: CollectionMetadata, su
     item.add_collection(collection.stac["id"])
 
     with subtests.test():
-        assert item.stac["collection"] == fake_collection_metadata.collection_id
+        assert item.stac["collection"] == fake_collection_context.collection_id
 
     with subtests.test():
         assert {"rel": "collection", "href": "./collection.json", "type": "application/json"} in item.stac["links"]
