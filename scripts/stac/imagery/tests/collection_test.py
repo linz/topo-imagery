@@ -586,5 +586,29 @@ def test_update_metadata(fake_collection_context: CollectionContext) -> None:
         {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]},
         {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]},
     ]
-    assert collection.stac["linz:slug"] == old_slug  # TODO: we should not update the existing slug?
+    assert collection.stac["linz:slug"] == old_slug
     assert collection.stac["title"] == "Hawke's Bay 0.3m Rural Aerial Photos (2025) - Draft"
+    assert (
+        collection.stac["description"] == "Orthophotography within the Hawke's Bay region captured in the 2025 flying season."
+    )
+
+
+def test_update_metadata_except_title_description(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    old_title = collection.stac["title"]
+    old_description = collection.stac["description"]
+    new_metadata = CollectionContext(
+        category="rural-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2025, 1, 1),
+        end_datetime=datetime(2025, 2, 2),
+        lifecycle="ongoing",
+        linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
+        producers=["Maxar"],
+        licensors=["Maxar"],
+    )
+    collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title_desc=True)
+    assert collection.stac["title"] == old_title
+    assert collection.stac["description"] == old_description
