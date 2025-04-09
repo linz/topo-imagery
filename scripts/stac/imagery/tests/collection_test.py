@@ -609,6 +609,6 @@ def test_update_metadata_except_title_description(fake_collection_context: Colle
         producers=["Maxar"],
         licensors=["Maxar"],
     )
-    collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title_desc=True)
+    collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title_description=True)
     assert collection.stac["title"] == old_title
     assert collection.stac["description"] == old_description

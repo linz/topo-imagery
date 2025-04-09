@@ -29,6 +29,7 @@ def create_collection(
     item_polygons: list[BaseGeometry],
     uri: str,
     add_capture_dates: bool = False,
+    keep_title_description: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
@@ -63,7 +64,7 @@ def create_collection(
                 f"existing={collection.stac['linz:slug']}."
                 "Keeping existing Collection linz_slug."
             )
-        collection.update(collection_context, current_datetime)
+        collection.update(collection_context, current_datetime, keep_title_description)
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 

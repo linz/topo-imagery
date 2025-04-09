@@ -93,7 +93,7 @@ class ImageryCollection:
             collection.capture_area = json.loads(read(capture_area_path))
         return collection
 
-    def update(self, context: CollectionContext, updated_datetime: str, keep_title_desc: bool = False) -> None:
+    def update(self, context: CollectionContext, updated_datetime: str, keep_title_description: bool = False) -> None:
         """Update the Collection with new metadata.
 
         Args:
@@ -116,7 +116,7 @@ class ImageryCollection:
         if context.producers or context.licensors:
             self.stac["providers"] = []
             self.add_providers(context.get_providers())
-        if not keep_title_desc:
+        if not keep_title_description:
             self.stac["title"] = context.get_title()
             self.stac["description"] = context.get_description()
 
