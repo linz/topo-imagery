@@ -49,8 +49,8 @@ class ImageryCollection:
             "type": "Collection",
             "stac_version": STAC_VERSION,
             "id": context.collection_id,
-            "title": context.get_title(),
-            "description": context.get_description(),
+            "title": context.title,
+            "description": context.description,
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
@@ -69,7 +69,7 @@ class ImageryCollection:
         if geographic_description := context.geographic_description:
             self.stac["linz:geographic_description"] = geographic_description
 
-        self.add_providers(context.get_providers())
+        self.add_providers(context.providers)
 
     @classmethod
     def from_file(cls, path: str) -> "ImageryCollection":
