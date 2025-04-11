@@ -64,7 +64,8 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     historic_survey_number: str | None = None
     add_title_suffix: bool = True
 
-    def get_providers(self) -> list[Provider]:
+    @property
+    def providers(self) -> list[Provider]:
         providers: list[Provider] = [
             {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]}
         ]
@@ -75,7 +76,8 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
             providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
         return merge_provider_roles(providers)
 
-    def get_title(self) -> str:
+    @property
+    def title(self) -> str:
         """Generates the title for imagery and elevation datasets.
         Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
@@ -154,7 +156,8 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
 
         return " ".join(filter(None, components))
 
-    def get_description(self) -> str:
+    @property
+    def description(self) -> str:
         """Generates the descriptions for imagery and elevation datasets.
         Urban Aerial Photos / Rural Aerial Photos:
           Orthophotography within the [Region] region captured in the [year(s)] flying season.
@@ -193,7 +196,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         if category in base_descriptions:
             desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
         elif category.startswith(DEM_HILLSHADE):
-            desc = self._get_description_hillshade()
+            desc = self._description_hillshade
         else:
             raise SubtypeParameterError(category)
 
@@ -201,7 +204,8 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
 
         return desc
 
-    def _get_description_hillshade(self) -> str:
+    @property
+    def _description_hillshade(self) -> str:
         """Generates the description for hillshade datasets."""
 
         region = HUMAN_READABLE_REGIONS[self.region]
