@@ -93,7 +93,7 @@ class ImageryCollection:
             collection.capture_area = json.loads(read(capture_area_path))
         return collection
 
-    def update(self, context: CollectionContext, updated_datetime: str, keep_title_description: bool = False) -> None:
+    def update(self, context: CollectionContext, updated_datetime: str, keep_title: bool = False) -> None:
         """Update the Collection with new metadata.
 
         Args:
@@ -107,18 +107,26 @@ class ImageryCollection:
             self.stac["linz:geospatial_category"] = context.category
         if context.region:
             self.stac["linz:region"] = context.region
-        if context.geographic_description:
-            self.stac["linz:geographic_description"] = context.geographic_description
-        if context.event_name:
-            self.stac["linz:event_name"] = context.event_name
-        if context.historic_survey_number:
-            self.stac["linz:historic_survey_number"] = context.historic_survey_number
         if context.producers or context.licensors:
             self.stac["providers"] = []
             self.add_providers(context.get_providers())
-        if not keep_title_description:
+        self.stac["description"] = context.get_description()
+        if not keep_title:
             self.stac["title"] = context.get_title()
-            self.stac["description"] = context.get_description()
+
+        # Optional metadata - if not provided, the field will be removed from the Collection
+        if context.geographic_description:
+            self.stac["linz:geographic_description"] = context.geographic_description
+        else:
+            self.stac.pop("linz:geographic_description", None)
+        if context.event_name:
+            self.stac["linz:event_name"] = context.event_name
+        else:
+            self.stac.pop("linz:event_name", None)
+        if context.historic_survey_number:
+            self.stac["linz:historic_survey_number"] = context.historic_survey_number
+        else:
+            self.stac.pop("linz:historic_survey_number", None)
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd

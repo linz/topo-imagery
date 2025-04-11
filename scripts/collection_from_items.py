@@ -114,9 +114,9 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
     )
     parser.add_argument(
-        "--keep-title-description",
-        dest="keep_title_description",
-        help="Keep the title and description of the existing Collection as is.",
+        "--keep-title",
+        dest="keep_title",
+        help="Keep the title of the existing Collection as is.",
         type=str_to_bool,
         required=False,
     )
@@ -218,6 +218,7 @@ def main(args: List[str] | None = None) -> None:
         item_polygons=polygons,
         uri=uri,
         add_capture_dates=arguments.capture_dates,
+        keep_title=arguments.keep_title,
         odr_url=arguments.odr_url,
     )
 
