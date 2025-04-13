@@ -618,3 +618,9 @@ def test_update_metadata_except_title(fake_collection_context: CollectionContext
     )
     collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title=True)
     assert collection.stac["title"] == old_title
+
+
+def test_add_providers_roles_order_sorted(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.add_providers([{"name": "Maxar", "roles": [ProviderRole.PRODUCER, ProviderRole.LICENSOR]}])
+    assert {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]} in collection.stac["providers"]
