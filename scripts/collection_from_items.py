@@ -219,7 +219,6 @@ def main(args: List[str] | None = None) -> None:
         uri=uri,
         add_capture_dates=arguments.capture_dates,
         keep_title=arguments.keep_title,
-        add_capture_dates=arguments.capture_dates,
         odr_url=arguments.odr_url,
     )
 

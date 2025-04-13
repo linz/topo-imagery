@@ -30,7 +30,6 @@ def create_collection(
     uri: str,
     add_capture_dates: bool = False,
     keep_title: bool = False,
-    add_capture_dates: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
