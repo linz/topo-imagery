@@ -81,26 +81,40 @@ def test_title_description_id_created_on_init(fake_collection_context: Collectio
             "This renders a softer hillshade that tries to minimize effects on other map features.",
         ),
         (
+            "dsm-hillshade",
+            Decimal(1),
+            "New Zealand 1m DSM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 1m DSM using GDAL’s "
+            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+        ),
+        (
+            "dsm-hillshade-igor",
+            Decimal(1),
+            "New Zealand 1m DSM Hillshade - Igor",
+            "Hillshade generated from the New Zealand LiDAR 1m DSM using the -igor option in GDAL. "
+            "This renders a softer hillshade that tries to minimize effects on other map features.",
+        ),
+        (
             "dem-hillshade",
             Decimal(1),
-            "New Zealand DEM Hillshade",
-            "Hillshade generated from the New Zealand LiDAR 1m DEM and New Zealand Contour-Derived 8m DEM (where no "
-            "1m DEM data exists) using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            "New Zealand 1m DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM "
+            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
         ),
         (
             "dem-hillshade-igor",
             Decimal(1),
-            "New Zealand DEM Hillshade - Igor",
-            "Hillshade generated from the New Zealand LiDAR 1m DEM and New Zealand Contour-Derived 8m DEM (where no "
-            "1m DEM data exists) using the -igor option in GDAL. This renders a softer hillshade that tries to "
+            "New Zealand 1m DEM Hillshade - Igor",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM "
+            "using the -igor option in GDAL. This renders a softer hillshade that tries to "
             "minimize effects on other map features.",
         ),
         (
             "dem-hillshade",
             Decimal(0.25),
-            "New Zealand DEM Hillshade",
-            "Hillshade generated from the New Zealand LiDAR 0.25m DEM and New Zealand Contour-Derived 8m DEM (where no "
-            "0.25m DEM data exists) using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            "New Zealand 0.25m DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 0.25m DEM "
+            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
         ),
     ],
 )

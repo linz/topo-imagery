@@ -8,6 +8,8 @@ from scripts.stac.imagery.constants import (
     DEM_HILLSHADE,
     DEM_HILLSHADE_IGOR,
     DSM,
+    DSM_HILLSHADE,
+    DSM_HILLSHADE_IGOR,
     HUMAN_READABLE_REGIONS,
     LIFECYCLE_SUFFIXES,
     RURAL_AERIAL_PHOTOS,
@@ -143,12 +145,11 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
                 lifecycle_suffix,
             ]
 
-        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR}:
+        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             components = [
                 region,
-                gsd_str if self.gsd == 8 else None,
-                "DEM Hillshade",
-                "- Igor" if category == DEM_HILLSHADE_IGOR else None,
+                gsd_str,  # if self.gsd == 8 else None,
+                DATA_CATEGORIES[category],
             ]
 
         else:
@@ -195,7 +196,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
 
         if category in base_descriptions:
             desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
-        elif category.startswith(DEM_HILLSHADE):
+        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             desc = self._description_hillshade
         else:
             raise SubtypeParameterError(category)
@@ -209,22 +210,26 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         """Generates the description for hillshade datasets."""
 
         region = HUMAN_READABLE_REGIONS[self.region]
-        category = self.category
+        category = DATA_CATEGORIES[self.category]
+        category_prefix = category[0:3]  # e.g. "dem" or "dsm"
+        category_suffix = category[4:]  # e.g. "hillshade" or "hillshade-igor"
         gsd_str = f"{self.gsd}{GSD_UNIT}"
 
-        if category == DEM_HILLSHADE_IGOR:
+        if category_suffix == "Hillshade":
+            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
+        else:
             shading_option = (
                 "the -igor option in GDAL. "
                 "This renders a softer hillshade that tries to minimize effects on other map features"
             )
-        else:
-            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
 
         components = [
             "Hillshade generated from the",
-            f"{region} LiDAR {gsd_str} DEM and" if gsd_str != "8m" else None,
-            f"{region} Contour-Derived 8m DEM",
-            f"(where no {self.gsd}m DEM data exists)" if gsd_str != "8m" else None,
+            region,
+            "LiDAR" if gsd_str != "8m" else "Contour-Derived",
+            gsd_str,
+            category_prefix,
+            # f"(where no {self.gsd}m DEM data exists)" if gsd_str != "8m" else None,
             "using",
             shading_option,
         ]
