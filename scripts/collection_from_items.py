@@ -6,7 +6,6 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 
 import shapely.geometry
-import shapely.ops
 from boto3 import client
 from linz_logger import get_log
 
@@ -103,14 +102,21 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--capture-dates",
         dest="capture_dates",
-        help="Add a capture-dates.geojson.gz file to the collection assets",
+        help="Add a capture-dates.geojson.gz file to the Collection assets",
         type=str_to_bool,
         required=False,
     )
     parser.add_argument(
         "--add-title-suffix",
         dest="add_title_suffix",
-        help="Add a title suffix to the collection title based on the lifecycle. For example, '[TITLE] - Preview'",
+        help="Add a title suffix to the Collection title based on the lifecycle. For example, '[TITLE] - Preview'",
+        type=str_to_bool,
+        required=False,
+    )
+    parser.add_argument(
+        "--keep-title",
+        dest="keep_title",
+        help="Keep the title of the existing Collection as is.",
         type=str_to_bool,
         required=False,
     )
@@ -212,6 +218,7 @@ def main(args: List[str] | None = None) -> None:
         item_polygons=polygons,
         uri=uri,
         add_capture_dates=arguments.capture_dates,
+        keep_title=arguments.keep_title,
         odr_url=arguments.odr_url,
     )
 

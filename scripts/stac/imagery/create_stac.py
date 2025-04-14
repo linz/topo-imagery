@@ -29,21 +29,20 @@ def create_collection(
     item_polygons: list[BaseGeometry],
     uri: str,
     add_capture_dates: bool = False,
+    keep_title: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
 
     Args:
-        collection_identifiers: identifiers of the collection
-        collection_metadata: metadata of the collection
+        collection_context: context to create the Collection
         current_datetime: datetime string that represents the current time when the item is created.
-        producers: producers of the dataset
-        licensors: licensors of the dataset
-        stac_items: items to link to the collection
-        item_polygons: polygons of the items linked to the collection
-        options: options to be used to create a Collection
+        stac_items: list of STAC Items to be added as links to the Collection
+        item_polygons: list of polygons of the items linked to the Collection
         uri: path of the dataset
+        add_capture_dates: whether to add the capture-dates file to the Collection. Defaults to False.
+        keep_title: whether to keep the title in the existing Collection. Defaults to False.
         odr_url: path of the published dataset. Defaults to None.
 
     Returns:
@@ -63,8 +62,7 @@ def create_collection(
                 f"existing={collection.stac['linz:slug']}."
                 "Keeping existing Collection linz_slug."
             )
-        collection.gsd = collection_context.gsd
-        collection.stac["updated"] = current_datetime
+        collection.update(collection_context, current_datetime, keep_title)
         published_items = collection.get_items_stac()
         stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
 

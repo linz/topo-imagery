@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from shutil import rmtree
@@ -15,6 +16,7 @@ from pytest import CaptureFixture, mark
 from pytest_subtests import SubTests
 from shapely.predicates import is_valid
 
+from scripts.conftest import fake_linz_slug
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
@@ -561,3 +563,58 @@ def test_add_providers_roles_order_sorted(fake_collection_context: CollectionCon
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.add_providers([{"name": "Maxar", "roles": [ProviderRole.PRODUCER, ProviderRole.LICENSOR]}])
     assert {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]} in collection.stac["providers"]
+
+
+def test_update_metadata(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
+    fake_collection_context.event_name = "Forest Assessment"
+    fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    old_slug = collection.stac["linz:slug"]
+    new_metadata = CollectionContext(
+        category="rural-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2025, 1, 1),
+        end_datetime=datetime(2025, 2, 2),
+        lifecycle="ongoing",
+        linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
+        producers=["Maxar"],
+        licensors=["Maxar"],
+    )
+    collection.update(new_metadata, "2025-01-01T00:00:00Z")
+    with subtests.test(msg="Metadata should be updated"):
+        assert collection.stac["linz:lifecycle"] == "ongoing"
+        assert collection.stac["providers"] == [
+            {"name": "Toitū Te Whenua Land Information New Zealand", "roles": [ProviderRole.HOST, ProviderRole.PROCESSOR]},
+            {"name": "Maxar", "roles": [ProviderRole.LICENSOR, ProviderRole.PRODUCER]},
+        ]
+        assert collection.stac["title"] == "Hawke's Bay 0.3m Rural Aerial Photos (2025) - Draft"
+        assert (
+            collection.stac["description"]
+            == "Orthophotography within the Hawke's Bay region captured in the 2025 flying season."
+        )
+    with subtests.test(msg="Slug should remain the same"):
+        assert collection.stac["linz:slug"] == old_slug
+    with subtests.test(msg="Optional metadata should be removed if not passed"):
+        assert collection.stac.get("linz:event_name") is None
+        assert collection.stac.get("linz:geographic_description") is None
+
+
+def test_update_metadata_except_title(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    old_title = collection.stac["title"]
+    new_metadata = CollectionContext(
+        category="rural-aerial-photos",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        start_datetime=datetime(2025, 1, 1),
+        end_datetime=datetime(2025, 2, 2),
+        lifecycle="ongoing",
+        linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
+        producers=["Maxar"],
+        licensors=["Maxar"],
+    )
+    collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title=True)
+    assert collection.stac["title"] == old_title
