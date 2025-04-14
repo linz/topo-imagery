@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.4.2](https://github.com/linz/topo-imagery/compare/v7.4.1...v7.4.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* existing collection is not updated with new metadata TDE-1444 ([#1313](https://github.com/linz/topo-imagery/issues/1313)) ([b0c7bcd](https://github.com/linz/topo-imagery/commit/b0c7bcd4be1b90638b048bab11d2f24fa6378533))
+
 ## [7.4.1](https://github.com/linz/topo-imagery/compare/v7.4.0...v7.4.1) (2025-03-31)
 
 
