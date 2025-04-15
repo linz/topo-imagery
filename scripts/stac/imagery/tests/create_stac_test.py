@@ -460,7 +460,6 @@ def test_create_collection_resupply_delete_existing_items(
     with subtests.test("links"):
         assert item_to_add_link in collection.stac["links"]
         assert existing_item_link not in collection.stac["links"]
-        
 
 
 def test_create_item_with_odr_url(tmp_path: Path) -> None:

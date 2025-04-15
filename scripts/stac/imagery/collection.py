@@ -73,12 +73,12 @@ class ImageryCollection:
         self.add_providers(context.providers)
 
     @classmethod
-    def from_file(cls, path: str) -> "ImageryCollection":
+    def from_file(cls, path: str, load_capture_area: bool = True) -> "ImageryCollection":
         """Load an ImageryCollection object from a STAC Collection file.
 
         Args:
             path: The path to the STAC Collection file to load.
-            metadata: The metadata of the Collection.
+            load_capture_area: Whether to load the capture area from a separate file.
 
         Returns:
             The ImageryCollection loaded from the file.
@@ -88,11 +88,13 @@ class ImageryCollection:
         collection = cls.__new__(cls)
         collection.stac = stac_from_file
         collection.published_location = os.path.dirname(path)
-        # TODO: if delete existing Items, capture-area should not be loaded
-        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
-        # Some published datasets may not have a capture-area.geojson file (TDE-988)
-        if exists(capture_area_path):
-            collection.capture_area = json.loads(read(capture_area_path))
+        if load_capture_area:
+            capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+            # Some published datasets may not have a capture-area.geojson file (TDE-988)
+            if exists(capture_area_path):
+                collection.capture_area = json.loads(read(capture_area_path))
+            else:
+                collection.publish_capture_area = False
         return collection
 
     def update(self, context: CollectionContext, updated_datetime: str, keep_title: bool = False) -> None:
@@ -151,7 +153,7 @@ class ImageryCollection:
                 f"{WARN_NO_PUBLISHED_CAPTURE_AREA}: a new capture-area can't be generated.",
             )
             return
-        # If published dataset update, merge the existing capture area with the new one
+        # If published dataset with a capture-area update, merge the existing capture area with the new one
         if self.capture_area:
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
