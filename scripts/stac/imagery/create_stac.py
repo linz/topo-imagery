@@ -1,6 +1,5 @@
 import json
 import os
-from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from linz_logger import get_log
@@ -13,9 +12,8 @@ from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
+from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
-from scripts.stac.imagery.metadata_constants import CollectionMetadata
-from scripts.stac.imagery.provider import Provider, ProviderRole
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
@@ -24,29 +22,11 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 JSON_Dict: TypeAlias = dict[str, "JSON"]
 
 
-@dataclass
-class CreateCollectionOptions:
-    """Options to be used to create a Collection.
-
-    Attributes:
-        add_capture_dates: Link a `capture-dates.geojson` file to the Collection
-        add_title_suffix: Add suffix to the Collection `title`
-        delete_existing_items: Delete existing Items in the Collection
-    """
-
-    add_capture_dates: bool = False
-    add_title_suffix: bool = False
-    delete_existing_items: bool = False
-
-
-def create_collection(  # pylint: disable=too-many-arguments
-    collection_metadata: CollectionMetadata,
+def create_collection(
+    collection_context: CollectionContext,
     current_datetime: str,
-    producers: list[str],
-    licensors: list[str],
     stac_items: list[dict[Any, Any]],
     item_polygons: list[BaseGeometry],
-    options: CreateCollectionOptions,
     uri: str,
     odr_url: str | None = None,
 ) -> ImageryCollection:
@@ -54,31 +34,36 @@ def create_collection(  # pylint: disable=too-many-arguments
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
 
     Args:
-        collection_identifiers: identifiers of the collection
-        collection_metadata: metadata of the collection
+        collection_context: context to create the Collection
         current_datetime: datetime string that represents the current time when the item is created.
-        producers: producers of the dataset
-        licensors: licensors of the dataset
-        stac_items: items to link to the collection
-        item_polygons: polygons of the items linked to the collection
-        options: options to be used to create a Collection
+        stac_items: list of STAC Items to be added as links to the Collection
+        item_polygons: list of polygons of the items linked to the Collection
         uri: path of the dataset
+        add_capture_dates: whether to add the capture-dates file to the Collection. Defaults to False.
+        keep_title: whether to keep the title in the existing Collection. Defaults to False.
         odr_url: path of the published dataset. Defaults to None.
 
     Returns:
         an ImageryCollection object
     """
     if odr_url:
-        load_capture_area = True
-        if options.delete_existing_items:
-            load_capture_area = False
-        collection = ImageryCollection.from_file(
-            os.path.join(odr_url, COLLECTION_FILE_NAME), collection_metadata, current_datetime, load_capture_area
-        )
-        if not options.delete_existing_items:
+        existing_collection_path = os.path.join(odr_url, COLLECTION_FILE_NAME)
+        get_log().info("Retrieving existing Collection", path=existing_collection_path)
+        collection = ImageryCollection.from_file(existing_collection_path)
+        if collection_context.collection_id != collection.stac["id"]:
+            raise ValueError(
+                f"Collection ID mismatch: input={collection_context.collection_id} != existing={collection.stac['id']}"
+            )
+        if collection_context.linz_slug != collection.stac["linz:slug"]:
+            get_log().warn(
+                f"Collection LINZ slug mismatch: input={collection_context.linz_slug} != "
+                f"existing={collection.stac['linz:slug']}."
+                "Keeping existing Collection linz_slug."
+            )
+        collection.update(collection_context, current_datetime)
+        if not collection_context.delete_existing_items:
             published_items = collection.get_items_stac()
             stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
-
         # Remove all Item links
         collection.reset_items()
         # Empty extents so they can be recalculated
@@ -86,17 +71,15 @@ def create_collection(  # pylint: disable=too-many-arguments
 
     else:
         collection = ImageryCollection(
-            metadata=collection_metadata,
+            context=collection_context,
             created_datetime=current_datetime,
             updated_datetime=current_datetime,
-            providers=get_providers(licensors, producers),
-            add_title_suffix=options.add_title_suffix,
         )
 
     for item in stac_items:
         collection.add_item(item)
 
-    if options.add_capture_dates:
+    if collection_context.add_capture_date:
         collection.add_capture_dates(uri)
 
     if item_polygons:
@@ -148,15 +131,6 @@ def merge_item_list_for_resupply(
         published_items.remove(item_to_remove)
 
     return supplied_items + published_items
-
-
-def get_providers(licensors: list[str], producers: list[str]) -> list[Provider]:
-    providers: list[Provider] = []
-    for producer_name in producers:
-        providers.append({"name": producer_name, "roles": [ProviderRole.PRODUCER]})
-    for licensor_name in licensors:
-        providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
-    return providers
 
 
 def create_item(  # pylint: disable=too-many-arguments

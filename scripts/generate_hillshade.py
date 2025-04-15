@@ -62,6 +62,12 @@ def get_args_parser() -> argparse.ArgumentParser:
         help="Regenerate the hillshade TIFF files if already exist. Defaults to False.",
         action="store_true",
     )
+    parser.add_argument(
+        "--odr-url",
+        dest="odr_url",
+        help="The path of the published dataset. Example: 's3://nz-elevation/new-zealand/new-zealand/dem-hillshade_1m/2193/'",
+        required=False,
+    )
 
     return parser
 
@@ -195,6 +201,7 @@ def main() -> None:
                     current_datetime=arguments.current_datetime,
                     gdalinfo_result=None,
                     derived_from=[url_derived_from.rsplit(".", 1)[0] + SUFFIX_JSON for url_derived_from in derived_from_tiffs],
+                    odr_url=arguments.odr_url,
                 )
                 write(stac_item_path, dict_to_json_bytes(item.stac), content_type=ContentType.GEOJSON.value)
             else:
