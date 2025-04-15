@@ -23,7 +23,7 @@ GSD_UNIT = "m"
 @dataclass
 class CollectionContext:  # pylint:disable=too-many-instance-attributes
     """
-    Holds contextual data used to create or update a STAC Collection.
+    Holds contextual data and options used to create or update a STAC Collection.
 
     This class acts as a structured container for user-provided metadata when
     initializing an `ImageryCollection`. It does not represent a full STAC
@@ -47,6 +47,9 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         event_name (str | None): Event name, if applicable.
         historic_survey_number (str | None): Historic survey number, if applicable.
         add_title_suffix (bool): Whether to add a suffix based on lifecycle status.
+        keep_title (bool): Whether to keep the original title.
+        add_capture_date (bool): Whether to add the capture date to the title.
+        delete_existing_items (bool): Whether to delete existing items in the collection.
     """
 
     category: str
@@ -63,6 +66,9 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     event_name: str | None = None
     historic_survey_number: str | None = None
     add_title_suffix: bool = True
+    keep_title: bool = False
+    add_capture_date: bool = False
+    delete_existing_items: bool = False
 
     @property
     def providers(self) -> list[Provider]:

@@ -375,12 +375,12 @@ def test_create_collection_resupply_add_items(
 
 
 def test_create_collection_resupply_delete_existing_items(
-    fake_collection_metadata: CollectionMetadata,
+    fake_collection_context: CollectionContext,
     subtests: SubTests,
     tmp_path: Path,
 ) -> None:
     created_datetime_string = any_epoch_datetime_string()
-
+    fake_collection_context.delete_existing_items = True
     existing_item_path = tmp_path / "item_a.json"
     existing_item = {
         "type": "Feature",
@@ -404,8 +404,8 @@ def test_create_collection_resupply_delete_existing_items(
     existing_collection_content = {
         "type": "Collection",
         "stac_version": STAC_VERSION,
-        "id": fake_collection_metadata.collection_id,
-        "linz:slug": fake_collection_metadata.linz_slug,
+        "id": fake_collection_context.collection_id,
+        "linz:slug": fake_collection_context.linz_slug,
         "links": [
             {
                 "rel": "root",
@@ -443,13 +443,10 @@ def test_create_collection_resupply_delete_existing_items(
     updated_datetime_string = any_epoch_datetime_string()
 
     collection = create_collection(
-        collection_metadata=fake_collection_metadata,
+        collection_context=fake_collection_context,
         current_datetime=updated_datetime_string,
-        producers=[],
-        licensors=[],
         stac_items=[item_to_add],
         item_polygons=[],
-        options=CreateCollectionOptions(delete_existing_items=True),
         uri="test",
         odr_url=tmp_path.as_posix(),
     )
@@ -463,6 +460,7 @@ def test_create_collection_resupply_delete_existing_items(
     with subtests.test("links"):
         assert item_to_add_link in collection.stac["links"]
         assert existing_item_link not in collection.stac["links"]
+        
 
 
 def test_create_item_with_odr_url(tmp_path: Path) -> None:
