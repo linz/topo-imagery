@@ -48,7 +48,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         historic_survey_number (str | None): Historic survey number, if applicable.
         add_title_suffix (bool): Whether to add a suffix based on lifecycle status.
         keep_title (bool): Whether to keep the original title.
-        add_capture_date (bool): Whether to add the capture date to the title.
+        add_capture_dates (bool): Whether to link the capture dates file to the Collection.
         delete_existing_items (bool): Whether to delete existing items in the collection.
     """
 
@@ -67,7 +67,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     historic_survey_number: str | None = None
     add_title_suffix: bool = True
     keep_title: bool = False
-    add_capture_date: bool = False
+    add_capture_dates: bool = False
     delete_existing_items: bool = False
 
     @property

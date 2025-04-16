@@ -80,7 +80,7 @@ def create_collection(
     for item in stac_items:
         collection.add_item(item)
 
-    if collection_context.add_capture_date:
+    if collection_context.add_capture_dates:
         collection.add_capture_dates(uri)
 
     if item_polygons:
