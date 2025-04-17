@@ -158,8 +158,6 @@ def main(args: List[str] | None = None) -> None:
     files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
 
     items_to_add = []
-    start_datetime = ""
-    end_datetime = ""
     polygons = []
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
@@ -187,10 +185,6 @@ def main(args: List[str] | None = None) -> None:
                 )
                 continue
             items_to_add.append(content)
-            if not start_datetime or content["properties"]["start_datetime"] < start_datetime:
-                start_datetime = content["properties"]["start_datetime"]
-            if not end_datetime or content["properties"]["end_datetime"] > end_datetime:
-                end_datetime = content["properties"]["end_datetime"]
             get_log().info("Item will be added to Collection", item=content["id"], file=key)
         elif key.endswith(SUFFIX_FOOTPRINT):
             get_log().debug(f"adding geometry from {key}")
@@ -206,8 +200,6 @@ def main(args: List[str] | None = None) -> None:
         category=arguments.category,
         region=arguments.region,
         gsd=arguments.gsd,
-        start_datetime=parse_rfc_3339_datetime(start_datetime),
-        end_datetime=parse_rfc_3339_datetime(end_datetime),
         lifecycle=arguments.lifecycle,
         linz_slug=arguments.linz_slug,
         collection_id=collection_id,
