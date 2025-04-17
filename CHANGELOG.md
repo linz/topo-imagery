@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.5.0](https://github.com/linz/topo-imagery/compare/v7.4.2...v7.5.0) (2025-04-17)
+
+
+### Features
+
+* --delete-all-existing-items TDE-1443 ([#1306](https://github.com/linz/topo-imagery/issues/1306)) ([caca74b](https://github.com/linz/topo-imagery/commit/caca74b63efce2dc8f6de27257e27d57cde8c124))
+
 ## [7.4.2](https://github.com/linz/topo-imagery/compare/v7.4.1...v7.4.2) (2025-04-14)
 
 
