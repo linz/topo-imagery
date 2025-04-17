@@ -7,6 +7,8 @@ DEM = "dem"
 DSM = "dsm"
 DEM_HILLSHADE = "dem-hillshade"
 DEM_HILLSHADE_IGOR = "dem-hillshade-igor"
+DSM_HILLSHADE = "dsm-hillshade"
+DSM_HILLSHADE_IGOR = "dsm-hillshade-igor"
 
 DATA_CATEGORIES = {
     AERIAL_PHOTOS: "Aerial Photos",
@@ -17,7 +19,9 @@ DATA_CATEGORIES = {
     DEM: "DEM",
     DSM: "DSM",
     DEM_HILLSHADE: "DEM Hillshade",
-    DEM_HILLSHADE_IGOR: "DEM Hillshade Igor",
+    DEM_HILLSHADE_IGOR: "DEM Hillshade - Igor",
+    DSM_HILLSHADE: "DSM Hillshade",
+    DSM_HILLSHADE_IGOR: "DSM Hillshade - Igor",
 }
 
 HUMAN_READABLE_REGIONS = {
