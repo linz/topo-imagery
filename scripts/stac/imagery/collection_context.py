@@ -1,23 +1,7 @@
 from dataclasses import dataclass, field
-from datetime import datetime
 from decimal import Decimal
 
-from scripts.stac.imagery.constants import (
-    DATA_CATEGORIES,
-    DEM,
-    DEM_HILLSHADE,
-    DEM_HILLSHADE_IGOR,
-    DSM,
-    HUMAN_READABLE_REGIONS,
-    LIFECYCLE_SUFFIXES,
-    RURAL_AERIAL_PHOTOS,
-    SATELLITE_IMAGERY,
-    SCANNED_AERIAL_PHOTOS,
-    URBAN_AERIAL_PHOTOS,
-)
 from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
-
-GSD_UNIT = "m"
 
 
 @dataclass
@@ -36,8 +20,6 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         category (str): The category of the dataset (e.g., "satellite-imagery").
         region (str): The region of the dataset (e.g., "auckland").
         gsd (Decimal): Ground Sample Distance in meters.
-        start_datetime (datetime): Start date and time of the dataset.
-        end_datetime (datetime): End date and time of the dataset.
         lifecycle (str): Lifecycle status of the dataset (e.g., "completed").
         linz_slug (str): LINZ slug for the dataset.
         producers (list[str]): List of producers for the dataset.
@@ -55,8 +37,6 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     category: str
     region: str
     gsd: Decimal
-    start_datetime: datetime
-    end_datetime: datetime
     lifecycle: str
     linz_slug: str
     producers: list[str] = field(default_factory=list)
@@ -82,168 +62,5 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
             providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
         return merge_provider_roles(providers)
 
-    @property
-    def title(self) -> str:
-        """Generates the title for imagery and elevation datasets.
-        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
-          https://github.com/linz/imagery/blob/master/docs/naming.md
-        DEM / DSM:
-          https://github.com/linz/elevation/blob/master/docs/naming.md
-
-        Raises:
-            MissingMetadataError: if required metadata is missing
-            SubtypeParameterError: if category is not recognised
-
-        Returns:
-            Dataset Title
-        """
-        # format optional metadata
-        geographic_description = self.geographic_description
-        historic_survey_number = self.historic_survey_number
-
-        # format region
-        region = HUMAN_READABLE_REGIONS[self.region]
-
-        # format date
-        start_year = self.start_datetime.year
-        end_year = self.end_datetime.year
-        date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
-
-        # format gsd
-        gsd_str = f"{self.gsd}{GSD_UNIT}"
-
-        # determine suffix based on its lifecycle
-        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.lifecycle, "") if self.add_title_suffix else None
-
-        category = self.category
-
-        if category == SCANNED_AERIAL_PHOTOS:
-            if not historic_survey_number:
-                raise MissingMetadataError("historic_survey_number")
-            components = [
-                geographic_description or region,
-                gsd_str,
-                historic_survey_number,
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
-            components = [
-                geographic_description or region,
-                gsd_str,
-                DATA_CATEGORIES[category],
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {DEM, DSM}:
-            components = [
-                region,
-                "-" if geographic_description else None,
-                geographic_description,
-                "LiDAR",
-                gsd_str,
-                DATA_CATEGORIES[category],
-                date,
-                lifecycle_suffix,
-            ]
-
-        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR}:
-            components = [
-                region,
-                gsd_str if self.gsd == 8 else None,
-                "DEM Hillshade",
-                "- Igor" if category == DEM_HILLSHADE_IGOR else None,
-            ]
-
-        else:
-            raise SubtypeParameterError(self.category)
-
-        return " ".join(filter(None, components))
-
-    @property
-    def description(self) -> str:
-        """Generates the descriptions for imagery and elevation datasets.
-        Urban Aerial Photos / Rural Aerial Photos:
-          Orthophotography within the [Region] region captured in the [year(s)] flying season.
-        DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
-        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
-          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
-          Gaps filled with lower resolution elevation data (8m contour) as needed.
-        Satellite Imagery / Scanned Aerial Photos:
-          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
-
-        Returns:
-            Dataset Description
-        """
-        # format date
-        start_year = self.start_datetime.year
-        end_year = self.end_datetime.year
-        date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
-
-        # format region
-        region = HUMAN_READABLE_REGIONS[self.region]
-
-        category = self.category
-        if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
-            date = f"the {date} flying season"
-
-        base_descriptions = {
-            SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
-            SATELLITE_IMAGERY: "Satellite imagery",
-            URBAN_AERIAL_PHOTOS: "Orthophotography",
-            RURAL_AERIAL_PHOTOS: "Orthophotography",
-            DEM: "Digital Elevation Model",
-            DSM: "Digital Surface Model",
-        }
-
-        if category in base_descriptions:
-            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
-        elif category.startswith(DEM_HILLSHADE):
-            desc = self._description_hillshade
-        else:
-            raise SubtypeParameterError(category)
-
-        desc += f", published as a record of the {self.event_name} event." if self.event_name else "."
-
-        return desc
-
-    @property
-    def _description_hillshade(self) -> str:
-        """Generates the description for hillshade datasets."""
-
-        region = HUMAN_READABLE_REGIONS[self.region]
-        category = self.category
-        gsd_str = f"{self.gsd}{GSD_UNIT}"
-
-        if category == DEM_HILLSHADE_IGOR:
-            shading_option = (
-                "the -igor option in GDAL. "
-                "This renders a softer hillshade that tries to minimize effects on other map features"
-            )
-        else:
-            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
-
-        components = [
-            "Hillshade generated from the",
-            f"{region} LiDAR {gsd_str} DEM and" if gsd_str != "8m" else None,
-            f"{region} Contour-Derived 8m DEM",
-            f"(where no {self.gsd}m DEM data exists)" if gsd_str != "8m" else None,
-            "using",
-            shading_option,
-        ]
-
-        return " ".join(filter(None, components))
 
 
-class SubtypeParameterError(Exception):
-    def __init__(self, category: str) -> None:
-        self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
-
-
-class MissingMetadataError(Exception):
-    def __init__(self, metadata: str) -> None:
-        self.message = f"Missing metadata: {metadata}"
-        self.message = f"Missing metadata: {metadata}"

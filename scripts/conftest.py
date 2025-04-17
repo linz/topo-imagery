@@ -1,4 +1,3 @@
-from datetime import datetime
 from decimal import Decimal
 from random import choice, randint
 from string import ascii_lowercase
@@ -24,8 +23,6 @@ def fake_collection_context() -> Iterator[CollectionContext]:
         category="rural-aerial-photos",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
-        start_datetime=datetime(2023, 1, 1),
-        end_datetime=datetime(2023, 2, 2),
         lifecycle="completed",
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",

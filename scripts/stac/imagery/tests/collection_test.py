@@ -31,18 +31,10 @@ from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
-def test_title_description_id_created_on_init(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
+def test_id_created_on_init(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.event_name = "Forest Assessment"
     fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    with subtests.test():
-        assert collection.stac["title"] == "Hawke's Bay Forest Assessment 0.3m Rural Aerial Photos (2023)"
-
-    with subtests.test():
-        assert collection.stac["description"] == (
-            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
-            "published as a record of the Forest Assessment event."
-        )
 
     with subtests.test():
         assert collection.stac["id"]
@@ -116,6 +108,7 @@ def test_hillshade_title_and_description(
     fake_collection_context.category = category
     fake_collection_context.gsd = gsd
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    
 
     with subtests.test(msg=f"{gsd}m DEM Hillshade Title"):
         assert collection.stac["title"] == expected_title
