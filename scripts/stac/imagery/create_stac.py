@@ -28,8 +28,6 @@ def create_collection(
     stac_items: list[dict[Any, Any]],
     item_polygons: list[BaseGeometry],
     uri: str,
-    add_capture_dates: bool = False,
-    keep_title: bool = False,
     odr_url: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
@@ -51,7 +49,8 @@ def create_collection(
     if odr_url:
         existing_collection_path = os.path.join(odr_url, COLLECTION_FILE_NAME)
         get_log().info("Retrieving existing Collection", path=existing_collection_path)
-        collection = ImageryCollection.from_file(existing_collection_path)
+        load_existing_capture_area = not collection_context.delete_existing_items
+        collection = ImageryCollection.from_file(existing_collection_path, load_existing_capture_area)
         if collection_context.collection_id != collection.stac["id"]:
             raise ValueError(
                 f"Collection ID mismatch: input={collection_context.collection_id} != existing={collection.stac['id']}"
@@ -62,9 +61,14 @@ def create_collection(
                 f"existing={collection.stac['linz:slug']}."
                 "Keeping existing Collection linz_slug."
             )
-        collection.update(collection_context, current_datetime, keep_title)
-        published_items = collection.get_items_stac()
-        stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
+        collection.update(collection_context, current_datetime)
+        if not collection_context.delete_existing_items:
+            published_items = collection.get_items_stac()
+            stac_items = merge_item_list_for_resupply(collection, published_items, stac_items)
+        # Remove all Item links
+        collection.reset_items()
+        # Empty extents so they can be recalculated
+        collection.reset_extent()
 
     else:
         collection = ImageryCollection(
@@ -76,7 +80,7 @@ def create_collection(
     for item in stac_items:
         collection.add_item(item)
 
-    if add_capture_dates:
+    if collection_context.add_capture_dates:
         collection.add_capture_dates(uri)
 
     if item_polygons:
@@ -126,11 +130,6 @@ def merge_item_list_for_resupply(
     for item_to_remove in items_to_replace:
         collection.remove_item_geometry_from_capture_area(item_to_remove)
         published_items.remove(item_to_remove)
-
-    # Remove all Item links
-    collection.stac["links"] = [link for link in collection.stac.get("links", []) if link["rel"] != "item"]
-    # Empty extents so they can be recalculated
-    collection.reset_extent()
 
     return supplied_items + published_items
 

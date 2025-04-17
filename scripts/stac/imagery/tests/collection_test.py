@@ -382,6 +382,7 @@ def test_should_not_add_capture_area(
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.published_location = "s3://bucket/dataset/collection.json"
+        collection.publish_capture_area = False
         collection.add_capture_area(polygons, tmp_path, artifact_path)
         logs = json.loads(capsys.readouterr().out)
         assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
@@ -503,6 +504,18 @@ def test_get_items_from_collection(tmp_path: Path, fake_collection_context: Coll
     collection_items = collection.get_items_stac()
     assert len(collection_items) == 1
     assert collection_items[0] == existing_item
+
+
+def test_reset_items_in_collection(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    links = [
+        {"rel": "item", "href": "./item_a.json"},
+        {"rel": "item", "href": "./item_b.json"},
+        {"rel": "item", "href": "./item_c.json"},
+    ]
+    collection.stac["links"] = links
+    collection.reset_items()
+    assert [link for link in collection.stac["links"] if link.get("rel") == "item"] == []
 
 
 def test_remove_item_geometry_from_capture_area(fake_collection_context: CollectionContext) -> None:

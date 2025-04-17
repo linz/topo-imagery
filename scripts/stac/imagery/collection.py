@@ -32,6 +32,7 @@ class ImageryCollection:
     stac: dict[str, Any]
     gsd: Decimal
     capture_area: dict[str, Any] | None = None
+    publish_capture_area = True
     published_location: str | None = None
 
     def __init__(
@@ -72,12 +73,12 @@ class ImageryCollection:
         self.add_providers(context.providers)
 
     @classmethod
-    def from_file(cls, path: str) -> "ImageryCollection":
+    def from_file(cls, path: str, load_capture_area: bool = True) -> "ImageryCollection":
         """Load an ImageryCollection object from a STAC Collection file.
 
         Args:
             path: The path to the STAC Collection file to load.
-            metadata: The metadata of the Collection.
+            load_capture_area: Whether to load the capture area from a separate file.
 
         Returns:
             The ImageryCollection loaded from the file.
@@ -87,10 +88,13 @@ class ImageryCollection:
         collection = cls.__new__(cls)
         collection.stac = stac_from_file
         collection.published_location = os.path.dirname(path)
-        capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
-        # Some published datasets may not have a capture-area.geojson file (TDE-988)
-        if exists(capture_area_path):
-            collection.capture_area = json.loads(read(capture_area_path))
+        if load_capture_area:
+            capture_area_path = os.path.join(collection.published_location, CAPTURE_AREA_FILE_NAME)
+            # Some published datasets may not have a capture-area.geojson file (TDE-988)
+            if exists(capture_area_path):
+                collection.capture_area = json.loads(read(capture_area_path))
+            else:
+                collection.publish_capture_area = False
         return collection
 
     def update(self, context: CollectionContext, updated_datetime: str, keep_title: bool = False) -> None:
@@ -144,12 +148,12 @@ class ImageryCollection:
         """
         # If published dataset does not have a capture-area,
         # system should skip its creation as it may miss existing Item footprints
-        if self.published_location and not self.capture_area:
+        if not self.publish_capture_area:
             get_log().warn(
                 f"{WARN_NO_PUBLISHED_CAPTURE_AREA}: a new capture-area can't be generated.",
             )
             return
-        # If published dataset update, merge the existing capture area with the new one
+        # If published dataset with a capture-area update, merge the existing capture area with the new one
         if self.capture_area:
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
@@ -326,6 +330,10 @@ class ImageryCollection:
             existing_item_stac = json.loads(read(item_path))
             items_stac.append(existing_item_stac)
         return items_stac
+
+    def reset_items(self) -> None:
+        """Reset the STAC Item links list in the Collection links."""
+        self.stac["links"] = [link for link in self.stac["links"] if link.get("rel") != "item"]
 
     def write_to(self, destination: str) -> None:
         """Write the Collection in JSON format to the specified `destination`.
