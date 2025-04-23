@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.0](https://github.com/linz/topo-imagery/compare/v7.5.0...v7.6.0) (2025-04-23)
+
+
+### Features
+
+* support national DSM hillshades TDE-1455 ([#1319](https://github.com/linz/topo-imagery/issues/1319)) ([62c4260](https://github.com/linz/topo-imagery/commit/62c4260b63f62a6a7f653e8ed177e7ffe63601f9))
+
 ## [7.5.0](https://github.com/linz/topo-imagery/compare/v7.4.2...v7.5.0) (2025-04-17)
 
 
