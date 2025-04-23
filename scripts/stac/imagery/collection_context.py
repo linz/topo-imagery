@@ -154,7 +154,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             components = [
                 region,
-                gsd_str,  # if self.gsd == 8 else None,
+                gsd_str,
                 DATA_CATEGORIES[category],
             ]
 
@@ -235,7 +235,6 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
             "LiDAR" if gsd_str != "8m" else "Contour-Derived",
             gsd_str,
             category_prefix,
-            # f"(where no {self.gsd}m DEM data exists)" if gsd_str != "8m" else None,
             "using",
             shading_option,
         ]
