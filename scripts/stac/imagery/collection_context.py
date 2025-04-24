@@ -61,6 +61,3 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         for licensor_name in self.licensors:
             providers.append({"name": licensor_name, "roles": [ProviderRole.LICENSOR]})
         return merge_provider_roles(providers)
-
-
-

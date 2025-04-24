@@ -1,12 +1,12 @@
 import json
 import os
 import tempfile
-from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
 from shutil import rmtree
 from tempfile import mkdtemp
 
+import pytest
 import shapely.geometry
 from boto3 import client
 from moto import mock_aws
@@ -21,7 +21,7 @@ from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
 from scripts.stac.imagery.capture_area import merge_polygons
-from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection
+from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.provider import ProviderRole
@@ -31,7 +31,7 @@ from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
-def test_id_created_on_init(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
+def test_metadata_initialised(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.event_name = "Forest Assessment"
     fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
@@ -53,6 +53,248 @@ def test_id_created_on_init(fake_collection_context: CollectionContext, subtests
 
     with subtests.test():
         assert collection.stac["linz:geospatial_category"] == "rural-aerial-photos"
+
+
+# `set_title()` TESTS
+
+
+@mark.parametrize(
+    "context,expected_title,expected_description",
+    [
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay 0.3m Rural Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="Aerial Imagery",
+        ),
+        param(
+            CollectionContext(
+                category="dem",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay LiDAR 0.3m DEM (2023)",
+            "Digital Elevation Model within the Hawke's Bay region captured in 2023.",
+            id="DEM",
+        ),
+        param(
+            CollectionContext(
+                category="dsm",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay LiDAR 0.3m DSM (2023)",
+            "Digital Surface Model within the Hawke's Bay region captured in 2023.",
+            id="DSM",
+        ),
+        param(
+            CollectionContext(
+                category="satellite-imagery",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay 0.3m Satellite Imagery (2023)",
+            "Satellite imagery within the Hawke's Bay region captured in 2023.",
+            id="Satellite",
+        ),
+        param(
+            CollectionContext(
+                category="scanned-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                historic_survey_number="SNC8844",
+            ),
+            "Hawke's Bay 0.3m SNC8844 (2023)",
+            "Scanned aerial imagery within the Hawke's Bay region captured in 2023.",
+            id="Historical imagery",
+        ),
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="Ponsonby",
+            ),
+            "Ponsonby 0.3m Rural Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="Geographic description",
+        ),
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="Hawke's Bay Cyclone Gabrielle",
+                event_name="Cyclone Gabrielle",
+            ),
+            "Hawke's Bay Cyclone Gabrielle 0.3m Rural Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, \
+published as a record of the Cyclone Gabrielle event.",
+            id="Event Imagery",
+        ),
+        param(
+            CollectionContext(
+                category="dsm",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="Hawke's Bay Cyclone Gabrielle",
+                event_name="Cyclone Gabrielle",
+            ),
+            "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)",
+            "Digital Surface Model within the Hawke's Bay region captured in 2023, "
+            "published as a record of the Cyclone Gabrielle event.",
+            id="Event Elevation",
+        ),
+        param(
+            CollectionContext(
+                category="satellite-imagery",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="Hawke's Bay Cyclone Gabrielle",
+                event_name="Cyclone Gabrielle",
+            ),
+            "Hawke's Bay Cyclone Gabrielle 0.3m Satellite Imagery (2023)",
+            "Satellite imagery within the Hawke's Bay region captured in 2023, "
+            "published as a record of the Cyclone Gabrielle event.",
+            id="Event Satellite",
+        ),
+        param(
+            CollectionContext(
+                category="dsm",
+                region="hawkes-bay",
+                lifecycle="preview",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay LiDAR 0.3m DSM (2023) - Preview",
+            "Digital Surface Model within the Hawke's Bay region captured in 2023.",
+            id="Preview DSM",
+        ),
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="ongoing",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay 0.3m Rural Aerial Photos (2023) - Draft",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="Draft",
+        ),
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="ongoing",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                add_title_suffix=False,
+            ),
+            "Hawke's Bay 0.3m Rural Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="No title suffix",
+        ),
+        param(
+            CollectionContext(
+                category="rural-aerial-photos",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "Hawke's Bay 0.3m Rural Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="Empty optional",
+        ),
+    ],
+)
+def test_set_title_set_description(
+    context: CollectionContext,
+    expected_title: str,
+    expected_description: str,
+    subtests: SubTests,
+) -> None:
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
+        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
+    ]
+
+    with subtests.test(msg="title"):
+        collection.set_title()
+        assert collection.stac["title"] == expected_title
+    with subtests.test(msg="description"):
+        collection.set_description()
+        assert collection.stac["description"] == expected_description
+
+
+def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
+    fake_collection_context.category = "rural-aerial-photos"
+    fake_collection_context.historic_survey_number = None
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
+        ["2023-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
+    ]
+
+    with subtests.test(msg="title"):
+        collection.set_title()
+        assert collection.stac["title"] == "Hawke's Bay 0.3m Rural Aerial Photos (2023-2024)"
+    with subtests.test(msg="description"):
+        collection.set_description()
+        assert (
+            collection.stac["description"]
+            == "Orthophotography within the Hawke's Bay region captured in the 2023-2024 flying season."
+        )
+
+
+def test_get_title_historic_imagery_with_missing_number(fake_collection_context: CollectionContext) -> None:
+    fake_collection_context.category = "scanned-aerial-photos"
+    fake_collection_context.historic_survey_number = None
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
+        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
+    ]
+    with pytest.raises(MissingMetadataError) as excinfo:
+        collection.set_title()
+
+    assert "historic_survey_number" in str(excinfo.value)
 
 
 @mark.parametrize(
@@ -113,12 +355,15 @@ def test_hillshade_title_and_description(
     fake_collection_context.category = category
     fake_collection_context.gsd = gsd
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    
-
+    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
+        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
+    ]
     with subtests.test(msg="title"):
+        collection.set_title()
         assert collection.stac["title"] == expected_title
 
     with subtests.test(msg="description"):
+        collection.set_description()
         assert collection.stac["description"] == expected_description
 
 
@@ -585,8 +830,6 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
         category="rural-aerial-photos",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
-        start_datetime=datetime(2025, 1, 1),
-        end_datetime=datetime(2025, 2, 2),
         lifecycle="ongoing",
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",
@@ -594,6 +837,11 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
         licensors=["Maxar"],
     )
     collection.update(new_metadata, "2025-01-01T00:00:00Z")
+    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
+        ["2025-01-01T00:00:00Z", "2025-12-31T23:59:59Z"]
+    ]
+    collection.set_title()
+    collection.set_description()
     with subtests.test(msg="Metadata should be updated"):
         assert collection.stac["linz:lifecycle"] == "ongoing"
         assert collection.stac["providers"] == [
@@ -610,22 +858,3 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     with subtests.test(msg="Optional metadata should be removed if not passed"):
         assert collection.stac.get("linz:event_name") is None
         assert collection.stac.get("linz:geographic_description") is None
-
-
-def test_update_metadata_except_title(fake_collection_context: CollectionContext) -> None:
-    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    old_title = collection.stac["title"]
-    new_metadata = CollectionContext(
-        category="rural-aerial-photos",
-        region="hawkes-bay",
-        gsd=Decimal("0.3"),
-        start_datetime=datetime(2025, 1, 1),
-        end_datetime=datetime(2025, 2, 2),
-        lifecycle="ongoing",
-        linz_slug=fake_linz_slug(),
-        collection_id="a-random-collection-id",
-        producers=["Maxar"],
-        licensors=["Maxar"],
-    )
-    collection.update(new_metadata, "2025-01-01T00:00:00Z", keep_title=True)
-    assert collection.stac["title"] == old_title

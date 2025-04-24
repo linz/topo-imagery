@@ -1,64 +1,6 @@
-from datetime import datetime
-
-import pytest
 from pytest_subtests import SubTests
 
-from scripts.stac.imagery.collection_context import CollectionContext, MissingMetadataError
-
-# `get_description()` TESTS
-
-
-def test_get_description_imagery(
-    fake_collection_context: CollectionContext,
-) -> None:
-    assert (
-        fake_collection_context.description
-        == "Orthophotography within the Hawke's Bay region captured in the 2023 flying season."
-    )
-
-
-def test_get_description_elevation(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.category = "dem"
-    assert fake_collection_context.description == "Digital Elevation Model within the Hawke's Bay region captured in 2023."
-
-
-def test_get_description_elevation_geographic_description_input(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.category = "dem"
-    fake_collection_context.geographic_description = "Central"
-    assert fake_collection_context.description == "Digital Elevation Model within the Hawke's Bay region captured in 2023."
-
-
-def test_get_description_satellite_imagery(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.category = "satellite-imagery"
-    assert fake_collection_context.description == "Satellite imagery within the Hawke's Bay region captured in 2023."
-
-
-def test_get_description_historic_imagery(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.category = "scanned-aerial-photos"
-    fake_collection_context.historic_survey_number = "SNC8844"
-    assert fake_collection_context.description == "Scanned aerial imagery within the Hawke's Bay region captured in 2023."
-
-
-def test_get_description_event(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.event_name = "Cyclone Gabrielle"
-    assert (
-        fake_collection_context.description
-        == "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, \
-published as a record of the Cyclone Gabrielle event."
-    )
-
-
-# `get_providers()` TESTS
+from scripts.stac.imagery.collection_context import CollectionContext
 
 
 def test_get_providers_default_is_present(fake_collection_context: CollectionContext, subtests: SubTests) -> None:

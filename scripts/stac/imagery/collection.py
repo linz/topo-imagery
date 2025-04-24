@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
@@ -60,8 +59,7 @@ class ImageryCollection:
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
-    start_datetime: datetime | None = None
-    end_datetime: datetime | None = None
+    add_title_suffix: bool = True
 
     def __init__(
         self,
@@ -73,6 +71,7 @@ class ImageryCollection:
             context.collection_id = str(ulid.ULID())
 
         self.gsd = context.gsd
+        self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
             "type": "Collection",
@@ -97,6 +96,8 @@ class ImageryCollection:
             self.stac["linz:event_name"] = event_name
         if geographic_description := context.geographic_description:
             self.stac["linz:geographic_description"] = geographic_description
+        if historic_survey_number := context.historic_survey_number:
+            self.stac["linz:historic_survey_number"] = historic_survey_number
 
         self.add_providers(context.providers)
 
@@ -159,8 +160,9 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.add_title_suffix = context.add_title_suffix
 
-    def set_title(self, add_suffix: bool = True) -> None:
+    def set_title(self) -> None:
         """Set the title based on the STAC metadata.
         Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
@@ -174,8 +176,9 @@ class ImageryCollection:
         Returns:
             Dataset Title
         """
-        if not self.start_datetime or not self.end_datetime:
-            raise ValueError("start_datetime and end_datetime must be set before setting the title")
+        temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
+        if not temporal_extent:
+            raise ValueError("temporal extent must be set before setting the title")
         # format optional metadata
         geographic_description = self.stac.get("linz:geographic_description")
         historic_survey_number = self.stac.get("linz:historic_survey_number")
@@ -184,15 +187,15 @@ class ImageryCollection:
         region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
 
         # format date
-        start_year = self.start_datetime.year
-        end_year = self.end_datetime.year
+        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
+        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
         date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
 
         # format gsd
         gsd_str = f"{self.gsd}{GSD_UNIT}"
 
         # determine suffix based on its lifecycle
-        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.stac["linz:lifecycle"], "") if add_suffix else None
+        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.stac["linz:lifecycle"], "") if self.add_title_suffix else None
 
         category = self.stac["linz:geospatial_category"]
 
@@ -256,11 +259,12 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
-        if not self.start_datetime or not self.end_datetime:
-            raise ValueError("start_datetime and end_datetime must be set before setting the description")
+        temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
+        if not temporal_extent:
+            raise ValueError("temporal extent must be set before setting the description")
         # format date
-        start_year = self.start_datetime.year
-        end_year = self.end_datetime.year
+        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
+        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
         date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
 
         # format region
@@ -287,7 +291,9 @@ class ImageryCollection:
             raise SubtypeParameterError(category)
 
         desc += (
-            f", published as a record of the {self.stac["linz:event_name"]} event." if self.stac["linz:event_name"] else "."
+            f", published as a record of the {self.stac["linz:event_name"]} event."
+            if self.stac.get("linz:event_name")
+            else "."
         )
 
         self.stac["description"] = desc
@@ -473,9 +479,6 @@ class ImageryCollection:
                 format_rfc_3339_datetime_string(end_datetime),
             ]
         )
-
-        self.start_datetime = start_datetime
-        self.end_datetime = end_datetime
 
     def update_extent(self, bbox: list[float] | None = None, interval: list[str] | None = None) -> None:
         """Update an extent of the Collection whereas it's spatial or temporal.
