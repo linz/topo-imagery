@@ -15,6 +15,21 @@ from scripts.files.fs import exists, read, write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
+from scripts.stac.imagery.constants import (
+    DATA_CATEGORIES,
+    DEM,
+    DEM_HILLSHADE,
+    DEM_HILLSHADE_IGOR,
+    DSM,
+    DSM_HILLSHADE,
+    DSM_HILLSHADE_IGOR,
+    HUMAN_READABLE_REGIONS,
+    LIFECYCLE_SUFFIXES,
+    RURAL_AERIAL_PHOTOS,
+    SATELLITE_IMAGERY,
+    SCANNED_AERIAL_PHOTOS,
+    URBAN_AERIAL_PHOTOS,
+)
 from scripts.stac.imagery.provider import Provider
 from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
@@ -26,6 +41,18 @@ COLLECTION_FILE_NAME = "collection.json"
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
+GSD_UNIT = "m"
+
+
+class SubtypeParameterError(Exception):
+    def __init__(self, category: str) -> None:
+        self.message = f"Unrecognised/Unimplemented Subtype Parameter: {category}"
+
+
+class MissingMetadataError(Exception):
+    def __init__(self, metadata: str) -> None:
+        self.message = f"Missing metadata: {metadata}"
+        self.message = f"Missing metadata: {metadata}"
 
 
 class ImageryCollection:
@@ -34,6 +61,7 @@ class ImageryCollection:
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
+    add_title_suffix: bool = True
 
     def __init__(
         self,
@@ -45,13 +73,14 @@ class ImageryCollection:
             context.collection_id = str(ulid.ULID())
 
         self.gsd = context.gsd
+        self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
             "type": "Collection",
             "stac_version": STAC_VERSION,
             "id": context.collection_id,
-            "title": context.title,
-            "description": context.description,
+            "title": "",
+            "description": "",
             "license": "CC-BY-4.0",
             "links": [{"rel": "self", "href": "./collection.json", "type": "application/json"}],
             "providers": [],
@@ -69,6 +98,8 @@ class ImageryCollection:
             self.stac["linz:event_name"] = event_name
         if geographic_description := context.geographic_description:
             self.stac["linz:geographic_description"] = geographic_description
+        if historic_survey_number := context.historic_survey_number:
+            self.stac["linz:historic_survey_number"] = historic_survey_number
 
         self.add_providers(context.providers)
 
@@ -97,7 +128,7 @@ class ImageryCollection:
                 collection.publish_capture_area = False
         return collection
 
-    def update(self, context: CollectionContext, updated_datetime: str, keep_title: bool = False) -> None:
+    def update(self, context: CollectionContext, updated_datetime: str) -> None:
         """Update the Collection with new metadata.
 
         Args:
@@ -114,9 +145,6 @@ class ImageryCollection:
         if context.producers or context.licensors:
             self.stac["providers"] = []
             self.add_providers(context.providers)
-        self.stac["description"] = context.description
-        if not keep_title:
-            self.stac["title"] = context.title
 
         # Optional metadata - if not provided, the field will be removed from the Collection
         if context.geographic_description:
@@ -134,6 +162,171 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.add_title_suffix = context.add_title_suffix
+
+    def set_title(self) -> None:
+        """Set the title based on the STAC metadata.
+        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
+          https://github.com/linz/imagery/blob/master/docs/naming.md
+        DEM / DSM:
+          https://github.com/linz/elevation/blob/master/docs/naming.md
+
+        Raises:
+            MissingMetadataError: if required metadata is missing
+            SubtypeParameterError: if category is not recognised
+
+        Returns:
+            Dataset Title
+        """
+        temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
+        if not temporal_extent:
+            raise ValueError("temporal extent must be set before setting the title")
+        # format optional metadata
+        geographic_description = self.stac.get("linz:geographic_description")
+        historic_survey_number = self.stac.get("linz:historic_survey_number")
+
+        # format region
+        region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
+
+        # format date
+        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
+        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
+        date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
+
+        # format gsd
+        gsd_str = f"{self.gsd}{GSD_UNIT}"
+
+        # determine suffix based on its lifecycle
+        lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.stac["linz:lifecycle"], "") if self.add_title_suffix else None
+
+        category = self.stac["linz:geospatial_category"]
+
+        if category == SCANNED_AERIAL_PHOTOS:
+            if not historic_survey_number:
+                raise MissingMetadataError("historic_survey_number")
+            components = [
+                geographic_description or region,
+                gsd_str,
+                historic_survey_number,
+                date,
+                lifecycle_suffix,
+            ]
+
+        elif category in {SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
+            components = [
+                geographic_description or region,
+                gsd_str,
+                DATA_CATEGORIES[category],
+                date,
+                lifecycle_suffix,
+            ]
+
+        elif category in {DEM, DSM}:
+            components = [
+                region,
+                "-" if geographic_description else None,
+                geographic_description,
+                "LiDAR",
+                gsd_str,
+                DATA_CATEGORIES[category],
+                date,
+                lifecycle_suffix,
+            ]
+
+        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
+            components = [
+                region,
+                gsd_str,
+                DATA_CATEGORIES[category],
+            ]
+
+        else:
+            raise SubtypeParameterError(category)
+
+        self.stac["title"] = " ".join(filter(None, components))
+
+    def set_description(self) -> None:
+        """Set the descriptions for imagery and elevation datasets.
+        Urban Aerial Photos / Rural Aerial Photos:
+          Orthophotography within the [Region] region captured in the [year(s)] flying season.
+        DEM / DSM:
+          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
+        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
+          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
+          Gaps filled with lower resolution elevation data (8m contour) as needed.
+        Satellite Imagery / Scanned Aerial Photos:
+          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
+
+        Returns:
+            Dataset Description
+        """
+        temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
+        if not temporal_extent:
+            raise ValueError("temporal extent must be set before setting the description")
+        # format date
+        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
+        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
+        date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
+
+        # format region
+        region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
+
+        category = self.stac["linz:geospatial_category"]
+        if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
+            date = f"the {date} flying season"
+
+        base_descriptions = {
+            SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
+            SATELLITE_IMAGERY: "Satellite imagery",
+            URBAN_AERIAL_PHOTOS: "Orthophotography",
+            RURAL_AERIAL_PHOTOS: "Orthophotography",
+            DEM: "Digital Elevation Model",
+            DSM: "Digital Surface Model",
+        }
+
+        if category in base_descriptions:
+            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
+        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
+            desc = self._get_description_hillshade()
+        else:
+            raise SubtypeParameterError(category)
+
+        desc += (
+            f", published as a record of the {self.stac["linz:event_name"]} event."
+            if self.stac.get("linz:event_name")
+            else "."
+        )
+
+        self.stac["description"] = desc
+
+    def _get_description_hillshade(self) -> str:
+        """Generates the description for hillshade datasets."""
+
+        region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
+        category = DATA_CATEGORIES[self.stac["linz:geospatial_category"]]
+        category_prefix = category[0:3]  # e.g. "dem" or "dsm"
+        category_suffix = category[4:]  # e.g. "hillshade" or "hillshade-igor"
+        gsd_str = f"{self.gsd}{GSD_UNIT}"
+
+        if category_suffix == "Hillshade":
+            shading_option = "GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle"
+        else:
+            shading_option = (
+                "the -igor option in GDAL. "
+                "This renders a softer hillshade that tries to minimize effects on other map features"
+            )
+
+        components = [
+            "Hillshade generated from the",
+            region,
+            "LiDAR" if gsd_str != "8m" else "Contour-Derived",
+            gsd_str,
+            category_prefix,
+            "using",
+            shading_option,
+        ]
+
+        return " ".join(filter(None, components))
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.

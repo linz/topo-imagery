@@ -80,6 +80,11 @@ def create_collection(
     for item in stac_items:
         collection.add_item(item)
 
+    # At this stage the title and description can be set using the temporal extent for the dates
+    if not collection_context.keep_title:
+        collection.set_title()
+    collection.set_description()
+
     if collection_context.add_capture_dates:
         collection.add_capture_dates(uri)
 
