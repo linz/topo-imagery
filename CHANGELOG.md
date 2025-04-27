@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.6.1](https://github.com/linz/topo-imagery/compare/v7.6.0...v7.6.1) (2025-04-27)
+
+
+### Bug Fixes
+
+* title and description years should match temporal extent TDE-1464 ([#1317](https://github.com/linz/topo-imagery/issues/1317)) ([5a6c0b9](https://github.com/linz/topo-imagery/commit/5a6c0b9b5305c49d66f6376c0353d1370eb00fde))
+
 ## [7.6.0](https://github.com/linz/topo-imagery/compare/v7.5.0...v7.6.0) (2025-04-23)
 
 
