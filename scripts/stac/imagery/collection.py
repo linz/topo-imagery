@@ -134,7 +134,6 @@ class ImageryCollection:
         Args:
             context: The context containing the updated metadata.
             updated_datetime: The updated datetime of the Collection.
-            keep_title_desc: Whether to keep the original title and description.
         """
         if context.lifecycle:
             self.stac["linz:lifecycle"] = context.lifecycle
