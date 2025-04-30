@@ -244,6 +244,119 @@ published as a record of the Cyclone Gabrielle event.",
             "Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
             id="Empty optional",
         ),
+        param(
+            CollectionContext(
+                category="dem-hillshade",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("8"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 8m DEM Hillshade",
+            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using GDAL’s "
+            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            id="8m DEM Hillshade",
+        ),
+        param(
+            CollectionContext(
+                category="dem-hillshade-igor",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("8"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 8m DEM Hillshade - Igor",
+            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using the -igor option in GDAL. "
+            "This renders a softer hillshade that tries to minimize effects on other map features.",
+            id="8m DEM Hillshade Igor",
+        ),
+        param(
+            CollectionContext(
+                category="dsm-hillshade",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("1"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 1m DSM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 1m DSM using GDAL’s "
+            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            id="1m DSM Hillshade",
+        ),
+        param(
+            CollectionContext(
+                category="dsm-hillshade-igor",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("1"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 1m DSM Hillshade - Igor",
+            "Hillshade generated from the New Zealand LiDAR 1m DSM using the -igor option in GDAL. "
+            "This renders a softer hillshade that tries to minimize effects on other map features.",
+            id="1m DSM Hillshade Igor",
+        ),
+        param(
+            CollectionContext(
+                category="dem-hillshade",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("1"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 1m DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM "
+            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            id="1m DEM Hillshade",
+        ),
+        param(
+            CollectionContext(
+                category="dem-hillshade-igor",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("1"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 1m DEM Hillshade - Igor",
+            "Hillshade generated from the New Zealand LiDAR 1m DEM "
+            "using the -igor option in GDAL. This renders a softer hillshade that tries to "
+            "minimize effects on other map features.",
+            id="1m DEM Hillshade Igor",
+        ),
+        param(
+            CollectionContext(
+                category="dem-hillshade",
+                region="new-zealand",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.25"),
+                collection_id="a-random-collection-id",
+                geographic_description="",
+                event_name="",
+            ),
+            "New Zealand 0.25m DEM Hillshade",
+            "Hillshade generated from the New Zealand LiDAR 0.25m DEM "
+            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
+            id="0.25m DEM Hillshade",
+        ),
     ],
 )
 def test_set_title_set_description(
@@ -295,92 +408,6 @@ def test_get_title_historic_imagery_with_missing_number(fake_collection_context:
         collection.set_title()
 
     assert "historic_survey_number" in str(excinfo.value)
-
-
-@mark.parametrize(
-    "category, gsd, expected_title, expected_description",
-    [
-        param(
-            "dem-hillshade",
-            Decimal(8),
-            "New Zealand 8m DEM Hillshade",
-            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using GDAL’s "
-            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
-            id="8m DEM Hillshade",
-        ),
-        param(
-            "dem-hillshade-igor",
-            Decimal(8),
-            "New Zealand 8m DEM Hillshade - Igor",
-            "Hillshade generated from the New Zealand Contour-Derived 8m DEM using the -igor option in GDAL. "
-            "This renders a softer hillshade that tries to minimize effects on other map features.",
-            id="8m DEM Hillshade Igor",
-        ),
-        param(
-            "dsm-hillshade",
-            Decimal(1),
-            "New Zealand 1m DSM Hillshade",
-            "Hillshade generated from the New Zealand LiDAR 1m DSM using GDAL’s "
-            "default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
-            id="1m DSM Hillshade",
-        ),
-        param(
-            "dsm-hillshade-igor",
-            Decimal(1),
-            "New Zealand 1m DSM Hillshade - Igor",
-            "Hillshade generated from the New Zealand LiDAR 1m DSM using the -igor option in GDAL. "
-            "This renders a softer hillshade that tries to minimize effects on other map features.",
-            id="1m DSM Hillshade Igor",
-        ),
-        param(
-            "dem-hillshade",
-            Decimal(1),
-            "New Zealand 1m DEM Hillshade",
-            "Hillshade generated from the New Zealand LiDAR 1m DEM "
-            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
-            id="1m DEM Hillshade",
-        ),
-        param(
-            "dem-hillshade-igor",
-            Decimal(1),
-            "New Zealand 1m DEM Hillshade - Igor",
-            "Hillshade generated from the New Zealand LiDAR 1m DEM "
-            "using the -igor option in GDAL. This renders a softer hillshade that tries to "
-            "minimize effects on other map features.",
-            id="1m DEM Hillshade Igor",
-        ),
-        param(
-            "dem-hillshade",
-            Decimal(0.25),
-            "New Zealand 0.25m DEM Hillshade",
-            "Hillshade generated from the New Zealand LiDAR 0.25m DEM "
-            "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
-            id="0.25m DEM Hillshade",
-        ),
-    ],
-)
-def test_hillshade_title_and_description(
-    fake_collection_context: CollectionContext,
-    subtests: SubTests,
-    category: str,
-    gsd: Decimal,
-    expected_title: str,
-    expected_description: str,
-) -> None:
-    fake_collection_context.region = "new-zealand"
-    fake_collection_context.category = category
-    fake_collection_context.gsd = gsd
-    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
-        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
-    ]
-    with subtests.test(msg="title"):
-        collection.set_title()
-        assert collection.stac["title"] == expected_title
-
-    with subtests.test(msg="description"):
-        collection.set_description()
-        assert collection.stac["description"] == expected_description
 
 
 def test_id_parsed_on_init(fake_collection_context: CollectionContext) -> None:
