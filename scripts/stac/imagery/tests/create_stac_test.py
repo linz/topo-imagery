@@ -527,6 +527,28 @@ def test_create_collection_resupply_keep_title(
     assert collection.stac["title"] == existing_collection_content["title"]
 
 
+def test_create_collection_new_keep_title(fake_collection_context: CollectionContext) -> None:
+    current_datetime = any_epoch_datetime_string()
+    fake_item = {
+        "type": "Feature",
+        "id": "fake_item",
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "links": [{"href": "./fake_item.json", "rel": "self", "type": "application/geo+json"}],
+        "bbox": [174.5656855, -41.1625951, 174.8593132, -40.8342068],
+    }
+    fake_collection_context.keep_title = True
+    # create_collection without ODR URL
+    collection = create_collection(
+        collection_context=fake_collection_context,
+        current_datetime=current_datetime,
+        stac_items=[fake_item],
+        item_polygons=[],
+        uri="test",
+    )
+
+    assert collection.stac["title"]
+
+
 def test_create_item_with_odr_url(tmp_path: Path) -> None:
     item_name = "empty"
     existing_item_file = tmp_path / f"{item_name}.json"
