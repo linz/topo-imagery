@@ -81,7 +81,7 @@ def create_collection(
         collection.add_item(item)
 
     # At this stage the title and description can be set using the temporal extent for the dates
-    if not collection_context.keep_title:
+    if not collection_context.keep_title or not odr_url:
         collection.set_title()
     collection.set_description()
 
