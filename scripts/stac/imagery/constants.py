@@ -10,7 +10,7 @@ DEM_HILLSHADE = "dem-hillshade"
 DEM_HILLSHADE_IGOR = "dem-hillshade-igor"
 DSM_HILLSHADE = "dsm-hillshade"
 DSM_HILLSHADE_IGOR = "dsm-hillshade-igor"
-# SUBTYPES
+# DOMAINS
 LAND = "land"
 COASTAL = "coastal"
 
@@ -29,7 +29,7 @@ DATA_CATEGORIES = {
     DSM_HILLSHADE_IGOR: "DSM Hillshade - Igor",
 }
 
-DATA_SUBTYPES = {
+DATA_DOMAINS = {
     LAND: "",
     COASTAL: "Coastal",
 }

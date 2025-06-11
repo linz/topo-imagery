@@ -64,7 +64,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -78,7 +78,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="dem",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -92,7 +92,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="dsm",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -106,7 +106,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="satellite-imagery",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -120,7 +120,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="scanned-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -135,7 +135,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -150,7 +150,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -167,7 +167,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dsm",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -184,7 +184,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="satellite-imagery",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -201,7 +201,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dsm",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="preview",
                 linz_slug=fake_linz_slug(),
@@ -215,7 +215,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="ongoing",
                 linz_slug=fake_linz_slug(),
@@ -229,7 +229,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="ongoing",
                 linz_slug=fake_linz_slug(),
@@ -244,7 +244,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="rural-aerial-photos",
-                subtype="land",
+                domain="land",
                 region="hawkes-bay",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -260,7 +260,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -277,7 +277,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade-igor",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -294,7 +294,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dsm-hillshade",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -311,7 +311,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dsm-hillshade-igor",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -328,7 +328,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -345,7 +345,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade-igor",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -363,7 +363,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade",
-                subtype="land",
+                domain="land",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -380,7 +380,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem",
-                subtype="coastal",
+                domain="coastal",
                 region="bay-of-plenty",
                 geographic_description="Tauranga",
                 lifecycle="completed",
@@ -395,7 +395,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade",
-                subtype="coastal",
+                domain="coastal",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -412,7 +412,7 @@ published as a record of the Cyclone Gabrielle event.",
         param(
             CollectionContext(
                 category="dem-hillshade-igor",
-                subtype="coastal",
+                domain="coastal",
                 region="new-zealand",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
@@ -941,7 +941,7 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     old_slug = collection.stac["linz:slug"]
     new_metadata = CollectionContext(
         category="rural-aerial-photos",
-        subtype="land",
+        domain="land",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
         lifecycle="ongoing",

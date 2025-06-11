@@ -17,7 +17,7 @@ from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
     DATA_CATEGORIES,
-    DATA_SUBTYPES,
+    DATA_DOMAINS,
     DEM,
     DEM_HILLSHADE,
     DEM_HILLSHADE_IGOR,
@@ -59,7 +59,7 @@ class MissingMetadataError(Exception):
 class ImageryCollection:
     stac: dict[str, Any]
     gsd: Decimal
-    subtype: str
+    domain: str
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
@@ -75,7 +75,7 @@ class ImageryCollection:
             context.collection_id = str(ulid.ULID())
 
         self.gsd = context.gsd
-        self.subtype = context.subtype
+        self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -164,7 +164,7 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
-        self.subtype = context.subtype
+        self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
     def set_title(self) -> None:
@@ -229,7 +229,7 @@ class ImageryCollection:
                 region,
                 "-" if geographic_description else None,
                 geographic_description,
-                DATA_SUBTYPES[self.subtype],
+                DATA_DOMAINS[self.domain],
                 "LiDAR",
                 gsd_str,
                 DATA_CATEGORIES[category],
@@ -240,7 +240,7 @@ class ImageryCollection:
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             components = [
                 region,
-                DATA_SUBTYPES[self.subtype],
+                DATA_DOMAINS[self.domain],
                 gsd_str,
                 DATA_CATEGORIES[category],
             ]
@@ -289,9 +289,9 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
-        subtype_prefix = DATA_SUBTYPES[self.subtype]
+        subtype_prefix = DATA_DOMAINS[self.domain]
         desc_prefix = ""
-        # subtype is only used for DEM/DSM categories
+        # domain is only used for DEM/DSM categories
         if category in {DEM, DSM, DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR} and subtype_prefix:
             desc_prefix = f"{subtype_prefix} "
 

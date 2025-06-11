@@ -18,6 +18,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
 
     Attributes:
         category (str): The category of the dataset (e.g., "satellite-imagery").
+        domain (str): The domain of the dataset (e.g., "land").
         region (str): The region of the dataset (e.g., "auckland").
         gsd (Decimal): Ground Sample Distance in meters.
         lifecycle (str): Lifecycle status of the dataset (e.g., "completed").
@@ -35,7 +36,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     """
 
     category: str
-    subtype: str
+    domain: str
     region: str
     gsd: Decimal
     lifecycle: str

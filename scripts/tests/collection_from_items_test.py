@@ -94,7 +94,7 @@ def test_should_create_coastal_collection_file(item: ImageryItem, fake_collectio
         "abc",
         "--category",
         "dem",
-        "--subtype",
+        "--domain",
         "coastal",
         "--region",
         "hawkes-bay",
