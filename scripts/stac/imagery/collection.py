@@ -17,6 +17,7 @@ from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
     DATA_CATEGORIES,
+    DATA_SUBTYPES,
     DEM,
     DEM_HILLSHADE,
     DEM_HILLSHADE_IGOR,
@@ -58,6 +59,7 @@ class MissingMetadataError(Exception):
 class ImageryCollection:
     stac: dict[str, Any]
     gsd: Decimal
+    subtype: str
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
@@ -73,6 +75,7 @@ class ImageryCollection:
             context.collection_id = str(ulid.ULID())
 
         self.gsd = context.gsd
+        self.subtype = context.subtype
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -161,6 +164,7 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.subtype = context.subtype
         self.add_title_suffix = context.add_title_suffix
 
     def set_title(self) -> None:
@@ -225,6 +229,7 @@ class ImageryCollection:
                 region,
                 "-" if geographic_description else None,
                 geographic_description,
+                DATA_SUBTYPES[self.subtype],
                 "LiDAR",
                 gsd_str,
                 DATA_CATEGORIES[category],
@@ -235,6 +240,7 @@ class ImageryCollection:
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             components = [
                 region,
+                DATA_SUBTYPES[self.subtype],
                 gsd_str,
                 DATA_CATEGORIES[category],
             ]
@@ -283,10 +289,13 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
+        subtype_prefix = DATA_SUBTYPES[self.subtype]
+        desc_prefix = f"{subtype_prefix} " if subtype_prefix else ""
+
         if category in base_descriptions:
-            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
+            desc = f"{desc_prefix}{base_descriptions[category]} within the {region} region captured in {date}"
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
-            desc = self._get_description_hillshade()
+            desc = f"{desc_prefix}{self._get_description_hillshade()}"
         else:
             raise SubtypeParameterError(category)
 

@@ -35,6 +35,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     """
 
     category: str
+    subtype: str
     region: str
     gsd: Decimal
     lifecycle: str

@@ -21,6 +21,7 @@ def fake_linz_slug() -> str:
 def fake_collection_context() -> Iterator[CollectionContext]:
     yield CollectionContext(
         category="rural-aerial-photos",
+        subtype="land",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
         lifecycle="completed",
