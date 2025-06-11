@@ -93,7 +93,7 @@ def test_should_create_coastal_collection_file(item: ImageryItem, fake_collectio
         "--collection-id",
         "abc",
         "--category",
-        "urban-aerial-photos",
+        "dem",
         "--subtype",
         "coastal",
         "--region",
@@ -114,9 +114,9 @@ def test_should_create_coastal_collection_file(item: ImageryItem, fake_collectio
     # Call script's main function
     main(args)
 
-    # Verify collection.json has been created
+    # Verify collection.json has been created with "Coastal" information
     resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
-    assert '"type": "Collection"' in resp["Body"].read().decode("utf-8")
+    assert "Coastal" in resp["Body"].read().decode("utf-8")
 
 
 @mock_aws
