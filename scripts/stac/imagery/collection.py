@@ -289,11 +289,11 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
-        subtype_prefix = DATA_DOMAINS[self.domain]
+        domain_prefix = DATA_DOMAINS[self.domain]
         desc_prefix = ""
         # domain is only used for DEM/DSM categories
-        if category in {DEM, DSM, DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR} and subtype_prefix:
-            desc_prefix = f"{subtype_prefix} "
+        if category in {DEM, DSM, DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR} and domain_prefix:
+            desc_prefix = f"{domain_prefix} "
 
         if category in base_descriptions:
             desc = f"{desc_prefix}{base_descriptions[category]} within the {region} region captured in {date}"
