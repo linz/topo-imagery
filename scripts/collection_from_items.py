@@ -17,7 +17,7 @@ from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
 from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.constants import DATA_CATEGORIES, HUMAN_READABLE_REGIONS
+from scripts.stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
 from scripts.stac.imagery.create_stac import create_collection
 
 if TYPE_CHECKING:
@@ -43,9 +43,16 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--category",
         dest="category",
-        help="Dataset category description",
+        help="Dataset category",
         required=True,
         choices=DATA_CATEGORIES.keys(),
+    )
+    parser.add_argument(
+        "--domain",
+        dest="domain",
+        help="Dataset domain",
+        default=LAND,
+        choices=DATA_DOMAINS.keys(),
     )
     parser.add_argument(
         "--region",
@@ -198,6 +205,7 @@ def main(args: List[str] | None = None) -> None:
 
     collection_context = CollectionContext(
         category=arguments.category,
+        domain=arguments.domain,
         region=arguments.region,
         gsd=arguments.gsd,
         lifecycle=arguments.lifecycle,

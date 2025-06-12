@@ -80,6 +80,46 @@ def test_should_create_collection_file(item: ImageryItem, fake_collection_contex
 
 
 @mock_aws
+def test_should_create_coastal_collection_file(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
+    # Mock AWS S3
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    # CLI arguments
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "dem",
+        "--domain",
+        "coastal",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1m",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+    ]
+    # Call script's main function
+    main(args)
+
+    # Verify collection.json has been created with "Coastal" information
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    assert "Coastal" in resp["Body"].read().decode("utf-8")
+
+
+@mock_aws
 def test_should_fail_if_collection_has_no_matching_items(
     item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str], subtests: SubTests
 ) -> None:

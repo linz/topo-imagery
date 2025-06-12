@@ -17,6 +17,7 @@ from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
     DATA_CATEGORIES,
+    DATA_DOMAINS,
     DEM,
     DEM_HILLSHADE,
     DEM_HILLSHADE_IGOR,
@@ -58,6 +59,7 @@ class MissingMetadataError(Exception):
 class ImageryCollection:
     stac: dict[str, Any]
     gsd: Decimal
+    domain: str
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
@@ -73,6 +75,7 @@ class ImageryCollection:
             context.collection_id = str(ulid.ULID())
 
         self.gsd = context.gsd
+        self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -161,6 +164,7 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
     def set_title(self) -> None:
@@ -225,6 +229,7 @@ class ImageryCollection:
                 region,
                 "-" if geographic_description else None,
                 geographic_description,
+                DATA_DOMAINS[self.domain],
                 "LiDAR",
                 gsd_str,
                 DATA_CATEGORIES[category],
@@ -235,6 +240,7 @@ class ImageryCollection:
         elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
             components = [
                 region,
+                DATA_DOMAINS[self.domain],
                 gsd_str,
                 DATA_CATEGORIES[category],
             ]
@@ -259,20 +265,37 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
+        IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}
+        ELEVATION = {DEM, DSM}
+        HILLSHADES = {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}
+
+        category = self.stac["linz:geospatial_category"]
+
+        components = [DATA_DOMAINS[self.domain] if category in {*ELEVATION, *HILLSHADES} else None]
+        if category in {*IMAGERY, *ELEVATION}:
+            components.extend(self._get_imagery_description_components())
+        elif category in HILLSHADES:
+            components.extend(self._get_hillshade_description_components())
+        else:
+            raise SubtypeParameterError(category)
+
+        desc = " ".join(filter(None, components)) + (
+            f", published as a record of the {self.stac['linz:event_name']} event."
+            if self.stac.get("linz:event_name")
+            else "."
+        )
+
+        self.stac["description"] = desc
+
+    def _get_imagery_description_components(self) -> list[str | None]:
         temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
         if not temporal_extent:
             raise ValueError("temporal extent must be set before setting the description")
         # format date
         start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
         end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
-        date = str(start_year) if start_year == end_year else f"{start_year}-{end_year}"
-
-        # format region
-        region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
 
         category = self.stac["linz:geospatial_category"]
-        if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
-            date = f"the {date} flying season"
 
         base_descriptions = {
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
@@ -283,22 +306,19 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
-        if category in base_descriptions:
-            desc = f"{base_descriptions[category]} within the {region} region captured in {date}"
-        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
-            desc = self._get_description_hillshade()
-        else:
-            raise SubtypeParameterError(category)
+        components = [
+            base_descriptions[category],
+            "within the",
+            HUMAN_READABLE_REGIONS[self.stac["linz:region"]],
+            "region captured in",
+            "the" if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS} else None,
+            str(start_year) if start_year == end_year else f"{start_year}-{end_year}",
+            "flying season" if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS} else None,
+        ]
 
-        desc += (
-            f", published as a record of the {self.stac["linz:event_name"]} event."
-            if self.stac.get("linz:event_name")
-            else "."
-        )
+        return components
 
-        self.stac["description"] = desc
-
-    def _get_description_hillshade(self) -> str:
+    def _get_hillshade_description_components(self) -> list[str]:
         """Generates the description for hillshade datasets."""
 
         region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
@@ -325,7 +345,7 @@ class ImageryCollection:
             shading_option,
         ]
 
-        return " ".join(filter(None, components))
+        return components
 
     def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
         """Add the capture area of the Collection.
