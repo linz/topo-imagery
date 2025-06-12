@@ -1,5 +1,22 @@
 # Changelog
 
+## [7.7.0](https://github.com/linz/topo-imagery/compare/v7.6.1...v7.7.0) (2025-06-12)
+
+
+### Features
+
+* add dataset domain TDE-1542 ([#1326](https://github.com/linz/topo-imagery/issues/1326)) ([f80c4df](https://github.com/linz/topo-imagery/commit/f80c4df902a369aa346bd9a7f4c9d4d44bc90361))
+
+
+### Bug Fixes
+
+* Collection title should always be set when no odr url is provided TDE-1539 ([#1325](https://github.com/linz/topo-imagery/issues/1325)) ([061e312](https://github.com/linz/topo-imagery/commit/061e3124334a959a25eef5230b05fd59374e8d0f))
+
+
+### Documentation
+
+* cleanup collection.update() docstring ([#1322](https://github.com/linz/topo-imagery/issues/1322)) ([c55de37](https://github.com/linz/topo-imagery/commit/c55de373d22b5fd4db48e2707fa457d154d97729))
+
 ## [7.6.1](https://github.com/linz/topo-imagery/compare/v7.6.0...v7.6.1) (2025-04-27)
 
 
