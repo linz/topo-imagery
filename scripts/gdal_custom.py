@@ -34,15 +34,11 @@ def run_custom_gdal(files: TileFiles, command: List[str], target: str) -> None:
         sidecars = [f"{os.path.splitext(input_file)[0]}{extension}" for extension in [".prj", ".tfw"]]
         write_sidecars(sidecars, target_tmp)
         source_file = write(os.path.join(target_tmp, os.path.basename(input_file)), read(input_file))
-        try:
-            run_gdal(
-                command=command,
-                input_file=source_file,
-                output_file=tmp_file,
-            )
-        except Exception as e:
-            get_log().error("An error occurred during GDAL processing.", error=str(e))
-            return None
+        run_gdal(
+            command=command,
+            input_file=source_file,
+            output_file=tmp_file,
+        )
         write(processed_path, read(tmp_file))
 
 
@@ -56,7 +52,8 @@ def main() -> None:
     parser.add_argument(
         "--gdal-command",
         required=True,
-        help="The GDAL command to run on the input files. Do not include the input and output file arguments. They will be added automatically.",
+        help="The GDAL command to run on the input files. Do not include the input and output file arguments. "
+        "They will be added automatically.",
     )
     arguments = parser.parse_args()
     try:
