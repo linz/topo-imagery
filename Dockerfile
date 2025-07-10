@@ -1,4 +1,4 @@
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.9.0@sha256:d1a38af532e5d9e3991c4a6bddc2f2cb52644dc30a4eb8242101e8e23c3f83f6 AS builder
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.11.1@sha256:89216acd491c1e1d1f7a60e9df4b7d14b6d51ec82a3958ecc8d003d629ff3597 AS builder
 
 # Avoid blocking `apt-get install` commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -22,7 +22,7 @@ COPY poetry.lock pyproject.toml /src/
 RUN /root/.local/bin/poetry bundle venv --no-ansi --no-interaction --only=main -vvv /venv
 
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.9.0@sha256:d1a38af532e5d9e3991c4a6bddc2f2cb52644dc30a4eb8242101e8e23c3f83f6
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.11.1@sha256:89216acd491c1e1d1f7a60e9df4b7d14b6d51ec82a3958ecc8d003d629ff3597
 
 ARG GIT_HASH
 ENV GIT_HASH=$GIT_HASH
