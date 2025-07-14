@@ -121,6 +121,13 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
     )
     parser.add_argument(
+        "--keep-description",
+        dest="keep_description",
+        help="Keep the description of the existing Collection as is.",
+        type=str_to_bool,
+        required=False,
+    )
+    parser.add_argument(
         "--keep-title",
         dest="keep_title",
         help="Keep the title of the existing Collection as is.",
@@ -219,6 +226,7 @@ def main(args: List[str] | None = None) -> None:
         add_title_suffix=arguments.add_title_suffix,
         add_capture_dates=arguments.capture_dates,
         delete_existing_items=arguments.delete_all_existing_items,
+        keep_description=arguments.keep_description,
         keep_title=arguments.keep_title,
     )
 

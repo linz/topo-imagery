@@ -478,6 +478,77 @@ def test_create_collection_resupply_delete_existing_items(
         assert existing_item_link not in collection.stac["links"]
 
 
+def test_create_collection_resupply_keep_description(
+    fake_collection_context: CollectionContext,
+    tmp_path: Path,
+) -> None:
+    created_datetime = any_epoch_datetime()
+    created_datetime_string = format_rfc_3339_datetime_string(created_datetime)
+    existing_collection_content = {
+        "type": "Collection",
+        "stac_version": STAC_VERSION,
+        "id": fake_collection_context.collection_id,
+        "description": "existing description",
+        "linz:slug": fake_collection_context.linz_slug,
+        "created": created_datetime_string,
+        "updated": created_datetime_string,
+        "links": [
+            {
+                "rel": "root",
+                "href": "https://somewhere.s3.ap-southeast-2.amazonaws.com/catalog.json",
+                "type": "application/json",
+            },
+            {"rel": "self", "href": "./collection.json", "type": "application/json"},
+        ],
+    }
+    existing_collection_path = tmp_path / "collection.json"
+    existing_collection_path.write_text(json.dumps(existing_collection_content))
+
+    updated_datetime_string = format_rfc_3339_datetime_string(created_datetime + timedelta(days=1))
+
+    fake_item = {
+        "type": "Feature",
+        "id": "fake_item",
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "links": [{"href": "./fake_item.json", "rel": "self", "type": "application/geo+json"}],
+        "bbox": [174.5656855, -41.1625951, 174.8593132, -40.8342068],
+    }
+
+    fake_collection_context.keep_description = True
+    collection = create_collection(
+        collection_context=fake_collection_context,
+        current_datetime=updated_datetime_string,
+        stac_items=[fake_item],
+        item_polygons=[],
+        uri="test",
+        odr_url=tmp_path.as_posix(),
+    )
+
+    assert collection.stac["description"] == existing_collection_content["description"]
+
+
+def test_create_collection_new_keep_description(fake_collection_context: CollectionContext) -> None:
+    current_datetime = any_epoch_datetime_string()
+    fake_item = {
+        "type": "Feature",
+        "id": "fake_item",
+        "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
+        "links": [{"href": "./fake_item.json", "rel": "self", "type": "application/geo+json"}],
+        "bbox": [174.5656855, -41.1625951, 174.8593132, -40.8342068],
+    }
+    fake_collection_context.keep_description = True
+    # create_collection without ODR URL
+    collection = create_collection(
+        collection_context=fake_collection_context,
+        current_datetime=current_datetime,
+        stac_items=[fake_item],
+        item_polygons=[],
+        uri="test",
+    )
+
+    assert collection.stac["description"]
+
+
 def test_create_collection_resupply_keep_title(
     fake_collection_context: CollectionContext,
     tmp_path: Path,
