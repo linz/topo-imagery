@@ -40,6 +40,7 @@ def create_collection(
         item_polygons: list of polygons of the items linked to the Collection
         uri: path of the dataset
         add_capture_dates: whether to add the capture-dates file to the Collection. Defaults to False.
+        keep_description: whether to keep the description in the existing Collection. Defaults to False.
         keep_title: whether to keep the title in the existing Collection. Defaults to False.
         odr_url: path of the published dataset. Defaults to None.
 
@@ -83,7 +84,8 @@ def create_collection(
     # At this stage the title and description can be set using the temporal extent for the dates
     if not collection_context.keep_title or not odr_url:
         collection.set_title()
-    collection.set_description()
+    if not collection_context.keep_description or not odr_url:
+        collection.set_description()
 
     if collection_context.add_capture_dates:
         collection.add_capture_dates(uri)

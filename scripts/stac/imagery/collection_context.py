@@ -30,6 +30,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         event_name (str | None): Event name, if applicable.
         historic_survey_number (str | None): Historic survey number, if applicable.
         add_title_suffix (bool): Whether to add a suffix based on lifecycle status.
+        keep_description (bool): Whether to keep the original description.
         keep_title (bool): Whether to keep the original title.
         add_capture_dates (bool): Whether to link the capture dates file to the Collection.
         delete_existing_items (bool): Whether to delete existing items in the collection.
@@ -48,6 +49,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     event_name: str | None = None
     historic_survey_number: str | None = None
     add_title_suffix: bool = True
+    keep_description: bool = False
     keep_title: bool = False
     add_capture_dates: bool = False
     delete_existing_items: bool = False

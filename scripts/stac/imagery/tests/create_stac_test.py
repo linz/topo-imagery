@@ -478,7 +478,7 @@ def test_create_collection_resupply_delete_existing_items(
         assert existing_item_link not in collection.stac["links"]
 
 
-def test_create_collection_resupply_keep_title(
+def test_create_collection_resupply_keep_desc_title(
     fake_collection_context: CollectionContext,
     tmp_path: Path,
 ) -> None:
@@ -488,6 +488,7 @@ def test_create_collection_resupply_keep_title(
         "type": "Collection",
         "stac_version": STAC_VERSION,
         "id": fake_collection_context.collection_id,
+        "description": "existing description",
         "title": "existing title",
         "linz:slug": fake_collection_context.linz_slug,
         "created": created_datetime_string,
@@ -514,6 +515,7 @@ def test_create_collection_resupply_keep_title(
         "bbox": [174.5656855, -41.1625951, 174.8593132, -40.8342068],
     }
 
+    fake_collection_context.keep_description = True
     fake_collection_context.keep_title = True
     collection = create_collection(
         collection_context=fake_collection_context,
@@ -524,10 +526,11 @@ def test_create_collection_resupply_keep_title(
         odr_url=tmp_path.as_posix(),
     )
 
+    assert collection.stac["description"] == existing_collection_content["description"]
     assert collection.stac["title"] == existing_collection_content["title"]
 
 
-def test_create_collection_new_keep_title(fake_collection_context: CollectionContext) -> None:
+def test_create_collection_new_keep_desc_title(fake_collection_context: CollectionContext) -> None:
     current_datetime = any_epoch_datetime_string()
     fake_item = {
         "type": "Feature",
@@ -536,6 +539,7 @@ def test_create_collection_new_keep_title(fake_collection_context: CollectionCon
         "links": [{"href": "./fake_item.json", "rel": "self", "type": "application/geo+json"}],
         "bbox": [174.5656855, -41.1625951, 174.8593132, -40.8342068],
     }
+    fake_collection_context.keep_description = True
     fake_collection_context.keep_title = True
     # create_collection without ODR URL
     collection = create_collection(
@@ -546,6 +550,7 @@ def test_create_collection_new_keep_title(fake_collection_context: CollectionCon
         uri="test",
     )
 
+    assert collection.stac["description"]
     assert collection.stac["title"]
 
 
