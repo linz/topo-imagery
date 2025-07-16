@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.8.0](https://github.com/linz/topo-imagery/compare/v7.7.0...v7.8.0) (2025-07-16)
+
+
+### Features
+
+* keep existing collection description TDE-1498 ([#1338](https://github.com/linz/topo-imagery/issues/1338)) ([04efd8c](https://github.com/linz/topo-imagery/commit/04efd8c95d2d86f8a12358ff6df8fbfc8ac1b28e))
+
 ## [7.7.0](https://github.com/linz/topo-imagery/compare/v7.6.1...v7.7.0) (2025-06-12)
 
 
