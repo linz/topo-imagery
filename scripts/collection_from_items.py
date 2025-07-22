@@ -204,15 +204,15 @@ def main(args: List[str] | None = None) -> None:
             get_log().debug(f"adding geometry from {key}")
             try:
                 polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
-            except IndexError as e:
+            except (IndexError, KeyError) as e:
+                error_message = "The footprint file does not contain a valid geometry. Check if the associated tiff is empty."
                 get_log().error(
-                    "The footprint file does not contain a valid geometry. Check if the associated tiff is empty.",
+                    error_message,
                     file=key,
                     error=str(e),
                 )
-                raise IndexError(
-                    f"The footprint file does not contain a valid geometry. Check if the associated tiff is empty. {key}"
-                ) from e
+                e.add_note(f"{error_message} {key}")
+                raise
 
     if len(items_to_add) == 0:
         get_log().error(
