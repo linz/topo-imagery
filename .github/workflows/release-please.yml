@@ -23,6 +23,8 @@ jobs:
   publish-release:
     needs: release-please
     runs-on: ubuntu-latest
+    environment:
+      name: prod
     permissions:
       id-token: write
       contents: read
