@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.9.0](https://github.com/linz/topo-imagery/compare/v7.8.0...v7.9.0) (2025-07-22)
+
+
+### Features
+
+* better logging for empty features TDE-1585 ([#1347](https://github.com/linz/topo-imagery/issues/1347)) ([cfdc507](https://github.com/linz/topo-imagery/commit/cfdc507c77c4ef88511b3a16177c32b1b1e5152d))
+
 ## [7.8.0](https://github.com/linz/topo-imagery/compare/v7.7.0...v7.8.0) (2025-07-16)
 
 
