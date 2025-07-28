@@ -10,6 +10,8 @@ on:
 jobs:
   build-containers:
     runs-on: ubuntu-latest
+    environment:
+      name: prod
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event.label.name == 'container' }}
     permissions:
       id-token: write
