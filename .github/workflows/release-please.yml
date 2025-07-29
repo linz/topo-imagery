@@ -9,6 +9,8 @@ name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    environment:
+      name: prod
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
@@ -17,12 +19,14 @@ jobs:
         id: release
         with:
           release-type: python
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.LI_GITHUB_ACTION_TOKEN }}
           pull-request-title-pattern: "release: ${version}"
 
   publish-release:
     needs: release-please
     runs-on: ubuntu-latest
+    environment:
+      name: prod
     permissions:
       id-token: write
       contents: read
