@@ -175,11 +175,27 @@ def main(args: List[str] | None = None) -> None:
 
     items_to_add = []
     polygons = []
+
+    if supplied_capture_area:
+        get_log().debug(f"importing supplied capture area from {supplied_capture_area}")
+        capture_area = json.loads(read(supplied_capture_area))
+        try:
+            polygons.append(shapely.geometry.shape(capture_area["features"][0]["geometry"]))
+        except (IndexError, KeyError) as e:
+            error_message = "The supplied capture area file does not contain a valid geometry."
+            get_log().error(
+                error_message,
+                file=supplied_capture_area,
+                error=str(e),
+            )
+            e.add_note(f"{error_message} {supplied_capture_area}")
+            raise
+
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
     ):
         content = json.load(result["Body"])
-        # The following if/else looks like it could be avoid by refactoring `list_files_in_uri()`
+        # The following if/else looks like it could be avoided by refactoring `list_files_in_uri()`
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
@@ -215,20 +231,7 @@ def main(args: List[str] | None = None) -> None:
                 )
                 e.add_note(f"{error_message} {key}")
                 raise
-        elif supplied_capture_area:
-            get_log().debug(f"importing supplied capture area from {supplied_capture_area}")
-            capture_area = json.loads(read(arguments.capture_area))
-            try:
-                polygons.append(shapely.geometry.shape(capture_area["features"][0]["geometry"]))
-            except (IndexError, KeyError) as e:
-                error_message = "The supplied capture area file does not contain a valid geometry."
-                get_log().error(
-                    error_message,
-                    file=supplied_capture_area,
-                    error=str(e),
-                )
-                e.add_note(f"{error_message} {supplied_capture_area}")
-                raise
+
     if len(items_to_add) == 0:
         get_log().error(
             f"Collection {collection_id} has no items. Collection will not be created.",
