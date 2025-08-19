@@ -39,9 +39,6 @@ def create_collection(
         stac_items: list of STAC Items to be added as links to the Collection
         item_polygons: list of polygons of the items linked to the Collection
         uri: path of the dataset
-        add_capture_dates: whether to add the capture-dates file to the Collection. Defaults to False.
-        keep_description: whether to keep the description in the existing Collection. Defaults to False.
-        keep_title: whether to keep the title in the existing Collection. Defaults to False.
         odr_url: path of the published dataset. Defaults to None.
 
     Returns:

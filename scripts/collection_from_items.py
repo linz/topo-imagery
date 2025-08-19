@@ -12,7 +12,7 @@ from linz_logger import get_log
 from scripts.cli.cli_helper import coalesce_multi_single, str_to_bool, str_to_gsd
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON
-from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
+from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
@@ -152,6 +152,7 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
     )
+    parser.add_argument("--supplied-capture-area", dest="supplied_capture_area", help="Optional externally supplied capture area", required=False, nargs="?")
 
     return parser.parse_args(args)
 
@@ -162,6 +163,7 @@ def main(args: List[str] | None = None) -> None:
     arguments = parse_args(args)
     uri = arguments.uri
     collection_id = arguments.collection_id
+    supplied_capture_area = arguments.supplied_capture_area
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
@@ -200,7 +202,7 @@ def main(args: List[str] | None = None) -> None:
                 continue
             items_to_add.append(content)
             get_log().info("Item will be added to Collection", item=content["id"], file=key)
-        elif key.endswith(SUFFIX_FOOTPRINT):
+        elif key.endswith(SUFFIX_FOOTPRINT) and not arguments.supplied_capture_area:
             get_log().debug(f"adding geometry from {key}")
             try:
                 polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
@@ -213,7 +215,20 @@ def main(args: List[str] | None = None) -> None:
                 )
                 e.add_note(f"{error_message} {key}")
                 raise
-
+        elif supplied_capture_area:
+            get_log().debug(f"importing supplied capture area from {supplied_capture_area}")
+            capture_area = json.loads(read(arguments.capture_area))
+            try:
+                polygons.append(shapely.geometry.shape(capture_area["features"][0]["geometry"]))
+            except (IndexError, KeyError) as e:
+                error_message = "The supplied capture area file does not contain a valid geometry."
+                get_log().error(
+                    error_message,
+                    file=supplied_capture_area,
+                    error=str(e),
+                )
+                e.add_note(f"{error_message} {supplied_capture_area}")
+                raise
     if len(items_to_add) == 0:
         get_log().error(
             f"Collection {collection_id} has no items. Collection will not be created.",
