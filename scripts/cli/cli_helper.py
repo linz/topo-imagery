@@ -4,8 +4,9 @@ import warnings
 from datetime import datetime
 from decimal import Decimal
 from os import environ
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
+import shapely.geometry
 from linz_logger import get_log
 
 from scripts.datetimes import parse_rfc_3339_date
@@ -185,3 +186,25 @@ def str_to_list_or_none(values: str) -> list[Decimal] | None:
     if len(result) != 2:
         raise argparse.ArgumentTypeError(f"Invalid list - must be blank or exactly 2 values x,y. Received: {values}")
     return result
+
+
+def get_geometry_from_geojson(geojson: dict[str, Any], file_path: str) -> shapely.geometry.base.BaseGeometry:
+    """Extracts a geometry from a GeoJSON file and logs errors if the geometry is invalid.
+
+    :param geojson: The contents of the GeoJSON file.
+    :param file_path: Path to the GeoJSON file.
+    :return: A Shapely BaseGeometry object if successful, otherwise raises an exception.
+    """
+    get_log().debug(f"importing geometry from {file_path}")
+    # capture_area = json.loads(read(supplied_capture_area))
+    try:
+        return shapely.geometry.shape(geojson["features"][0]["geometry"])
+    except (IndexError, KeyError) as e:
+        error_message = "The supplied GeoJSON does not contain a valid geometry."
+        get_log().error(
+            error_message,
+            file=file_path,
+            error=str(e),
+        )
+        e.add_note(f"{error_message} {file_path}")
+        raise

@@ -59,7 +59,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument(
-        "--supplied-capture-area", dest="supplied_capture_area", help="Optional externally supplied capture area", required=False, nargs="?"
+        "--supplied-capture-area",
+        dest="supplied_capture_area",
+        help="Optional externally supplied capture area",
+        required=False,
+        nargs="?",
     )
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
