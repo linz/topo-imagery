@@ -19,7 +19,6 @@ from scripts.conftest import fake_linz_slug
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
-from scripts.stac.imagery.capture_area import merge_polygons
 from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset
