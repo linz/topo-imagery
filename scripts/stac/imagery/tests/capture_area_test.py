@@ -4,6 +4,7 @@ from typing import cast
 
 from shapely import get_exterior_ring, is_ccw
 from shapely.geometry import MultiPolygon, Polygon, shape
+from shapely.predicates import is_valid
 
 from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
 
@@ -150,6 +151,7 @@ def test_capture_area_orientation_polygon() -> None:
     )
     capture_area = generate_capture_area(polygons, Decimal("0.05"))
     assert is_ccw(get_exterior_ring(shape(capture_area["geometry"])))
+    assert is_valid((shape(capture_area["geometry"])))
 
 
 def test_capture_area_orientation_multipolygon() -> None:
@@ -190,6 +192,7 @@ def test_capture_area_orientation_multipolygon() -> None:
     capture_area = generate_capture_area(polygons, Decimal("0.05"))
     mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
     assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
+    assert is_valid((shape(capture_area["geometry"])))
 
 
 def test_capture_area_rounding_decimal_places() -> None:
@@ -229,3 +232,25 @@ def test_capture_area_rounding_decimal_places() -> None:
     }
     capture_area = generate_capture_area(polygons, Decimal("1"))
     assert capture_area == capture_area_expected
+
+
+def test_should_make_valid_capture_area() -> None:
+    # Given two touching triangles
+    polygons = [
+        shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [[[[0, 0], [0, 1], [1, 1], [0, 0]]]],
+            }
+        ),
+        shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [[[[1, 0], [2, 2], [1, 2], [1, 0]]]],
+            }
+        ),
+    ]
+
+    capture_area = merge_polygons(polygons, 0.1)
+    assert is_valid(capture_area)
+    assert is_ccw(get_exterior_ring(capture_area.geoms[0]))

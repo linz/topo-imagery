@@ -14,7 +14,6 @@ from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
-from shapely.predicates import is_valid
 
 from scripts.conftest import fake_linz_slug
 from scripts.files.files_helper import ContentType
@@ -752,27 +751,6 @@ def test_should_not_add_capture_area(
 
     with subtests.test():
         assert "capture_area" not in collection.stac.get("assets", {})
-
-
-def test_should_make_valid_capture_area() -> None:
-    # Given two touching triangles
-    polygons = [
-        shapely.geometry.shape(
-            {
-                "type": "MultiPolygon",
-                "coordinates": [[[[0, 0], [0, 1], [1, 1], [0, 0]]]],
-            }
-        ),
-        shapely.geometry.shape(
-            {
-                "type": "MultiPolygon",
-                "coordinates": [[[[1, 0], [2, 2], [1, 2], [1, 0]]]],
-            }
-        ),
-    ]
-
-    capture_area = merge_polygons(polygons, 0.1)
-    assert is_valid(capture_area)
 
 
 def test_event_name_is_present(fake_collection_context: CollectionContext) -> None:
