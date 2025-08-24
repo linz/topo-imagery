@@ -252,5 +252,8 @@ def test_should_make_valid_capture_area() -> None:
     ]
 
     capture_area = merge_polygons(polygons, 0.1)
-    assert is_valid(capture_area)
-    assert is_ccw(get_exterior_ring(capture_area.geoms[0]))
+    with subtests.test(msg="Valid geometry"):
+        assert is_valid(capture_area)
+
+    with subtests.test(msg="Is counterclockwise"):
+        assert is_ccw(get_exterior_ring(capture_area.geoms[0]))
