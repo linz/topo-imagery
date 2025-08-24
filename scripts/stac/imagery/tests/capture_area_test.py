@@ -234,7 +234,7 @@ def test_capture_area_rounding_decimal_places() -> None:
     assert capture_area == capture_area_expected
 
 
-def test_should_make_valid_capture_area() -> None:
+def test_should_make_compliant_capture_area() -> None:
     # Given two touching triangles
     polygons = [
         shape(
