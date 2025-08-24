@@ -196,7 +196,6 @@ def get_geometry_from_geojson(geojson: dict[str, Any], file_path: str) -> shapel
     :return: A Shapely BaseGeometry object if successful, otherwise raises an exception.
     """
     get_log().debug(f"importing geometry from {file_path}")
-    # capture_area = json.loads(read(supplied_capture_area))
     try:
         return shapely.geometry.shape(geojson["features"][0]["geometry"])
     except (IndexError, KeyError) as e:
