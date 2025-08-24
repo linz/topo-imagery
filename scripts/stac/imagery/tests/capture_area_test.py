@@ -2,6 +2,7 @@ from decimal import Decimal
 from sys import float_info
 from typing import cast
 
+from pytest_subtests import SubTests
 from shapely import get_exterior_ring, is_ccw
 from shapely.geometry import MultiPolygon, Polygon, shape
 from shapely.predicates import is_valid
@@ -234,7 +235,7 @@ def test_capture_area_rounding_decimal_places() -> None:
     assert capture_area == capture_area_expected
 
 
-def test_should_make_compliant_capture_area() -> None:
+def test_should_make_compliant_capture_area(subtests: SubTests) -> None:
     # Given two touching triangles
     polygons = [
         shape(
