@@ -369,7 +369,7 @@ class ImageryCollection:
             )
             return
         # If published dataset with a capture-area update, merge the existing capture area with the new one
-        if self.capture_area:
+        if self.capture_area and self.capture_area.get("geometry"):
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)
         capture_area_document = generate_capture_area(polygons, self.gsd)

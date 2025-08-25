@@ -40,7 +40,6 @@ def create_collection(
         odr_url: path of the published dataset. Defaults to None.
         supplied_capture_area: Externally supplied capture area, if applicable. Defaults to None.
 
-
     Returns:
         an ImageryCollection object
     """
