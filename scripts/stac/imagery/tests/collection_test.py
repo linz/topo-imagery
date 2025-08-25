@@ -617,6 +617,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     file_name = "capture-area.geojson"
 
+
     polygons = []
     polygons.append(
         shapely.geometry.shape(
@@ -656,7 +657,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
     )
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
-        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        collection.add_capture_area(polygons, tmp_path, None, artifact_path)
         file_target = os.path.join(tmp_path, file_name)
         file_artifact = os.path.join(artifact_path, file_name)
         with subtests.test():
@@ -737,7 +738,7 @@ def test_should_not_add_capture_area(
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.published_location = "s3://bucket/dataset/collection.json"
         collection.publish_capture_area = False
-        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        collection.add_capture_area(polygons, tmp_path, None, artifact_path)
         logs = json.loads(capsys.readouterr().out)
         assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
         file_target = os.path.join(tmp_path, file_name)
