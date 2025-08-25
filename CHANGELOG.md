@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.9.1](https://github.com/linz/topo-imagery/compare/v7.9.0...v7.9.1) (2025-08-24)
+
+
+### Bug Fixes
+
+* orient the capture area after making geometry valid TDE-1618 ([#1377](https://github.com/linz/topo-imagery/issues/1377)) ([b813f4a](https://github.com/linz/topo-imagery/commit/b813f4a53dc3e8428ffe3a27c52651228dc37df3))
+
 ## [7.9.0](https://github.com/linz/topo-imagery/compare/v7.8.0...v7.9.0) (2025-07-22)
 
 
