@@ -347,7 +347,9 @@ class ImageryCollection:
 
         return components
 
-    def add_capture_area(self, polygons: list[BaseGeometry], target: str, artifact_target: str = "/tmp") -> None:
+    def add_capture_area(
+        self, polygons: list[BaseGeometry], target: str, supplied_capture_area: str | None, artifact_target: str = "/tmp"
+    ) -> None:
         """Add the capture area of the Collection.
         If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
@@ -355,6 +357,7 @@ class ImageryCollection:
         Args:
             polygons: list of BaseGeometries
             target: location where the capture-area.geojson file will be saved
+            supplied_capture_area: Optional externally supplied capture area
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
@@ -375,8 +378,14 @@ class ImageryCollection:
         capture_area = {
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
             "title": "Capture area",
-            "description": "Boundary of the total capture area for this collection. Excludes nodata areas in the source "
-            "data. Geometries are simplified.",
+            "description": (
+                "Boundary of the total capture area for this collection provided by the data supplier. "
+                "May include some areas of nodata where capture was attempted but unsuccessful. "
+                "Geometries are simplified."
+                if supplied_capture_area
+                else "Boundary of the total capture area for this collection. Excludes nodata areas in the source "
+                "data. Geometries are simplified."
+            ),
             "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,

@@ -248,6 +248,7 @@ def main(args: List[str] | None = None) -> None:
         item_polygons=polygons,
         uri=uri,
         odr_url=arguments.odr_url,
+        supplied_capture_area=supplied_capture_area,
     )
 
     destination = os.path.join(uri, COLLECTION_FILE_NAME)
