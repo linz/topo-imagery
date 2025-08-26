@@ -199,7 +199,7 @@ def get_geometry_from_geojson(geojson: dict[str, Any], file_path: str) -> shapel
     try:
         return shapely.geometry.shape(geojson["features"][0]["geometry"])
     except (IndexError, KeyError) as e:
-        error_message = "The supplied GeoJSON does not contain a valid geometry."
+        error_message = "The supplied GeoJSON does not contain a valid geometry:"
         get_log().error(
             error_message,
             file=file_path,

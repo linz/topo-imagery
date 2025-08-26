@@ -617,7 +617,6 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     file_name = "capture-area.geojson"
 
-
     polygons = []
     polygons.append(
         shapely.geometry.shape(
