@@ -261,12 +261,10 @@ def test_should_make_compliant_capture_area(subtests: SubTests) -> None:
     ]
 
     merged_polygons = merge_polygons(polygons, 0.1)
-    # print(type(merged_polygons))
-    mp_geom = cast(MultiPolygon, merged_polygons)
-    # print(type(mp_geom))
+    mp = cast(MultiPolygon, merged_polygons)
 
     with subtests.test(msg="Valid geometry"):
         assert is_valid(merged_polygons)
 
     with subtests.test(msg="Is counterclockwise"):
-        assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
+        assert is_ccw(get_exterior_ring(mp.geoms[0]))
