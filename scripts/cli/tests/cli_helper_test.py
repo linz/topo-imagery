@@ -4,7 +4,6 @@ from pytest import raises
 from pytest_subtests import SubTests
 from shapely.geometry import MultiPolygon
 
-
 from scripts.cli.cli_helper import (
     TileFiles,
     coalesce_multi_single,

@@ -182,8 +182,8 @@ def main(args: List[str] | None = None) -> None:
     polygons = []
 
     if supplied_capture_area:
-        capture_area = json.loads(read(supplied_capture_area))
-        polygons.append(get_geometry_from_geojson(capture_area, supplied_capture_area))
+        content = json.loads(read(supplied_capture_area))
+        polygons.append(get_geometry_from_geojson(content, supplied_capture_area))
 
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
