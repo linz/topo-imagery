@@ -357,7 +357,7 @@ class ImageryCollection:
         Args:
             polygons: list of BaseGeometries
             target: location where the capture-area.geojson file will be saved
-            supplied_capture_area: optional externally supplied capture area
+            supplied_capture_area: optional externally supplied capture area to identify which description to use
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
@@ -369,6 +369,7 @@ class ImageryCollection:
             )
             return
         # If published dataset with a capture-area update, merge the existing capture area with the new one
+        print(self.capture_area)
         if self.capture_area and self.capture_area.get("geometry"):
             polygons.append(shape(self.capture_area["geometry"]))
         # The GSD is measured in meters (e.g., `0.3m`)

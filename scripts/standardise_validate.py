@@ -124,15 +124,17 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 def main() -> None:
     arguments = parse_args()
 
+    create_footprints = arguments.create_footprings
+
     if arguments.supplied_capture_area:
-        arguments.create_footprints = False
+        create_footprints = False
 
     standardising_config = StandardisingConfig(
         gdal_preset=arguments.preset,
         source_epsg=arguments.source_epsg,
         target_epsg=arguments.target_epsg,
         gsd=arguments.gsd,
-        create_footprints=arguments.create_footprints,
+        create_footprints=create_footprints,
         cutline=arguments.cutline,
         scale_to_resolution=arguments.scale_to_resolution,
     )
