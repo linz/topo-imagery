@@ -124,7 +124,7 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 def main() -> None:
     arguments = parse_args()
 
-    create_footprints = arguments.create_footprings
+    create_footprints = arguments.create_footprints
 
     if arguments.supplied_capture_area:
         create_footprints = False
