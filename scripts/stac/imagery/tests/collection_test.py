@@ -659,6 +659,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
     )
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
+        collection.add_capture_area(polygons, tmp_path, None, artifact_path)
         file_target = os.path.join(tmp_path, file_name)
         file_artifact = os.path.join(artifact_path, file_name)
         with subtests.test():
@@ -704,57 +705,57 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
-# def test_supplied_capture_area_description(fake_collection_context: CollectionContext) -> None:
-#
-#     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-#
-#     polygons = []
-#     polygons.append(
-#         shapely.geometry.shape(
-#             {
-#                 "type": "MultiPolygon",
-#                 "coordinates": [
-#                     [
-#                         [
-#                             [178.259659571653, -38.40831927359251],
-#                             [178.26012930415902, -38.41478071250544],
-#                             [178.26560430668172, -38.41453416326152],
-#                             [178.26513409076952, -38.40807278109057],
-#                             [178.259659571653, -38.40831927359251],
-#                         ]
-#                     ]
-#                 ],
-#             }
-#         )
-#     )
-#     polygons.append(
-#         shapely.geometry.shape(
-#             {
-#                 "type": "MultiPolygon",
-#                 "coordinates": [
-#                     [
-#                         [
-#                             [178.25418498567294, -38.40856551170436],
-#                             [178.25465423474975, -38.41502700730107],
-#                             [178.26012930415902, -38.41478071250544],
-#                             [178.259659571653, -38.40831927359251],
-#                             [178.25418498567294, -38.40856551170436],
-#                         ]
-#                     ]
-#                 ],
-#             }
-#         )
-#     )
-#     with tempfile.TemporaryDirectory() as tmp_path:
-#         artifact_path = os.path.join(tmp_path, "tmp")
-#         collection.add_capture_area(polygons, tmp_path, "test", artifact_path)
-#         print(collection.stac["assets"]["capture_area"]["description"])
-#
-#     assert (
-#         collection.stac["assets"]["capture_area"]["description"] == "Boundary of the total capture area for "
-#         "this collection provided by the data supplier. May include some areas of nodata where capture was attempted "
-#         "but unsuccessful. Geometries are simplified."
-#     )
+def test_supplied_capture_area_description(fake_collection_context: CollectionContext) -> None:
+
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    polygons = []
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [178.25418498567294, -38.40856551170436],
+                            [178.25465423474975, -38.41502700730107],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.259659571653, -38.40831927359251],
+                            [178.25418498567294, -38.40856551170436],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    with tempfile.TemporaryDirectory() as tmp_path:
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.add_capture_area(polygons, tmp_path, "test", artifact_path)
+        print(collection.stac["assets"]["capture_area"]["description"])
+
+    assert (
+        collection.stac["assets"]["capture_area"]["description"] == "Boundary of the total capture area for "
+        "this collection provided by the data supplier. May include some areas of nodata where capture was attempted "
+        "but unsuccessful. Geometries are simplified."
+    )
 
 
 def test_should_not_add_capture_area(
