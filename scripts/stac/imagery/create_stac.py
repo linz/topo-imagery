@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, TypeAlias
+from typing import Any
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
@@ -18,9 +18,6 @@ from scripts.stac.link import Link, Relation
 from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
 
-JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
-JSON_Dict: TypeAlias = dict[str, "JSON"]
-
 
 def create_collection(
     collection_context: CollectionContext,
@@ -29,6 +26,7 @@ def create_collection(
     item_polygons: list[BaseGeometry],
     uri: str,
     odr_url: str | None = None,
+    supplied_capture_area: str | None = None,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
@@ -39,10 +37,8 @@ def create_collection(
         stac_items: list of STAC Items to be added as links to the Collection
         item_polygons: list of polygons of the items linked to the Collection
         uri: path of the dataset
-        add_capture_dates: whether to add the capture-dates file to the Collection. Defaults to False.
-        keep_description: whether to keep the description in the existing Collection. Defaults to False.
-        keep_title: whether to keep the title in the existing Collection. Defaults to False.
         odr_url: path of the published dataset. Defaults to None.
+        supplied_capture_area: Externally supplied capture area, if applicable. Defaults to None.
 
     Returns:
         an ImageryCollection object
@@ -91,7 +87,7 @@ def create_collection(
         collection.add_capture_dates(uri)
 
     if item_polygons:
-        collection.add_capture_area(item_polygons, uri)
+        collection.add_capture_area(item_polygons, uri, supplied_capture_area)
         get_log().info(
             "Capture area created",
         )
