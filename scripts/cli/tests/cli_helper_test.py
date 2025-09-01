@@ -104,10 +104,12 @@ def test_get_geometry_from_geojson() -> None:
     )
     geojson = {
         "type": "FeatureCollection",
+        "name": "foo",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
         "features": [
             {
                 "type": "Feature",
-                "properties": {},
+                "properties": {"Id": 0},
                 "geometry": {
                     "type": "MultiPolygon",
                     "coordinates": [

@@ -392,10 +392,6 @@ class ImageryCollection:
             "file:checksum": file_checksum,
             "file:size": len(capture_area_content),
         }
-        print("==============================")
-        print(supplied_capture_area)
-        print("==============================")
-        print(capture_area)
         self.stac.setdefault("assets", {})["capture_area"] = capture_area
 
         # Save `capture-area.geojson` in target
