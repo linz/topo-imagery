@@ -704,7 +704,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
-def supplied_capture_area_with_odr_url(fake_collection_context: CollectionContext) -> None:
+def test_supplied_capture_area_with_odr_url(fake_collection_context: CollectionContext) -> None:
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.capture_area = {
         "geometry": {

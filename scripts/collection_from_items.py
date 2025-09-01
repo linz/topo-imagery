@@ -154,7 +154,7 @@ def parse_args(args: List[str] | None) -> Namespace:
     parser.add_argument(
         "--supplied-capture-area",
         dest="supplied_capture_area",
-        help="Optional externally supplied capture area",
+        help="Optional externally supplied EPSG:4326 capture area",
         required=False,
         nargs="?",
     )
