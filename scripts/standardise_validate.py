@@ -58,13 +58,6 @@ def parse_args() -> argparse.Namespace:
         required=True,
     )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
-    parser.add_argument(
-        "--supplied-capture-area",
-        dest="supplied_capture_area",
-        help="Optional externally supplied capture area",
-        required=False,
-        nargs="?",
-    )
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
         "--start-datetime",
@@ -124,17 +117,12 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 def main() -> None:
     arguments = parse_args()
 
-    create_footprints = arguments.create_footprints
-
-    if arguments.supplied_capture_area:
-        create_footprints = False
-
     standardising_config = StandardisingConfig(
         gdal_preset=arguments.preset,
         source_epsg=arguments.source_epsg,
         target_epsg=arguments.target_epsg,
         gsd=arguments.gsd,
-        create_footprints=create_footprints,
+        create_footprints=arguments.create_footprints,
         cutline=arguments.cutline,
         scale_to_resolution=arguments.scale_to_resolution,
     )
