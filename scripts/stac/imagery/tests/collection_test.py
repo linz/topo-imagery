@@ -704,7 +704,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
-def test_supplied_capture_area_with_odr_url(fake_collection_context: CollectionContext) -> None:
+def test_supplied_capture_area_with_existing_capture_area(fake_collection_context: CollectionContext) -> None:
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.capture_area = {
         "geometry": {
@@ -745,8 +745,10 @@ def test_supplied_capture_area_with_odr_url(fake_collection_context: CollectionC
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.add_capture_area(polygons, tmp_path, "path/to/supplied-capture-area.geojson", artifact_path)
+        capture_area_file = json.loads(read(f"{tmp_path}/capture-area.geojson"))
 
-    assert collection.capture_area["geometry"] == {
+    assert capture_area_file["geometry"] == {
+        "type": "Polygon",
         "coordinates": [
             [
                 [175.33070754, -38.23087459],
@@ -758,7 +760,6 @@ def test_supplied_capture_area_with_odr_url(fake_collection_context: CollectionC
                 [175.33070754, -38.23087459],
             ]
         ],
-        "type": "Polygon",
     }
 
 
