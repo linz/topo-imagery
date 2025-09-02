@@ -379,13 +379,22 @@ class ImageryCollection:
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
             "title": "Capture area",
             "description": (
-                "Boundary of the total capture area for this collection provided by the data supplier. "
-                "May include some areas of nodata where capture was attempted but unsuccessful. "
-                "Geometries are simplified."
-                if supplied_capture_area
-                else "Boundary of the total capture area for this collection. Excludes nodata areas in the source "
-                "data. Geometries are simplified."
+                "Boundary of the total capture area for this collection"
+                f"{(' provided by the data supplier. '
+                    'May include some areas of nodata where capture was attempted but unsuccessful.')
+                if supplied_capture_area else '. Excludes nodata areas in the source data.'}"
+                " Geometries are simplified."
             ),
+            #
+            #
+            # "description": (
+            #     "Boundary of the total capture area for this collection provided by the data supplier. "
+            #     "May include some areas of nodata where capture was attempted but unsuccessful. "
+            #     "Geometries are simplified."
+            #     if supplied_capture_area
+            #     else "Boundary of the total capture area for this collection. Excludes nodata areas in the source "
+            #     "data. Geometries are simplified."
+            # ),
             "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,
