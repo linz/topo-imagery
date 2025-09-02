@@ -2,8 +2,16 @@ from datetime import datetime
 
 from pytest import raises
 from pytest_subtests import SubTests
+from shapely.geometry import MultiPolygon
 
-from scripts.cli.cli_helper import TileFiles, coalesce_multi_single, get_tile_files, parse_list, valid_date
+from scripts.cli.cli_helper import (
+    TileFiles,
+    coalesce_multi_single,
+    get_geometry_from_geojson,
+    get_tile_files,
+    parse_list,
+    valid_date,
+)
 
 
 def test_get_tile_files(subtests: SubTests) -> None:
@@ -88,3 +96,43 @@ def test_valid_date_invalid_string() -> None:
     with raises(Exception) as e:
         valid_date("foo")
         assert str(e.value) == "not a valid date: foo"
+
+
+def test_get_geometry_from_geojson() -> None:
+    geom = MultiPolygon(
+        [[[(175.326912, -41.66861622), (175.33531971, -41.67266055), (175.3351674, -41.6684487), (175.326912, -41.66861622)]]]
+    )
+    geojson = {
+        "type": "FeatureCollection",
+        "name": "foo",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"Id": 0},
+                "geometry": {
+                    "type": "MultiPolygon",
+                    "coordinates": [
+                        [
+                            [
+                                [175.326912, -41.66861622],
+                                [175.33531971, -41.67266055],
+                                [175.3351674, -41.6684487],
+                                [175.326912, -41.66861622],
+                            ]
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    assert get_geometry_from_geojson(geojson, "/tmp/test/test.geojson") == geom
+
+
+def test_get_geometry_from_invalid_geojson() -> None:
+    geojson = {
+        "foo": "bar",
+    }
+    with raises(Exception) as e:
+        get_geometry_from_geojson(geojson, "/tmp/test/test.geojson")
+        assert str(e.value) == "The supplied GeoJSON does not contain a valid geometry. /tmp/test/test.geojson"

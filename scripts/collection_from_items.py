@@ -5,14 +5,13 @@ from argparse import Namespace
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 
-import shapely.geometry
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, str_to_bool, str_to_gsd
+from scripts.cli.cli_helper import coalesce_multi_single, get_geometry_from_geojson, str_to_bool, str_to_gsd
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON
-from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri
+from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
@@ -152,6 +151,13 @@ def parse_args(args: List[str] | None) -> Namespace:
         required=False,
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
     )
+    parser.add_argument(
+        "--supplied-capture-area",
+        dest="supplied_capture_area",
+        help="Optional externally supplied EPSG:4326 capture area",
+        required=False,
+        nargs="?",
+    )
 
     return parser.parse_args(args)
 
@@ -162,6 +168,7 @@ def main(args: List[str] | None = None) -> None:
     arguments = parse_args(args)
     uri = arguments.uri
     collection_id = arguments.collection_id
+    supplied_capture_area = arguments.supplied_capture_area
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
@@ -173,11 +180,16 @@ def main(args: List[str] | None = None) -> None:
 
     items_to_add = []
     polygons = []
+
+    if supplied_capture_area:
+        content = json.loads(read(supplied_capture_area))
+        polygons.append(get_geometry_from_geojson(content, supplied_capture_area))
+
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
     ):
         content = json.load(result["Body"])
-        # The following if/else looks like it could be avoid by refactoring `list_files_in_uri()`
+        # The following if/else looks like it could be avoided by refactoring `list_files_in_uri()`
         # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
         # for each of them to avoid this if/else.
         if key.endswith(SUFFIX_JSON):
@@ -200,19 +212,8 @@ def main(args: List[str] | None = None) -> None:
                 continue
             items_to_add.append(content)
             get_log().info("Item will be added to Collection", item=content["id"], file=key)
-        elif key.endswith(SUFFIX_FOOTPRINT):
-            get_log().debug(f"adding geometry from {key}")
-            try:
-                polygons.append(shapely.geometry.shape(content["features"][0]["geometry"]))
-            except (IndexError, KeyError) as e:
-                error_message = "The footprint file does not contain a valid geometry. Check if the associated tiff is empty."
-                get_log().error(
-                    error_message,
-                    file=key,
-                    error=str(e),
-                )
-                e.add_note(f"{error_message} {key}")
-                raise
+        elif key.endswith(SUFFIX_FOOTPRINT) and not arguments.supplied_capture_area:
+            polygons.append(get_geometry_from_geojson(content, key))
 
     if len(items_to_add) == 0:
         get_log().error(
@@ -247,6 +248,7 @@ def main(args: List[str] | None = None) -> None:
         item_polygons=polygons,
         uri=uri,
         odr_url=arguments.odr_url,
+        supplied_capture_area=supplied_capture_area,
     )
 
     destination = os.path.join(uri, COLLECTION_FILE_NAME)

@@ -28,6 +28,8 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
 from scripts.tests.datetimes_test import any_epoch_datetime_string
 
+# pylint: disable=too-many-lines
+
 
 def test_metadata_initialised(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.event_name = "Forest Assessment"
@@ -656,7 +658,7 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
     )
     with tempfile.TemporaryDirectory() as tmp_path:
         artifact_path = os.path.join(tmp_path, "tmp")
-        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        collection.add_capture_area(polygons, tmp_path, None, artifact_path)
         file_target = os.path.join(tmp_path, file_name)
         file_artifact = os.path.join(artifact_path, file_name)
         with subtests.test():
@@ -702,6 +704,97 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
         assert collection.stac["assets"]["capture_area"]["file:size"] in (269,)  # geos 3.11 - geos 3.12 as yet untested
 
 
+def test_supplied_capture_area_with_existing_capture_area(fake_collection_context: CollectionContext) -> None:
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    collection.capture_area = {
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [175.33070754, -38.23087459],
+                    [175.34114274, -38.55504694],
+                    [175.61631903, -38.54921714],
+                    [175.60466049, -38.22511173],
+                    [175.33070754, -38.23087459],
+                ]
+            ],
+        },
+        "type": "Feature",
+        "properties": {},
+    }
+
+    polygons = []
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [
+                        [
+                            [175.0566807, -38.23599854],
+                            [175.06589127, -38.56023041],
+                            [175.34114274, -38.55504694],
+                            [175.33070754, -38.23087459],
+                            [175.0566807, -38.23599854],
+                        ]
+                    ]
+                ],
+            }
+        )
+    )
+    with tempfile.TemporaryDirectory() as tmp_path:
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.add_capture_area(polygons, tmp_path, "path/to/supplied-capture-area.geojson", artifact_path)
+        capture_area_file = json.loads(read(f"{tmp_path}/capture-area.geojson"))
+
+    assert capture_area_file["geometry"] == {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [175.33070754, -38.23087459],
+                [175.0566807, -38.23599854],
+                [175.06589127, -38.56023041],
+                [175.34114274, -38.55504694],
+                [175.61631903, -38.54921714],
+                [175.60466049, -38.22511173],
+                [175.33070754, -38.23087459],
+            ]
+        ],
+    }
+
+
+def test_supplied_capture_area_description(fake_collection_context: CollectionContext) -> None:
+
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    polygons = []
+    polygons.append(
+        shapely.geometry.shape(
+            {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [178.259659571653, -38.40831927359251],
+                        [178.26012930415902, -38.41478071250544],
+                        [178.26560430668172, -38.41453416326152],
+                        [178.26513409076952, -38.40807278109057],
+                        [178.259659571653, -38.40831927359251],
+                    ]
+                ],
+            }
+        )
+    )
+    with tempfile.TemporaryDirectory() as tmp_path:
+        artifact_path = os.path.join(tmp_path, "tmp")
+        collection.add_capture_area(polygons, tmp_path, "path/to/supplied-capture-area.geojson", artifact_path)
+
+    assert (
+        collection.stac["assets"]["capture_area"]["description"] == "Boundary of the total capture area for "
+        "this collection provided by the data supplier. May include some areas of nodata where capture was attempted "
+        "but unsuccessful. Geometries are simplified."
+    )
+
+
 def test_should_not_add_capture_area(
     fake_collection_context: CollectionContext,
     subtests: SubTests,
@@ -737,7 +830,7 @@ def test_should_not_add_capture_area(
         artifact_path = os.path.join(tmp_path, "tmp")
         collection.published_location = "s3://bucket/dataset/collection.json"
         collection.publish_capture_area = False
-        collection.add_capture_area(polygons, tmp_path, artifact_path)
+        collection.add_capture_area(polygons, tmp_path, None, artifact_path)
         logs = json.loads(capsys.readouterr().out)
         assert WARN_NO_PUBLISHED_CAPTURE_AREA in logs["msg"]
         file_target = os.path.join(tmp_path, file_name)

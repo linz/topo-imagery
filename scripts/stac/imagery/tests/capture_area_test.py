@@ -129,7 +129,7 @@ def test_generate_capture_area_not_rounded() -> None:
     assert capture_area_expected != capture_area_result
 
 
-def test_capture_area_orientation_polygon() -> None:
+def test_capture_area_orientation_polygon(subtests: SubTests) -> None:
     # Test the orientation of the capture area
     # The polygon capture area should be the same as the polygon and not reversed
     polygons = []
@@ -151,11 +151,15 @@ def test_capture_area_orientation_polygon() -> None:
         )
     )
     capture_area = generate_capture_area(polygons, Decimal("0.05"))
-    assert is_ccw(get_exterior_ring(shape(capture_area["geometry"])))
-    assert is_valid((shape(capture_area["geometry"])))
+
+    with subtests.test(msg="Is counterclockwise"):
+        assert is_ccw(get_exterior_ring(shape(capture_area["geometry"])))
+
+    with subtests.test(msg="Valid geometry"):
+        assert is_valid((shape(capture_area["geometry"])))
 
 
-def test_capture_area_orientation_multipolygon() -> None:
+def test_capture_area_orientation_multipolygon(subtests: SubTests) -> None:
     # Test the orientation of the capture area
     # The multipolygon capture area polygons should be the same as the polygon and not reversed
     polygons = []
@@ -192,8 +196,12 @@ def test_capture_area_orientation_multipolygon() -> None:
     )
     capture_area = generate_capture_area(polygons, Decimal("0.05"))
     mp_geom = cast(MultiPolygon, shape(capture_area["geometry"]))
-    assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
-    assert is_valid((shape(capture_area["geometry"])))
+
+    with subtests.test(msg="Valid geometry"):
+        assert is_ccw(get_exterior_ring(mp_geom.geoms[0]))
+
+    with subtests.test(msg="Valid geometry"):
+        assert is_valid((shape(capture_area["geometry"])))
 
 
 def test_capture_area_rounding_decimal_places() -> None:
@@ -252,9 +260,10 @@ def test_should_make_compliant_capture_area(subtests: SubTests) -> None:
         ),
     ]
 
-    capture_area = merge_polygons(polygons, 0.1)
+    merged_polygons = merge_polygons(polygons, 0.1)
+
     with subtests.test(msg="Valid geometry"):
-        assert is_valid(capture_area)
+        assert is_valid(merged_polygons)
 
     with subtests.test(msg="Is counterclockwise"):
-        assert is_ccw(get_exterior_ring(capture_area.geoms[0]))
+        assert is_ccw(get_exterior_ring(merged_polygons.geoms[0]))
