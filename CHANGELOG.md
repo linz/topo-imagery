@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.10.0](https://github.com/linz/topo-imagery/compare/v7.9.1...v7.10.0) (2025-09-02)
+
+
+### Features
+
+* use supplied capture area TDE-1604 ([#1374](https://github.com/linz/topo-imagery/issues/1374)) ([9f45051](https://github.com/linz/topo-imagery/commit/9f45051917e9ec3e0f0a62ebe714faffbfffd41f))
+
 ## [7.9.1](https://github.com/linz/topo-imagery/compare/v7.9.0...v7.9.1) (2025-08-24)
 
 
