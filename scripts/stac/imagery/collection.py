@@ -40,6 +40,9 @@ from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
 ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}
+IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
+ELEVATION = {DEM, DSM}
+HILLSHADES = {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}
 COLLECTION_FILE_NAME = "collection.json"
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
@@ -226,7 +229,7 @@ class ImageryCollection:
                 lifecycle_suffix,
             ]
 
-        elif category in {DEM, DSM}:
+        elif category in ELEVATION:
             components = [
                 region,
                 "-" if geographic_description else None,
@@ -239,7 +242,7 @@ class ImageryCollection:
                 lifecycle_suffix,
             ]
 
-        elif category in {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}:
+        elif category in HILLSHADES:
             components = [
                 region,
                 DATA_DOMAINS[self.domain],
@@ -254,7 +257,7 @@ class ImageryCollection:
 
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
-        Urban Aerial Photos / Rural Aerial Photos:
+        Urban / Rural / Aerial Photos:
           Orthophotography within the [Region] region captured in the [year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
@@ -267,9 +270,6 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
-        IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
-        ELEVATION = {DEM, DSM}
-        HILLSHADES = {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}
 
         category = self.stac["linz:geospatial_category"]
 
