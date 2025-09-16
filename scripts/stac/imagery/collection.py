@@ -16,6 +16,7 @@ from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
+    AERIAL_PHOTOS,
     DATA_CATEGORIES,
     DATA_DOMAINS,
     DEM,
@@ -38,6 +39,7 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
+ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}
 COLLECTION_FILE_NAME = "collection.json"
 CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
@@ -215,7 +217,7 @@ class ImageryCollection:
                 lifecycle_suffix,
             ]
 
-        elif category in {SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}:
+        elif category in {SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
             components = [
                 geographic_description or region,
                 gsd_str,
@@ -265,7 +267,7 @@ class ImageryCollection:
         Returns:
             Dataset Description
         """
-        IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}
+        IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
         ELEVATION = {DEM, DSM}
         HILLSHADES = {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}
 
@@ -300,6 +302,7 @@ class ImageryCollection:
         base_descriptions = {
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
+            AERIAL_PHOTOS: "Orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
             DEM: "Digital Elevation Model",
@@ -311,9 +314,9 @@ class ImageryCollection:
             "within the",
             HUMAN_READABLE_REGIONS[self.stac["linz:region"]],
             "region captured in",
-            "the" if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS} else None,
+            "the" if category in ANY_ORTHO_AERIAL_PHOTOS else None,
             str(start_year) if start_year == end_year else f"{start_year}-{end_year}",
-            "flying season" if category in {URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS} else None,
+            "flying season" if category in ANY_ORTHO_AERIAL_PHOTOS else None,
         ]
 
         return components
