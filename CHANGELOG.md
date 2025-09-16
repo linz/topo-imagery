@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.10.1](https://github.com/linz/topo-imagery/compare/v7.10.0...v7.10.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* accept aerial-photos as a category TDE-1650 ([#1402](https://github.com/linz/topo-imagery/issues/1402)) ([7c954d6](https://github.com/linz/topo-imagery/commit/7c954d6fe999076fbcd3a177e0cc0a78b7b641c8))
+
 ## [7.10.0](https://github.com/linz/topo-imagery/compare/v7.9.1...v7.10.0) (2025-09-02)
 
 
