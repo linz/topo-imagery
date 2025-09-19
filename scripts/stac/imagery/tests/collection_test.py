@@ -449,10 +449,11 @@ def test_set_title_set_description(
 
 
 def test_set_gsd(
-    context: CollectionContext,
+    fake_collection_context: CollectionContext,
 ) -> None:
-    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    assert collection.stac["gsd"] == 0.3
+    fake_collection_context.gsd = Decimal("123.456")
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    assert collection.stac["gsd"] == 123.456
 
 
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
