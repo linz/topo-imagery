@@ -97,6 +97,7 @@ class ImageryCollection:
             "linz:region": context.region,
             "linz:security_classification": "unclassified",
             "linz:slug": context.linz_slug,
+            "gsd": float(context.gsd),
             "created": created_datetime,
             "updated": updated_datetime,
         }
