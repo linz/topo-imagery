@@ -448,6 +448,14 @@ def test_set_title_set_description(
         assert collection.stac["description"] == expected_description
 
 
+def test_set_gsd(
+    fake_collection_context: CollectionContext,
+) -> None:
+    fake_collection_context.gsd = Decimal("123.456")
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    assert collection.stac["gsd"] == 123.456
+
+
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.category = "rural-aerial-photos"
     fake_collection_context.historic_survey_number = None
@@ -595,6 +603,7 @@ def test_write_collection(fake_collection_context: CollectionContext) -> None:
     rmtree(target)
 
     assert collection["title"] == collectionObj.stac["title"]
+    assert collection["gsd"] == collectionObj.stac["gsd"]
 
 
 def test_write_collection_special_chars(fake_collection_context: CollectionContext) -> None:
