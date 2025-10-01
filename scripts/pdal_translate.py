@@ -23,7 +23,8 @@ def get_args_parser() -> argparse.ArgumentParser:
         "--from-file",
         dest="from_file",
         required=False,
-        help="JSON file containing a nested list of files to process. If provided, this will be added to --files.",
+        help="JSON file containing a nested list of files to process. "
+        "If provided, this will be processed in addition to other file arguments.",
     )
     parser.add_argument(
         "--force",
@@ -36,7 +37,25 @@ def get_args_parser() -> argparse.ArgumentParser:
         dest="files",
         nargs="+",
         required=False,
-        help="List of files to process (space separated). If provided, this will be processed in addition to --from-file.",
+        help="List of files to process (space separated). "
+        "If provided, this will be processed in addition to other file arguments.",
+    )
+    parser.add_argument(
+        "--json-files",
+        dest="json_files",
+        type=json.loads,
+        nargs="+",
+        help="List of files to process in a JSON array format "
+        '(e.g. \'["s3://bucket/file1.laz", "s3://bucket/file2.laz"]\'). '
+        "If provided, this will be processed in addition to other file arguments.",
+        required=False,
+    )
+    parser.add_argument(
+        "--target-output",
+        dest="target_output",
+        required=False,
+        default="/tmp/",
+        help="Path where the output files will be saved to. Defaults to '/tmp/'.",
     )
 
     return parser
@@ -133,8 +152,11 @@ def main() -> None:
     arguments = arguments_parser.parse_args()
 
     input_files: list[str] = []
+    if arguments.json_files:
+        input_files.extend(arguments.json_files)
+
     if arguments.files:
-        input_files.append(arguments.files)
+        input_files.extend(arguments.files)
     try:
         if arguments.from_file:
             with open(arguments.from_file, "r", encoding="utf-8") as f:
@@ -155,7 +177,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    output_files = run_pdal_translate(input_files, concurrency, force=arguments.force)
+    output_files = run_pdal_translate(input_files, concurrency, force=arguments.force, target_output=arguments.target_output)
     write("/tmp/processed.json", bytes(json.dumps(output_files), "UTF-8"), content_type=ContentType.JSON)
 
     get_log().info("pdal_translate_end", duration=time_in_ms() - start_time, modifiedFileCount=len(output_files))
