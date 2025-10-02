@@ -74,46 +74,46 @@ def flatten(items: list[Any]) -> Iterable[Any]:
 
 
 def pdal_translate(
-    file: str,
+    source_file: str,
     target_output: str = "/tmp/",
     force: bool = False,
 ) -> str | None:
     """Fix LAZ files by adding consistent CRS information in the header.
 
     Args:
-        file: /path/to/a/file to process (S3 or local).
+        source_file: /path/to/a/file to process (S3 or local).
         target_output: path where the output files need to be saved to. Defaults to "/tmp/".
         force: overwrite existing output file even if it did not change. Defaults to False.
 
     Returns:
-        The filename of the fixed LAZ file if it is different to the input file, else None.
+        The name of the fixed LAZ file if it is different to the input file, else None.
     """
-    filename = file.split("/")[-1]
-    target_file = os.path.join(target_output, filename)
+    basename = source_file.split("/")[-1]
+    target_file = os.path.join(target_output, basename)
 
     # Already processed can skip processing
     if exists(target_file):
         if not force:
             get_log().info("Skipping: Output file already exists.", path=target_file)
-            # Note: Some of these may be unchanged from the input file. Err on side of caution and return the filename.
+            # Note: Some of these may be unchanged from the input file. Err on side of caution and return the basename.
             return target_file
         get_log().info("Overwriting: Output file already exists.", path=target_file)
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
-        tmp_file_in = os.path.join(tmp_path, filename)
-        tmp_file_out = os.path.join(tmp_path, "out_" + filename)
+        tmp_file_in = os.path.join(tmp_path, "in_" + basename)
+        tmp_file_out = os.path.join(tmp_path, "out_" + basename)
 
-        copy(source=file, target=tmp_file_in)
+        copy(source=source_file, target=tmp_file_in)
 
         # Get PDAL to write to temporary location so no broken files end up in the final folder.
         run_pdal(pdal_translate_add_proj_command, input_file=tmp_file_in, output_file=tmp_file_out)
 
-        if filecmp.cmp(tmp_file_out, target_file, shallow=False):
-            get_log().info("No changes made to file.", path=target_file)
+        if filecmp.cmp(tmp_file_in, tmp_file_out, shallow=False):
+            get_log().info("No changes made to file.", path=source_file)
             return None
 
-        return write(target_file, read(tmp_file_out), content_type=ContentType.LAZ)
+        return write(destination=target_file, source=read(tmp_file_out), content_type=ContentType.LAZ)
 
 
 def run_pdal_translate(
