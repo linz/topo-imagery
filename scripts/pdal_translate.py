@@ -9,7 +9,7 @@ from typing import Any, Iterable
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, is_argo
+from scripts.cli.cli_helper import is_argo
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import copy, exists, read, write
 from scripts.logging.time_helper import time_in_ms
@@ -19,8 +19,15 @@ from scripts.pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
 def get_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--force",
+        dest="force",
+        help="Overwrite existing files even if they did not change. Defaults to False.",
+        action="store_true",
+    )
+    parser.add_argument(
         "--from-file",
         dest="from_file",
+        type=json_file_loader,
         required=False,
         help="JSON file containing a nested list of files to process. "
         "If provided, this will be processed in addition to other file arguments.",
@@ -28,15 +35,10 @@ def get_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--from-manifest",
         dest="from_manifest",
+        type=manifest_loader,
         required=False,
         help="JSON file containing a manifest of files to process. "
         "If provided, this will be processed in addition to other file arguments.",
-    )
-    parser.add_argument(
-        "--force",
-        dest="force",
-        help="Overwrite existing files even if they did not change. Defaults to False.",
-        action="store_true",
     )
     parser.add_argument(
         "--files",
@@ -66,11 +68,44 @@ def flatten(items: list[Any]) -> Iterable[Any]:
     Returns:
         Any: The flattened elements, one by one
     """
-    for x in items:
-        if isinstance(x, list):
-            yield from flatten(x)
+    for item in items:
+        if isinstance(item, list):
+            yield from flatten(item)
         else:
-            yield x
+            yield item
+
+
+def json_file_loader(path: str) -> list[str]:
+    """Load a JSON file and return its contents as a list of strings.
+
+    Args: path: path to the JSON file
+    Returns:
+        A list of strings contained in the JSON file.
+    """
+    if not path:
+        return []
+    try:
+        return list(flatten(json.loads(read(path))))
+    except FileNotFoundError as e:
+        get_log().error("An error occurred when loading the input file.", error=str(e))
+        return []
+
+
+def manifest_loader(path: str) -> list[str]:
+    """Load a JSON manifest file (compatible with our create-manifest workflow) and return its sources as a list of strings.
+
+    Args: path: path to the manifest file
+    Returns:
+        A list of strings contained in the manifest.
+    """
+    if not path:
+        return []
+    try:
+        manifest = json.loads(read(path))
+        return list(flatten([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])]))
+    except FileNotFoundError as e:
+        get_log().error("An error occurred when loading the input file.", error=str(e))
+        return []
 
 
 def pdal_translate(
@@ -99,21 +134,21 @@ def pdal_translate(
             return target_file
         get_log().info("Overwriting: Output file already exists.", path=target_file)
 
-    # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
-    with tempfile.TemporaryDirectory() as tmp_path:
+    with tempfile.TemporaryDirectory() as tmp_path:  # pdal needs local files
         tmp_file_in = os.path.join(tmp_path, "in_" + basename)
         tmp_file_out = os.path.join(tmp_path, "out_" + basename)
 
         copy(source=source_file, target=tmp_file_in)
 
-        # Get PDAL to write to temporary location so no broken files end up in the final folder.
         run_pdal(pdal_translate_add_proj_command, input_file=tmp_file_in, output_file=tmp_file_out)
 
-        if filecmp.cmp(tmp_file_in, tmp_file_out, shallow=False):
+        copy(source=tmp_file_out, target=target_file)  # copy back to target location (S3 or local) before comparing
+
+        if not force and filecmp.cmp(tmp_file_in, tmp_file_out, shallow=False):
             get_log().info("No changes made to file.", path=source_file)
             return None
 
-        return write(destination=target_file, source=read(tmp_file_out), content_type=ContentType.LAZ)
+        return target_file
 
 
 def run_pdal_translate(
@@ -147,26 +182,18 @@ def main() -> None:
     arguments = arguments_parser.parse_args()
 
     input_files: list[str] = []
-    if arguments.files:
-        input_files.extend(arguments.files)
-    if arguments.from_file:
-        try:
-            input_files.extend(json.loads(read(arguments.from_file)))
-        except InputParameterError as e:
-            get_log().error("An error occurred when loading the input file.", error=str(e))
-    if arguments.from_manifest:
-        try:
-            manifest = json.loads(read(arguments.from_manifest))
-            input_files.extend([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])])
-        except InputParameterError as e:
-            get_log().error("An error occurred when loading the input manifest.", error=str(e))
+    for arg in [arguments.files, arguments.from_file, arguments.from_manifest]:
+        if arg:
+            input_files.extend(arg)
+
+    input_files = list(flatten(input_files))
 
     if len(input_files) == 0:
         get_log().info("no_files_to_process", action="pdal_translate", reason="skipped")
         return
 
     pdal_version = os.environ.get("PDAL_VERSION", "unknown_pdal_version")
-    input_files = [item for sub in input_files for item in (sub if isinstance(sub, list) else [sub])]
+
     get_log().info("pdal_translate_start", pdalVersion=pdal_version, inputFileCount=len(input_files))
 
     concurrency: int = 1
