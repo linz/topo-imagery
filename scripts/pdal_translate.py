@@ -47,16 +47,6 @@ def get_args_parser() -> argparse.ArgumentParser:
         "If provided, this will be processed in addition to other file arguments.",
     )
     parser.add_argument(
-        "--json-files",
-        dest="json_files",
-        type=json.loads,
-        nargs="+",
-        help="List of files to process in a JSON array format "
-        '(e.g. \'["s3://bucket/file1.laz", "s3://bucket/file2.laz"]\'). '
-        "If provided, this will be processed in addition to other file arguments.",
-        required=False,
-    )
-    parser.add_argument(
         "--target-output",
         dest="target_output",
         required=False,
@@ -158,23 +148,18 @@ def main() -> None:
     arguments = arguments_parser.parse_args()
 
     input_files: list[str] = []
-    if arguments.json_files:
-        input_files.extend(arguments.json_files)
-
     if arguments.files:
         input_files.extend(arguments.files)
     if arguments.from_file:
         try:
-            with open(arguments.from_file, "r", encoding="utf-8") as f:
-                input_files.extend(json.load(f))
+            input_files.extend(json.loads(read(arguments.from_file)))
         except InputParameterError as e:
             get_log().error("An error occurred when loading the input file.", error=str(e))
     if arguments.from_manifest:
         try:
-            with open(arguments.from_manifest, "r", encoding="utf-8") as f:
-                manifest = json.load(f)
-                input_files.extend([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])])
-        except (InputParameterError, KeyError) as e:
+            manifest = json.loads(read(arguments.from_manifest))
+            input_files.extend([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])])
+        except InputParameterError as e:
             get_log().error("An error occurred when loading the input manifest.", error=str(e))
 
     if len(input_files) == 0:
