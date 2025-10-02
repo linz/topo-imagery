@@ -89,32 +89,31 @@ def pdal_translate(
         The filename of the fixed LAZ file if it is different to the input file, else None.
     """
     filename = file.split("/")[-1]
-    output_full_path = os.path.join(target_output, filename)
+    target_file = os.path.join(target_output, filename)
 
     # Already processed can skip processing
-    if exists(output_full_path):
+    if exists(target_file):
         if not force:
-            get_log().info("Skipping: Output file already exists.", path=output_full_path)
+            get_log().info("Skipping: Output file already exists.", path=target_file)
             # Note: Some of these may be unchanged from the input file. Err on side of caution and return the filename.
-            return output_full_path
-        get_log().info("Overwriting: Output file already exists.", path=output_full_path)
+            return target_file
+        get_log().info("Overwriting: Output file already exists.", path=target_file)
 
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         tmp_file_in = os.path.join(tmp_path, filename)
         tmp_file_out = os.path.join(tmp_path, "out_" + filename)
-        source_file = copy(source=file, target=tmp_file_in)
+
+        copy(source=file, target=tmp_file_in)
 
         # Get PDAL to write to temporary location so no broken files end up in the final folder.
-        run_pdal(pdal_translate_add_proj_command, input_file=source_file, output_file=tmp_file_out)
+        run_pdal(pdal_translate_add_proj_command, input_file=tmp_file_in, output_file=tmp_file_out)
 
-        write(output_full_path, read(tmp_file_out), content_type=ContentType.LAZ)
-
-        if filecmp.cmp(tmp_file_out, output_full_path, shallow=False):
-            get_log().info("No changes made to file.", path=output_full_path)
+        if filecmp.cmp(tmp_file_out, target_file, shallow=False):
+            get_log().info("No changes made to file.", path=target_file)
             return None
 
-        return output_full_path
+        return write(target_file, read(tmp_file_out), content_type=ContentType.LAZ)
 
 
 def run_pdal_translate(
