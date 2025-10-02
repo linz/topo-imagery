@@ -2,7 +2,6 @@ import argparse
 import filecmp
 import json
 import os
-import sys
 import tempfile
 from functools import partial
 from multiprocessing import Pool
@@ -24,6 +23,13 @@ def get_args_parser() -> argparse.ArgumentParser:
         dest="from_file",
         required=False,
         help="JSON file containing a nested list of files to process. "
+        "If provided, this will be processed in addition to other file arguments.",
+    )
+    parser.add_argument(
+        "--from-manifest",
+        dest="from_manifest",
+        required=False,
+        help="JSON file containing a manifest of files to process. "
         "If provided, this will be processed in addition to other file arguments.",
     )
     parser.add_argument(
@@ -157,13 +163,19 @@ def main() -> None:
 
     if arguments.files:
         input_files.extend(arguments.files)
-    try:
-        if arguments.from_file:
+    if arguments.from_file:
+        try:
             with open(arguments.from_file, "r", encoding="utf-8") as f:
                 input_files.extend(json.load(f))
-    except InputParameterError as e:
-        get_log().error("An error occurred when loading the input file.", error=str(e))
-        sys.exit(1)
+        except InputParameterError as e:
+            get_log().error("An error occurred when loading the input file.", error=str(e))
+    if arguments.from_manifest:
+        try:
+            with open(arguments.from_manifest, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+                input_files.extend([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])])
+        except (InputParameterError, KeyError) as e:
+            get_log().error("An error occurred when loading the input manifest.", error=str(e))
 
     if len(input_files) == 0:
         get_log().info("no_files_to_process", action="pdal_translate", reason="skipped")
