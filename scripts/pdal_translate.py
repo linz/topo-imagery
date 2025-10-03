@@ -49,8 +49,8 @@ def get_args_parser() -> argparse.ArgumentParser:
         "If provided, this will be processed in addition to other file arguments.",
     )
     parser.add_argument(
-        "--target-output",
-        dest="target_output",
+        "--target",
+        dest="target",
         required=False,
         default="/tmp/",
         help="Path where the output files will be saved to. Defaults to '/tmp/'.",
@@ -110,21 +110,21 @@ def manifest_loader(path: str) -> list[str]:
 
 def pdal_translate(
     source_file: str,
-    target_output: str = "/tmp/",
+    target: str = "/tmp/",
     force: bool = False,
 ) -> str | None:
     """Fix LAZ files by adding consistent CRS information in the header.
 
     Args:
         source_file: /path/to/a/file to process (S3 or local).
-        target_output: path where the output files need to be saved to. Defaults to "/tmp/".
+        target: path where the output files need to be saved to. Defaults to "/tmp/".
         force: overwrite existing output file even if it did not change. Defaults to False.
 
     Returns:
         The name of the fixed LAZ file if it is different to the input file, else None.
     """
     basename = source_file.split("/")[-1]
-    target_file = os.path.join(target_output, basename)
+    target_file = os.path.join(target, basename)
 
     # Already processed can skip processing
     if exists(target_file):
@@ -154,7 +154,7 @@ def pdal_translate(
 def run_pdal_translate(
     files_to_process: list[str],
     concurrency: int,
-    target_output: str = "/tmp/",
+    target: str = "/tmp/",
     force: bool = False,
 ) -> list[str]:
     """Run `pdal_translate()` in parallel (see `concurrency`).
@@ -162,14 +162,14 @@ def run_pdal_translate(
     Args:
         files_to_process: list of files to process
         concurrency: number of concurrent tiles to process
-        target_output: output directory path. Defaults to "/tmp/"
+        target: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
 
     Returns:
         the list of generated hillshade TIFF paths with their input files.
     """
     with Pool(concurrency) as p:
-        results = list(p.map(partial(pdal_translate, target_output=target_output, force=force), files_to_process))
+        results = list(p.map(partial(pdal_translate, target=target, force=force), files_to_process))
         p.close()
         p.join()
 
@@ -200,7 +200,7 @@ def main() -> None:
     if is_argo():
         concurrency = 4
 
-    output_files = run_pdal_translate(input_files, concurrency, force=arguments.force, target_output=arguments.target_output)
+    output_files = run_pdal_translate(input_files, concurrency, force=arguments.force, target=arguments.target)
     write("/tmp/processed.json", bytes(json.dumps(output_files), "UTF-8"), content_type=ContentType.JSON)
 
     get_log().info("pdal_translate_end", duration=time_in_ms() - start_time, modifiedFileCount=len(output_files))
