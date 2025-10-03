@@ -10,8 +10,6 @@ class ContentType(str, Enum):
     GEOJSON = "application/geo+json"
     """ https://www.iana.org/assignments/media-types/application/geo+json"""
     JPEG = "image/jpeg"
-    LAZ = "application/vnd.laszip"
-    LAS = "application/vnd.las"
 
 
 def get_file_name_from_path(path: str) -> str:
