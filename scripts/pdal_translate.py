@@ -215,9 +215,12 @@ def main() -> None:
         concurrency = 4
 
     output_files = run_pdal_translate(input_files, concurrency, force=arguments.force, target=arguments.target)
-    write("/tmp/processed.json", bytes(json.dumps(output_files), "UTF-8"), content_type=ContentType.JSON)
+    modified_file_count = len(output_files)
+    write("/tmp/modified_file_count", bytes(f"{modified_file_count}", "UTF-8"))
+    if modified_file_count > 0:
+        write("/tmp/processed.json", bytes(json.dumps(output_files), "UTF-8"), content_type=ContentType.JSON)
 
-    get_log().info("pdal_translate_end", duration=time_in_ms() - start_time, modifiedFileCount=len(output_files))
+    get_log().info("pdal_translate_end", duration=time_in_ms() - start_time, modifiedFileCount=modified_file_count)
 
 
 if __name__ == "__main__":
