@@ -43,6 +43,7 @@ def get_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--files",
         dest="files",
+        type=non_empty_str,
         nargs="+",
         required=False,
         help="List of files to process (space separated). "
@@ -73,6 +74,18 @@ def flatten(items: list[Any]) -> Iterable[Any]:
             yield from flatten(item)
         else:
             yield item
+
+def non_empty_str(s: str) -> list[str]:
+    """Check if a string is non-empty after stripping whitespace.
+
+    Args:
+        s: input string
+    Returns:
+        The original string as a list if non-empty, or an empty list otherwise.
+    """
+    if not s or s.strip() == "":
+        return []
+    return [s]
 
 
 def json_file_loader(path: str) -> list[str]:
