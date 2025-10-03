@@ -75,6 +75,7 @@ def flatten(items: list[Any]) -> Iterable[Any]:
         else:
             yield item
 
+
 def non_empty_str(s: str) -> list[str]:
     """Check if a string is non-empty after stripping whitespace.
 
