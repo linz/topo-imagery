@@ -25,6 +25,25 @@ def get_pdal_command(command: str, options: list[str]) -> list[str]:
         a list of arguments for `pdal`
     """
     get_log().info("pdal command", command=command, options=options)
+    if command not in [
+        "chamfer",
+        "delta",
+        "density",
+        "eval",
+        "fauxplugin",
+        "ground",
+        "hausdorff",
+        "info",
+        "merge",
+        "pipeline",
+        "random",
+        "sort",
+        "split",
+        "tile",
+        "tindex",
+        "translate",
+    ]:
+        raise ValueError(f"Unsupported PDAL command: {command}")
 
     pdal_command: list[str] = [command]
     pdal_command.extend(options)
