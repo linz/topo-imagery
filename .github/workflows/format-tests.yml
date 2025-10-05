@@ -14,13 +14,6 @@ jobs:
       - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4
         with:
           python-version: "3.12.3"
-      - name: Install PDAL
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common apt-transport-https ca-certificates gnupg
-          sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable  # need unstable for ubuntu noble.
-          sudo apt-get update
-          sudo apt-get install -y pdal
       - name: Install
         run: |
           pip install poetry
@@ -94,6 +87,12 @@ jobs:
           docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01 --gsd 60 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
           empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
           [[ -n "$empty_target_directory" ]]
+
+      - name: End to end test - Fix LAZ headers with pdal translate
+        run: |
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 pdal_translate.py --files ./tests/data/pdal_bad_header_1.laz ./tests/data/pdal_good_header_1.laz --target /tmp/
+          cmp --silent "${{ runner.temp }}/pdal_good_header_1.laz" "./scripts/tests/data/pdal_good_header_1.laz" && echo "good header retained, as expected"
+          cmp --silent "${{ runner.temp }}/pdal_bad_header_1.laz" "./scripts/tests/data/pdal_bad_header_1.laz" && exit 1 || echo "bad header fixed, as expected"
 
       - uses: actions/upload-artifact@v4.6.0
         with:
