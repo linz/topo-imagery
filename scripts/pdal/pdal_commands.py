@@ -73,16 +73,16 @@ def run_pdal(
 ) -> "subprocess.CompletedProcess[bytes]":
     """Run the PDAL command. The permissions to access to the input file are applied to the pdal environment.
 
-        Args:
-            command_options_args: list of command, options and arguments to be passed to the PDAL command
-            input_file: /path/to/the/input_file
-            output_file: /path/to/the/output_file
+    Args:
+        command_options_args: list of command, options and arguments to be passed to the PDAL command
+        input_file: /path/to/the/input_file
+        output_file: /path/to/the/output_file
 
     Raises:
-            PDALExecutionException: If no input file is provided or if something goes wrong during the execution of the command
+        PDALExecutionException: If no input file is provided or if something goes wrong during the execution of the command
 
-        Returns:
-            subprocess.CompletedProcess: the output process.
+    Returns:
+        subprocess.CompletedProcess: the output process.
     """
     start_time = time_in_ms()
     pdal_env = os.environ.copy()

@@ -13,7 +13,10 @@ RUN pipx install poetry
 RUN pipx inject poetry poetry-plugin-bundle
 
 # Add UbuntuGIS PPA and install PDAL
-RUN apt-get install --assume-yes software-properties-common apt-transport-https # ca-certificates gnupg
+RUN apt-get install --assume-yes software-properties-common apt-transport-https
+
+# FIXME: This is using the "unstable" PPA as the stable one does not yet support Ubuntu 24.04 LTS (Noble Numbat). This should be changed to the stable PPA as soon as it supports Noble.
+# See: https://launchpad.net/~ubuntugis/+archive/ubuntu/ppa/+packages?field.name_filter=pdal&field.status_filter=published&field.series_filter=
 RUN add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 RUN apt-get update
 RUN apt-get install -y pdal=2.6.2+ds-1~noble2
