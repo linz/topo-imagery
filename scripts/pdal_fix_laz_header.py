@@ -122,7 +122,7 @@ def manifest_loader(path: str) -> list[str]:
         return []
 
 
-def pdal_translate(
+def pdal_fix_laz_header(
     source_file: str,
     target: str = "/tmp/",
     force: bool = False,
@@ -165,13 +165,13 @@ def pdal_translate(
         return target_file
 
 
-def run_pdal_translate(
+def run_pdal_fix_laz_header(
     files_to_process: list[str],
     concurrency: int,
     target: str = "/tmp/",
     force: bool = False,
 ) -> list[str]:
-    """Run `pdal_translate()` in parallel (see `concurrency`).
+    """Run `pdal_fix_laz_header()` in parallel (see `concurrency`).
 
     Args:
         files_to_process: list of files to process
@@ -183,7 +183,7 @@ def run_pdal_translate(
         the list of generated hillshade TIFF paths with their input files.
     """
     with Pool(concurrency) as p:
-        results = list(p.map(partial(pdal_translate, target=target, force=force), files_to_process))
+        results = list(p.map(partial(pdal_fix_laz_header, target=target, force=force), files_to_process))
         p.close()
         p.join()
 
@@ -203,24 +203,24 @@ def main() -> None:
     input_files = list(flatten(input_files))
 
     if len(input_files) == 0:
-        get_log().info("no_files_to_process", action="pdal_translate", reason="skipped")
+        get_log().info("no_files_to_process", action="pdal_fix_laz_header", reason="skipped")
         return
 
     pdal_version = os.environ.get("PDAL_VERSION", "unknown_pdal_version")
 
-    get_log().info("pdal_translate_start", pdalVersion=pdal_version, inputFileCount=len(input_files))
+    get_log().info("pdal_fix_laz_header_start", pdalVersion=pdal_version, inputFileCount=len(input_files))
 
     concurrency: int = 1
     if is_argo():
         concurrency = 4
 
-    output_files = run_pdal_translate(input_files, concurrency, force=arguments.force, target=arguments.target)
+    output_files = run_pdal_fix_laz_header(input_files, concurrency, target=arguments.target, force=arguments.force)
     modified_file_count = len(output_files)
     write("/tmp/modified_file_count", bytes(f"{modified_file_count}", "UTF-8"))
     if modified_file_count > 0:
-        write("/tmp/processed.json", bytes(json.dumps(output_files), "UTF-8"), content_type=ContentType.JSON)
+        write("/tmp/processed.json", bytes(json.dumps(output_files, indent=0), "UTF-8"), content_type=ContentType.JSON)
 
-    get_log().info("pdal_translate_end", duration=time_in_ms() - start_time, modifiedFileCount=modified_file_count)
+    get_log().info("pdal_fix_laz_header_end", duration=time_in_ms() - start_time, modifiedFileCount=modified_file_count)
 
 
 if __name__ == "__main__":
