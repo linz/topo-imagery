@@ -437,7 +437,7 @@ def test_set_title_set_description(
 ) -> None:
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
-        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
+        ["2022-12-31T11:00:00Z", "2023-12-30T11:00:00Z"]
     ]
 
     with subtests.test(msg="title"):
@@ -461,7 +461,7 @@ def test_set_title_set_description_long_date(fake_collection_context: Collection
     fake_collection_context.historic_survey_number = None
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
-        ["2023-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
+        ["2022-12-31T11:00:00Z", "2024-12-30T11:00:00Z"]
     ]
 
     with subtests.test(msg="title"):
@@ -480,7 +480,7 @@ def test_get_title_historic_imagery_with_missing_number(fake_collection_context:
     fake_collection_context.historic_survey_number = None
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
-        ["2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"]
+        ["2022-12-31T11:00:00Z", "2023-12-30T11:00:00Z"]
     ]
     with pytest.raises(MissingMetadataError) as excinfo:
         collection.set_title()
@@ -1031,7 +1031,7 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     )
     collection.update(new_metadata, "2025-01-01T00:00:00Z")
     collection.stac.setdefault("extent", {}).setdefault("temporal", {})["interval"] = [
-        ["2025-01-01T00:00:00Z", "2025-12-31T23:59:59Z"]
+        ["2024-12-31T11:00:00Z", "2025-12-30T11:00:00Z"]
     ]
     collection.set_title()
     collection.set_description()

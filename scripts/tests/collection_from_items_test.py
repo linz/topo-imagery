@@ -34,8 +34,8 @@ def setup() -> Iterator[ImageryItem]:
         "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
-    start_datetime = "2021-01-27T00:00:00Z"
-    end_datetime = "2021-01-27T00:00:00Z"
+    start_datetime = "2021-01-27T11:00:00Z"
+    end_datetime = "2021-01-27T11:00:00Z"
     item.update_spatial(geometry, bbox)
     item.update_datetime(start_datetime, end_datetime)
     yield item
@@ -243,8 +243,8 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_co
     s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
     write("s3://stacfiles/item_a.json", dict_to_json_bytes(item.stac))
-    item.stac["properties"]["start_datetime"] = "2022-04-12T00:00:00Z"
-    item.stac["properties"]["end_datetime"] = "2022-04-12T00:00:00Z"
+    item.stac["properties"]["start_datetime"] = "2022-04-12T12:00:00Z"
+    item.stac["properties"]["end_datetime"] = "2022-04-12T12:00:00Z"
     write("s3://stacfiles/item_b.json", dict_to_json_bytes(item.stac))
 
     # CLI arguments
