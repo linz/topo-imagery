@@ -117,7 +117,7 @@ def convert_utc_to_nz(datetime_object: datetime) -> datetime:
     if datetime_object.tzinfo is None:
         raise NaiveDatetimeError()
     tzinfo = datetime_object.tzinfo
-    if tzinfo != timezone.utc and str(tzinfo) not in (str(timezone.utc), str(tz.gettz("UTC"))):
+    if tzinfo != timezone.utc:
         raise NotUTCError()
     nz_tz = tz.gettz("Pacific/Auckland")
     return datetime_object.astimezone(nz_tz)
