@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.12.0](https://github.com/linz/topo-imagery/compare/v7.11.0...v7.12.0) (2025-10-20)
+
+
+### Features
+
+* Add script to fix LAZ headers TDE-1649 ([#1419](https://github.com/linz/topo-imagery/issues/1419)) ([018f9e0](https://github.com/linz/topo-imagery/commit/018f9e0ba7f8c8588b49dcd8c0af918b884a2d3b))
+
 ## [7.11.0](https://github.com/linz/topo-imagery/compare/v7.10.0...v7.11.0) (2025-09-21)
 
 
