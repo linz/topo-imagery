@@ -88,6 +88,12 @@ jobs:
           empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
           [[ -n "$empty_target_directory" ]]
 
+      - name: End to end test - Fix LAZ headers with pdal translate
+        run: |
+          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 fix_laz_header.py --files ./tests/data/pdal_bad_header_1.laz ./tests/data/pdal_good_header_1.laz --target /tmp/
+          cmp --silent "${{ runner.temp }}/pdal_good_header_1.laz" "./scripts/tests/data/pdal_good_header_1.laz" && echo "good header retained, as expected"
+          cmp --silent "${{ runner.temp }}/pdal_bad_header_1.laz" "./scripts/tests/data/pdal_bad_header_1.laz" && exit 1 || echo "bad header fixed, as expected"
+
       - uses: actions/upload-artifact@v4.6.0
         with:
           name: gdal-output
