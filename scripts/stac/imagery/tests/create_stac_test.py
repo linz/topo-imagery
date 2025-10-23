@@ -5,6 +5,7 @@ from typing import Any, cast
 
 from pytest_subtests import SubTests
 
+from scripts.conftest import any_epoch_datetime, any_epoch_datetime_string
 from scripts.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import ImageryCollection
@@ -12,7 +13,6 @@ from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, merge_item_list_for_resupply
 from scripts.stac.imagery.tests.generators import any_multihash_as_hex
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
-from scripts.tests.datetimes_test import any_epoch_datetime, any_epoch_datetime_string
 
 
 def test_create_item(subtests: SubTests) -> None:

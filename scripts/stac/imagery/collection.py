@@ -9,7 +9,7 @@ from shapely import to_geojson
 from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
 
-from scripts.datetimes import format_rfc_3339_datetime_string, parse_rfc_3339_datetime
+from scripts.datetimes import convert_utc_to_nz_datetime, format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import exists, read, write
 from scripts.json_codec import dict_to_json_bytes
@@ -198,8 +198,8 @@ class ImageryCollection:
         region = HUMAN_READABLE_REGIONS[self.stac["linz:region"]]
 
         # format date
-        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
-        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
+        start_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][0])).year
+        end_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][1])).year
         date = f"({start_year})" if start_year == end_year else f"({start_year}-{end_year})"
 
         # format gsd
@@ -295,8 +295,8 @@ class ImageryCollection:
         if not temporal_extent:
             raise ValueError("temporal extent must be set before setting the description")
         # format date
-        start_year = parse_rfc_3339_datetime(temporal_extent[0][0]).year
-        end_year = parse_rfc_3339_datetime(temporal_extent[0][1]).year
+        start_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][0])).year
+        end_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][1])).year
 
         category = self.stac["linz:geospatial_category"]
 

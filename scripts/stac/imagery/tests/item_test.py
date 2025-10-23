@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from pytest_subtests import SubTests
 
+from scripts.conftest import any_epoch_datetime_string
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
@@ -13,7 +14,6 @@ from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
 from scripts.stac.link import Relation
 from scripts.stac.util.media_type import StacMediaType
-from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 
 def test_imagery_stac_item(subtests: SubTests) -> None:
