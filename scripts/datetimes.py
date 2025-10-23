@@ -92,7 +92,7 @@ def format_rfc_3339_nz_midnight_datetime_string(datetime_object: datetime) -> st
     return format_rfc_3339_datetime_string(datetime_utc)
 
 
-def convert_utc_to_nz(datetime_object: datetime) -> datetime:
+def convert_utc_to_nz_datetime(datetime_object: datetime) -> datetime:
     """Convert a UTC datetime to New Zealand time zone (Pacific/Auckland).
 
     Args:
@@ -102,14 +102,14 @@ def convert_utc_to_nz(datetime_object: datetime) -> datetime:
         datetime: Timezone-aware datetime object in Pacific/Auckland.
 
     >>> dt_utc = datetime(2001, 2, 2, 11, 0, 0, tzinfo=timezone.utc)
-    >>> convert_utc_to_nz(dt_utc)
+    >>> convert_utc_to_nz_datetime(dt_utc)
     datetime.datetime(2001, 2, 3, 0, 0, tzinfo=tzfile('...Pacific/Auckland'))
-    >>> convert_utc_to_nz(datetime(2001, 2, 3, 4, 5, 6))
+    >>> convert_utc_to_nz_datetime(datetime(2001, 2, 3, 4, 5, 6))
     Traceback (most recent call last):
     ...
     scripts.datetimes.NaiveDatetimeError: Can't convert naive datetime, timezone aware datetime object needed
     >>> dt_nz = datetime(2001, 2, 3, 4, 5, 6, tzinfo=tz.gettz("Pacific/Auckland"))
-    >>> convert_utc_to_nz(dt_nz)
+    >>> convert_utc_to_nz_datetime(dt_nz)
     Traceback (most recent call last):
     ...
     scripts.datetimes.NotUTCError: Input datetime must be in UTC

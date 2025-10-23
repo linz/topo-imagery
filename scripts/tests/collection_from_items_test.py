@@ -10,13 +10,13 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 
 from scripts.collection_from_items import NoItemsError, main
+from scripts.conftest import any_epoch_datetime_string
 from scripts.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem
 from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

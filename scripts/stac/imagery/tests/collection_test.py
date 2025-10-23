@@ -15,7 +15,7 @@ from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
 
-from scripts.conftest import fake_linz_slug
+from scripts.conftest import any_epoch_datetime_string, fake_linz_slug
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import read
 from scripts.files.fs_s3 import write
@@ -26,7 +26,6 @@ from scripts.stac.imagery.provider import ProviderRole
 from scripts.stac.imagery.tests.generators import any_stac_processing
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.stac_extensions import StacExtensions
-from scripts.tests.datetimes_test import any_epoch_datetime_string
 
 # pylint: disable=too-many-lines
 
