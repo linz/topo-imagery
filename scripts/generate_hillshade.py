@@ -119,8 +119,6 @@ def create_hillshade(
         gdal_translate_command = ["gdal_translate", "-co", "compress=lerc"] + BASE_COG  # BASE_COG contains `-stats`
         run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
 
-        write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
-
         if gsd:
             footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd)
             write(
@@ -128,6 +126,9 @@ def create_hillshade(
                 read(footprint_tmp_path),
                 content_type=ContentType.GEOJSON.value,
             )
+
+        # Note: This file is used as an implicit indicator that processing has completed, so should be written last.
+        write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
 
         return hillshade_file_path, tile.inputs
 
