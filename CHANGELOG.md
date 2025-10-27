@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.12.1](https://github.com/linz/topo-imagery/compare/v7.12.0...v7.12.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* ensure hillshade has been fully processed when skipping TDE-1701 ([#1442](https://github.com/linz/topo-imagery/issues/1442)) ([13c9c27](https://github.com/linz/topo-imagery/commit/13c9c2758828e664f304bd516edcb662ae8d3d47))
+
 ## [7.12.0](https://github.com/linz/topo-imagery/compare/v7.11.0...v7.12.0) (2025-10-20)
 
 
