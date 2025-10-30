@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.12.2](https://github.com/linz/topo-imagery/compare/v7.12.1...v7.12.2) (2025-10-30)
+
+
+### Bug Fixes
+
+* convert temporal extent to NZ time for title and description TDE-1661 ([#1433](https://github.com/linz/topo-imagery/issues/1433)) ([5ca0421](https://github.com/linz/topo-imagery/commit/5ca0421ba3848d9d7e04ca83492c895bd02d3983))
+
 ## [7.12.1](https://github.com/linz/topo-imagery/compare/v7.12.0...v7.12.1) (2025-10-27)
 
 
