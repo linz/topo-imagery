@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import tempfile
@@ -7,7 +6,7 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import is_argo
+from scripts.cli.common_args import CommonArgumentParser
 from scripts.files.files_helper import get_file_name_from_path
 from scripts.files.fs import read, write_all, write_sidecars
 from scripts.gdal.gdal_commands import get_ascii_translate_command
@@ -27,7 +26,7 @@ def main() -> None:
         python translate_ascii.py --from-file ./tests/data/file-list.json --target /tmp/
     """
 
-    parser = argparse.ArgumentParser()
+    parser = CommonArgumentParser(description="Translate ASCII files to TIFF files.")
     parser.add_argument("--from-file", dest="from_file", required=True, help="Path to file listing ascii files")
     parser.add_argument("--target", dest="target", required=True, help="Output location path")
     arguments = parser.parse_args()
@@ -35,7 +34,7 @@ def main() -> None:
     asc_files = json.loads(read(arguments.from_file))[0]
 
     concurrency: int = 1
-    if is_argo():
+    if arguments.is_argo:
         concurrency = 4
 
     start_time = time_in_ms()

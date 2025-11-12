@@ -1,4 +1,3 @@
-import argparse
 import os
 import sys
 from datetime import datetime, timezone
@@ -7,14 +6,17 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import (
     InputParameterError,
-    is_argo,
     load_input_files,
     str_to_bool,
     str_to_gsd,
     str_to_list_or_none,
     valid_date,
 )
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
+from scripts.cli.common_args import CommonArgumentParser
+from scripts.datetimes import (
+    RFC_3339_DATETIME_FORMAT,
+    format_rfc_3339_nz_midnight_datetime_string,
+)
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write
@@ -24,8 +26,8 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import StandardisingConfig, run_standardising
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+def get_args_parser() -> CommonArgumentParser:
+    parser = CommonArgumentParser(description="Standardise and validate imagery TIFF files, and create STAC Metadata.")
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
@@ -90,7 +92,7 @@ def parse_args() -> argparse.Namespace:
         help="Scale to x,y resolution (leave blank for no scaling)",
         required=False,
     )
-    return parser.parse_args()
+    return parser
 
 
 def report_non_visual_qa_errors(file: FileTiff) -> None:
@@ -115,7 +117,7 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 
 
 def main() -> None:
-    arguments = parse_args()
+    arguments = get_args_parser().parse_args()
 
     standardising_config = StandardisingConfig(
         gdal_preset=arguments.preset,
@@ -145,7 +147,7 @@ def main() -> None:
         end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
 
     concurrency: int = 1
-    if is_argo():
+    if arguments.is_argo:
         concurrency = 4
 
     gdal_version = os.environ["GDAL_VERSION"]
