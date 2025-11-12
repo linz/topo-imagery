@@ -77,7 +77,7 @@ def thumbnails(path: str, target: str) -> str | None:
 def main() -> None:
     start_time = time_in_ms()
     get_log().info("thumbnails_start")
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Generate thumbnails from TIFF files.")
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
     )
