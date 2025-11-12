@@ -46,7 +46,10 @@ class NoItemsError(Exception):
 
 def parse_args(args: List[str] | None) -> Namespace:
     parser = argparse.ArgumentParser(
-        description="Create a STAC Collection from existing STAC Items in a given S3 URI. Generate a capture-area file if footprint files are present."
+        description=(
+            "Create a STAC Collection from existing STAC Items in a given S3 URI. "
+            "Generate a capture-area file if footprint files are present."
+        )
     )
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
