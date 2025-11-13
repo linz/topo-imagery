@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import tempfile
@@ -7,6 +6,7 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
+from scripts.cli.common_args import CommonArgumentParser
 from scripts.files.files_helper import ContentType, get_file_name_from_path, is_tiff
 from scripts.files.fs import exists, read, write
 from scripts.gdal import gdal_helper
@@ -76,7 +76,7 @@ def thumbnails(path: str, target: str) -> str | None:
 
 def main() -> None:
     start_time = time_in_ms()
-    parser = argparse.ArgumentParser(description="Generate thumbnails from TIFF files.")
+    parser = CommonArgumentParser(description="Generate thumbnails from TIFF files.")
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
     )
