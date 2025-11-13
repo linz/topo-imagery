@@ -13,10 +13,7 @@ from scripts.cli.cli_helper import (
     valid_date,
 )
 from scripts.cli.common_args import CommonArgumentParser
-from scripts.datetimes import (
-    RFC_3339_DATETIME_FORMAT,
-    format_rfc_3339_nz_midnight_datetime_string,
-)
+from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
 from scripts.files.fs import exists, write

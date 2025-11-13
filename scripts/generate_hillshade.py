@@ -8,12 +8,7 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import (
-    InputParameterError,
-    TileFiles,
-    load_input_files,
-    str_to_gsd,
-)
+from scripts.cli.cli_helper import InputParameterError, TileFiles, load_input_files, str_to_gsd
 from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
