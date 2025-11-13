@@ -3,7 +3,6 @@ import json
 import warnings
 from datetime import datetime
 from decimal import Decimal
-from os import environ
 from typing import Any, NamedTuple
 
 import shapely.geometry
@@ -75,10 +74,6 @@ def load_input_files(path: str) -> list[TileFiles]:
     except InputParameterError as e:
         get_log().error("An error occurred while getting tile_files", error=str(e))
         raise e
-
-
-def is_argo() -> bool:
-    return bool(environ.get("ARGO_TEMPLATE"))
 
 
 def valid_date(s: str) -> datetime | None:

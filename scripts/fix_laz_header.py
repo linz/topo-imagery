@@ -1,4 +1,3 @@
-import argparse
 import filecmp
 import json
 import os
@@ -9,15 +8,16 @@ from typing import Any, Iterable
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import is_argo
+from scripts.cli.common_args import CommonArgumentParser
 from scripts.files.files_helper import ContentType
 from scripts.files.fs import copy, exists, read, write
 from scripts.logging.time_helper import time_in_ms
 from scripts.pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
 
 
-def get_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
+def get_args_parser() -> CommonArgumentParser:
+    parser = CommonArgumentParser(description="Fix LAZ file headers by adding consistent CRS information.")
+
     parser.add_argument(
         "--force",
         dest="force",
@@ -211,7 +211,7 @@ def main() -> None:
     get_log().info("pdal_fix_laz_header_start", pdalVersion=pdal_version, inputFileCount=len(input_files))
 
     concurrency: int = 1
-    if is_argo():
+    if arguments.is_argo:
         concurrency = 4
 
     output_files = run_pdal_fix_laz_header(input_files, concurrency, target=arguments.target, force=arguments.force)
