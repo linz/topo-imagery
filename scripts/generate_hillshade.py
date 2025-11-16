@@ -24,7 +24,7 @@ from scripts.standardising import create_vrt
 
 
 def get_args_parser() -> CommonArgumentParser:
-    parser = CommonArgumentParser(description="Generate hillshade TIFF files from input DEM TIFF files.")
+    parser = CommonArgumentParser(description="Generate hillshade TIFF files from input DEM/DSM TIFF files.")
     parser.add_argument(
         "--from-file",
         dest="from_file",
