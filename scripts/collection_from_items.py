@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-from argparse import Namespace
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 
@@ -9,6 +8,7 @@ from boto3 import client
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import coalesce_multi_single, get_geometry_from_geojson, str_to_bool, str_to_gsd
+from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
@@ -29,8 +29,13 @@ class NoItemsError(Exception):
     pass
 
 
-def parse_args(args: List[str] | None) -> Namespace:
-    parser = argparse.ArgumentParser()
+def get_args_parser() -> CommonArgumentParser:
+    parser = CommonArgumentParser(
+        description=(
+            "Create a STAC Collection from existing STAC Items in a given S3 URI. "
+            "Generate a capture-area file if footprint files are present."
+        )
+    )
     parser.add_argument("--uri", dest="uri", help="s3 path to items and collection.json write location", required=True)
     parser.add_argument("--collection-id", dest="collection_id", help="Collection ID", required=True)
     parser.add_argument(
@@ -159,13 +164,14 @@ def parse_args(args: List[str] | None) -> Namespace:
         nargs="?",
     )
 
-    return parser.parse_args(args)
+    return parser
 
 
 # pylint: disable=too-many-locals
 def main(args: List[str] | None = None) -> None:
     start_time = time_in_ms()
-    arguments = parse_args(args)
+    parser = get_args_parser()
+    arguments = parser.parse_args(args)
     uri = arguments.uri
     collection_id = arguments.collection_id
     supplied_capture_area = arguments.supplied_capture_area

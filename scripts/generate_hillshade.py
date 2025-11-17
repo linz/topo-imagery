@@ -1,4 +1,3 @@
-import argparse
 import os
 import sys
 import tempfile
@@ -9,7 +8,8 @@ from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, is_argo, load_input_files, str_to_gsd
+from scripts.cli.cli_helper import InputParameterError, TileFiles, load_input_files, str_to_gsd
+from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
@@ -23,8 +23,8 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import create_vrt
 
 
-def get_args_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
+def get_args_parser() -> CommonArgumentParser:
+    parser = CommonArgumentParser(description="Generate hillshade TIFF files from input DEM/DSM TIFF files.")
     parser.add_argument(
         "--from-file",
         dest="from_file",
@@ -183,7 +183,7 @@ def main() -> None:
     get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
 
     concurrency: int = 1
-    if is_argo():
+    if arguments.is_argo:
         concurrency = 4
 
     tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force, arguments.gsd)
