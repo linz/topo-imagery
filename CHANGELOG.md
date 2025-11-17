@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.13.0](https://github.com/linz/topo-imagery/compare/v7.12.2...v7.13.0) (2025-11-17)
+
+
+### Features
+
+* remove Argo Workflows environment variables usage TDE-1693 ([#1452](https://github.com/linz/topo-imagery/issues/1452)) ([a817c33](https://github.com/linz/topo-imagery/commit/a817c33286e211082c336173fa89d5aa4eee92a1))
+
 ## [7.12.2](https://github.com/linz/topo-imagery/compare/v7.12.1...v7.12.2) (2025-10-30)
 
 
