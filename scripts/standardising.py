@@ -119,7 +119,7 @@ def create_vrt(
     Args:
         source_tiffs: list of tiffs to create the VRT from
         target_path: path of the generated VRT
-        epsg: the projection of the source files. Defaults to 2193 (NZTM).
+        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
         add_alpha: add alpha band to the VRT. Defaults to False.
         resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
