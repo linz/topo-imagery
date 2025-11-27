@@ -130,7 +130,7 @@ def create_vrt(
     vrt_path = os.path.join(target_path, "source.vrt")
     run_gdal(
         command=get_build_vrt_command(
-            files=source_tiffs, epsg=epsg, output=vrt_path, add_alpha=add_alpha, resolution=resolution
+            files=source_tiffs, output=vrt_path, epsg=epsg, add_alpha=add_alpha, resolution=resolution
         )
     )
     return vrt_path

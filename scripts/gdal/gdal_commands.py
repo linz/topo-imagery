@@ -80,8 +80,8 @@ def get_cutline_command(cutline: str | None) -> list[str]:
 
 def get_build_vrt_command(
     files: list[str],
-    epsg: int = 2193,
     output: str = "output.vrt",
+    epsg: int = 2193,
     add_alpha: bool = False,
     resolution: list[Decimal] | None = None,
 ) -> list[str]:
@@ -89,8 +89,8 @@ def get_build_vrt_command(
 
     Args:
         files: list of tiffs to build the vrt from
-        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
         output: the name of the VRT generated. Defaults to "output.vrt".
+        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
         add_alpha: use `-addalpha`. Defaults to False.
         resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
