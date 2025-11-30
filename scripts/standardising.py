@@ -108,13 +108,18 @@ def run_standardising(
 
 
 def create_vrt(
-    source_tiffs: list[str], target_path: str, add_alpha: bool = False, resolution: list[Decimal] | None = None
+    source_tiffs: list[str],
+    target_path: str,
+    epsg: int = 2193,
+    add_alpha: bool = False,
+    resolution: list[Decimal] | None = None,
 ) -> str:
     """Create a VRT from a list of tiffs files
 
     Args:
         source_tiffs: list of tiffs to create the VRT from
         target_path: path of the generated VRT
+        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
         add_alpha: add alpha band to the VRT. Defaults to False.
         resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
 
@@ -123,7 +128,11 @@ def create_vrt(
     """
     # Create the `vrt` file
     vrt_path = os.path.join(target_path, "source.vrt")
-    run_gdal(command=get_build_vrt_command(files=source_tiffs, output=vrt_path, add_alpha=add_alpha, resolution=resolution))
+    run_gdal(
+        command=get_build_vrt_command(
+            files=source_tiffs, output=vrt_path, epsg=epsg, add_alpha=add_alpha, resolution=resolution
+        )
+    )
     return vrt_path
 
 
@@ -178,6 +187,7 @@ def standardising(
         current_working_file = create_vrt(
             [source_file for source_file in source_files if is_tiff(source_file)],
             tmp_path,
+            epsg=config.source_epsg,
             add_alpha=vrt_add_alpha,
             resolution=config.scale_to_resolution,
         )
@@ -280,7 +290,7 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
     """Generate output using GDAL command."""
     target_file = os.path.join(tmp_path, f"{tile_name}.tiff")
 
-    command = get_gdal_command(config.gdal_preset, epsg=int(config.target_epsg))
+    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg)
     command.extend(get_gdal_band_offset(input_file, gdal_info(input_file), config.gdal_preset))
 
     # Specify the extent to get the right boundaries in case of the tiff got no data on its edges
