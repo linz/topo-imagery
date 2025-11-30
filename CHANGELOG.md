@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.13.1](https://github.com/linz/topo-imagery/compare/v7.13.0...v7.13.1) (2025-11-30)
+
+
+### Bug Fixes
+
+* gdalbuildvrt - specify EPSG code to prevent complex VRT cutline geometry ([#1454](https://github.com/linz/topo-imagery/issues/1454)) ([db54175](https://github.com/linz/topo-imagery/commit/db54175d9baaa04d6b7442ecbca93a197e748f6e))
+
 ## [7.13.0](https://github.com/linz/topo-imagery/compare/v7.12.2...v7.13.0) (2025-11-17)
 
 
