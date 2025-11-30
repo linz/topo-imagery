@@ -99,8 +99,7 @@ def get_build_vrt_command(
     """
     # `-allow_projection_difference` is passed to workaround different coordinate system descriptions within the same EPSG
     # Having the same EPSG code for all images is already checked by `linz/argo-tasks` `tile-index-validate`
-    gdal_command = ["gdalbuildvrt", "-strict", "-allow_projection_difference"]
-    gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
+    gdal_command = ["gdalbuildvrt", "-strict", "-allow_projection_difference", "-a_srs", f"EPSG:{epsg}"]
     if add_alpha:
         gdal_command.append("-addalpha")
     if resolution is not None:
