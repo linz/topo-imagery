@@ -57,6 +57,7 @@ COMPRESS_LZW = [
     "-co",
     "predictor=2",
 ]
+
 COMPRESS_WEBP_LOSSLESS = [
     # Compress into webp
     "-co",
@@ -65,6 +66,7 @@ COMPRESS_WEBP_LOSSLESS = [
     "-co",
     "quality=100",
 ]
+
 WEBP_OVERVIEWS = [
     # When creating overviews also compress them into Webp
     "-co",
@@ -78,12 +80,33 @@ WEBP_OVERVIEWS = [
     "overview_quality=90",
 ]
 
+COMPRESS_ZSTD_17 = [
+    # Compress as ZSTD Level 17
+    "-co",
+    "compress=zstd",
+    "-co",
+    "level=17",
+    # Predictor creates smaller files, for RGBNIR imagery
+    "-co",
+    "predictor=2",
+]
+ZSTD_OVERVIEWS = [
+    # When creating overviews also compress them into ZSTD
+    "-co",
+    "overview_compress=zstd",
+    # When resampling overviews use lanczos
+    # see https://github.com/linz/basemaps/blob/master/docs/operator-guide/cog-quality.md
+    "-co",
+    "overview_resampling=lanczos",
+]
+
 
 class CompressionPreset(str, Enum):
     """Enum for the different compression presets available for standardising TIFFs."""
 
     DEM_LERC = "dem_lerc"
     LZW = "lzw"
+    RGBNIR_ZSTD_17 = "rgbnir_zstd_17"
     WEBP = "webp"
 
 

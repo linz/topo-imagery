@@ -10,9 +10,11 @@ from scripts.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
     COMPRESS_WEBP_LOSSLESS,
+    COMPRESS_ZSTD_17,
     DEM_LERC,
     SCALE_254_ADD_NO_DATA,
     WEBP_OVERVIEWS,
+    ZSTD_OVERVIEWS,
     CompressionPreset,
     HillshadePreset,
 )
@@ -45,6 +47,10 @@ def get_gdal_command(preset: str, epsg: int) -> list[str]:
     elif preset == CompressionPreset.WEBP.value:
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
         gdal_command.extend(WEBP_OVERVIEWS)
+
+    if preset == CompressionPreset.RGBNIR_ZSTD_17.value:
+        gdal_command.extend(COMPRESS_ZSTD_17)
+        gdal_command.extend(ZSTD_OVERVIEWS)
 
     elif preset == CompressionPreset.DEM_LERC.value:
         gdal_command.extend(DEM_LERC)
