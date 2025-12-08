@@ -27,6 +27,8 @@ from scripts.stac.imagery.constants import (
     DSM_HILLSHADE_IGOR,
     HUMAN_READABLE_REGIONS,
     LIFECYCLE_SUFFIXES,
+    NEAR_INFRARED_AERIAL_PHOTOS,
+    NEAR_INFRARED_SATELLITE_IMAGERY,
     RURAL_AERIAL_PHOTOS,
     SATELLITE_IMAGERY,
     SCANNED_AERIAL_PHOTOS,
@@ -303,9 +305,11 @@ class ImageryCollection:
         base_descriptions = {
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
+            NEAR_INFRARED_SATELLITE_IMAGERY: "Near-infrared satellite imagery",
             AERIAL_PHOTOS: "Orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
+            NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared aerial photos",
             DEM: "Digital Elevation Model",
             DSM: "Digital Surface Model",
         }
