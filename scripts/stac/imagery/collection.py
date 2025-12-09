@@ -41,8 +41,8 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
-ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS}
-IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
+ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS, NEAR_INFRARED_AERIAL_PHOTOS}
+IMAGERY = {SCANNED_AERIAL_PHOTOS, SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
 ELEVATION = {DEM, DSM}
 HILLSHADES = {DEM_HILLSHADE, DEM_HILLSHADE_IGOR, DSM_HILLSHADE, DSM_HILLSHADE_IGOR}
 COLLECTION_FILE_NAME = "collection.json"
@@ -223,7 +223,7 @@ class ImageryCollection:
                 lifecycle_suffix,
             ]
 
-        elif category in {SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
+        elif category in {SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
             components = [
                 geographic_description or region,
                 gsd_str,
@@ -309,7 +309,7 @@ class ImageryCollection:
             AERIAL_PHOTOS: "Orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
-            NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared aerial photos",
+            NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",
             DEM: "Digital Elevation Model",
             DSM: "Digital Surface Model",
         }
