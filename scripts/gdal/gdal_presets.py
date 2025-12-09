@@ -80,7 +80,7 @@ WEBP_OVERVIEWS = [
     "overview_quality=90",
 ]
 
-COMPRESS_ZSTD_17 = [
+COMPRESS_ZSTD = [
     # Compress as ZSTD Level 17
     "-co",
     "compress=zstd",
@@ -106,7 +106,7 @@ class CompressionPreset(str, Enum):
 
     DEM_LERC = "dem_lerc"
     LZW = "lzw"
-    RGBNIR_ZSTD_17 = "rgbnir_zstd_17"
+    RGBNIR_ZSTD = "rgbnir_zstd"
     WEBP = "webp"
 
 

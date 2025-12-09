@@ -6,7 +6,7 @@ from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
 def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
-    """Look for a specific colorInterperation inside of a `gdalinfo` band output.
+    """Look for a specific colorInterpretation inside of a `gdalinfo` band output.
 
     Args:
         bands: Bands to search
@@ -21,7 +21,7 @@ def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     return None
 
 
-# pylint: disable-msg=too-many-return-statements
+# pylint: disable-msg=too-many-return-statements, too-many-locals
 def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | None = None) -> list[str]:
     """Get the banding parameters for a `gdal_translate` command.
 
@@ -83,7 +83,16 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
         # Could be RGB assume it is RGB
         return ["-b", "1", "-b", "2", "-b", "3"] + band_alpha_arg
 
-    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + band_alpha_arg
+    if preset == CompressionPreset.RGBNIR_ZSTD.value:
+        band_nir_arg: list[str] = []
+        if (band_nir := find_band(bands, "NIR")) or (band_nir := find_band(bands, "Undefined")):
+            band_nir_arg.extend(["-b", str(band_nir["band"]), f"-colorinterp_{str(band_nir["band"])}", "nir"])
+
+    return (
+        ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])]
+        + band_alpha_arg
+        + band_nir_arg
+    )
 
 
 def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:

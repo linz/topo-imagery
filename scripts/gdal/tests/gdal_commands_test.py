@@ -46,7 +46,7 @@ def test_preset_webp(subtests: SubTests) -> None:
 
 
 def test_preset_zstd_17(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(CompressionPreset.RGBNIR_ZSTD_17.value, epsg=EpsgNumber.NZTM_2000.value)
+    gdal_command = get_gdal_command(CompressionPreset.RGBNIR_ZSTD.value, epsg=EpsgNumber.NZTM_2000.value)
 
     # Basic cog creation
     with subtests.test():
