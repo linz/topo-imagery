@@ -224,7 +224,7 @@ class ImageryCollection:
                 lifecycle_suffix,
             ]
 
-        elif category in {SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
+        elif category in {*ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
             components = [
                 geographic_description or region,
                 gsd_str,
