@@ -84,8 +84,8 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
         # Could be RGB assume it is RGB
         return ["-b", "1", "-b", "2", "-b", "3"] + band_alpha_arg
 
+    band_nir_arg: list[str] = []
     if preset == CompressionPreset.RGBNIR_ZSTD.value:
-        band_nir_arg: list[str] = []
         if (band_nir := find_band(bands, "NIR")) or (band_nir := find_band(bands, "Undefined")):
             band_nir_arg.extend(["-b", str(band_nir["band"]), f"-colorinterp_{str(band_nir["band"])}", "nir"])
 
