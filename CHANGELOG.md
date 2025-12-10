@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.14.0](https://github.com/linz/topo-imagery/compare/v7.13.1...v7.14.0) (2025-12-10)
+
+
+### Features
+
+* add RGBNIR metadata tde-1741 ([#1456](https://github.com/linz/topo-imagery/issues/1456)) ([d6a9e92](https://github.com/linz/topo-imagery/commit/d6a9e92fab87b6e83a01416072c1984627035b93))
+
 ## [7.13.1](https://github.com/linz/topo-imagery/compare/v7.13.0...v7.13.1) (2025-11-30)
 
 
