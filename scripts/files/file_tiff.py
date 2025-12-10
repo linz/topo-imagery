@@ -279,6 +279,11 @@ class FileTiff:
         if len(bands) == bands_num + 1:
             if bands[bands_num]["colorInterpretation"] == "Alpha":
                 bands_num += 1
+
+        if len(bands) == bands_num + 2:
+            if (bands[bands_num]["colorInterpretation"] == "NIR") and (bands[bands_num + 1]["colorInterpretation"] == "Alpha"):
+                bands_num += 2
+
         if self._tiff_type == "DEM":
             bands_num = 1
         if len(bands) != bands_num:
