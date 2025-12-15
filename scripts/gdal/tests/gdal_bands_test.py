@@ -92,8 +92,9 @@ def test_gdal_default_rg_missing_b() -> None:
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
 
-    with raises(RuntimeError):
+    with raises(RuntimeError) as excinfo:
         get_gdal_band_offset("some_file.tiff", gdalinfo)
+    assert "missing_expected_rgb_bands: Blue" in str(excinfo.value)
 
 
 def test_get_band_type() -> None:
