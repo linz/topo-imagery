@@ -71,13 +71,9 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
     band_green = find_band(bands, "Green")
     band_blue = find_band(bands, "Blue")
 
-    missing = []
-    if band_red is None:
-        missing.append("Red")
-    if band_green is None:
-        missing.append("Green")
-    if band_blue is None:
-        missing.append("Blue")
+    missing = [
+        color_interp for color_interp, band in [("Red", band_red), ("Green", band_green), ("Blue", band_blue)] if band is None
+    ]
 
     if band_red is None or band_green is None or band_blue is None:
         get_log().error(
