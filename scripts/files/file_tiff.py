@@ -269,7 +269,7 @@ class FileTiff:
         return False
 
     def check_band_count(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if there is not exactly 3 or 4 bands found, or 1 band if DEM.
+        """Add a Non Visual QA error if there is not exactly 3, 4 or 5 bands found, or 1 band if DEM.
 
         Args:
             gdalinfo: `gdalinfo` output
@@ -279,6 +279,9 @@ class FileTiff:
         if len(bands) == bands_num + 1:
             if bands[bands_num]["colorInterpretation"] == "Alpha":
                 bands_num += 1
+        if len(bands) == bands_num + 2:
+            if bands[bands_num]["colorInterpretation"] == "NIR" and bands[bands_num + 1]["colorInterpretation"] == "Alpha":
+                bands_num += 2
         if self._tiff_type == "DEM":
             bands_num = 1
         if len(bands) != bands_num:

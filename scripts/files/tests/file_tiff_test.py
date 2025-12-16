@@ -36,6 +36,24 @@ def test_check_band_count_valid_4() -> None:
     assert not file_tiff.get_errors()
 
 
+def test_check_band_count_valid_5() -> None:
+    """
+    tests check_band_count when the input layer has a valid band count
+    which is 5 bands where the fourth band is NIR and the fifth band is Alpha
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo, color_interpretation="NIR")
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_band_count(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
 def test_check_band_count_invalid_2() -> None:
     """
     tests check_band_count when the input layer has a invalid band count of 2
@@ -53,13 +71,31 @@ def test_check_band_count_invalid_2() -> None:
 def test_check_band_count_invalid_4() -> None:
     """
     tests check_band_count when the input layer has a invalid
-    band count of 4 wheere the 4th band is not Alpha
+    band count of 4 where the 4th band is not Alpha
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo)
     add_band(gdalinfo)
     add_band(gdalinfo)
     add_band(gdalinfo)
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_band_count(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_band_count_invalid_5() -> None:
+    """
+    tests check_band_count when the input layer has a invalid
+    band count of 5 where the 4th band is not NIR
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo)
+    add_band(gdalinfo, color_interpretation="Alpha")
 
     file_tiff = FileTiff(["test"])
     file_tiff.check_band_count(gdalinfo)
