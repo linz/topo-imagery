@@ -163,6 +163,23 @@ def test_check_color_interpretation_valid_rgb() -> None:
     assert not file_tiff.get_errors()
 
 
+def test_check_color_interpretation_valid_rgbn() -> None:
+    """
+    tests check_color_interpretation with the correct RGB color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
+    add_band(gdalinfo, color_interpretation="NIR")
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert not file_tiff.get_errors()
+
+
 def test_check_color_interpretation_valid_greyscale() -> None:
     """
     tests check_color_interpretation with the correct greyscale color interpretation
@@ -187,6 +204,40 @@ def test_check_color_interpretation_invalid() -> None:
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
     add_band(gdalinfo, color_interpretation="undefined")
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_color_interpretation_invalid_rgbn() -> None:
+    """
+    tests check_color_interpretation with incorrect RGBN color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="undefined")
+    add_band(gdalinfo, color_interpretation="NIR")
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    file_tiff = FileTiff(["test"])
+    file_tiff.check_color_interpretation(gdalinfo)
+
+    assert file_tiff.get_errors()
+
+
+def test_check_color_interpretation_invalid_5_band() -> None:
+    """
+    tests check_color_interpretation with incorrect 5 band color interpretation
+    """
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
+    add_band(gdalinfo, color_interpretation="undefined")
+    add_band(gdalinfo, color_interpretation="Alpha")
 
     file_tiff = FileTiff(["test"])
     file_tiff.check_color_interpretation(gdalinfo)

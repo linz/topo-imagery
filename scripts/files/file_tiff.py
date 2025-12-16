@@ -304,7 +304,7 @@ class FileTiff:
             self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
     def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if the colors don't match RGB or greyscale.
+        """Add a Non Visual QA error if the colors don't match RGB, RGBN, or greyscale.
 
         Args:
             gdalinfo: `gdalinfo` output
@@ -313,21 +313,30 @@ class FileTiff:
         missing_bands = []
         band_colour_ints = {1: "Red", 2: "Green", 3: "Blue"}
         band_greyscale_ints = {1: "Gray", 2: "Gray", 3: "Gray"}
+        band_rgbn_ints = {1: "Red", 2: "Green", 3: "Blue", 4: "NIR", 5: "Alpha"}
         optional_colour_ints = {4: "Alpha"}
         if self._tiff_type == "DEM":
             band_colour_ints = {1: "Gray"}
-        n = 1
-        for band in bands:
-            colour_int = band["colorInterpretation"]
-            if n in band_colour_ints:
-                if colour_int not in (band_colour_ints[n], band_greyscale_ints[n]):
+        if len(bands) == 5 and bands[3]["colorInterpretation"] == "NIR":
+            n = 1
+            for band in bands:
+                colour_int = band["colorInterpretation"]
+                if colour_int != band_rgbn_ints[n]:
                     missing_bands.append(f"band {n} {colour_int}")
-            elif n in optional_colour_ints:
-                if colour_int != optional_colour_ints[n]:
+                n += 1
+        else:
+            n = 1
+            for band in bands:
+                colour_int = band["colorInterpretation"]
+                if n in band_colour_ints:
+                    if colour_int not in (band_colour_ints[n], band_greyscale_ints[n]):
+                        missing_bands.append(f"band {n} {colour_int}")
+                elif n in optional_colour_ints:
+                    if colour_int != optional_colour_ints[n]:
+                        missing_bands.append(f"band {n} {colour_int}")
+                else:
                     missing_bands.append(f"band {n} {colour_int}")
-            else:
-                missing_bands.append(f"band {n} {colour_int}")
-            n += 1
+                n += 1
         if missing_bands:
             missing_bands.sort()
             self.add_error(
