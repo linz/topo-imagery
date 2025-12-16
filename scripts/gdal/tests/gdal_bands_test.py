@@ -1,3 +1,5 @@
+from pytest import raises
+
 from scripts.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from scripts.gdal.gdal_presets import CompressionPreset
 from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
@@ -72,24 +74,27 @@ def test_gdal_rgb_palette_detection() -> None:
     assert " ".join(bands) == "-expand rgb"
 
 
-def test_gdal_default_grey_scale() -> None:
+# Older greyscale historical scanned imagery was standardised as 4 band GGGA from paletted source TIFFs
+def test_gdal_ggga() -> None:
     gdalinfo = fake_gdal_info()
-    add_band(gdalinfo, color_interpretation="Pallette")
+    add_band(gdalinfo, color_interpretation="Gray")
+    add_band(gdalinfo, color_interpretation="Gray")
+    add_band(gdalinfo, color_interpretation="Gray")
+    add_band(gdalinfo, color_interpretation="Alpha")
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
 
-    assert " ".join(bands) == "-b 1 -b 1 -b 1"
+    assert " ".join(bands) == "-b 1 -b 1 -b 1 -b 4"
 
 
-def test_gdal_default_rgb() -> None:
+def test_gdal_default_rg_missing_b() -> None:
     gdalinfo = fake_gdal_info()
-    add_band(gdalinfo, color_interpretation="R")
-    add_band(gdalinfo, color_interpretation="G")
-    add_band(gdalinfo, color_interpretation="B")
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
 
-    bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
-
-    assert " ".join(bands) == "-b 1 -b 2 -b 3"
+    with raises(RuntimeError) as excinfo:
+        get_gdal_band_offset("some_file.tiff", gdalinfo)
+    assert "missing_expected_rgb_bands: Blue" in str(excinfo.value)
 
 
 def test_get_band_type() -> None:

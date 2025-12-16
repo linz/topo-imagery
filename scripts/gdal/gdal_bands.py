@@ -71,17 +71,15 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
     band_green = find_band(bands, "Green")
     band_blue = find_band(bands, "Blue")
 
+    missing = [
+        color_interp for color_interp, band in [("Red", band_red), ("Green", band_green), ("Blue", band_blue)] if band is None
+    ]
+
     if band_red is None or band_green is None or band_blue is None:
-        get_log().warn(
+        get_log().error(
             "gdal_info_bands_failed", band_red=band_red is None, band_green=band_green is None, band_blue=band_blue is None
         )
-
-        # Not enough bands for RGB assume it is grey scale
-        if len(bands) < 3:
-            return ["-b", "1", "-b", "1", "-b", "1"] + band_alpha_arg
-
-        # Could be RGB assume it is RGB
-        return ["-b", "1", "-b", "2", "-b", "3"] + band_alpha_arg
+        raise RuntimeError(f"missing_expected_rgb_bands: {', '.join(missing)}")
 
     return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])] + band_alpha_arg
 
