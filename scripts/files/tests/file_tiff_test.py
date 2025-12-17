@@ -163,9 +163,9 @@ def test_check_color_interpretation_valid_rgb() -> None:
     assert not file_tiff.get_errors()
 
 
-def test_check_color_interpretation_valid_rgbn() -> None:
+def test_check_color_interpretation_valid_rgbna() -> None:
     """
-    tests check_color_interpretation with the correct RGB color interpretation
+    tests check_color_interpretation with the correct RGBNA color interpretation
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Red")
@@ -211,9 +211,9 @@ def test_check_color_interpretation_invalid() -> None:
     assert file_tiff.get_errors()
 
 
-def test_check_color_interpretation_invalid_rgbn() -> None:
+def test_check_color_interpretation_invalid_rgbna() -> None:
     """
-    tests check_color_interpretation with incorrect RGBN color interpretation
+    tests check_color_interpretation with incorrect RGBNA color interpretation
     """
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Red")
