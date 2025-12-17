@@ -235,7 +235,7 @@ class FileTiff:
             gdalinfo: `gdalinfo` output
         """
         bands = gdalinfo["bands"]
-        if self._tiff_type != "DEM" and len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha":
+        if self._tiff_type != "DEM" and len(bands) in (4, 5) and bands[-1]["colorInterpretation"] == "Alpha":
             return
         if "noDataValue" in bands[0]:
             current_nodata_val = bands[0]["noDataValue"]
