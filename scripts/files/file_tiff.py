@@ -304,7 +304,7 @@ class FileTiff:
             self.add_error(error_type=FileTiffErrorType.SRS, error_message="srs not defined")
 
     def check_color_interpretation(self, gdalinfo: GdalInfo) -> None:
-        """Add a Non Visual QA error if the colors don't match RGB, RGBN, or greyscale.
+        """Add a Non Visual QA error if the colors don't match RGB(A), RGBNA, or greyscale.
 
         Args:
             gdalinfo: `gdalinfo` output
