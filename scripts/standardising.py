@@ -238,8 +238,10 @@ def check_vrt_alpha(source_files: list[str]) -> bool:
     for file in source_files:
         if is_tiff(file):
             bands = gdal_info(file)["bands"]
-            if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
-                len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
+            if (
+                (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha")
+                or (len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray")
+                or (len(bands) == 5 and bands[4]["colorInterpretation"] == "Alpha")
             ):
                 return False
     return True
