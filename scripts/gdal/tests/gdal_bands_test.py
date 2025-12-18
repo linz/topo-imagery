@@ -68,6 +68,19 @@ def test_gdal_rgb_undefined_bands_detection() -> None:
     assert " ".join(bands) == "-b 1 -b 2 -b 3 -b 4 -colorinterp_4 nir"
 
 
+def test_gdal_rgb_undefined_alpha_bands_detection() -> None:
+    gdalinfo = fake_gdal_info()
+    add_band(gdalinfo, color_interpretation="Red")
+    add_band(gdalinfo, color_interpretation="Green")
+    add_band(gdalinfo, color_interpretation="Blue")
+    add_band(gdalinfo, color_interpretation="Undefined")
+    add_band(gdalinfo, color_interpretation="Alpha")
+
+    bands = get_gdal_band_offset("some_file.tiff", gdalinfo, CompressionPreset.RGBNIR_ZSTD.value)
+
+    assert " ".join(bands) == "-b 1 -b 2 -b 3 -b 4 -colorinterp_4 nir -b 5"
+
+
 def test_gdal_rgbnir_bands_detection() -> None:
     gdalinfo = fake_gdal_info()
     add_band(gdalinfo, color_interpretation="Red")

@@ -89,8 +89,8 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
 
     return (
         ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])]
-        + band_alpha_arg
         + band_nir_arg
+        + band_alpha_arg
     )
 
 
