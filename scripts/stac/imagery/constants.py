@@ -2,7 +2,9 @@
 AERIAL_PHOTOS = "aerial-photos"
 SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
 RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
+NEAR_INFRARED_AERIAL_PHOTOS = "near-infrared-aerial-photos"
 SATELLITE_IMAGERY = "satellite-imagery"
+NEAR_INFRARED_SATELLITE_IMAGERY = "near-infrared-satellite-imagery"
 URBAN_AERIAL_PHOTOS = "urban-aerial-photos"
 DEM = "dem"
 DSM = "dsm"
@@ -19,7 +21,9 @@ DATA_CATEGORIES = {
     AERIAL_PHOTOS: "Aerial Photos",
     SCANNED_AERIAL_PHOTOS: "Scanned Aerial Photos",
     RURAL_AERIAL_PHOTOS: "Rural Aerial Photos",
+    NEAR_INFRARED_AERIAL_PHOTOS: "Near-Infrared Aerial Photos",
     SATELLITE_IMAGERY: "Satellite Imagery",
+    NEAR_INFRARED_SATELLITE_IMAGERY: "Near-Infrared Satellite Imagery",
     URBAN_AERIAL_PHOTOS: "Urban Aerial Photos",
     DEM: "DEM",
     DSM: "DSM",

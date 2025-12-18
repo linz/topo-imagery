@@ -118,6 +118,34 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         ),
         param(
             CollectionContext(
+                category="near-infrared-satellite-imagery",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay 0.3m Near-Infrared Satellite Imagery (2023)",
+            "Near-infrared satellite imagery within the Hawke's Bay region captured in 2023.",
+            id="Near-Infrared Satellite",
+        ),
+        param(
+            CollectionContext(
+                category="near-infrared-aerial-photos",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+            ),
+            "Hawke's Bay 0.3m Near-Infrared Aerial Photos (2023)",
+            "Near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            id="Near-Infrared Aerial",
+        ),
+        param(
+            CollectionContext(
                 category="scanned-aerial-photos",
                 domain="land",
                 region="hawkes-bay",
