@@ -1,0 +1,6 @@
+[
+  {
+    "output": "BR33_500_040034",
+    "input": ["./tests/data/input_nir.tif"]
+  }
+]
