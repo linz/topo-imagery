@@ -37,7 +37,6 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
         info = gdal_info(file)
 
     bands = info["bands"]
-    print(bands)
 
     band_alpha_arg: list[str] = []
     if band_alpha := find_band(bands, "Alpha"):
