@@ -57,7 +57,6 @@ COMPRESS_LZW = [
     "-co",
     "predictor=2",
 ]
-
 COMPRESS_WEBP_LOSSLESS = [
     # Compress into webp
     "-co",
@@ -66,7 +65,6 @@ COMPRESS_WEBP_LOSSLESS = [
     "-co",
     "quality=100",
 ]
-
 WEBP_OVERVIEWS = [
     # When creating overviews also compress them into Webp
     "-co",
@@ -79,7 +77,6 @@ WEBP_OVERVIEWS = [
     "-co",
     "overview_quality=90",
 ]
-
 COMPRESS_ZSTD = [
     # Compress as ZSTD Level 17
     "-co",

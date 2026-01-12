@@ -45,7 +45,7 @@ def test_preset_webp(subtests: SubTests) -> None:
         assert f"EPSG:{EpsgNumber.NZTM_2000.value}" in gdal_command
 
 
-def test_preset_zstd_17(subtests: SubTests) -> None:
+def test_preset_zstd(subtests: SubTests) -> None:
     gdal_command = get_gdal_command(CompressionPreset.RGBNIR_ZSTD.value, epsg=EpsgNumber.NZTM_2000.value)
 
     # Basic cog creation
@@ -61,10 +61,10 @@ def test_preset_zstd_17(subtests: SubTests) -> None:
     with subtests.test():
         assert "bigtiff=no" in gdal_command
 
-    # ZSTD level 17
     with subtests.test():
         assert "compress=zstd" in gdal_command
 
+    # ZSTD level 17
     with subtests.test():
         assert "level=17" in gdal_command
 
