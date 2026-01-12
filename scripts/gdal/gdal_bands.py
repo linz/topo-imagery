@@ -21,7 +21,7 @@ def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     return None
 
 
-# pylint: disable-msg=too-many-return-statements, too-many-locals
+# pylint: disable-msg=too-many-return-statements, too-many-locals, too-many-branches
 def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | None = None) -> list[str]:
     """Get the banding parameters for a `gdal_translate` command.
 
@@ -39,8 +39,16 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
     bands = info["bands"]
 
     band_alpha_arg: list[str] = []
+    band_nir_arg: list[str] = []
     if band_alpha := find_band(bands, "Alpha"):
-        band_alpha_arg.extend(["-b", str(band_alpha["band"])])
+        # If RGBNIR_ZSTD preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band
+        if preset == CompressionPreset.RGBNIR_ZSTD.value:
+            if band_alpha["band"] == 5:
+                band_alpha_arg.extend(["-b", str(band_alpha["band"])])
+            else:
+                band_nir_arg.extend(["-b", str(band_alpha["band"]), f"-colorinterp_{str(band_alpha["band"])}", "nir"])
+        else:
+            band_alpha_arg.extend(["-b", str(band_alpha["band"])])
 
     if band_grey := find_band(bands, "Gray"):
         band_grey_index = str(band_grey["band"])
@@ -81,7 +89,6 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
         )
         raise RuntimeError(f"missing_expected_rgb_bands: {', '.join(missing)}")
 
-    band_nir_arg: list[str] = []
     if preset == CompressionPreset.RGBNIR_ZSTD.value:
         if (band_nir := find_band(bands, "NIR")) or (band_nir := find_band(bands, "Undefined")):
             band_nir_arg.extend(["-b", str(band_nir["band"]), f"-colorinterp_{str(band_nir["band"])}", "nir"])
