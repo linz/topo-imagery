@@ -61,10 +61,8 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
     if band_palette := find_band(bands, "Palette"):
         if colour_table := band_palette["colorTable"]:
             palette_channels = len(colour_table["entries"][0])
-            if palette_channels == 4:
-                return ["-expand", "rgba"]
-            if palette_channels == 3:
-                return ["-expand", "rgb"]
+            if palette_channels in (3, 4):
+                return ["-expand", "rgba" if palette_channels == 4 else "rgb"]
             get_log().error(
                 "unknown_palette_band_type",
                 palette_channels=palette_channels,
