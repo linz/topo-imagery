@@ -13,14 +13,10 @@ profile = "black"
 [tool.mypy]
 show_error_codes = true
 strict = true
-disable_error_code = [
-    "import",
-]
+disable_error_code = ["import"]
 
 [[tool.mypy.overrides]]
-module = [
-    "linz_logger",
-]
+module = ["linz_logger"]
 ignore_missing_imports = true
 
 [tool.poetry]
@@ -35,6 +31,7 @@ authors = [
     "Megan Davidson <mdavidson@linz.govt.nz>",
     "Tobias Schmidt <tschmidt@linz.govt.nz>",
 ]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "~3.12.3"
