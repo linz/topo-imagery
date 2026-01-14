@@ -87,7 +87,7 @@ COMPRESS_ZSTD = [
     "-co",
     "predictor=2",
     "-mask",
-    "5"
+    "5",
 ]
 ZSTD_OVERVIEWS = [
     # When creating overviews also compress them into ZSTD
