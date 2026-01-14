@@ -183,10 +183,14 @@ def main(args: List[str] | None = None) -> None:
     uri = arguments.uri
     collection_id = arguments.collection_id
     supplied_capture_area = arguments.supplied_capture_area
+    simplified_capture_area = arguments.simplified_capture_area
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
+
+    if supplied_capture_area and simplified_capture_area:
+        parser.error("--supplied-capture-area and --simplified-capture-area cannot both be True")
 
     s3_client: S3Client = client("s3")
 
@@ -263,7 +267,7 @@ def main(args: List[str] | None = None) -> None:
         uri=uri,
         odr_url=arguments.odr_url,
         supplied_capture_area=supplied_capture_area,
-        simplified_capture_area=arguments.simplified_capture_area,
+        simplified_capture_area=simplified_capture_area,
     )
 
     destination = os.path.join(uri, COLLECTION_FILE_NAME)
