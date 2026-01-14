@@ -183,11 +183,11 @@ def test_footprint_preset_rgbnir_zstd(subtests: SubTests) -> None:
     gdal_command = get_footprint_command(Decimal(1), CompressionPreset.RGBNIR_ZSTD.value)
 
     with subtests.test():
-        assert "-b 5" in gdal_command
+        assert "-b 5" in " ".join(gdal_command)
 
 
 def test_footprint_preset_hillshade_igor(subtests: SubTests) -> None:
     gdal_command = get_footprint_command(Decimal(1), HillshadePreset.IGOR.value)
 
     with subtests.test():
-        assert "-b 5" not in gdal_command
+        assert "-b 5" not in " ".join(gdal_command)
