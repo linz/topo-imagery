@@ -163,6 +163,14 @@ def get_args_parser() -> CommonArgumentParser:
         required=False,
         nargs="?",
     )
+    parser.add_argument(
+        "--simplified-capture-area",
+        dest="simplified_capture_area",
+        help="Whether the individual item footprints have been simplified.",
+        required=False,
+        default=False,
+        type=str_to_bool,
+    )
 
     return parser
 
@@ -255,6 +263,7 @@ def main(args: List[str] | None = None) -> None:
         uri=uri,
         odr_url=arguments.odr_url,
         supplied_capture_area=supplied_capture_area,
+        simplified_capture_area=arguments.simplified_capture_area,
     )
 
     destination = os.path.join(uri, COLLECTION_FILE_NAME)

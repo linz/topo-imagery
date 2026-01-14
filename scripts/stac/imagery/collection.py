@@ -357,7 +357,7 @@ class ImageryCollection:
         return components
 
     def add_capture_area(
-        self, polygons: list[BaseGeometry], target: str, supplied_capture_area: str | None, artifact_target: str = "/tmp"
+        self, polygons: list[BaseGeometry], target: str, description: str, artifact_target: str = "/tmp"
     ) -> None:
         """Add the capture area of the Collection.
         If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.
@@ -366,7 +366,7 @@ class ImageryCollection:
         Args:
             polygons: list of BaseGeometries
             target: location where the capture-area.geojson file will be saved
-            supplied_capture_area: optional externally supplied capture area to identify which description to use
+            description: description of the capture area
             artifact_target: location where the capture-area.geojson artifact file will be saved.
             This is useful for Argo Workflow in order to expose the file to the user for testing/validation purpose.
         """
@@ -387,13 +387,7 @@ class ImageryCollection:
         capture_area = {
             "href": f"./{CAPTURE_AREA_FILE_NAME}",
             "title": "Capture area",
-            "description": (
-                "Boundary of the total capture area for this collection"
-                f"{(' provided by the data supplier. '
-                    'May include some areas of nodata where capture was attempted but unsuccessful.')
-                if supplied_capture_area else '. Excludes nodata areas in the source data.'}"
-                " Geometries are simplified."
-            ),
+            "description": description,
             "type": ContentType.GEOJSON,
             "roles": ["metadata"],
             "file:checksum": file_checksum,
@@ -589,3 +583,39 @@ class ImageryCollection:
         capture_area_geometry = shape(self.capture_area["geometry"])
         updated_capture_area_geometry = capture_area_geometry.difference(item_geometry)
         self.capture_area["geometry"] = json.loads(to_geojson(updated_capture_area_geometry))
+
+
+def get_capture_area_description(is_supplied: bool = False, is_simplified: bool = False) -> str:
+    # pylint: disable=line-too-long
+    # Disabled line-too-long for the doctests
+    """
+    Get the description for the capture area asset based on whether it is standard, supplied, or created from
+    simplified footprints.
+
+    Args:
+        is_supplied: Whether the capture area is supplied by the data provider. Defaults to False.
+        is_simplified: Whether the capture area is created from simplified footprints. Defaults to False.
+
+    Returns:
+        A description string for the capture area asset.
+
+    Examples:
+        >>> get_capture_area_description(is_supplied=False)
+        'Boundary of the total capture area for this collection. Excludes nodata areas in the source data. Geometries are simplified.'
+        >>> get_capture_area_description(is_supplied=True)
+        'Boundary of the total capture area for this collection provided by the data supplier. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
+        >>> get_capture_area_description(is_supplied=False, is_simplified=True)
+        'Boundary of the total capture area for this collection. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
+    """
+    if is_supplied and is_simplified:
+        raise ValueError("'is_supplied' and 'is_simplified' cannot both be True.")
+    nodata_warning = ". May include some areas of nodata where capture was attempted but unsuccessful."
+    desc = "Boundary of the total capture area for this collection"
+    if is_supplied:
+        desc += " provided by the data supplier" + nodata_warning
+    elif is_simplified:
+        desc += nodata_warning
+    else:
+        desc += ". Excludes nodata areas in the source data."
+    desc += " Geometries are simplified."
+    return desc
