@@ -11,7 +11,8 @@ from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection, get_capture_area_description
+from scripts.stac.imagery.capture_area import get_capture_area_description
+from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.link import Link, Relation

@@ -102,3 +102,43 @@ def generate_capture_area(polygons: Sequence[BaseGeometry], gsd: Decimal) -> dic
     )
 
     return to_feature(merged_polygons)
+
+
+def get_capture_area_description(is_supplied: bool = False, is_simplified: bool = False) -> str:
+    # pylint: disable=line-too-long
+    # Disabled line-too-long for the doctests
+    """
+    Get the description for the capture area asset based on whether it is standard, supplied, or created from
+    simplified footprints.
+
+    Args:
+        is_supplied: Whether the capture area is supplied by the data provider. Defaults to False.
+        is_simplified: Whether the capture area is created from simplified footprints. Defaults to False.
+
+    Returns:
+        A description string for the capture area asset.
+
+    Examples:
+        >>> get_capture_area_description(is_supplied=False)
+        'Boundary of the total capture area for this collection. Excludes nodata areas in the source data. Geometries are simplified.'
+        >>> get_capture_area_description(is_supplied=True)
+        'Boundary of the total capture area for this collection provided by the data supplier. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
+        >>> get_capture_area_description(is_supplied=False, is_simplified=True)
+        'Boundary of the total capture area for this collection. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
+        >>> get_capture_area_description(is_supplied=True, is_simplified=True)
+        Traceback (most recent call last):
+            ...
+        ValueError: 'is_supplied' and 'is_simplified' cannot both be True.
+    """
+    if is_supplied and is_simplified:
+        raise ValueError("'is_supplied' and 'is_simplified' cannot both be True.")
+    nodata_warning = ". May include some areas of nodata where capture was attempted but unsuccessful."
+    desc = "Boundary of the total capture area for this collection"
+    if is_supplied:
+        desc += " provided by the data supplier" + nodata_warning
+    elif is_simplified:
+        desc += nodata_warning
+    else:
+        desc += ". Excludes nodata areas in the source data."
+    desc += " Geometries are simplified."
+    return desc
