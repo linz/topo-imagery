@@ -21,6 +21,7 @@ def create_footprint(
         source: TIFF path to generate the footprint from
         target_dir: Directory path to save the footprint
         gsd: Ground Sample Distance in meters
+        preset: Compression preset used to create the source TIFF
 
     Returns:
         The path to the generated footprint

@@ -270,6 +270,6 @@ def get_footprint_command(gsd: Decimal, preset: str) -> list[str]:
         str(get_buffer_distance(gsd)),
     ]
     if preset == CompressionPreset.RGBNIR_ZSTD.value:
-        gdal_footprint_command.extend(["-b", "5"])
+        gdal_footprint_command.extend(["-b 5"])
 
     return gdal_footprint_command

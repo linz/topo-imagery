@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 from pytest_subtests import SubTests
 
-from scripts.gdal.gdal_commands import get_cutline_command, get_gdal_command
+from scripts.gdal.gdal_commands import get_cutline_command, get_footprint_command, get_gdal_command
 from scripts.gdal.gdal_helper import EpsgNumber
-from scripts.gdal.gdal_presets import CompressionPreset
+from scripts.gdal.gdal_presets import CompressionPreset, HillshadePreset
 
 
 def test_preset_webp(subtests: SubTests) -> None:
@@ -175,3 +177,17 @@ def test_cutline_params(subtests: SubTests) -> None:
 
     with subtests.test():
         assert "-dstalpha" in gdal_command
+
+
+def test_footprint_preset_rgbnir_zstd(subtests: SubTests) -> None:
+    gdal_command = get_footprint_command(Decimal(1), CompressionPreset.RGBNIR_ZSTD.value)
+
+    with subtests.test():
+        assert "-b 5" in gdal_command
+
+
+def test_footprint_preset_hillshade_igor(subtests: SubTests) -> None:
+    gdal_command = get_footprint_command(Decimal(1), HillshadePreset.IGOR.value)
+
+    with subtests.test():
+        assert "-b 5" not in gdal_command
