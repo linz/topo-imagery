@@ -86,6 +86,8 @@ COMPRESS_ZSTD = [
     # Predictor creates smaller files, for RGBNIR imagery
     "-co",
     "predictor=2",
+    "-mask",
+    "5"
 ]
 ZSTD_OVERVIEWS = [
     # When creating overviews also compress them into ZSTD
