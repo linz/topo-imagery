@@ -213,7 +213,7 @@ def standardising(
             return None
 
         if config.create_footprints:
-            temp_footprint = create_footprint(current_working_file, tmp_path, config.gsd)
+            temp_footprint = create_footprint(current_working_file, tmp_path, config.gsd, config.gdal_preset)
             footprint_file_path = os.path.join(target_output, f"{files.output}{SUFFIX_FOOTPRINT}")
             write(footprint_file_path, read(temp_footprint), content_type=ContentType.GEOJSON.value)
 

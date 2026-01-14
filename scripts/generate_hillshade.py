@@ -120,7 +120,7 @@ def create_hillshade(
         run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
 
         if gsd:
-            footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd)
+            footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd, preset)
             write(
                 os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
                 read(footprint_tmp_path),

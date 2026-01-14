@@ -12,6 +12,7 @@ def create_footprint(
     source: str,
     target_dir: str,
     gsd: Decimal,
+    preset: str,
 ) -> str:
     """Generate a footprint from a TIFF file.
     https://gdal.org/en/stable/programs/gdal_footprint.html
@@ -27,7 +28,7 @@ def create_footprint(
     file_prefix = get_file_name_from_path(source)
     footprint_path = os.path.join(target_dir, file_prefix + SUFFIX_FOOTPRINT)
     run_gdal(
-        get_footprint_command(gsd),
+        get_footprint_command(gsd, preset),
         source,
         footprint_path,
     )

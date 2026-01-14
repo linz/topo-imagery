@@ -257,8 +257,8 @@ def get_hillshade_command(preset: str) -> list[str]:
     return gdal_command
 
 
-def get_footprint_command(gsd: Decimal) -> list[str]:
-    return [
+def get_footprint_command(gsd: Decimal, preset: str) -> list[str]:
+    gdal_footprint_command: list[str] = [
         "gdal_footprint",
         "-t_srs",
         f"EPSG:{EpsgNumber.WGS_1984.value}",
@@ -269,3 +269,7 @@ def get_footprint_command(gsd: Decimal) -> list[str]:
         "-simplify",
         str(get_buffer_distance(gsd)),
     ]
+    if preset == CompressionPreset.RGBNIR_ZSTD.value:
+        gdal_footprint_command.extend(["-b", "5"])
+
+    return gdal_footprint_command
