@@ -21,58 +21,46 @@ def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     return None
 
 
-# pylint: disable-msg=too-many-return-statements, too-many-locals, too-many-branches
-def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | None = None) -> list[str]:
-    """Get the banding parameters for a `gdal_translate` command.
+def get_alpha_band_args(band: GdalInfoBand, preset: str | None = None) -> list[str]:
+    """Return GDAL args for alpha and NIR bands (band 5 as alpha, else as NIR)."""
+    # If RGBNIR_ZSTD preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band
+    if preset == CompressionPreset.RGBNIR_ZSTD.value:
+        if band["band"] == 5:
+            return ["-b", str(band["band"])]
+        return ["-b", str(band["band"]), f"-colorinterp_{str(band["band"])}", "nir"]
+    return ["-b", str(band["band"])]
 
-    Args:
-        file: file to check
-        info: optional precomputed gdalinfo
-        preset: "dem_lerc" preset used to differentiate single band elevation tiffs from single band historical imagery
 
-    Returns:
-        list of band mappings eg "-b 1 -b 1 -b 1"
-    """
-    if info is None:
-        info = gdal_info(file)
+def get_gray_band_args(band: GdalInfoBand, preset: str | None = None) -> list[str]:
+    """Return GDAL args for gray band (single or expanded to RGB)."""
 
-    bands = info["bands"]
+    band_grey_index = str(band["band"])
+    if preset == CompressionPreset.DEM_LERC.value:
+        # return single band if DEM/DSM
+        return ["-b", band_grey_index]
+    # Grey scale imagery, set R,G and B to just the grey_band
+    return ["-b", band_grey_index, "-b", band_grey_index, "-b", band_grey_index]
 
-    band_alpha_arg: list[str] = []
-    band_nir_arg: list[str] = []
-    if band_alpha := find_band(bands, "Alpha"):
-        # If RGBNIR_ZSTD preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band
-        if preset == CompressionPreset.RGBNIR_ZSTD.value:
-            if band_alpha["band"] == 5:
-                band_alpha_arg.extend(["-b", str(band_alpha["band"])])
-            else:
-                band_nir_arg.extend(["-b", str(band_alpha["band"]), f"-colorinterp_{str(band_alpha["band"])}", "nir"])
-        else:
-            band_alpha_arg.extend(["-b", str(band_alpha["band"])])
 
-    if band_grey := find_band(bands, "Gray"):
-        band_grey_index = str(band_grey["band"])
-        if preset == CompressionPreset.DEM_LERC.value:
-            # return single band if DEM/DSM
-            return ["-b", band_grey_index]
-        # Grey scale imagery, set R,G and B to just the grey_band
-        return ["-b", band_grey_index, "-b", band_grey_index, "-b", band_grey_index] + band_alpha_arg
+def get_palette_band_args(band: GdalInfoBand, file: str) -> list[str]:
+    """Return GDAL args for palette band (expand to rgb or rgba)."""
+    if colour_table := band["colorTable"]:
+        palette_channels = len(colour_table["entries"][0])
+        if palette_channels in (3, 4):
+            return ["-expand", "rgba" if palette_channels == 4 else "rgb"]
+        get_log().error(
+            "unknown_palette_band_type",
+            palette_channels=palette_channels,
+            first_entry=colour_table["entries"][0],
+            path=file,
+        )
+        raise RuntimeError("unknown_palette_band_type")
+    get_log().error("palette_band_missing_colorTable", path=file)
+    raise RuntimeError("palette_band_missing_colorTable")
 
-    if band_palette := find_band(bands, "Palette"):
-        if colour_table := band_palette["colorTable"]:
-            palette_channels = len(colour_table["entries"][0])
-            if palette_channels in (3, 4):
-                return ["-expand", "rgba" if palette_channels == 4 else "rgb"]
-            get_log().error(
-                "unknown_palette_band_type",
-                palette_channels=palette_channels,
-                first_entry=colour_table["entries"][0],
-                path=file,
-            )
-            raise RuntimeError("unknown_palette_band_type")
-        get_log().error("palette_band_missing_colorTable", path=file)
-        raise RuntimeError("palette_band_missing_colorTable")
 
+def get_rgb_bands_args(bands: list[GdalInfoBand]) -> list[str]:
+    """Return GDAL args for RGB bands (bands 1,2,3)."""
     band_red = find_band(bands, "Red")
     band_green = find_band(bands, "Green")
     band_blue = find_band(bands, "Blue")
@@ -87,15 +75,46 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
         )
         raise RuntimeError(f"missing_expected_rgb_bands: {', '.join(missing)}")
 
+    return ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])]
+
+
+def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | None = None) -> list[str]:
+    """Get the banding parameters for a `gdal_translate` command.
+
+    Args:
+        file: file to check
+        info: optional precomputed gdalinfo
+        preset: "dem_lerc" preset used to differentiate single band elevation tiffs from single band historical imagery,
+                "rgbnir_zstd" preset used to identify NIR
+
+    Returns:
+        list of band mappings eg "-b 1 -b 1 -b 1"
+    """
+    if info is None:
+        info = gdal_info(file)
+
+    bands = info["bands"]
+
+    extra_args: list[str] = []
+    band_nir_arg: list[str] = []
+
+    if band_alpha := find_band(bands, "Alpha"):
+        extra_args.extend(get_alpha_band_args(band_alpha, preset))
+
+    if band_grey := find_band(bands, "Gray"):
+        return get_gray_band_args(band_grey, preset) + extra_args
+
+    if band_palette := find_band(bands, "Palette"):
+        return get_palette_band_args(band_palette, file)
+
+    rgb_bands = get_rgb_bands_args(bands)
+
+    # Add NIR band if required
     if preset == CompressionPreset.RGBNIR_ZSTD.value:
         if (band_nir := find_band(bands, "NIR")) or (band_nir := find_band(bands, "Undefined")):
             band_nir_arg.extend(["-b", str(band_nir["band"]), f"-colorinterp_{str(band_nir["band"])}", "nir"])
 
-    return (
-        ["-b", str(band_red["band"]), "-b", str(band_green["band"]), "-b", str(band_blue["band"])]
-        + band_nir_arg
-        + band_alpha_arg
-    )
+    return rgb_bands + band_nir_arg + extra_args
 
 
 def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
