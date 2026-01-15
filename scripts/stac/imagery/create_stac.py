@@ -91,7 +91,7 @@ def create_collection(
 
     if item_polygons:
         capture_area_asset_description = get_capture_area_description(
-            is_supplied=supplied_capture_area is not None, is_simplified=simplified_capture_area
+            is_supplied=bool(supplied_capture_area), is_simplified=simplified_capture_area
         )
         collection.add_capture_area(item_polygons, uri, capture_area_asset_description)
         get_log().info(

@@ -331,6 +331,8 @@ def test_should_accept_simplified_capture_area_flag(item: ImageryItem, fake_coll
         "25",
         "--linz-slug",
         fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "",
         "--simplified-capture-area",
         "true",
     ]
@@ -389,4 +391,4 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
     with raises(SystemExit):
         main(args)
 
-    assert "--supplied-capture-area and --simplified-capture-area cannot both be" in capsys.readouterr().err
+    assert "--simplified-capture-area cannot be True when --supplied-capture-area is set." in capsys.readouterr().err

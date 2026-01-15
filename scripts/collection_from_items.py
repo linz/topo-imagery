@@ -190,7 +190,7 @@ def main(args: List[str] | None = None) -> None:
         raise argparse.ArgumentTypeError(msg)
 
     if supplied_capture_area and simplified_capture_area:
-        parser.error("--supplied-capture-area and --simplified-capture-area cannot both be True")
+        parser.error("--simplified-capture-area cannot be True when --supplied-capture-area is set.")
 
     s3_client: S3Client = client("s3")
 
