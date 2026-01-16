@@ -154,8 +154,6 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
 
     Returns:
         list of band mappings eg "-b 1 -b 1 -b 1"
-
-    Note: This function requires a valid file and gdalinfo structure, so doctest is not provided here.
     """
     if info is None:
         info = gdal_info(file)
