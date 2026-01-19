@@ -1,0 +1,6 @@
+[
+  {
+    "output": "AX31_10000_0502",
+    "input": ["./tests/data/input_footprint.tif"]
+  }
+]
