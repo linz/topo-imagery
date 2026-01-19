@@ -11,6 +11,7 @@ from scripts.files.fs import NoSuchFileError, read
 from scripts.files.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
+from scripts.stac.imagery.capture_area import get_capture_area_description
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
@@ -27,6 +28,7 @@ def create_collection(
     uri: str,
     odr_url: str | None = None,
     supplied_capture_area: str | None = None,
+    simplified_capture_area: bool = False,
 ) -> ImageryCollection:
     """Create an ImageryCollection object.
     If `item_polygons` is not empty, it will add a generated capture area to the collection.
@@ -39,6 +41,7 @@ def create_collection(
         uri: path of the dataset
         odr_url: path of the published dataset. Defaults to None.
         supplied_capture_area: Externally supplied capture area, if applicable. Defaults to None.
+        simplified_capture_area: Whether the capture area is created from simplified footprints. Defaults to False.
 
     Returns:
         an ImageryCollection object
@@ -87,7 +90,10 @@ def create_collection(
         collection.add_capture_dates(uri)
 
     if item_polygons:
-        collection.add_capture_area(item_polygons, uri, supplied_capture_area)
+        capture_area_asset_description = get_capture_area_description(
+            is_supplied=bool(supplied_capture_area), is_simplified=simplified_capture_area
+        )
+        collection.add_capture_area(item_polygons, uri, capture_area_asset_description)
         get_log().info(
             "Capture area created",
         )
