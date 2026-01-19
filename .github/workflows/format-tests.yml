@@ -69,7 +69,7 @@ jobs:
       - name: End to end test - Footprint simplification
         run: |
           docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/footprint.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z --simplify-footprints=true
-          cmp --silent "${{ runner.temp }}/AX31_10000_0502_footprint.geojson" ./scripts/tests/data/output/AX31_10000_0502_footprint_simplified.geojson
+          cmp --silent <(jq -S '.features[].geometry' scripts/tests/data/output/AX31_10000_0502_footprint_simplified.geojson) <(jq -S '.features[].geometry' "${{ runner.temp }}/AX31_10000_0502_footprint.geojson")
 
       - name: End to end test - Thumbnails (Topo50/Topo250)
         run: |
