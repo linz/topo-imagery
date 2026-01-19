@@ -163,6 +163,14 @@ def get_args_parser() -> CommonArgumentParser:
         required=False,
         nargs="?",
     )
+    parser.add_argument(
+        "--simplified-capture-area",
+        dest="simplified_capture_area",
+        help="Whether the individual item footprints have been simplified.",
+        required=False,
+        default=False,
+        type=str_to_bool,
+    )
 
     return parser
 
@@ -175,10 +183,14 @@ def main(args: List[str] | None = None) -> None:
     uri = arguments.uri
     collection_id = arguments.collection_id
     supplied_capture_area = arguments.supplied_capture_area
+    simplified_capture_area = arguments.simplified_capture_area
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
+
+    if supplied_capture_area and simplified_capture_area:
+        parser.error("--simplified-capture-area cannot be True when --supplied-capture-area is set.")
 
     s3_client: S3Client = client("s3")
 
@@ -255,6 +267,7 @@ def main(args: List[str] | None = None) -> None:
         uri=uri,
         odr_url=arguments.odr_url,
         supplied_capture_area=supplied_capture_area,
+        simplified_capture_area=simplified_capture_area,
     )
 
     destination = os.path.join(uri, COLLECTION_FILE_NAME)
