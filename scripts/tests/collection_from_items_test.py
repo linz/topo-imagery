@@ -371,7 +371,7 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
         "--region",
         "hawkes-bay",
         "--gsd",
-        "1m",
+        "1",
         "--lifecycle",
         "ongoing",
         "--producer",
