@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.15.0](https://github.com/linz/topo-imagery/compare/v7.14.0...v7.15.0) (2026-01-19)
+
+
+### Features
+
+* add an option to simplify footprints TDE-1772 ([#1463](https://github.com/linz/topo-imagery/issues/1463)) ([d3a222d](https://github.com/linz/topo-imagery/commit/d3a222d6282920465a8e67cb8cc240222c309ba4))
+* add description for simplified capture-area TDE-1773 ([#1464](https://github.com/linz/topo-imagery/issues/1464)) ([bbb9817](https://github.com/linz/topo-imagery/commit/bbb9817c23dd695ab32043659b8d96332dcc2d33))
+
 ## [7.14.0](https://github.com/linz/topo-imagery/compare/v7.13.1...v7.14.0) (2025-12-17)
 
 
