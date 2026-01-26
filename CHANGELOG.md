@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.16.0](https://github.com/linz/topo-imagery/compare/v7.15.0...v7.16.0) (2026-01-26)
+
+
+### Features
+
+* standardise RGBN imagery TDE-693 ([#1460](https://github.com/linz/topo-imagery/issues/1460)) ([e99d791](https://github.com/linz/topo-imagery/commit/e99d791f74c9091bff607ddd8087a1145cddf8a2))
+
 ## [7.15.0](https://github.com/linz/topo-imagery/compare/v7.14.0...v7.15.0) (2026-01-19)
 
 
