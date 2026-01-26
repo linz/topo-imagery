@@ -21,7 +21,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "topo-imagery"
-version = "7.15.0"
+version = "7.16.0"
 description = "A collection of scripts for processing imagery"
 authors = [
     "Blayne Chard <bchard@linz.govt.nz>",
