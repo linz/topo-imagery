@@ -33,7 +33,7 @@ class GdalInfoBand(TypedDict):
     colorInterpretation: str
     """Color
     Examples:
-        "Red", "Green", "Blue", "Alpha", "Gray", "Palette"
+        "Red", "Green", "Blue", "Alpha", "Gray", "Palette", "NIR", "Undefined"
     """
     noDataValue: int | None
     colorTable: GdalInfoBandColorTable | None

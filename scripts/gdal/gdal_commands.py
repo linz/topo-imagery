@@ -10,9 +10,11 @@ from scripts.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
     COMPRESS_WEBP_LOSSLESS,
+    COMPRESS_ZSTD,
     DEM_LERC,
     SCALE_254_ADD_NO_DATA,
     WEBP_OVERVIEWS,
+    ZSTD_OVERVIEWS,
     CompressionPreset,
     HillshadePreset,
 )
@@ -45,6 +47,10 @@ def get_gdal_command(preset: str, epsg: int) -> list[str]:
     elif preset == CompressionPreset.WEBP.value:
         gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
         gdal_command.extend(WEBP_OVERVIEWS)
+
+    if preset == CompressionPreset.RGBNIR_ZSTD.value:
+        gdal_command.extend(COMPRESS_ZSTD)
+        gdal_command.extend(ZSTD_OVERVIEWS)
 
     elif preset == CompressionPreset.DEM_LERC.value:
         gdal_command.extend(DEM_LERC)
@@ -251,8 +257,8 @@ def get_hillshade_command(preset: str) -> list[str]:
     return gdal_command
 
 
-def get_footprint_command(gsd: Decimal) -> list[str]:
-    return [
+def get_footprint_command(gsd: Decimal, preset: str) -> list[str]:
+    gdal_footprint_command: list[str] = [
         "gdal_footprint",
         "-t_srs",
         f"EPSG:{EpsgNumber.WGS_1984.value}",
@@ -263,6 +269,10 @@ def get_footprint_command(gsd: Decimal) -> list[str]:
         "-simplify",
         str(get_buffer_distance(gsd)),
     ]
+    if preset == CompressionPreset.RGBNIR_ZSTD.value:
+        gdal_footprint_command.extend(["-b", "5"])
+
+    return gdal_footprint_command
 
 
 def get_fillnodata_command() -> list[str]:

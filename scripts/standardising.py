@@ -26,6 +26,7 @@ from scripts.gdal.gdal_commands import (
 )
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import gdal_info, run_gdal
+from scripts.gdal.gdal_presets import CompressionPreset
 from scripts.logging.time_helper import time_in_ms
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
@@ -152,7 +153,7 @@ def standardising(
         source_files = write_all(tiff.get_paths_original(), f"{tmp_path}/source/")
 
         # Determine if VRT needs alpha
-        vrt_add_alpha = check_vrt_alpha(source_files)
+        vrt_add_alpha = check_vrt_alpha(source_files, config.gdal_preset)
 
         # Create base VRT file
         current_working_file = create_vrt(
@@ -188,7 +189,7 @@ def standardising(
                 # Create a temporary TIFF with nodata filled to generate a simpler footprint
                 fillnodata_tiff_path = os.path.join(tmp_path, files.output + "_fillnodata.tiff")
                 tiff_for_footprint = create_fillnodata_tiff(current_working_file, fillnodata_tiff_path)
-            temp_footprint = create_footprint(tiff_for_footprint, tmp_path, config.gsd)
+            temp_footprint = create_footprint(tiff_for_footprint, tmp_path, config.gsd, config.gdal_preset)
             footprint_file_path = os.path.join(target_output, f"{files.output}{SUFFIX_FOOTPRINT}")
             write(footprint_file_path, read(temp_footprint), content_type=ContentType.GEOJSON.value)
 
@@ -238,14 +239,18 @@ def get_prj_tfw_sidecars(tiff: FileTiff, target_path: str) -> list[str]:
     return sidecars
 
 
-def check_vrt_alpha(source_files: list[str]) -> bool:
+def check_vrt_alpha(source_files: list[str], preset: str) -> bool:
     """Check if alpha is needed in the VRT."""
     for file in source_files:
         if is_tiff(file):
             bands = gdal_info(file)["bands"]
-            if (len(bands) == 4 and bands[3]["colorInterpretation"] == "Alpha") or (
-                len(bands) == 1 and bands[0]["colorInterpretation"] == "Gray"
-            ):
+            has_alpha = (
+                len(bands) == 4
+                and bands[3].get("colorInterpretation") == "Alpha"
+                and preset != CompressionPreset.RGBNIR_ZSTD.value
+            ) or (len(bands) == 5 and bands[4].get("colorInterpretation") == "Alpha")
+            is_gray = len(bands) == 1 and bands[0].get("colorInterpretation") == "Gray"
+            if has_alpha or is_gray:
                 return False
     return True
 
