@@ -24,7 +24,7 @@ def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
 def get_alpha_nir_band_args(band: GdalInfoBand, preset: str | None = None) -> list[str]:
     """
     Return GDAL args for bands labelled Alpha.
-    If rgbnir_zsrd preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band.
+    If rgbnir_zstd preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band.
 
     Args:
         band: Band to create gdal_translate args for
