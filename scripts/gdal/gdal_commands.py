@@ -273,3 +273,10 @@ def get_footprint_command(gsd: Decimal, preset: str) -> list[str]:
         gdal_footprint_command.extend(["-b", "5"])
 
     return gdal_footprint_command
+
+
+def get_fillnodata_command() -> list[str]:
+    """
+    Get a `gdal_fillnodata` command to fill nodata values in a TIFF.
+    """
+    return ["gdal_fillnodata", "-md", "5", "-b", "1", "-of", "GTiff"]

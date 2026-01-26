@@ -56,6 +56,13 @@ def get_args_parser() -> CommonArgumentParser:
         type=str_to_bool,
         required=True,
     )
+    parser.add_argument(
+        "--simplify-footprints",
+        dest="simplify_footprints",
+        help="Simplify footprints for each tile using gdal_fillnodata ('true' / 'false')",
+        type=str_to_bool,
+        default=False,
+    )
     parser.add_argument("--cutline", dest="cutline", help="Optional cutline to cut imagery to", required=False, nargs="?")
     parser.add_argument("--collection-id", dest="collection_id", help="Unique id for collection", required=True)
     parser.add_argument(
@@ -122,6 +129,7 @@ def main() -> None:
         target_epsg=arguments.target_epsg,
         gsd=arguments.gsd,
         create_footprints=arguments.create_footprints,
+        simplify_footprints=arguments.simplify_footprints,
         cutline=arguments.cutline,
         scale_to_resolution=arguments.scale_to_resolution,
     )

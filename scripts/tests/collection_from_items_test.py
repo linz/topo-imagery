@@ -1,3 +1,4 @@
+import json
 from os import environ
 from typing import TYPE_CHECKING, Iterator
 from unittest.mock import patch
@@ -278,3 +279,116 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_co
     # Verify collection.json has been created
     resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
     assert "(2021-2022)" in resp["Body"].read().decode("utf-8")
+
+
+@mock_aws
+def test_should_accept_simplified_capture_area_flag(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    footprint = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [178.259659571653, -38.40831927359251],
+                            [178.26012930415902, -38.41478071250544],
+                            [178.26560430668172, -38.41453416326152],
+                            [178.26513409076952, -38.40807278109057],
+                            [178.259659571653, -38.40831927359251],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    write("s3://stacfiles/item_footprint.geojson", dict_to_json_bytes(footprint))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "",
+        "--simplified-capture-area",
+        "true",
+    ]
+    main(args)
+
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    collection_content = resp["Body"].read().decode("utf-8")
+    collection_json = json.loads(collection_content)
+
+    assert "capture_area" in collection_json["assets"]
+    expected_description = (
+        "Boundary of the total capture area for this collection. "
+        "May include some areas of nodata where capture was attempted but unsuccessful. "
+        "Geometries are simplified."
+    )
+    assert collection_json["assets"]["capture_area"]["description"] == expected_description
+
+
+@mock_aws
+def test_should_fail_with_both_supplied_and_simplified_capture_area(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    write("s3://stacfiles/supplied-capture-area.geojson", dict_to_json_bytes({"type": "FeatureCollection", "features": []}))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "s3://stacfiles/supplied-capture-area.geojson",
+        "--simplified-capture-area",
+        "true",
+    ]
+
+    with raises(SystemExit):
+        main(args)
+
+    assert "--simplified-capture-area cannot be True when --supplied-capture-area is set." in capsys.readouterr().err

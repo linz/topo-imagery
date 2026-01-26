@@ -20,6 +20,7 @@ from scripts.gdal.gdal_commands import (
     get_alpha_command,
     get_build_vrt_command,
     get_cutline_command,
+    get_fillnodata_command,
     get_gdal_command,
     get_transform_srs_command,
 )
@@ -32,11 +33,15 @@ from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 @dataclass
 class StandardisingConfig:
+    # pylint: disable=too-many-instance-attributes
+    # FIXME: https://github.com/pylint-dev/pylint/issues/9058
     """Standardising configuration.
     gdal_preset: gdal preset to use. See `gdal.gdal_preset.py`
     source_epsg: current EPSG code of the source file
     target_epsg: desired EPSG code of the output file
     gsd: expected Ground Sample Distance in meters
+    create_footprints: whether to create footprints for each tile
+    simplify_footprints: whether to simplify footprints for each tile using gdal_fillnodata
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
     """
@@ -46,6 +51,7 @@ class StandardisingConfig:
     target_epsg: int
     gsd: Decimal
     create_footprints: bool
+    simplify_footprints: bool
     cutline: str | None
     scale_to_resolution: list[Decimal] | None = None
 
@@ -66,21 +72,15 @@ def run_standardising(
     """Run `standardising()` in parallel (`concurrency`).
 
     Args:
-        tiles_to_process: list of TileFiles (tile name and input files) to standardise
-        standardising_config: a StandardisingConfig dictionary, containing
-            gdal_preset: gdal preset to use. See `gdal.gdal_preset.py`
-            source_epsg: current EPSG code of the source file
-            target_epsg: desired EPSG code of the output file
-            gsd: expected Ground Sample Distance in meters
-            cutline: path to the cutline file. Must be `.fgb` or `.geojson`
-            scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
+        tiles_to_process: list of `TileFiles` (tile name and input files) to standardise
+        standardising_config: a `StandardisingConfig`
         concurrency: number of concurrent files to process
         gdal_version: version of GDAL used for standardising
         target_output: output directory path. Defaults to "/tmp/"
 
 
     Returns:
-        a list of FileTiff wrapper
+        a list of `FileTiff` wrapper
     """
     # pylint: disable-msg=too-many-arguments
     start_time = time_in_ms()
@@ -106,35 +106,6 @@ def run_standardising(
     get_log().info("standardising_end", duration=time_in_ms() - start_time, fileCount=len(standardized_tiffs))
 
     return standardized_tiffs
-
-
-def create_vrt(
-    source_tiffs: list[str],
-    target_path: str,
-    epsg: int = 2193,
-    add_alpha: bool = False,
-    resolution: list[Decimal] | None = None,
-) -> str:
-    """Create a VRT from a list of tiffs files
-
-    Args:
-        source_tiffs: list of tiffs to create the VRT from
-        target_path: path of the generated VRT
-        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
-        add_alpha: add alpha band to the VRT. Defaults to False.
-        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
-
-    Returns:
-        the path to the VRT created
-    """
-    # Create the `vrt` file
-    vrt_path = os.path.join(target_path, "source.vrt")
-    run_gdal(
-        command=get_build_vrt_command(
-            files=source_tiffs, output=vrt_path, epsg=epsg, add_alpha=add_alpha, resolution=resolution
-        )
-    )
-    return vrt_path
 
 
 def standardising(
@@ -213,7 +184,12 @@ def standardising(
             return None
 
         if config.create_footprints:
-            temp_footprint = create_footprint(current_working_file, tmp_path, config.gsd, config.gdal_preset)
+            tiff_for_footprint = current_working_file
+            if config.simplify_footprints:
+                # Create a temporary TIFF with nodata filled to generate a simpler footprint
+                fillnodata_tiff_path = os.path.join(tmp_path, files.output + "_fillnodata.tiff")
+                tiff_for_footprint = create_fillnodata_tiff(current_working_file, fillnodata_tiff_path)
+            temp_footprint = create_footprint(tiff_for_footprint, tmp_path, config.gsd, config.gdal_preset)
             footprint_file_path = os.path.join(target_output, f"{files.output}{SUFFIX_FOOTPRINT}")
             write(footprint_file_path, read(temp_footprint), content_type=ContentType.GEOJSON.value)
 
@@ -221,6 +197,35 @@ def standardising(
         write(standardised_file_path, read(current_working_file), content_type=ContentType.GEOTIFF.value)
 
     return tiff
+
+
+def create_vrt(
+    source_tiffs: list[str],
+    target_path: str,
+    epsg: int = 2193,
+    add_alpha: bool = False,
+    resolution: list[Decimal] | None = None,
+) -> str:
+    """Create a VRT from a list of tiffs files
+
+    Args:
+        source_tiffs: list of tiffs to create the VRT from
+        target_path: path of the generated VRT
+        epsg: the EPSG code (projection) of the source dataset. Defaults to 2193 (NZTM).
+        add_alpha: add alpha band to the VRT. Defaults to False.
+        resolution: set user-defined resolution [xres, yres], e.g. [1, 1]. Defaults to None = no scaling.
+
+    Returns:
+        the path to the VRT created
+    """
+    # Create the `vrt` file
+    vrt_path = os.path.join(target_path, "source.vrt")
+    run_gdal(
+        command=get_build_vrt_command(
+            files=source_tiffs, output=vrt_path, epsg=epsg, add_alpha=add_alpha, resolution=resolution
+        )
+    )
+    return vrt_path
 
 
 def get_prj_tfw_sidecars(tiff: FileTiff, target_path: str) -> list[str]:
@@ -318,3 +323,31 @@ def check_tiff_empty(current_working_file: str) -> bool:
     """Check whether the TIFF output is empty."""
     with TiffFile(current_working_file) as file_handle:
         return all(tile_byte_count == 0 for tile_byte_count in file_handle.pages.first.tags["TileByteCounts"].value)
+
+
+def create_fillnodata_tiff(
+    source_tiff: str,
+    target_tiff: str,
+) -> str:
+    """Create a TIFF using gdal_fillnodata.
+
+    Args:
+        source_tiff: path to the source TIFF
+        target_tiff: path to the output TIFF of gdal_fillnodata
+
+    Returns:
+        path to the fillnodata output TIFF
+    """
+    command = get_fillnodata_command()
+    command.extend(
+        [
+            source_tiff,
+            target_tiff,
+        ]
+    )
+
+    get_log().info("Running GDAL", command=command, input_file=source_tiff, output_file=target_tiff)
+
+    run_gdal(command)
+
+    return target_tiff
