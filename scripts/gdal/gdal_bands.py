@@ -21,35 +21,6 @@ def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     return None
 
 
-def get_alpha_nir_band_args(band: GdalInfoBand, preset: str | None = None) -> list[str]:
-    """
-    Return GDAL args for bands labelled Alpha.
-    If rgbnir_zstd preset, only add alpha band if it's band 5, otherwise assume it's mislabelled NIR band.
-
-    Args:
-        band: Band to create gdal_translate args for
-        preset: TIFF compression preset for the dataset
-
-    Returns:
-       List of GDAL args for alpha/NIR band
-
-    Examples:
-        >>> get_alpha_nir_band_args({"band": 5, "colorInterpretation": "Alpha"}, "rgbnir_zstd")
-        ['-b', '5']
-        >>> get_alpha_nir_band_args({"band": 4, "colorInterpretation": "Alpha"}, "rgbnir_zstd")
-        ['-b', '4', '-colorinterp_4', 'nir']
-        >>> get_alpha_nir_band_args({"band": 4, "colorInterpretation": "Alpha"}, "webp")
-        ['-b', '4']
-        >>> get_alpha_nir_band_args({"band": 2, "colorInterpretation": "Alpha"})
-        ['-b', '2']
-    """
-    if preset == CompressionPreset.RGBNIR_ZSTD.value:
-        if band["band"] == 5:
-            return ["-b", str(band["band"])]
-        return ["-b", str(band["band"]), f"-colorinterp_{str(band["band"])}", "nir"]
-    return ["-b", str(band["band"])]
-
-
 def get_gray_band_args(band: GdalInfoBand, preset: str | None = None) -> list[str]:
     """
     Return GDAL args for gray band (single DEM/DSM or converted to RGB).
@@ -160,30 +131,24 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
 
     bands = info["bands"]
 
-    extra_args: list[str] = []
+    band_alpha_arg: list[str] = []
     band_nir_arg: list[str] = []
 
-    print("==============================================")
-    print("bands", bands)
-    print("==============================================")
-
     if band_alpha := find_band(bands, "Alpha"):
-        extra_args.extend(get_alpha_nir_band_args(band_alpha, preset))
+        band_alpha_arg.extend(["-b", str(band_alpha["band"])])
 
     if band_grey := find_band(bands, "Gray"):
-        return get_gray_band_args(band_grey, preset) + extra_args
+        return get_gray_band_args(band_grey, preset) + band_alpha_arg
 
     if band_palette := find_band(bands, "Palette"):
         return get_palette_band_args(band_palette, file)
 
     rgb_bands = get_rgb_bands_args(bands)
 
-    # Add NIR band if required
-    if preset == CompressionPreset.RGBNIR_ZSTD.value:
-        if (band_nir := find_band(bands, "NIR")) or (band_nir := find_band(bands, "Undefined")):
-            band_nir_arg.extend(["-b", str(band_nir["band"]), f"-colorinterp_{str(band_nir["band"])}", "nir"])
+    if band_nir := find_band(bands, "NIR"):
+        band_nir_arg.extend(["-b", str(band_nir["band"])])
 
-    return rgb_bands + band_nir_arg + extra_args
+    return rgb_bands + band_nir_arg + band_alpha_arg
 
 
 def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
