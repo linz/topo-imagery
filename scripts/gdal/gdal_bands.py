@@ -163,6 +163,10 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
     extra_args: list[str] = []
     band_nir_arg: list[str] = []
 
+    print("==============================================")
+    print("bands", bands)
+    print("==============================================")
+
     if band_alpha := find_band(bands, "Alpha"):
         extra_args.extend(get_alpha_nir_band_args(band_alpha, preset))
 
