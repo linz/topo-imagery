@@ -156,7 +156,7 @@ def standardising(
         # Determine if VRT needs alpha
         vrt_add_alpha = check_vrt_alpha(source_files, config.gdal_preset)
 
-        # Set RGBNIR Band 4 colorInterpretation set to NIR if necessary
+        # Force RGBNIR Band 4 colorInterpretation to NIR if mislabelled as Alpha
         if (config.gdal_preset == "rgbnir_zstd") and (detect_mislabelled_rgbnir_bands(source_files)):
             for source_file in source_files:
                 if is_tiff(source_file):
@@ -252,9 +252,8 @@ def detect_mislabelled_rgbnir_bands(source_files: list[str]) -> bool:
     for file in source_files:
         if is_tiff(file):
             bands = gdal_info(file)["bands"]
-            # Check if the 4th band is 'Undefined' or 'Alpha'
-            band = bands[3].get("colorInterpretation", "")
-            if band in ("Undefined", "Alpha"):
+            # Check if the 4th band is labelled 'Alpha'
+            if bands[3].get("colorInterpretation", "") == "Alpha":
                 return True
     return False
 
