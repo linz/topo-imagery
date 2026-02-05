@@ -135,6 +135,16 @@ def get_alpha_command() -> list[str]:
     ]
 
 
+def get_relabel_colorinterp_command() -> list[str]:
+    """Get a `gdal_edit` command to relabel RGBNIR Band 4 as NIR.
+
+    Returns:
+        a list of arguments to run `gdal_edit`
+    """
+
+    return ["gdal_edit", "-colorinterp_4", "NIR"]
+
+
 def get_transform_srs_command(source_epsg: int, target_epsg: int) -> list[str]:
     """Get a `gdalwarp` command to transform the srs.
 
