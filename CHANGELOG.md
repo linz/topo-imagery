@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.16.1](https://github.com/linz/topo-imagery/compare/v7.16.0...v7.16.1) (2026-02-08)
+
+
+### Bug Fixes
+
+* force RGBNIR Band 4 to NIR if labelled Alpha TDE-1810 ([#1469](https://github.com/linz/topo-imagery/issues/1469)) ([397c67c](https://github.com/linz/topo-imagery/commit/397c67c0daf1003208655ec31942b7fda1ffc905))
+
 ## [7.16.0](https://github.com/linz/topo-imagery/compare/v7.15.0...v7.16.0) (2026-01-26)
 
 
