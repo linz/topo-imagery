@@ -22,6 +22,7 @@ from scripts.gdal.gdal_commands import (
     get_cutline_command,
     get_fillnodata_command,
     get_gdal_command,
+    get_relabel_colorinterp_command,
     get_transform_srs_command,
 )
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
@@ -155,6 +156,13 @@ def standardising(
         # Determine if VRT needs alpha
         vrt_add_alpha = check_vrt_alpha(source_files, config.gdal_preset)
 
+        # Force RGBNIR Band 4 colorInterpretation to NIR if mislabelled as Alpha
+        if (config.gdal_preset == "rgbnir_zstd") and (detect_mislabelled_rgbnir_bands(source_files)):
+            for source_file in source_files:
+                if is_tiff(source_file):
+                    get_log().info("Relabelling RGBNIR Band 4 as NIR", path=source_file)
+                    run_gdal(get_relabel_colorinterp_command(), source_file, None)
+
         # Create base VRT file
         current_working_file = create_vrt(
             [source_file for source_file in source_files if is_tiff(source_file)],
@@ -237,6 +245,17 @@ def get_prj_tfw_sidecars(tiff: FileTiff, target_path: str) -> list[str]:
     ]
     write_sidecars(sidecars, target_path)
     return sidecars
+
+
+def detect_mislabelled_rgbnir_bands(source_files: list[str]) -> bool:
+    """Check if RGBNIR bands need color_interpretation relabelling."""
+    for file in source_files:
+        if is_tiff(file):
+            bands = gdal_info(file)["bands"]
+            # Check if the 4th band is labelled 'Alpha'
+            if bands[3].get("colorInterpretation", "") == "Alpha":
+                return True
+    return False
 
 
 def check_vrt_alpha(source_files: list[str], preset: str) -> bool:
