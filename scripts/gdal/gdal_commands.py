@@ -33,29 +33,29 @@ def get_gdal_command(preset: str, epsg: int) -> list[str]:
         a list of arguments to run `gdal_translate`
     """
     get_log().info("gdal_preset", preset=preset)
-    gdal_command: list[str] = ["gdal_translate"]
 
-    gdal_command.extend(BASE_COG)
-    # Force the source projection to an input EPSG
-    gdal_command.extend(["-a_srs", f"EPSG:{epsg}"])
+    base_command: list[str] = [
+        "gdal_translate",
+        *BASE_COG,
+        "-a_srs",
+        f"EPSG:{epsg}",
+    ]
 
-    if preset == CompressionPreset.LZW.value:
-        gdal_command.extend(SCALE_254_ADD_NO_DATA)
-        gdal_command.extend(COMPRESS_LZW)
-        gdal_command.extend(WEBP_OVERVIEWS)
+    ZSTD_OPTIONS = COMPRESS_ZSTD + ZSTD_OVERVIEWS
 
-    elif preset == CompressionPreset.WEBP.value:
-        gdal_command.extend(COMPRESS_WEBP_LOSSLESS)
-        gdal_command.extend(WEBP_OVERVIEWS)
+    PRESET_OPTIONS: dict[str, list[str]] = {
+        CompressionPreset.LZW.value: (SCALE_254_ADD_NO_DATA + COMPRESS_LZW + WEBP_OVERVIEWS),
+        CompressionPreset.WEBP.value: (COMPRESS_WEBP_LOSSLESS + WEBP_OVERVIEWS),
+        CompressionPreset.RGBNIR_ZSTD.value: ZSTD_OPTIONS,
+        CompressionPreset.ZSTD.value: ZSTD_OPTIONS,
+        CompressionPreset.DEM_LERC.value: DEM_LERC,
+    }
 
-    if preset == CompressionPreset.RGBNIR_ZSTD.value:
-        gdal_command.extend(COMPRESS_ZSTD)
-        gdal_command.extend(ZSTD_OVERVIEWS)
+    preset_options = PRESET_OPTIONS.get(preset)
+    if preset_options is None:
+        raise ValueError(f"Unsupported compression preset: {preset}")
 
-    elif preset == CompressionPreset.DEM_LERC.value:
-        gdal_command.extend(DEM_LERC)
-
-    return gdal_command
+    return base_command + preset_options
 
 
 def get_cutline_command(cutline: str | None) -> list[str]:
@@ -245,18 +245,6 @@ def get_hillshade_command(preset: str) -> list[str]:
         "gdaldem",
         "hillshade",
         "-compute_edges",
-        "-of",
-        "COG",
-        "-co",
-        "COMPRESS=lerc",
-        "-co",
-        "OVERVIEW_COMPRESS=lerc",
-        "-co",
-        "MAX_Z_ERROR_OVERVIEW=0",
-        "-co",
-        "NUM_THREADS=ALL_CPUS",
-        "-co",
-        "MAX_Z_ERROR=0",
     ]
 
     if preset == HillshadePreset.DEFAULT.value:
