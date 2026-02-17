@@ -10,16 +10,16 @@ Write code others can understand quickly.
 
 - avoid "clever" shortcuts
 
-   ```python
-   # can be confusing
-   inside = [pt for pt in points if polygons.contains(pt)]
-   
-   # more readable
-   inside_points = []
-   for point in points:
-    if polygon.contains(point):
-        inside_points.append(point)
-   ```
+  ```python
+  # can be confusing
+  inside = [pt for pt in points if polygons.contains(pt)]
+
+  # more readable
+  inside_points = []
+  for point in points:
+   if polygon.contains(point):
+       inside_points.append(point)
+  ```
 
   - Each step is explicit: iterating, testing, appending
   - Easier to debug as you can add a trigger point per step
@@ -32,7 +32,7 @@ The code should follow the same **patterns, naming conventions, formatting and s
 
 - **Naming**
 
-   Keep consistent naming accross modules for things that have the same purpose. For example, a CLI argument for the source files to take in input, should not be `source` somewhere and `input` or `path` somewhere else.
+  Keep consistent naming accross modules for things that have the same purpose. For example, a CLI argument for the source files to take in input, should not be `source` somewhere and `input` or `path` somewhere else.
 
 - **Structure**
   - Maintain the same folder and module pattern accross the repository
