@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.17.0](https://github.com/linz/topo-imagery/compare/v7.16.1...v7.17.0) (2026-02-26)
+
+
+### Features
+
+* change hillshade COG compression to ZSTD TDE-1817 ([#1471](https://github.com/linz/topo-imagery/issues/1471)) ([c71fe2c](https://github.com/linz/topo-imagery/commit/c71fe2c9217f46d365844856d15e0e5e8f2df63e))
+
+
+### Documentation
+
+* init CONTRIBUTING coding guidelines TDE-1446 ([#1472](https://github.com/linz/topo-imagery/issues/1472)) ([c9aa7bd](https://github.com/linz/topo-imagery/commit/c9aa7bdf237fd964526b89acb2e048afc46b8092))
+
 ## [7.16.1](https://github.com/linz/topo-imagery/compare/v7.16.0...v7.16.1) (2026-02-08)
 
 
