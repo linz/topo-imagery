@@ -83,7 +83,7 @@ COMPRESS_ZSTD = [
     "compress=zstd",
     "-co",
     "level=17",
-    # Predictor creates smaller files, for RGBNIR imagery
+    # Predictor creates smaller files
     "-co",
     "predictor=2",
 ]
@@ -105,6 +105,7 @@ class CompressionPreset(str, Enum):
     LZW = "lzw"
     RGBNIR_ZSTD = "rgbnir_zstd"
     WEBP = "webp"
+    ZSTD = "zstd"
 
 
 class HillshadePreset(str, Enum):

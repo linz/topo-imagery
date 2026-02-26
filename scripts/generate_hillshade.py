@@ -13,10 +13,10 @@ from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
-from scripts.gdal.gdal_commands import get_hillshade_command
+from scripts.gdal.gdal_commands import get_gdal_command, get_hillshade_command
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.gdal.gdal_presets import BASE_COG, HillshadePreset
+from scripts.gdal.gdal_presets import CompressionPreset, HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
 from scripts.logging.time_helper import time_in_ms
 from scripts.stac.imagery.create_stac import create_item
@@ -104,7 +104,7 @@ def create_hillshade(
     # Download any needed file from S3 ["/foo/bar.tiff", "s3://foo"] => "/tmp/bar.tiff", "/tmp/foo.tiff"
     with tempfile.TemporaryDirectory() as tmp_path:
         hillshade_working_path = os.path.join(tmp_path, hillshade_file_name)
-        hillshade_with_stats_working_path = os.path.join(tmp_path, tile.output + "_w_stats.tiff")
+        hillshade_cog_working_path = os.path.join(tmp_path, tile.output + "_cog.tiff")
 
         source_files = write_all(tile.inputs, f"{tmp_path}/source/")
         source_tiffs = [file for file in source_files if is_tiff(file)]
@@ -112,15 +112,18 @@ def create_hillshade(
         # Start from base VRT
         input_file = create_vrt(source_tiffs, tmp_path)
 
-        # Need GDAL to write to temporary location so no broken files end up in the final folder.
+        # Compute the hillshade
         run_gdal(get_hillshade_command(preset), input_file=input_file, output_file=hillshade_working_path)
 
-        # Add statistics to the TIFF and force COGifying the output
-        gdal_translate_command = ["gdal_translate", "-co", "compress=lerc"] + BASE_COG  # BASE_COG contains `-stats`
-        run_gdal(gdal_translate_command, input_file=hillshade_working_path, output_file=hillshade_with_stats_working_path)
+        # COGify the hillshade output, using ZSTD compression
+        run_gdal(
+            get_gdal_command(CompressionPreset.ZSTD.value, 2193),
+            input_file=hillshade_working_path,
+            output_file=hillshade_cog_working_path,
+        )
 
         if gsd:
-            footprint_tmp_path = create_footprint(hillshade_working_path, tmp_path, gsd, preset)
+            footprint_tmp_path = create_footprint(hillshade_cog_working_path, tmp_path, gsd, preset)
             write(
                 os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
                 read(footprint_tmp_path),
@@ -128,7 +131,7 @@ def create_hillshade(
             )
 
         # Note: This file is used as an implicit indicator that processing has completed, so should be written last.
-        write(hillshade_file_path, read(hillshade_with_stats_working_path), content_type=ContentType.GEOTIFF.value)
+        write(hillshade_file_path, read(hillshade_cog_working_path), content_type=ContentType.GEOTIFF.value)
 
         return hillshade_file_path, tile.inputs
 
