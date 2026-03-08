@@ -45,7 +45,7 @@ class StandardisingConfig:
     simplify_footprints: whether to simplify footprints for each tile using gdal_fillnodata
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
-    force: overwrite existing output files. Defaults to False.
+    force: overwrite existing output file. Defaults to False.
     """
 
     gdal_preset: str

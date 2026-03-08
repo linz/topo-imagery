@@ -99,7 +99,7 @@ def get_args_parser() -> CommonArgumentParser:
     parser.add_argument(
         "--force",
         dest="force",
-        help="Regenerate the TIFFs and STAC files if already exist. Defaults to False.",
+        help="Regenerate the standardised TIFF and STAC files if already exist. Defaults to False.",
         action="store_true",
     )
     return parser
