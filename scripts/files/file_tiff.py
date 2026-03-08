@@ -50,7 +50,10 @@ class FileTiff:
         self._errors: list[dict[str, Any]] = []
         self._gdalinfo: GdalInfo | None = None
         self._srs: bytes | None = None
-        if preset == CompressionPreset.DEM_LERC.value:
+        if preset in [
+            CompressionPreset.DEM_LERC.value,
+            CompressionPreset.DEM_ZSTD.value,
+        ]:
             self._tiff_type = FileTiffType.DEM
         else:
             self._tiff_type = FileTiffType.IMAGERY
