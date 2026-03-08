@@ -174,16 +174,16 @@ def str_to_list_or_none(values: str) -> list[Decimal] | None:
     return result
 
 
-def get_geometry_from_geojson(geojson: dict[str, Any], file_path: str) -> shapely.geometry.base.BaseGeometry:
-    """Extracts a geometry from a GeoJSON file and logs errors if the geometry is invalid.
+def get_geometry_from_geojson_feature(feature: Any, file_path: str) -> shapely.geometry.base.BaseGeometry:
+    """Extracts a geometry from a GeoJSON feature and logs errors if the geometry is invalid.
 
-    :param geojson: The contents of the GeoJSON file.
-    :param file_path: Path to the GeoJSON file.
+    :param feature: A feature from the GeoJSON file.
+    :param file_path: Path to the GeoJSON file for logging.
     :return: A Shapely BaseGeometry object if successful, otherwise raises an exception.
     """
     get_log().debug(f"importing geometry from {file_path}")
     try:
-        return shapely.geometry.shape(geojson["features"][0]["geometry"])
+        return shapely.geometry.shape(feature["geometry"])
     except (IndexError, KeyError) as e:
         error_message = "The supplied GeoJSON does not contain a valid geometry:"
         get_log().error(

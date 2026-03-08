@@ -7,7 +7,7 @@ from shapely.geometry import MultiPolygon
 from scripts.cli.cli_helper import (
     TileFiles,
     coalesce_multi_single,
-    get_geometry_from_geojson,
+    get_geometry_from_geojson_feature,
     get_tile_files,
     parse_list,
     valid_date,
@@ -98,7 +98,7 @@ def test_valid_date_invalid_string() -> None:
         assert str(e.value) == "not a valid date: foo"
 
 
-def test_get_geometry_from_geojson() -> None:
+def test_get_geometry_from_geojson_feature() -> None:
     geom = MultiPolygon(
         [[[(175.326912, -41.66861622), (175.33531971, -41.67266055), (175.3351674, -41.6684487), (175.326912, -41.66861622)]]]
     )
@@ -126,13 +126,13 @@ def test_get_geometry_from_geojson() -> None:
             }
         ],
     }
-    assert get_geometry_from_geojson(geojson, "/tmp/test/test.geojson") == geom
+    assert get_geometry_from_geojson_feature(geojson["features"][0], "/tmp/test/test.geojson") == geom
 
 
-def test_get_geometry_from_invalid_geojson() -> None:
+def test_get_geometry_from_invalid_geojson_feature() -> None:
     geojson = {
         "foo": "bar",
     }
     with raises(Exception) as e:
-        get_geometry_from_geojson(geojson, "/tmp/test/test.geojson")
+        get_geometry_from_geojson_feature(geojson, "/tmp/test/test.geojson")
         assert str(e.value) == "The supplied GeoJSON does not contain a valid geometry. /tmp/test/test.geojson"
