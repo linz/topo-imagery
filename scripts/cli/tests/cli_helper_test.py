@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pytest import raises
 from pytest_subtests import SubTests
@@ -102,7 +103,7 @@ def test_get_geometry_from_geojson_feature() -> None:
     geom = MultiPolygon(
         [[[(175.326912, -41.66861622), (175.33531971, -41.67266055), (175.3351674, -41.6684487), (175.326912, -41.66861622)]]]
     )
-    geojson = {
+    geojson: dict[str, Any] = {
         "type": "FeatureCollection",
         "name": "foo",
         "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
@@ -134,5 +135,5 @@ def test_get_geometry_from_invalid_geojson_feature() -> None:
         "foo": "bar",
     }
     with raises(Exception) as e:
-        get_geometry_from_geojson_feature(geojson, "/tmp/test/test.geojson")
+        get_geometry_from_geojson_feature(geojson["features"][0], "/tmp/test/test.geojson")
         assert str(e.value) == "The supplied GeoJSON does not contain a valid geometry. /tmp/test/test.geojson"
