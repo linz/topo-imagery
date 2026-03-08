@@ -96,6 +96,12 @@ def get_args_parser() -> CommonArgumentParser:
         help="Scale to x,y resolution (leave blank for no scaling)",
         required=False,
     )
+    parser.add_argument(
+        "--force",
+        dest="force",
+        help="Regenerate the standardised TIFF and STAC files if already exist. Defaults to False.",
+        action="store_true",
+    )
     return parser
 
 
@@ -122,6 +128,7 @@ def report_non_visual_qa_errors(file: FileTiff) -> None:
 
 def main() -> None:
     arguments = get_args_parser().parse_args()
+    force = arguments.force
 
     standardising_config = StandardisingConfig(
         gdal_preset=arguments.preset,
@@ -132,6 +139,7 @@ def main() -> None:
         simplify_footprints=arguments.simplify_footprints,
         cutline=arguments.cutline,
         scale_to_resolution=arguments.scale_to_resolution,
+        force=force,
     )
 
     try:
@@ -168,7 +176,7 @@ def main() -> None:
 
     for file in tiff_files:
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + SUFFIX_JSON
-        if not exists(stac_item_path):
+        if force or not exists(stac_item_path):
             file.set_srs(srs)
 
             # Validate the file

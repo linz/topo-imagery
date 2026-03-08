@@ -45,6 +45,7 @@ class StandardisingConfig:
     simplify_footprints: whether to simplify footprints for each tile using gdal_fillnodata
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
+    force: overwrite existing output file. Defaults to False.
     """
 
     gdal_preset: str
@@ -55,6 +56,7 @@ class StandardisingConfig:
     simplify_footprints: bool
     cutline: str | None
     scale_to_resolution: list[Decimal] | None = None
+    force: bool = False
 
     def __post_init__(self) -> None:
         if self.cutline and not self.cutline.endswith((".fgb", ".geojson")):
@@ -142,7 +144,7 @@ def standardising(
     tiff.set_path_standardised(standardised_file_path)
 
     # Skip processing if output file already exists
-    if exists(standardised_file_path):
+    if not config.force and exists(standardised_file_path):
         get_log().info("standardised_tiff_already_exists", path=standardised_file_path)
         return tiff
 
