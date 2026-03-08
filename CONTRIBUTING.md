@@ -1,5 +1,24 @@
 # Contributing
 
+## Table of Contents
+
+- [Coding guidelines](#coding-guidelines)
+  - [Core principles](#core-principles)
+    - [Readability](#readability)
+    - [Consistency](#consistency)
+    - [Focused changes](#focused-changes)
+    - [Documentation](#documentation)
+  - [Testing](#testing)
+    - [Coverage](#coverage)
+      - [New Features](#new-features)
+      - [Bug Fixes](#bug-fixes)
+    - [Structure](#structure)
+      - [Clarity](#clarity)
+      - [Isolation](#isolation)
+      - [Focused](#focused)
+    - [Names](#names)
+    - [Organisation](#organisation)
+
 ## Coding guidelines
 
 ### Core principles
@@ -63,3 +82,117 @@ Where possible, prefer executable documentation such as `doctest` over explanato
 `doctest` documents expected behavior through concrete examples that are automatically verified by running the tests pipeline.
 
 This keeps documentation and behavior in sync, reduces the risk of outdated comments, and provides both usage examples and regression protection at the same time.
+
+### Testing
+
+Tests are required for all non-trivial behavior.
+
+Testing is not optional or “added later.”
+It is part of the implementation.
+
+A good test suite should:
+
+- Increase confidence
+- Encourage refactoring
+- Prevent regressions
+- Reduce fear of change
+- Help contributors understand the codebase
+
+Tests serve as documentation:
+
+- How function are expected to be used
+- What inputs are valid
+- What outputs are expected
+- What errors should be raised
+
+#### Coverage
+
+When to write tests?
+
+- When adding a new functionality
+- Before refactoring if not existing for what is going to be refactored
+- Before fixing complex bugs
+- When behaviour is ambiguous
+- When adding new branches / edge cases
+
+Focus on:
+
+- Testing important logic
+- Covering edge cases
+- Verifying actual outcomes
+
+##### New Features
+
+All new features must include tests that verify:
+
+- Expected behavior
+- Edge cases
+- Failure scenarios (when applicable)
+
+A feature is not complete without tests.
+
+##### Bug Fixes
+
+Every bug fix must include a regression test that:
+
+- Reproduces the original bug
+- Verify the correct behavior
+- Prevent the same bug from reappearing
+
+This ensures the same issue cannot silently reappear in the future.
+
+#### Structure
+
+##### Clarity
+
+Tests should be as readable as production code.
+
+A good test:
+
+- Is easy to understand without reading the implementation
+- Clearly communicates what is being validated
+- Has minimal setup noise
+
+##### Isolation
+
+Tests must not depend on:
+
+- Execution order
+- Shared mutable state
+- Data left behind by other tests
+- Each test should be runnable independently.
+
+##### Focused
+
+Each test should verify one logical behavior.
+
+If a test fails, it should be immediately clear why.
+
+#### Names
+
+Test names should describe the expected behaviour.
+Pattern: `test_<expected_behaviour>_when_<condition>`
+
+The reader should understand the behaviour without reading the test definition.
+
+Examples:
+
+```python
+test_returns_empty_list_when_input_is_empty
+test_raises_value_error_for_invalid_path
+```
+
+#### Organisation
+
+- Group related tests together
+- Keep test files aligned with module structure
+
+Example:
+
+```text
+stac/imagery/
+          collection.py
+
+stac/imagery/tests/
+              collection_test.py
+```
