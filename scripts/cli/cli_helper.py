@@ -186,5 +186,5 @@ def get_geometry_from_geojson_feature(feature: Any, file_path: str) -> shapely.g
         return shapely.geometry.shape(feature["geometry"])
     except (KeyError, TypeError) as e:
         error_message = f"The supplied GeoJSON feature does not contain a valid geometry: {file_path}"
-        get_log().error(error_message, file=file_path)
+        get_log().error(error_message, error=str(e))
         raise ValueError(error_message) from e
