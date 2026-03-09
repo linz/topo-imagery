@@ -190,6 +190,11 @@ def main(args: List[str] | None = None) -> None:
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
+    if capture_dates:
+        capture_dates_path = os.path.join(uri, CAPTURE_DATES_FILE_NAME)
+        supplied_capture_area = capture_dates_path
+        get_log().info("Using capture dates file to generate capture area", capture_dates_path=capture_dates_path)
+
     if supplied_capture_area and simplified_capture_area:
         parser.error("--simplified-capture-area cannot be True when --supplied-capture-area is set.")
 
@@ -199,11 +204,6 @@ def main(args: List[str] | None = None) -> None:
 
     items_to_add = []
     polygons = []
-
-    if capture_dates:
-        capture_dates_path = os.path.join(uri, CAPTURE_DATES_FILE_NAME)
-        supplied_capture_area = capture_dates_path
-        get_log().info("Using capture dates file to generate capture area", capture_dates_path=capture_dates_path)
 
     if supplied_capture_area:
         content = json.loads(read(supplied_capture_area))
