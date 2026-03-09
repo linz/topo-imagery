@@ -135,5 +135,5 @@ def test_get_geometry_from_invalid_geojson_feature() -> None:
         "foo": "bar",
     }
     with raises(Exception) as e:
-        get_geometry_from_geojson_feature(geojson["features"][0], "/tmp/test/test.geojson")
-        assert str(e.value) == "The supplied GeoJSON does not contain a valid geometry. /tmp/test/test.geojson"
+        get_geometry_from_geojson_feature(geojson, "/tmp/test/test.geojson")
+        assert str(e.value) == "The supplied GeoJSON feature does not contain a valid geometry: /tmp/test/test.geojson"
