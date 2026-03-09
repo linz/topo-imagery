@@ -47,7 +47,7 @@ def get_gdal_command(preset: str, epsg: int) -> list[str]:
         CompressionPreset.LZW.value: (SCALE_254_ADD_NO_DATA + COMPRESS_LZW + WEBP_OVERVIEWS),
         CompressionPreset.WEBP.value: (COMPRESS_WEBP_LOSSLESS + WEBP_OVERVIEWS),
         CompressionPreset.RGBNIR_ZSTD.value: ZSTD_OPTIONS,
-        CompressionPreset.ZSTD.value: ZSTD_OPTIONS,
+        CompressionPreset.DEM_ZSTD.value: ZSTD_OPTIONS,
         CompressionPreset.DEM_LERC.value: DEM_LERC,
     }
 

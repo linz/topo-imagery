@@ -39,7 +39,10 @@ def get_gray_band_args(band: GdalInfoBand, preset: str | None = None) -> list[st
         ['-b', '1', '-b', '1', '-b', '1']
     """
     band_grey_index = str(band["band"])
-    if preset == CompressionPreset.DEM_LERC.value:
+    if preset in [
+        CompressionPreset.DEM_LERC.value,
+        CompressionPreset.DEM_ZSTD.value,
+    ]:
         # return single band if DEM/DSM
         return ["-b", band_grey_index]
     # Grey scale imagery, set R,G and B to just the grey_band

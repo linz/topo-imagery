@@ -117,7 +117,7 @@ def create_hillshade(
 
         # COGify the hillshade output, using ZSTD compression
         run_gdal(
-            get_gdal_command(CompressionPreset.ZSTD.value, 2193),
+            get_gdal_command(CompressionPreset.DEM_ZSTD.value, 2193),
             input_file=hillshade_working_path,
             output_file=hillshade_cog_working_path,
         )
