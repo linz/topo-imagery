@@ -96,7 +96,7 @@ def test_valid_date_valid_string() -> None:
 def test_valid_date_invalid_string() -> None:
     with raises(Exception) as e:
         valid_date("foo")
-        assert str(e.value) == "not a valid date: foo"
+    assert str(e.value) == "not a valid date: foo"
 
 
 def test_get_geometry_from_geojson_feature() -> None:
@@ -136,4 +136,4 @@ def test_get_geometry_from_invalid_geojson_feature() -> None:
     }
     with raises(Exception) as e:
         get_geometry_from_geojson_feature(geojson, "/tmp/test/test.geojson")
-        assert str(e.value) == "The supplied GeoJSON feature does not contain a valid geometry: /tmp/test/test.geojson"
+    assert str(e.value) == "The supplied GeoJSON feature does not contain a valid geometry: /tmp/test/test.geojson"
