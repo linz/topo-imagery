@@ -1,5 +1,22 @@
 # Changelog
 
+## [7.18.0](https://github.com/linz/topo-imagery/compare/v7.17.0...v7.18.0) (2026-03-09)
+
+
+### Features
+
+* add `--force` option for standardise_validate.py ([#1477](https://github.com/linz/topo-imagery/issues/1477)) ([567be7b](https://github.com/linz/topo-imagery/commit/567be7b6a818cbfb5ae8c9deae0f899d1fca8204))
+
+
+### Bug Fixes
+
+* ZSTD hillshades should be treated as DEMs TDE-1835 ([#1479](https://github.com/linz/topo-imagery/issues/1479)) ([30de692](https://github.com/linz/topo-imagery/commit/30de692b07608e6f3684d37a231453209d91d0c9))
+
+
+### Documentation
+
+* update AWS tests instructions ([#1475](https://github.com/linz/topo-imagery/issues/1475)) ([2a5014d](https://github.com/linz/topo-imagery/commit/2a5014d0e922dfc404d336e5088152bff73121cc))
+
 ## [7.17.0](https://github.com/linz/topo-imagery/compare/v7.16.1...v7.17.0) (2026-02-26)
 
 
