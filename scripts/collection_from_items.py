@@ -7,7 +7,13 @@ from typing import TYPE_CHECKING, List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, get_geometry_from_geojson_feature, str_to_bool, str_to_gsd
+from scripts.cli.cli_helper import (
+    coalesce_multi_single,
+    get_geometry_from_geojson_feature,
+    get_non_empty_features,
+    str_to_bool,
+    str_to_gsd,
+)
 from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON
@@ -207,7 +213,8 @@ def main(args: List[str] | None = None) -> None:
 
     if supplied_capture_area:
         content = json.loads(read(supplied_capture_area))
-        for feature in content["features"]:
+        features = get_non_empty_features(content, supplied_capture_area)
+        for feature in features:
             polygons.append(get_geometry_from_geojson_feature(feature, supplied_capture_area))
 
     for key, result in get_object_parallel_multithreading(
@@ -238,7 +245,8 @@ def main(args: List[str] | None = None) -> None:
             items_to_add.append(content)
             get_log().info("Item will be added to Collection", item=content["id"], file=key)
         elif key.endswith(SUFFIX_FOOTPRINT) and not supplied_capture_area:
-            for feature in content["features"]:
+            features = get_non_empty_features(content, key)
+            for feature in features:
                 polygons.append(get_geometry_from_geojson_feature(feature, key))
 
     if len(items_to_add) == 0:

@@ -188,3 +188,18 @@ def get_geometry_from_geojson_feature(feature: Any, file_path: str) -> shapely.g
         error_message = f"The supplied GeoJSON feature does not contain a valid geometry: {file_path}"
         get_log().error(error_message, error=str(e))
         raise ValueError(error_message) from e
+
+
+def get_non_empty_features(content: dict[str, Any], file_path: str) -> list[Any]:
+    """Return a non-empty feature list from a supplied GeoJSON file.
+
+    :param content: The content of the GeoJSON.
+    :param file_path: The path to the GeoJSON file for logging purposes.
+    :return: A list of features, otherwise raises an exception.
+    """
+    features = content.get("features")
+    if not isinstance(features, list) or len(features) == 0:
+        msg = f"Supplied GeoJSON has no features: {file_path}"
+        get_log().error(msg)
+        raise ValueError(msg)
+    return features
