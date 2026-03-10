@@ -435,7 +435,6 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
             },
         ],
     }
-    print(capture_dates)
     write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
 
     args = [
