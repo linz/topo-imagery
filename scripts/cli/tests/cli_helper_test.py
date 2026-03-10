@@ -137,3 +137,21 @@ def test_get_geometry_from_invalid_geojson_feature() -> None:
     with raises(Exception) as e:
         get_geometry_from_geojson_feature(geojson, "/tmp/test/test.geojson")
     assert str(e.value) == "The supplied GeoJSON feature does not contain a valid geometry: /tmp/test/test.geojson"
+
+
+def test_get_geometry_from_empty_geojson_feature() -> None:
+    geojson: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "name": "foo",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}},
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"Id": 0},
+                "geometry": {},
+            }
+        ],
+    }
+    with raises(Exception) as e:
+        get_geometry_from_geojson_feature(geojson["features"][0], "/tmp/test/test.geojson")
+    assert str(e.value) == "The supplied GeoJSON feature does not contain a valid geometry: /tmp/test/test.geojson"

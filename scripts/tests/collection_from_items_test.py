@@ -392,3 +392,90 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
         main(args)
 
     assert "--simplified-capture-area cannot be True when --supplied-capture-area is set." in capsys.readouterr().err
+
+
+@mock_aws
+def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    capture_dates = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.08592083, -41.23816732],
+                            [173.08596333, -41.2705955],
+                            [173.11461773, -41.27057054],
+                            [173.11456106, -41.23814238],
+                            [173.08592083, -41.23816732],
+                        ]
+                    ],
+                },
+            },
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.11456106, -41.23814238],
+                            [173.11461773, -41.27057054],
+                            [173.14327209, -41.27053845],
+                            [173.14320125, -41.23811033],
+                            [173.11456106, -41.23814238],
+                        ]
+                    ],
+                },
+            },
+        ],
+    }
+    print(capture_dates)
+    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "",
+        "--simplified-capture-area",
+        "false",
+        "--capture-dates",
+        "true",
+    ]
+    main(args)
+
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    collection_content = resp["Body"].read().decode("utf-8")
+    collection_json = json.loads(collection_content)
+
+    assert "capture_area" in collection_json["assets"]
+    expected_description = (
+        "Boundary of the total capture area for this collection provided by the data supplier. "
+        "May include some areas of nodata where capture was attempted but unsuccessful. "
+        "Geometries are simplified."
+    )
+    assert collection_json["assets"]["capture_area"]["description"] == expected_description
