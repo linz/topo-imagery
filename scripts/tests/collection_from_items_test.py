@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 from unittest.mock import patch
 
 import pytest
@@ -9,6 +9,7 @@ from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
+from shapely.geometry import shape
 
 from scripts.collection_from_items import NoItemsError, main
 from scripts.conftest import any_epoch_datetime_string
@@ -400,7 +401,8 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
     s3_client.create_bucket(Bucket="stacfiles")
     item.add_collection("abc")
     write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
-    capture_dates = {
+
+    capture_dates: dict[str, Any] = {
         "type": "FeatureCollection",
         "features": [
             {
@@ -417,7 +419,14 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
                         ]
                     ],
                 },
-            },
+            }
+        ],
+    }
+    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+
+    footprint = {
+        "type": "FeatureCollection",
+        "features": [
             {
                 "type": "Feature",
                 "geometry": {
@@ -432,10 +441,10 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
                         ]
                     ],
                 },
-            },
+            }
         ],
     }
-    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+    write("s3://stacfiles/item_footprint.geojson", dict_to_json_bytes(footprint))
 
     args = [
         "--uri",
@@ -458,23 +467,13 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
         "25",
         "--linz-slug",
         fake_collection_context.linz_slug,
-        "--supplied-capture-area",
-        "",
-        "--simplified-capture-area",
-        "false",
         "--capture-dates",
         "true",
     ]
     main(args)
 
-    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
-    collection_content = resp["Body"].read().decode("utf-8")
-    collection_json = json.loads(collection_content)
+    capture_area_resp = s3_client.get_object(Bucket="stacfiles", Key="capture-area.geojson")
+    capture_area: dict[str, Any] = json.loads(capture_area_resp["Body"].read().decode("utf-8"))
+    expected_feature: dict[str, Any] = capture_dates["features"][0]
 
-    assert "capture_area" in collection_json["assets"]
-    expected_description = (
-        "Boundary of the total capture area for this collection. "
-        "May include some areas of nodata where capture was attempted but unsuccessful. "
-        "Geometries are simplified."
-    )
-    assert collection_json["assets"]["capture_area"]["description"] == expected_description
+    assert shape(capture_area["geometry"]).equals(shape(expected_feature["geometry"]))
