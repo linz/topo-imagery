@@ -474,7 +474,7 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
 
     assert "capture_area" in collection_json["assets"]
     expected_description = (
-        "Boundary of the total capture area for this collection provided by the data supplier. "
+        "Boundary of the total capture area for this collection. "
         "May include some areas of nodata where capture was attempted but unsuccessful. "
         "Geometries are simplified."
     )
