@@ -8,6 +8,7 @@ from boto3 import client
 from linz_logger import get_log
 
 from scripts.cli.cli_helper import (
+    check_capture_area_option_compatibility,
     coalesce_multi_single,
     get_geometry_from_geojson_feature,
     get_non_empty_features,
@@ -196,13 +197,17 @@ def main(args: List[str] | None = None) -> None:
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
+    check_capture_area_option_compatibility(
+        parser,
+        supplied_capture_area,
+        simplified_capture_area,
+        capture_dates,
+    )
+
     if capture_dates:
         capture_dates_path = os.path.join(uri, CAPTURE_DATES_FILE_NAME)
         supplied_capture_area = capture_dates_path
         get_log().info("Using capture dates file to generate capture area", capture_dates_path=capture_dates_path)
-
-    if supplied_capture_area and simplified_capture_area:
-        parser.error("--simplified-capture-area cannot be True when --supplied-capture-area is set.")
 
     s3_client: S3Client = client("s3")
 

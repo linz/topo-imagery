@@ -203,3 +203,47 @@ def get_non_empty_features(content: dict[str, Any], file_path: str) -> list[Any]
         get_log().error(error_message)
         raise ValueError(error_message)
     return features
+
+
+def check_capture_area_option_compatibility(
+    parser: argparse.ArgumentParser,
+    supplied_capture_area: str | None,
+    simplified_capture_area: bool,
+    capture_dates: bool | None,
+) -> None:
+    # pylint: disable=line-too-long
+    # Disabled line-too-long for the doctests
+    """Validate capture-area related options are not incompatible.
+
+    Args:
+        parser: The argparse.ArgumentParser instance to use for raising errors.
+        supplied_capture_area: Whether the capture area is supplied. Defaults to None.
+        simplified_capture_area: Whether the capture area is created from simplified footprints. Defaults to False.
+        capture_dates: Whether capture dates file exists. Defaults to None.
+
+    Examples:
+        >>> parser = argparse.ArgumentParser(prog="test")
+        >>> check_capture_area_option_compatibility(parser, "", False, False)
+        >>> check_capture_area_option_compatibility(parser, "", False, True)
+        >>> class DummyParser:
+        ...     def error(self, message: str) -> None:
+        ...         raise argparse.ArgumentTypeError(message)
+        >>> check_capture_area_option_compatibility(DummyParser(), "s3://bucket/capture-area.geojson", True, False)
+        Traceback (most recent call last):
+            ...
+        argparse.ArgumentTypeError: --simplified-capture-area cannot be True when --supplied-capture-area or --capture-dates are set.
+        >>> check_capture_area_option_compatibility(DummyParser(), "", True, True)
+        Traceback (most recent call last):
+            ...
+        argparse.ArgumentTypeError: --simplified-capture-area cannot be True when --supplied-capture-area or --capture-dates are set.
+        >>> check_capture_area_option_compatibility(DummyParser(), "s3://bucket/capture-area.geojson", False, True)
+        Traceback (most recent call last):
+            ...
+        argparse.ArgumentTypeError: --supplied-capture-area and --capture-dates cannot both be set
+
+    """
+    if simplified_capture_area and (supplied_capture_area or capture_dates):
+        parser.error("--simplified-capture-area cannot be True when --supplied-capture-area or --capture-dates are set.")
+
+    if supplied_capture_area and capture_dates:
+        parser.error("--supplied-capture-area and --capture-dates cannot both be set")
