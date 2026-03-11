@@ -523,3 +523,45 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
     expected_feature: dict[str, Any] = capture_dates["features"][0]
 
     assert shape(capture_area["geometry"]).equals(shape(expected_feature["geometry"]))
+
+
+@mock_aws
+def test_should_fail_when_capture_dates_file_missing(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--capture-dates",
+        "true",
+    ]
+
+    with raises(Exception):
+        main(args)
+
+    logs = capsys.readouterr().out
+
+    assert "s3_key_not_found" in logs
