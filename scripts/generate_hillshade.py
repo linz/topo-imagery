@@ -2,19 +2,17 @@ import os
 import sys
 import tempfile
 from datetime import datetime, timezone
-from decimal import Decimal
 from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import InputParameterError, TileFiles, load_input_files, str_to_gsd
+from scripts.cli.cli_helper import InputParameterError, TileFiles, load_input_files
 from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from scripts.files.fs import exists, read, write, write_all
 from scripts.gdal.gdal_commands import get_gdal_command, get_hillshade_command
-from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import run_gdal
 from scripts.gdal.gdal_presets import CompressionPreset, HillshadePreset
 from scripts.json_codec import dict_to_json_bytes
@@ -44,7 +42,6 @@ def get_args_parser() -> CommonArgumentParser:
         dest="collection_id",
         help="Unique id of the Collection. If not provided, STAC Items won't be created.",
     )
-    parser.add_argument("--gsd", dest="gsd", type=str_to_gsd, required=False, help="GSD of imagery Dataset, for example 1")
     parser.add_argument(
         "--current-datetime",
         dest="current_datetime",
@@ -77,7 +74,6 @@ def create_hillshade(
     preset: str,
     target_output: str = "/tmp/",
     force: bool = False,
-    gsd: Decimal | None = None,
 ) -> tuple[str, list[str]]:
     """Create a hillshade TIFF file from a `TileFiles` which include an output tile with its input TIFFs.
 
@@ -86,7 +82,6 @@ def create_hillshade(
         preset: a `HillshadePreset` to use. See `gdal.gdal_presets.py`.
         target_output: path where the output files need to be saved to. Defaults to "/tmp/".
         force: overwrite existing output file. Defaults to False.
-        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         The filename of the hillshade TIFF file if created and the path of the input files used to create it.
@@ -122,14 +117,6 @@ def create_hillshade(
             output_file=hillshade_cog_working_path,
         )
 
-        if gsd:
-            footprint_tmp_path = create_footprint(hillshade_cog_working_path, tmp_path, gsd, preset)
-            write(
-                os.path.join(target_output, tile.output + SUFFIX_FOOTPRINT),
-                read(footprint_tmp_path),
-                content_type=ContentType.GEOJSON.value,
-            )
-
         # Note: This file is used as an implicit indicator that processing has completed, so should be written last.
         write(hillshade_file_path, read(hillshade_cog_working_path), content_type=ContentType.GEOTIFF.value)
 
@@ -142,7 +129,6 @@ def run_create_hillshade(
     concurrency: int,
     target_output: str = "/tmp/",
     force: bool = False,
-    gsd: Decimal | None = None,
 ) -> list[tuple[str, list[str]]]:
     """Run `create_hillshade()` in parallel (see `concurrency`).
 
@@ -152,15 +138,12 @@ def run_create_hillshade(
         concurrency: number of concurrent tiles to process
         target_output: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
-        gsd: Ground Sample Distance in meters. If provided, footprint will be created. Defaults to None.
 
     Returns:
         the list of generated hillshade TIFF paths with their input files.
     """
     with Pool(concurrency) as p:
-        results = list(
-            p.map(partial(create_hillshade, preset=preset, target_output=target_output, gsd=gsd, force=force), todo)
-        )
+        results = list(p.map(partial(create_hillshade, preset=preset, target_output=target_output, force=force), todo))
         p.close()
         p.join()
 
@@ -189,7 +172,7 @@ def main() -> None:
     if arguments.is_argo:
         concurrency = 4
 
-    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force, arguments.gsd)
+    tiles = run_create_hillshade(tile_files, arguments.preset, concurrency, arguments.target, arguments.force)
 
     if arguments.collection_id:
         for path, derived_from_tiffs in tiles:
