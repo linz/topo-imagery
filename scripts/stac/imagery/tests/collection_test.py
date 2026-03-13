@@ -53,6 +53,12 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
     with subtests.test():
         assert collection.stac["linz:geospatial_category"] == "rural-aerial-photos"
 
+    with subtests.test():
+        assert collection.stac["linz:security_classification"] == "unclassified"
+
+    with subtests.test():
+        assert collection.stac["gsd"] == 0.3
+
 
 # `set_title()` TESTS
 
@@ -1039,6 +1045,9 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
             collection.stac["description"]
             == "Orthophotography within the Hawke's Bay region captured in the 2025 flying season."
         )
+        assert collection.stac["linz:security_classification"] == "unclassified"
+        assert collection.stac["gsd"] == 0.3
+
     with subtests.test(msg="Slug should remain the same"):
         assert collection.stac["linz:slug"] == old_slug
     with subtests.test(msg="Optional metadata should be removed if not passed"):
