@@ -7,14 +7,21 @@ from typing import TYPE_CHECKING, List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import coalesce_multi_single, get_geometry_from_geojson, str_to_bool, str_to_gsd
+from scripts.cli.cli_helper import (
+    coalesce_multi_single,
+    empty_str_to_bool,
+    get_geometry_from_geojson_feature,
+    get_non_empty_features,
+    str_to_bool,
+    str_to_gsd,
+)
 from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT
 from scripts.files.files_helper import SUFFIX_JSON
 from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.logging.time_helper import time_in_ms
-from scripts.stac.imagery.collection import COLLECTION_FILE_NAME
+from scripts.stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
 from scripts.stac.imagery.create_stac import create_collection
@@ -111,13 +118,6 @@ def get_args_parser() -> CommonArgumentParser:
         "--concurrency", dest="concurrency", help="The number of files to limit concurrent reads", required=True, type=int
     )
     parser.add_argument(
-        "--capture-dates",
-        dest="capture_dates",
-        help="Add a capture-dates.geojson.gz file to the Collection assets",
-        type=str_to_bool,
-        required=False,
-    )
-    parser.add_argument(
         "--add-title-suffix",
         dest="add_title_suffix",
         help="Add a title suffix to the Collection title based on the lifecycle. For example, '[TITLE] - Preview'",
@@ -156,17 +156,29 @@ def get_args_parser() -> CommonArgumentParser:
         required=False,
         default=datetime.now(timezone.utc).strftime(RFC_3339_DATETIME_FORMAT),
     )
-    parser.add_argument(
+    capture_area_arguments = parser.add_mutually_exclusive_group()
+    capture_area_arguments.add_argument(
         "--supplied-capture-area",
         dest="supplied_capture_area",
-        help="Optional externally supplied EPSG:4326 capture area",
+        help="S3 path to optional externally supplied EPSG:4326 capture area",
         required=False,
+        default=False,
+        const=False,
         nargs="?",
+        type=empty_str_to_bool,
     )
-    parser.add_argument(
+    capture_area_arguments.add_argument(
         "--simplified-capture-area",
         dest="simplified_capture_area",
         help="Whether the individual item footprints have been simplified.",
+        required=False,
+        default=False,
+        type=str_to_bool,
+    )
+    capture_area_arguments.add_argument(
+        "--capture-dates",
+        dest="capture_dates",
+        help="Add a capture-dates.geojson.gz file to the Collection assets",
         required=False,
         default=False,
         type=str_to_bool,
@@ -184,13 +196,16 @@ def main(args: List[str] | None = None) -> None:
     collection_id = arguments.collection_id
     supplied_capture_area = arguments.supplied_capture_area
     simplified_capture_area = arguments.simplified_capture_area
+    capture_dates = arguments.capture_dates
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
 
-    if supplied_capture_area and simplified_capture_area:
-        parser.error("--simplified-capture-area cannot be True when --supplied-capture-area is set.")
+    if capture_dates:
+        capture_dates_path = os.path.join(uri, CAPTURE_DATES_FILE_NAME)
+        supplied_capture_area = capture_dates_path
+        get_log().info("Using capture dates file to generate capture area", capture_dates_path=capture_dates_path)
 
     s3_client: S3Client = client("s3")
 
@@ -201,7 +216,9 @@ def main(args: List[str] | None = None) -> None:
 
     if supplied_capture_area:
         content = json.loads(read(supplied_capture_area))
-        polygons.append(get_geometry_from_geojson(content, supplied_capture_area))
+        features = get_non_empty_features(content, supplied_capture_area)
+        for feature in features:
+            polygons.append(get_geometry_from_geojson_feature(feature, supplied_capture_area))
 
     for key, result in get_object_parallel_multithreading(
         bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
@@ -230,8 +247,10 @@ def main(args: List[str] | None = None) -> None:
                 continue
             items_to_add.append(content)
             get_log().info("Item will be added to Collection", item=content["id"], file=key)
-        elif key.endswith(SUFFIX_FOOTPRINT) and not arguments.supplied_capture_area:
-            polygons.append(get_geometry_from_geojson(content, key))
+        elif key.endswith(SUFFIX_FOOTPRINT) and not supplied_capture_area:
+            features = get_non_empty_features(content, key)
+            for feature in features:
+                polygons.append(get_geometry_from_geojson_feature(feature, key))
 
     if len(items_to_add) == 0:
         get_log().error(
@@ -253,7 +272,7 @@ def main(args: List[str] | None = None) -> None:
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
         add_title_suffix=arguments.add_title_suffix,
-        add_capture_dates=arguments.capture_dates,
+        add_capture_dates=capture_dates,
         delete_existing_items=arguments.delete_all_existing_items,
         keep_description=arguments.keep_description,
         keep_title=arguments.keep_title,

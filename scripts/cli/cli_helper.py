@@ -148,6 +148,24 @@ def str_to_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
 
 
+def empty_str_to_bool(value: str) -> bool | str:
+    """Transform an empty string to a boolean value
+
+    Example:
+        >>> empty_str_to_bool("")
+        False
+        >>> empty_str_to_bool("foo")
+        'foo'
+
+    Args:
+        str: string representing a capture area or an empty string
+
+    Returns:
+        bool | str: False if value is an empty string else returns value
+    """
+    return value or False
+
+
 def str_to_list_or_none(values: str) -> list[Decimal] | None:
     """Transform a string to an empty list of list with 2 values. Return None if the string is empty.
 
@@ -174,22 +192,32 @@ def str_to_list_or_none(values: str) -> list[Decimal] | None:
     return result
 
 
-def get_geometry_from_geojson(geojson: dict[str, Any], file_path: str) -> shapely.geometry.base.BaseGeometry:
-    """Extracts a geometry from a GeoJSON file and logs errors if the geometry is invalid.
+def get_geometry_from_geojson_feature(feature: Any, file_path: str) -> shapely.geometry.base.BaseGeometry:
+    """Extracts a geometry from a GeoJSON feature and logs errors if the geometry is invalid.
 
-    :param geojson: The contents of the GeoJSON file.
-    :param file_path: Path to the GeoJSON file.
+    :param feature: A feature from the GeoJSON file.
+    :param file_path: Path to the GeoJSON file for logging.
     :return: A Shapely BaseGeometry object if successful, otherwise raises an exception.
     """
     get_log().debug(f"importing geometry from {file_path}")
     try:
-        return shapely.geometry.shape(geojson["features"][0]["geometry"])
-    except (IndexError, KeyError) as e:
-        error_message = "The supplied GeoJSON does not contain a valid geometry:"
-        get_log().error(
-            error_message,
-            file=file_path,
-            error=str(e),
-        )
-        e.add_note(f"{error_message} {file_path}")
-        raise
+        return shapely.geometry.shape(feature["geometry"])
+    except (AttributeError, KeyError, TypeError, ValueError) as e:
+        error_message = f"The supplied GeoJSON feature does not contain a valid geometry: {file_path}"
+        get_log().error(error_message, error=str(e))
+        raise ValueError(error_message) from e
+
+
+def get_non_empty_features(content: dict[str, Any], file_path: str) -> list[Any]:
+    """Return a non-empty feature list from a supplied GeoJSON file.
+
+    :param content: The content of the GeoJSON.
+    :param file_path: The path to the GeoJSON file for logging purposes.
+    :return: A list of features, otherwise raises an exception.
+    """
+    features = content.get("features")
+    if not isinstance(features, list) or len(features) == 0:
+        error_message = f"Supplied GeoJSON has no features: {file_path}"
+        get_log().error(error_message)
+        raise ValueError(error_message)
+    return features
