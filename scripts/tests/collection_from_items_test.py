@@ -441,7 +441,6 @@ def test_should_fail_with_both_supplied_capture_area_and_capture_dates(
     assert "error: argument --capture-dates: not allowed with argument --supplied-capture-area" in capsys.readouterr().err
 
 
-
 @mock_aws
 def test_should_pass_with_empty_supplied_capture_area_and_capture_dates(
     item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
@@ -503,6 +502,7 @@ def test_should_pass_with_empty_supplied_capture_area_and_capture_dates(
     main(args)
 
     assert "error:" not in capsys.readouterr().err
+
 
 @mock_aws
 def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
