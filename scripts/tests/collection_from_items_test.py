@@ -441,6 +441,69 @@ def test_should_fail_with_both_supplied_capture_area_and_capture_dates(
     assert "error: argument --capture-dates: not allowed with argument --supplied-capture-area" in capsys.readouterr().err
 
 
+
+@mock_aws
+def test_should_pass_with_empty_supplied_capture_area_and_capture_dates(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    capture_dates: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.08592083, -41.23816732],
+                            [173.08596333, -41.2705955],
+                            [173.11461773, -41.27057054],
+                            [173.11456106, -41.23814238],
+                            [173.08592083, -41.23816732],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "",
+        "--capture-dates",
+        "true",
+    ]
+
+    main(args)
+
+    assert "error:" not in capsys.readouterr().err
+
 @mock_aws
 def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
