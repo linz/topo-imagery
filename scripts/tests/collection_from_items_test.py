@@ -393,7 +393,7 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
         main(args)
 
     assert (
-        "--simplified-capture-area cannot be True when --supplied-capture-area or --capture-dates are set."
+        "error: argument --simplified-capture-area: not allowed with argument --supplied-capture-area"
         in capsys.readouterr().err
     )
 
@@ -438,7 +438,7 @@ def test_should_fail_with_both_supplied_capture_area_and_capture_dates(
     with raises(SystemExit):
         main(args)
 
-    assert "--supplied-capture-area and --capture-dates cannot both be set" in capsys.readouterr().err
+    assert "error: argument --capture-dates: not allowed with argument --supplied-capture-area" in capsys.readouterr().err
 
 
 @mock_aws
