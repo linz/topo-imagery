@@ -100,7 +100,7 @@ A good test suite should:
 
 Tests serve as documentation:
 
-- How function are expected to be used
+- How functions are expected to be used
 - What inputs are valid
 - What outputs are expected
 - What errors should be raised
