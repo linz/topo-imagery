@@ -149,7 +149,7 @@ def str_to_bool(value: str) -> bool:
 
 
 def empty_str_to_false(value: str) -> str | bool:
-    """Transform an empty string to a boolean value
+    """Transform an empty string to False. Returns value if not empty.
 
     Example:
         >>> empty_str_to_false("")
