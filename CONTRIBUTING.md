@@ -125,7 +125,7 @@ Focus on:
 
 All new features must include tests that verify:
 
-- Expected behavior
+- Expected behaviour
 - Edge cases
 - Failure scenarios (when applicable)
 
