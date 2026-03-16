@@ -164,7 +164,7 @@ Tests must not depend on:
 
 ##### Focused
 
-Each test should verify one logical behavior.
+Each test should verify one logical behaviour.
 
 If a test fails, it should be immediately clear why.
 
