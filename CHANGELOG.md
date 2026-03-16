@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.18.1](https://github.com/linz/topo-imagery/compare/v7.18.0...v7.18.1) (2026-03-16)
+
+
+### Bug Fixes
+
+* add gsd and linz:security_classification fields to collection when re-standardised TDE-1842 ([#1482](https://github.com/linz/topo-imagery/issues/1482)) ([b3f468d](https://github.com/linz/topo-imagery/commit/b3f468de004c2c2516ffb5df175795652d9d56e7))
+
 ## [7.18.0](https://github.com/linz/topo-imagery/compare/v7.17.0...v7.18.0) (2026-03-09)
 
 
