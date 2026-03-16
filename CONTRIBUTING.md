@@ -136,7 +136,7 @@ A feature is not complete without tests.
 Every bug fix must include a regression test that:
 
 - Reproduces the original bug
-- Verify the correct behavior
+- Verify the correct behaviour
 - Prevent the same bug from reappearing
 
 This ensures the same issue cannot silently reappear in the future.
