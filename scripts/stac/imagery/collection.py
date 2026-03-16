@@ -147,6 +147,8 @@ class ImageryCollection:
             context: The context containing the updated metadata.
             updated_datetime: The updated datetime of the Collection.
         """
+        self.stac["gsd"] = float(context.gsd)
+        self.stac["linz:security_classification"] = "unclassified"
         if context.lifecycle:
             self.stac["linz:lifecycle"] = context.lifecycle
         if context.category:
