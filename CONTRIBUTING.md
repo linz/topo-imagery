@@ -85,7 +85,7 @@ This keeps documentation and behavior in sync, reduces the risk of outdated comm
 
 ### Testing
 
-Tests are required for all non-trivial behavior.
+Tests are required for all non-trivial behaviour.
 
 Testing is not optional or “added later.”
 It is part of the implementation.
