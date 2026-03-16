@@ -9,7 +9,7 @@ from linz_logger import get_log
 
 from scripts.cli.cli_helper import (
     coalesce_multi_single,
-    empty_str_to_bool,
+    empty_str_to_false,
     get_geometry_from_geojson_feature,
     get_non_empty_features,
     str_to_bool,
@@ -165,7 +165,7 @@ def get_args_parser() -> CommonArgumentParser:
         default=False,
         const=False,
         nargs="?",
-        type=empty_str_to_bool,
+        type=empty_str_to_false,
     )
     capture_area_arguments.add_argument(
         "--simplified-capture-area",

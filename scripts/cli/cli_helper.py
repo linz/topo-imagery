@@ -148,20 +148,20 @@ def str_to_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError(f"Invalid boolean (must be exactly 'true' or 'false'): {value}")
 
 
-def empty_str_to_bool(value: str) -> bool | str:
+def empty_str_to_false(value: str) -> str | bool:
     """Transform an empty string to a boolean value
 
     Example:
-        >>> empty_str_to_bool("")
+        >>> empty_str_to_false("")
         False
-        >>> empty_str_to_bool("foo")
+        >>> empty_str_to_false("foo")
         'foo'
 
     Args:
         str: string representing a capture area or an empty string
 
     Returns:
-        bool | str: False if value is an empty string else returns value
+        str | bool: False if value is an empty string else returns value
     """
     return value or False
 
