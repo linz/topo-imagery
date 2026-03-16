@@ -109,7 +109,7 @@ Tests serve as documentation:
 
 When to write tests?
 
-- When adding a new functionality
+- When adding new functionality
 - Before refactoring if not existing for what is going to be refactored
 - Before fixing complex bugs
 - When behaviour is ambiguous
