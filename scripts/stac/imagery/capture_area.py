@@ -122,7 +122,7 @@ def get_capture_area_description(is_supplied: bool = False, is_simplified: bool 
         >>> get_capture_area_description(is_supplied=False)
         'Boundary of the total capture area for this collection. Excludes nodata areas in the source data. Geometries are simplified.'
         >>> get_capture_area_description(is_supplied=True)
-        'Boundary of the total capture area for this collection provided by the data supplier. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
+        'Boundary of the total capture area for this collection. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
         >>> get_capture_area_description(is_supplied=False, is_simplified=True)
         'Boundary of the total capture area for this collection. May include some areas of nodata where capture was attempted but unsuccessful. Geometries are simplified.'
         >>> get_capture_area_description(is_supplied=True, is_simplified=True)
@@ -134,9 +134,7 @@ def get_capture_area_description(is_supplied: bool = False, is_simplified: bool 
         raise ValueError("'is_supplied' and 'is_simplified' cannot both be True.")
     nodata_warning = ". May include some areas of nodata where capture was attempted but unsuccessful."
     desc = "Boundary of the total capture area for this collection"
-    if is_supplied:
-        desc += " provided by the data supplier" + nodata_warning
-    elif is_simplified:
+    if is_supplied or is_simplified:
         desc += nodata_warning
     else:
         desc += ". Excludes nodata areas in the source data."
