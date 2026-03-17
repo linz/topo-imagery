@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 from unittest.mock import patch
 
 import pytest
@@ -9,6 +9,7 @@ from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
+from shapely.geometry import shape
 
 from scripts.collection_from_items import NoItemsError, main
 from scripts.conftest import any_epoch_datetime_string
@@ -391,4 +392,239 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
     with raises(SystemExit):
         main(args)
 
-    assert "--simplified-capture-area cannot be True when --supplied-capture-area is set." in capsys.readouterr().err
+    assert (
+        "error: argument --simplified-capture-area: not allowed with argument --supplied-capture-area"
+        in capsys.readouterr().err
+    )
+
+
+@mock_aws
+def test_should_fail_with_both_supplied_capture_area_and_capture_dates(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+    write("s3://stacfiles/supplied-capture-area.geojson", dict_to_json_bytes({"type": "FeatureCollection", "features": []}))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "s3://stacfiles/supplied-capture-area.geojson",
+        "--capture-dates",
+        "true",
+    ]
+
+    with raises(SystemExit):
+        main(args)
+
+    assert "error: argument --capture-dates: not allowed with argument --supplied-capture-area" in capsys.readouterr().err
+
+
+@mock_aws
+def test_should_pass_with_empty_supplied_capture_area_and_capture_dates(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    capture_dates: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.08592083, -41.23816732],
+                            [173.08596333, -41.2705955],
+                            [173.11461773, -41.27057054],
+                            [173.11456106, -41.23814238],
+                            [173.08592083, -41.23816732],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--supplied-capture-area",
+        "",
+        "--capture-dates",
+        "true",
+    ]
+
+    main(args)
+
+    assert "error:" not in capsys.readouterr().err
+
+
+@mock_aws
+def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    capture_dates: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.08592083, -41.23816732],
+                            [173.08596333, -41.2705955],
+                            [173.11461773, -41.27057054],
+                            [173.11456106, -41.23814238],
+                            [173.08592083, -41.23816732],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    write("s3://stacfiles/capture-dates.geojson", dict_to_json_bytes(capture_dates))
+
+    footprint = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [173.11456106, -41.23814238],
+                            [173.11461773, -41.27057054],
+                            [173.14327209, -41.27053845],
+                            [173.14320125, -41.23811033],
+                            [173.11456106, -41.23814238],
+                        ]
+                    ],
+                },
+            }
+        ],
+    }
+    write("s3://stacfiles/item_footprint.geojson", dict_to_json_bytes(footprint))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--capture-dates",
+        "true",
+    ]
+    main(args)
+
+    capture_area_resp = s3_client.get_object(Bucket="stacfiles", Key="capture-area.geojson")
+    capture_area: dict[str, Any] = json.loads(capture_area_resp["Body"].read().decode("utf-8"))
+    expected_feature: dict[str, Any] = capture_dates["features"][0]
+
+    assert shape(capture_area["geometry"]).equals(shape(expected_feature["geometry"]))
+
+
+@mock_aws
+def test_should_fail_when_capture_dates_file_missing(
+    item: ImageryItem, fake_collection_context: CollectionContext, capsys: CaptureFixture[str]
+) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+        "--capture-dates",
+        "true",
+    ]
+
+    with raises(Exception):
+        main(args)
+
+    logs = capsys.readouterr().out
+
+    assert "s3_key_not_found" in logs
