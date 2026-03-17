@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.19.0](https://github.com/linz/topo-imagery/compare/v7.18.1...v7.19.0) (2026-03-17)
+
+
+### Features
+
+* create capture area from capture dates file TDE-1839 ([#1478](https://github.com/linz/topo-imagery/issues/1478)) ([25ae5dc](https://github.com/linz/topo-imagery/commit/25ae5dcd891052e1c53dec9b11f4f078983d0fc5))
+
+
+### Documentation
+
+* add Testing section in Coding Guidelines TDE-1446 ([#1474](https://github.com/linz/topo-imagery/issues/1474)) ([727bd5a](https://github.com/linz/topo-imagery/commit/727bd5a4adad22e0883e7fa93f8bd5ae2de67e6d))
+
 ## [7.18.1](https://github.com/linz/topo-imagery/compare/v7.18.0...v7.18.1) (2026-03-16)
 
 
