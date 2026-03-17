@@ -102,10 +102,10 @@ class CompressionPreset(str, Enum):
     """Enum for the different compression presets available for standardising TIFFs."""
 
     DEM_LERC = "dem_lerc"
+    DEM_ZSTD = "dem_zstd"
     LZW = "lzw"
     RGBNIR_ZSTD = "rgbnir_zstd"
     WEBP = "webp"
-    ZSTD = "zstd"
 
 
 class HillshadePreset(str, Enum):
