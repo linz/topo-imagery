@@ -50,19 +50,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure AWS Credentials
-        if: ${{env.AWS_CI_ROLE != '' && (github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:')) || github.event.label.name == 'container'}}
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
-        with:
-          aws-region: ap-southeast-2
-          mask-aws-account-id: true
-          role-to-assume: ${{ env.AWS_CI_ROLE }}
-
-      - name: Login to Amazon ECR
-        if: ${{env.AWS_CI_ROLE != '' && (github.ref == 'refs/heads/master') && !(startsWith(github.event.head_commit.message, 'release:')) || github.event.label.name == 'container'}}
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@2fc7aceee09e9e4a7105c0d060c656fad0b4f63d # v1
-
       - name: Setup docker tags
         id: tags
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v6
@@ -73,18 +60,10 @@ jobs:
 
             if ('${{github.event.label.name}}' == 'container') {
               tags.push('ghcr.io/${{ github.repository }}:pr-${{github.event.number}}');
-              if ("${{ steps.login-ecr.outputs.registry }}") {
-                tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:pr-${{ github.event.number }}');
-              }
             } else {
               tags.push('ghcr.io/${{ github.repository }}:latest');
               tags.push('ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}');
-              if ("${{ steps.login-ecr.outputs.registry }}") {
-                tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:latest');
-                tags.push('${{ steps.login-ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ steps.version.outputs.version }}');
-              }
             }
-
             return tags.join(', ')
 
       - name: Build and push container
