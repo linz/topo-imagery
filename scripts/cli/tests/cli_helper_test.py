@@ -168,3 +168,32 @@ def test_get_non_empty_features() -> None:
     with raises(Exception) as e:
         get_non_empty_features(geojson, "/tmp/test/test.geojson")
     assert str(e.value) == "Supplied GeoJSON has no features: /tmp/test/test.geojson"
+
+
+def test_get_non_empty_features_valid_feature_collection() -> None:
+    geojson: dict[str, Any] = {
+        "type": "FeatureCollection",
+        "name": "foo",
+        "features": [
+            {
+                "type": "Feature",
+                "geometry": {},
+            },
+            {
+                "type": "Feature",
+                "geometry": {},
+            },
+        ],
+    }
+    features = get_non_empty_features(geojson, "/tmp/test/test.geojson")
+    assert len(features) == 2
+
+
+def test_get_non_empty_features_single_feature() -> None:
+    geojson: dict[str, Any] = {
+        "type": "Feature",
+        "geometry": {},
+    }
+    features = get_non_empty_features(geojson, "/tmp/test/test.geojson")
+    assert len(features) == 1
+    assert features[0]["type"] == "Feature"
