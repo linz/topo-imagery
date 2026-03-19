@@ -215,6 +215,9 @@ def get_non_empty_features(content: dict[str, Any], file_path: str) -> list[Any]
     :param file_path: The path to the GeoJSON file for logging purposes.
     :return: A list of features, otherwise raises an exception.
     """
+    if content.get("type") == "Feature":
+        return [content]
+
     features = content.get("features")
     if not isinstance(features, list) or len(features) == 0:
         error_message = f"Supplied GeoJSON has no features: {file_path}"
