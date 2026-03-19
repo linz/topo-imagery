@@ -192,6 +192,31 @@ def str_to_list_or_none(values: str) -> list[Decimal] | None:
     return result
 
 
+def str_to_positive_int(value: str) -> int:
+    """Transform a string to a positive integer
+
+    Example:
+        >>> str_to_positive_int("5")
+        5
+
+    Args:
+        value: string representing a positive integer
+
+    Raises:
+        ArgumentTypeError: if the string is not a positive integer
+
+    Returns:
+        int: the positive integer value
+    """
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"{value!r} is not a valid integer") from exc
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be >= 1")
+    return parsed
+
+
 def get_geometry_from_geojson_feature(feature: Any, file_path: str) -> shapely.geometry.base.BaseGeometry:
     """Extracts a geometry from a GeoJSON feature and logs errors if the geometry is invalid.
 

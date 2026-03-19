@@ -1,5 +1,6 @@
 import os
 import sys
+from argparse import ArgumentParser
 from datetime import datetime, timezone
 
 from linz_logger import get_log
@@ -10,9 +11,9 @@ from scripts.cli.cli_helper import (
     str_to_bool,
     str_to_gsd,
     str_to_list_or_none,
+    str_to_positive_int,
     valid_date,
 )
-from scripts.cli.common_args import CommonArgumentParser
 from scripts.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from scripts.files.file_tiff import FileTiff
 from scripts.files.files_helper import SUFFIX_JSON, ContentType
@@ -23,8 +24,8 @@ from scripts.stac.imagery.create_stac import create_item
 from scripts.standardising import StandardisingConfig, run_standardising
 
 
-def get_args_parser() -> CommonArgumentParser:
-    parser = CommonArgumentParser(description="Standardise and validate imagery TIFF files, and create STAC Metadata.")
+def get_args_parser() -> ArgumentParser:
+    parser = ArgumentParser(description="Standardise and validate imagery TIFF files, and create STAC Metadata.")
     parser.add_argument("--preset", dest="preset", required=True, help="Standardised file format. Example: webp")
     parser.add_argument(
         "--from-file", dest="from_file", required=True, help="The path to a json file containing the input tiffs"
@@ -102,6 +103,14 @@ def get_args_parser() -> CommonArgumentParser:
         help="Regenerate the standardised TIFF and STAC files if already exist. Defaults to False.",
         action="store_true",
     )
+    parser.add_argument(
+        "--concurrency",
+        dest="concurrency",
+        type=str_to_positive_int,
+        help="Number of concurrent tile to standardise. Defaults to 1.",
+        required=False,
+        default=1,
+    )
     return parser
 
 
@@ -159,13 +168,9 @@ def main() -> None:
         start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
         end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
 
-    concurrency: int = 1
-    if arguments.is_argo:
-        concurrency = 4
-
     gdal_version = os.environ["GDAL_VERSION"]
 
-    tiff_files = run_standardising(tile_files, standardising_config, concurrency, gdal_version, arguments.target)
+    tiff_files = run_standardising(tile_files, standardising_config, arguments.concurrency, gdal_version, arguments.target)
 
     if len(tiff_files) == 0:
         get_log().info("no_tiff_to_process", action="standardise_validate", reason="skipped")
