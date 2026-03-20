@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.20.0](https://github.com/linz/topo-imagery/compare/v7.19.1...v7.20.0) (2026-03-20)
+
+
+### Features
+
+* standardise_validate allow custom concurrency TDE-1832 ([#1488](https://github.com/linz/topo-imagery/issues/1488)) ([8c22b24](https://github.com/linz/topo-imagery/commit/8c22b244a35b9bb1bcbd7cf2f97fb06a584ca721))
+
 ## [7.19.1](https://github.com/linz/topo-imagery/compare/v7.19.0...v7.19.1) (2026-03-19)
 
 
