@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.19.1](https://github.com/linz/topo-imagery/compare/v7.19.0...v7.19.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* accept single feature geojson TDE-1858 ([#1486](https://github.com/linz/topo-imagery/issues/1486)) ([da33c12](https://github.com/linz/topo-imagery/commit/da33c1283234b7fc74c868ed06e8cd62fa3189c6))
+
+
+### Reverts
+
+* "build: stop publishing containers to ECR" TDE-1861 ([#1485](https://github.com/linz/topo-imagery/issues/1485)) ([d84a3ba](https://github.com/linz/topo-imagery/commit/d84a3ba18979dc41d5e079c4ebb3854cef45fe47))
+
 ## [7.19.0](https://github.com/linz/topo-imagery/compare/v7.18.1...v7.19.0) (2026-03-17)
 
 
