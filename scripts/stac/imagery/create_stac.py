@@ -49,7 +49,9 @@ def create_collection(
     if odr_url:
         existing_collection_path = os.path.join(odr_url, COLLECTION_FILE_NAME)
         get_log().info("Retrieving existing Collection", path=existing_collection_path)
-        load_existing_capture_area = not collection_context.delete_existing_items
+        # load_existing_capture_area = not (collection_context.delete_existing_items or supplied_capture_area)
+        load_existing_capture_area = not (collection_context.delete_existing_items or supplied_capture_area)
+
         collection = ImageryCollection.from_file(existing_collection_path, load_existing_capture_area)
         if collection_context.collection_id != collection.stac["id"]:
             raise ValueError(

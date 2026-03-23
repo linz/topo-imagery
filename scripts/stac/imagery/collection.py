@@ -362,7 +362,8 @@ class ImageryCollection:
         self, polygons: list[BaseGeometry], target: str, description: str, artifact_target: str = "/tmp"
     ) -> None:
         """Add the capture area of the Collection.
-        If the Collection is an update of a published dataset, the existing capture area will be merged with the new one.
+        If the Collection is an update of a published dataset, and the capture area has not been supplied, 
+        the existing capture area will be merged with the new one.
         The `href` or path of the capture-area.geojson is always set as the relative `./capture-area.geojson`
 
         Args:
