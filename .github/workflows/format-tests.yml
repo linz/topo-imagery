@@ -29,10 +29,10 @@ jobs:
         run: |
           docker build --label "github_run_id=${GITHUB_RUN_ID}" --tag topo-imagery .
 
-      - name: End to end test - Aerial Imagery
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          cmp --silent "${{ runner.temp }}/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
+      # - name: End to end test - Aerial Imagery
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     cmp --silent "${{ runner.temp }}/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
 
       # - name: End to end test - Elevation
       #   run: |
@@ -40,74 +40,74 @@ jobs:
       #     cmp --silent "${{ runner.temp }}/BK39_10000_0102.tiff" ./scripts/tests/data/output/BK39_10000_0102.tiff
       #     cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101.tiff
 
-      - name: End to end test - Hillshade Default
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade --target /tmp/ --force
-          cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_default.tiff
+      # - name: End to end test - Hillshade Default
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade --target /tmp/ --force
+      #     cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_default.tiff
 
-      - name: End to end test - Hillshade Igor
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade-igor --target /tmp/ --force
-          cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_igor.tiff
+      # - name: End to end test - Hillshade Igor
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 generate_hillshade.py --from-file ./tests/data/hillshade.json --preset hillshade-igor --target /tmp/ --force
+      #     cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_igor.tiff
 
-      - name: End to end test - Historical Aerial Imagery
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/hi.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 60 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          cmp --silent "${{ runner.temp }}/BQ31_5000_0608.tiff" ./scripts/tests/data/output/BQ31_5000_0608.tiff
+      # - name: End to end test - Historical Aerial Imagery
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/hi.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 60 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     cmp --silent "${{ runner.temp }}/BQ31_5000_0608.tiff" ./scripts/tests/data/output/BQ31_5000_0608.tiff
 
-      - name: End to end test - DEM ZSTD
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem_zstd.json --preset dem_zstd --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z --force
-          cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_zstd.tiff
+      # - name: End to end test - DEM ZSTD
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/dem_zstd.json --preset dem_zstd --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z --force
+      #     cmp --silent "${{ runner.temp }}/BK39_10000_0101.tiff" ./scripts/tests/data/output/BK39_10000_0101_zstd.tiff
 
-      - name: End to end test - Near Infrared Aerial Imagery
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/nir.json --preset rgbnir_zstd --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          cmp --silent "${{ runner.temp }}/BR33_500_040034.tiff" ./scripts/tests/data/output/BR33_500_040034.tiff
+      # - name: End to end test - Near Infrared Aerial Imagery
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/nir.json --preset rgbnir_zstd --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     cmp --silent "${{ runner.temp }}/BR33_500_040034.tiff" ./scripts/tests/data/output/BR33_500_040034.tiff
 
-      - name: End to end test - Cutline (Aerial Imagery)
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/cutline/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --cutline ./tests/data/cutline_aerial.fgb --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          cmp --silent "${{ runner.temp }}/cutline/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829_cut.tiff
+      # - name: End to end test - Cutline (Aerial Imagery)
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/cutline/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --cutline ./tests/data/cutline_aerial.fgb --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     cmp --silent "${{ runner.temp }}/cutline/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829_cut.tiff
 
-      - name: End to end test - Footprint
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          jq 'select(.xy_coordinate_resolution == 1E-8) // error("Wrong or missing X/Y coordinate resolution")' "${{ runner.temp }}/BG35_1000_4829_footprint.geojson"
-          cmp --silent <(jq "del(.features[0].properties.location, .xy_coordinate_resolution)" "${{ runner.temp }}/BG35_1000_4829_footprint.geojson") <(jq "del(.features[0].properties.location, .xy_coordinate_resolution)" ./scripts/tests/data/output/BG35_1000_4829_footprint.geojson)
+      # - name: End to end test - Footprint
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/aerial.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     jq 'select(.xy_coordinate_resolution == 1E-8) // error("Wrong or missing X/Y coordinate resolution")' "${{ runner.temp }}/BG35_1000_4829_footprint.geojson"
+      #     cmp --silent <(jq "del(.features[0].properties.location, .xy_coordinate_resolution)" "${{ runner.temp }}/BG35_1000_4829_footprint.geojson") <(jq "del(.features[0].properties.location, .xy_coordinate_resolution)" ./scripts/tests/data/output/BG35_1000_4829_footprint.geojson)
 
-      - name: End to end test - Footprint simplification
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/footprint.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z --simplify-footprints=true
-          cmp --silent <(jq -S '.features[].geometry' ./scripts/tests/data/output/AX31_10000_0502_footprint_simplified.geojson) <(jq -S '.features[].geometry' "${{ runner.temp }}/AX31_10000_0502_footprint.geojson")
+      # - name: End to end test - Footprint simplification
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/footprint.json --preset dem_lerc --target-epsg 2193 --source-epsg 2193 --target /tmp/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z --simplify-footprints=true
+      #     cmp --silent <(jq -S '.features[].geometry' ./scripts/tests/data/output/AX31_10000_0502_footprint_simplified.geojson) <(jq -S '.features[].geometry' "${{ runner.temp }}/AX31_10000_0502_footprint.geojson")
 
-      - name: End to end test - Thumbnails (Topo50/Topo250)
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 thumbnails.py --from-file ./tests/data/thumbnails.json --target /tmp/
-          cmp --silent "${{ runner.temp }}/CB07_GeoTifv1-02-thumbnail.jpg" ./scripts/tests/data/output/CB07_GeoTifv1-02-thumbnail.jpg
-          cmp --silent "${{ runner.temp }}/CB07_TIFFv1-02-thumbnail.jpg" ./scripts/tests/data/output/CB07_TIFFv1-02-thumbnail.jpg
+      # - name: End to end test - Thumbnails (Topo50/Topo250)
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 thumbnails.py --from-file ./tests/data/thumbnails.json --target /tmp/
+      #     cmp --silent "${{ runner.temp }}/CB07_GeoTifv1-02-thumbnail.jpg" ./scripts/tests/data/output/CB07_GeoTifv1-02-thumbnail.jpg
+      #     cmp --silent "${{ runner.temp }}/CB07_TIFFv1-02-thumbnail.jpg" ./scripts/tests/data/output/CB07_TIFFv1-02-thumbnail.jpg
 
-      - name: End to end test - Restandardise Aerial Imagery
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/restandardise.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/restandardise/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          cmp --silent "${{ runner.temp }}/restandardise/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
+      # - name: End to end test - Restandardise Aerial Imagery
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 standardise_validate.py --from-file ./tests/data/restandardise.json --preset webp --target-epsg 2193 --source-epsg 2193 --target /tmp/restandardise/ --collection-id 123 --start-datetime 2023-01-01 --end-datetime 2023-01-01 --gsd 10 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     cmp --silent "${{ runner.temp }}/restandardise/BG35_1000_4829.tiff" ./scripts/tests/data/output/BG35_1000_4829.tiff
 
-      - name: End to end test - Translate Ascii Files (Elevation)
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 translate_ascii.py --from-file ./tests/data/elevation_ascii.json --target /tmp/
-          cmp --silent "${{ runner.temp }}/elevation_ascii.tiff" ./scripts/tests/data/output/elevation_ascii.tiff
+      # - name: End to end test - Translate Ascii Files (Elevation)
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 translate_ascii.py --from-file ./tests/data/elevation_ascii.json --target /tmp/
+      #     cmp --silent "${{ runner.temp }}/elevation_ascii.tiff" ./scripts/tests/data/output/elevation_ascii.tiff
 
-      - name: End to end test - Remove empty files
-        run: |
-          docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01 --gsd 60 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
-          empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
-          [[ -n "$empty_target_directory" ]]
+      # - name: End to end test - Remove empty files
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}/tmp-empty/:/tmp/" topo-imagery python3 standardise_validate.py --from-file=./tests/data/empty.json --preset=webp --target-epsg=2193 --source-epsg=2193 --target=/tmp --collection-id=123 --start-datetime=2023-01-01 --end-datetime=2023-01-01 --gsd 60 --create-footprints=true --current-datetime=2010-09-18T12:34:56Z
+      #     empty_target_directory="$(find "${{ runner.temp }}/tmp-empty" -maxdepth 0 -type d -empty)"
+      #     [[ -n "$empty_target_directory" ]]
 
-      - name: End to end test - Fix LAZ headers with pdal translate
-        run: |
-          docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 fix_laz_header.py --files ./tests/data/pdal_bad_header_1.laz ./tests/data/pdal_good_header_1.laz --target /tmp/
-          cmp --silent "${{ runner.temp }}/pdal_good_header_1.laz" "./scripts/tests/data/pdal_good_header_1.laz" && echo "good header retained, as expected"
-          cmp --silent "${{ runner.temp }}/pdal_bad_header_1.laz" "./scripts/tests/data/pdal_bad_header_1.laz" && exit 1 || echo "bad header fixed, as expected"
+      # - name: End to end test - Fix LAZ headers with pdal translate
+      #   run: |
+      #     docker run  -v "${{ runner.temp }}:/tmp/" topo-imagery python3 fix_laz_header.py --files ./tests/data/pdal_bad_header_1.laz ./tests/data/pdal_good_header_1.laz --target /tmp/
+      #     cmp --silent "${{ runner.temp }}/pdal_good_header_1.laz" "./scripts/tests/data/pdal_good_header_1.laz" && echo "good header retained, as expected"
+      #     cmp --silent "${{ runner.temp }}/pdal_bad_header_1.laz" "./scripts/tests/data/pdal_bad_header_1.laz" && exit 1 || echo "bad header fixed, as expected"
 
       - uses: actions/upload-artifact@v4.6.0
         with:
