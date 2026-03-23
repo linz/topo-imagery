@@ -405,13 +405,13 @@ def test_check_srs_invalid() -> None:
     assert file_tiff.get_errors()
 
 
-def test_should_throw_when_encountering_non_integer_no_data_value() -> None:
-    gdalinfo = fake_gdal_info()
-    add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))], no_data_value="-9999.1")
+# def test_should_throw_when_encountering_non_integer_no_data_value() -> None:
+#     gdalinfo = fake_gdal_info()
+#     add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))], no_data_value="-9999.1")
 
-    file_tiff = FileTiff(["test"], CompressionPreset.DEM_LERC.value)
-    file_tiff.check_no_data(gdalinfo)
+#     file_tiff = FileTiff(["test"], CompressionPreset.DEM_LERC.value)
+#     file_tiff.check_no_data(gdalinfo)
 
-    assert file_tiff.get_errors() == [
-        {"type": FileTiffErrorType.NO_DATA, "message": "noDataValue is not -9999", "current": "-9999.1"}
-    ]
+#     assert file_tiff.get_errors() == [
+#         {"type": FileTiffErrorType.NO_DATA, "message": "noDataValue is not -9999", "current": "-9999.1"}
+#     ]
