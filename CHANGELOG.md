@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.21.0](https://github.com/linz/topo-imagery/compare/v7.20.1...v7.21.0) (2026-03-23)
+
+
+### Features
+
+* do not generate hillshade footprints TDE-1839 ([#1481](https://github.com/linz/topo-imagery/issues/1481)) ([4da88fe](https://github.com/linz/topo-imagery/commit/4da88fe4a3b62e859259a983a8180360212cdc04))
+
 ## [7.20.1](https://github.com/linz/topo-imagery/compare/v7.20.0...v7.20.1) (2026-03-23)
 
 
