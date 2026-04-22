@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.21.1](https://github.com/linz/topo-imagery/compare/v7.21.0...v7.21.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* filter non-polygons artifacts from capture-area TDE-1857 ([#1495](https://github.com/linz/topo-imagery/issues/1495)) ([a1aef65](https://github.com/linz/topo-imagery/commit/a1aef6592b819d5b19f0d4cdea0da6e31fe9326a))
+
 ## [7.21.0](https://github.com/linz/topo-imagery/compare/v7.20.1...v7.21.0) (2026-03-23)
 
 
