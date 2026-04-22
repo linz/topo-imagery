@@ -2,7 +2,9 @@ from decimal import Decimal
 from enum import Enum
 from typing import Annotated
 
-DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(-9999)
+DEFAULT_NO_DATA_VALUE: Annotated[Decimal, "From the New Zealand National Aerial LiDAR Base Specification"] = Decimal(
+    "-3.402823e+38"
+)
 
 SCALE_254_ADD_NO_DATA = ["-scale", "0", "255", "0", "254", "-a_nodata", "255"]
 """ Scale imagery from 0-255 to 0-254 then set 255 as NO_DATA. 
