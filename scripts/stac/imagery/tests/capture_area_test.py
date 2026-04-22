@@ -4,10 +4,10 @@ from typing import cast
 
 from pytest_subtests import SubTests
 from shapely import get_exterior_ring, is_ccw
-from shapely.geometry import MultiPolygon, Polygon, shape
+from shapely.geometry import GeometryCollection, LineString, MultiPolygon, Point, Polygon, shape
 from shapely.predicates import is_valid
 
-from scripts.stac.imagery.capture_area import generate_capture_area, merge_polygons, to_feature
+from scripts.stac.imagery.capture_area import extract_polygons, generate_capture_area, merge_polygons, to_feature
 
 # In the following tests, the expected and result GeoJSON documents are printed if the test fails.
 # This allows to visualize the geometry for debugging purpose.
@@ -267,3 +267,27 @@ def test_should_make_compliant_capture_area(subtests: SubTests) -> None:
 
     with subtests.test(msg="Is counterclockwise"):
         assert is_ccw(get_exterior_ring(merged_polygons.geoms[0]))
+
+
+def test_extract_polygons_from_geometry_collection() -> None:
+    poly = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+    line = LineString([(0, 0), (1, 1)])
+    pt = Point(0, 0)
+
+    gc = GeometryCollection([poly, line, pt])
+    result = extract_polygons(gc)
+
+    assert result.geom_type == "Polygon"
+    assert result.equals_exact(poly, tolerance=0.0)
+
+
+def test_extract_multiple_polygons_from_geometry_collection() -> None:
+    poly1 = Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)])
+    poly2 = Polygon([(2, 2), (3, 2), (3, 3), (2, 3), (2, 2)])
+    line = LineString([(0, 0), (1, 1)])
+
+    gc = GeometryCollection([poly1, poly2, line])
+    result = extract_polygons(gc)
+
+    assert result.geom_type == "MultiPolygon"
+    assert len(result.geoms) == 2

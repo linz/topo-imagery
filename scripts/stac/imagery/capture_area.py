@@ -5,6 +5,7 @@ from typing import Any, Sequence
 from linz_logger import get_log
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
 from shapely.constructive import make_valid
+from shapely.geometry import MultiPolygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
@@ -42,6 +43,30 @@ def to_feature(geometry: BaseGeometry) -> dict[str, Any]:
     return {"geometry": json.loads(to_geojson(geometry)), "type": "Feature", "properties": {}}
 
 
+def extract_polygons(geometry: BaseGeometry) -> BaseGeometry:
+    """Extract only Polygon and MultiPolygon geometries.
+    If the geometry is a GeometryCollection, it will filter out Points, LineStrings, etc.
+
+    Args:
+        geometry: A BaseGeometry, potentially a GeometryCollection containing mixed types.
+
+    Returns:
+        A Polygon, MultiPolygon, or the original geometry if no extraction is needed.
+    """
+    if geometry.geom_type == "GeometryCollection":
+        polys = []
+        for geom in geometry.geoms:
+            if geom.geom_type == "Polygon":
+                polys.append(geom)
+            elif geom.geom_type == "MultiPolygon":
+                polys.extend(geom.geoms)
+
+        if len(polys) == 1:
+            return polys[0]
+        return MultiPolygon(polys)
+    return geometry
+
+
 def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> BaseGeometry:
     """Merge a list of polygons by converting them to a single geometry that covers the same area.
     A buffer distance is used to buffer out the polygons before dissolving them together and then negative buffer them back in.
@@ -66,9 +91,12 @@ def merge_polygons(polygons: Sequence[BaseGeometry], buffer_distance: float) -> 
     union_rounded = wkt.loads(wkt.dumps(union_simplified, rounding_precision=8))
     # Ensure geometry is valid
     valid_geom = make_valid(union_rounded)
+    # Remove potential non-polygon geometries that may have been created during the make_valid process
+    filtered_geom = extract_polygons(valid_geom)
+
     # Apply right-hand rule winding order (exterior rings should be counter-clockwise) to the geometry
     # Ref: https://datatracker.ietf.org/doc/html/rfc7946#section-3.1.6
-    oriented_valid_geom = orient(valid_geom, sign=1.0)
+    oriented_valid_geom = orient(filtered_geom, sign=1.0)
 
     return oriented_valid_geom
 
