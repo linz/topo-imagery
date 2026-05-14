@@ -22,10 +22,10 @@ jobs:
           uv sync --frozen --no-install-project
       - name: Format
         run: |
-          uvx run pre-commit run --all-files
+          uvx pre-commit run --all-files
       - name: Unit Tests
         run: |
-          uvx run pytest --doctest-modules .
+          uvx pytest --doctest-modules .
 
       - name: Build containers
         run: |
