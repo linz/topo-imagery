@@ -10,7 +10,7 @@ ENV TZ=Etc/UTC
 COPY --from=uv_source /uv /uvx /bin/
 
 RUN apt-get update
-# Install pipx and build dependencies
+# Install build dependencies
 RUN apt-get install --assume-yes gcc libgeos-dev python3-dev
 
 # Add UbuntuGIS PPA and install PDAL
