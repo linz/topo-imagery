@@ -79,7 +79,7 @@ def test_coalesce_single_no_multi() -> None:
 
 
 def test_coalesce_nothing() -> None:
-    # pylint: disable-msg=use-implicit-booleaness-not-comparison
+    # pylint: disable=use-implicit-booleaness-not-comparison
     multi_items = ""
     single_item = ""
     coalesced_list = coalesce_multi_single(multi_items, single_item)
