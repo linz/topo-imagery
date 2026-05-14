@@ -7,11 +7,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ=Etc/UTC
 
-COPY --from=uv_source /uv /uvx /bin/
-
 RUN apt-get update
 # Install build dependencies
 RUN apt-get install --assume-yes gcc libgeos-dev python3-dev
+COPY --from=uv_source /uv /uvx /bin/
 
 # Add UbuntuGIS PPA and install PDAL
 RUN apt-get install --assume-yes software-properties-common apt-transport-https
