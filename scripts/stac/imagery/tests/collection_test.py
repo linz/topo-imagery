@@ -653,11 +653,6 @@ def test_write_collection_special_chars(fake_collection_context: CollectionConte
 
 
 def test_capture_area_added(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
-    """
-    TODO: geos 3.12 changes the topology-preserving simplifier to produce stable results; see
-    <https://github.com/libgeos/geos/pull/718>. Once we start using geos 3.12 in CI we can delete the values for 3.11
-    below.
-    """
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     file_name = "capture-area.geojson"
 
@@ -732,16 +727,16 @@ def test_capture_area_added(fake_collection_context: CollectionContext, subtests
         assert "file:checksum" in collection.stac["assets"]["capture_area"]
 
     with subtests.test():
-        assert collection.stac["assets"]["capture_area"]["file:checksum"] in (
-            "1220ba57cd77defc7fa72e140f4faa0846e8905ae443de04aef99bf381d4650c17a0",  # geos 3.11
-            "122024fd55ea5f9812e80748ee78055893ad7bddbe2b5101dec1cc1b949edc295f51",  # geos 3.12
+        assert (
+            collection.stac["assets"]["capture_area"]["file:checksum"]
+            == "122024fd55ea5f9812e80748ee78055893ad7bddbe2b5101dec1cc1b949edc295f51"
         )
 
     with subtests.test():
         assert "file:size" in collection.stac["assets"]["capture_area"]
 
     with subtests.test():
-        assert collection.stac["assets"]["capture_area"]["file:size"] in (239, 269)  # geos 3.12, geos 3.11
+        assert collection.stac["assets"]["capture_area"]["file:size"] == 239
 
 
 def test_supplied_capture_area_with_existing_capture_area(fake_collection_context: CollectionContext) -> None:
