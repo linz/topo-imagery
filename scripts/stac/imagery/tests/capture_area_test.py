@@ -28,7 +28,9 @@ def test_merge_polygons() -> None:
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
     # Using `Polygon.equals_exact()` as merge_polygons might return a different set of coordinates for the same geometry
-    assert merged_polygons.equals_exact(expected_merged_polygon_geos_3_11, tolerance=0.0) or merged_polygons.equals_exact(expected_merged_polygon_geos_3_12, tolerance=0.0)
+    assert merged_polygons.equals_exact(expected_merged_polygon_geos_3_11, tolerance=0.0) or merged_polygons.equals_exact(
+        expected_merged_polygon_geos_3_12, tolerance=0.0
+    )
 
 
 def test_merge_polygons_with_rounding() -> None:
