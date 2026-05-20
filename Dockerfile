@@ -1,6 +1,6 @@
 FROM ghcr.io/astral-sh/uv:0.11.14@sha256:1025398289b62de8269e70c45b91ffa37c373f38118d7da036fb8bb8efc85d97 AS uv_source
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa AS builder
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.13.0@sha256:e0fedbcc5b51bd12617d6a6cf8b7c3244d98cbd29b266925fd9061f40081b351 AS builder
 
 # Avoid blocking `apt-get install` commands
 ARG DEBIAN_FRONTEND=noninteractive
@@ -33,7 +33,7 @@ COPY uv.lock pyproject.toml /src/
 ENV UV_PROJECT_ENVIRONMENT=/venv
 RUN uv sync --verbose --frozen --no-dev --no-install-project
 
-FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa
+FROM ghcr.io/osgeo/gdal:ubuntu-small-3.13.0@sha256:e0fedbcc5b51bd12617d6a6cf8b7c3244d98cbd29b266925fd9061f40081b351
 
 ARG GIT_HASH
 ENV GIT_HASH=$GIT_HASH
