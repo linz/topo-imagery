@@ -17,7 +17,7 @@ def test_merge_polygons() -> None:
     polygons = []
     polygons.append(Polygon([(0.0, 1.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0), (0.0, 1.0)]))
     polygons.append(Polygon([(1.0, 1.0), (2.0, 1.0), (2.0, 0.0), (1.0, 0.0), (1.0, 1.0)]))
-    expected_merged_polygon = Polygon([(1.0, 1.0), (0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (1.0, 1.0)])
+    expected_merged_polygon = Polygon([(0.0, 1.0), (0.0, 0.0), (2.0, 0.0), (2.0, 1.0), (0.0, 1.0)])
     merged_polygons = merge_polygons(polygons, 0)
 
     print(f"Polygon A: {to_feature(polygons[0])}")
@@ -26,7 +26,6 @@ def test_merge_polygons() -> None:
     print(f"GeoJSON result: {to_feature(merged_polygons)}")
 
     # Using `Polygon.equals_exact()` as merge_polygons might return a different set of coordinates for the same geometry
-    # In this example: `Polygon([(2.0, 1.0), (2.0, 0.0), (0.0, 0.0), (0.0, 1.0), (2.0, 1.0)])`
     assert merged_polygons.equals_exact(expected_merged_polygon, tolerance=0.0)
 
 

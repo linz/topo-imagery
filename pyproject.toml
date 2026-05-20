@@ -1,9 +1,51 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "topo-imagery"
+version = "7.21.1"
+description = "A collection of scripts for processing imagery"
+authors = [
+    { name = "Blayne Chard", email = "bchard@linz.govt.nz" },
+    { name = "Daniel Silk", email = "dsilk@linz.govt.nz" },
+    { name = "Paul Fouquet", email = "pfouquet@linz.govt.nz" },
+    { name = "Alice Fage", email = "afage@linz.govt.nz" },
+    { name = "Megan Davidson", email = "mdavidson@linz.govt.nz" },
+    { name = "Tobias Schmidt", email = "tschmidt@linz.govt.nz" },
+]
+requires-python = "~=3.12.3"
+dependencies = [
+    "boto3",
+    "linz-logger",
+    "py-multihash",
+    "shapely",
+    "tifffile",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+    "gitlint",
+    "isort",
+    "moto",
+    "mypy",
+    "mypy-boto3-s3",
+    "pre-commit",
+    "pylint",
+    "pytest",
+    "pytest-dependency",
+    "pytest-mock",
+    "pytest-subtests",
+    "shellcheck-py",
+]
 
 [tool.black]
 line-length = 127
+
+[tool.uv]
+package = false
+default-groups = "all"
 
 [tool.isort]
 line_length = 127
@@ -18,40 +60,3 @@ disable_error_code = ["import"]
 [[tool.mypy.overrides]]
 module = ["linz_logger"]
 ignore_missing_imports = true
-
-[tool.poetry]
-name = "topo-imagery"
-version = "7.21.1"
-description = "A collection of scripts for processing imagery"
-authors = [
-    "Blayne Chard <bchard@linz.govt.nz>",
-    "Daniel Silk <dsilk@linz.govt.nz>",
-    "Paul Fouquet <pfouquet@linz.govt.nz>",
-    "Alice Fage <afage@linz.govt.nz>",
-    "Megan Davidson <mdavidson@linz.govt.nz>",
-    "Tobias Schmidt <tschmidt@linz.govt.nz>",
-]
-package-mode = false
-
-[tool.poetry.dependencies]
-python = "~3.12.3"
-boto3 = "*"
-linz-logger = "*"
-py-multihash = "*"
-shapely = "*"
-tifffile = "*"
-
-[tool.poetry.group.dev.dependencies]
-black = "*"
-gitlint = "*"
-isort = "*"
-moto = "*"
-mypy = "*"
-mypy-boto3-s3 = "*"
-pre-commit = "*"
-pylint = "*"
-pytest = "*"
-pytest-dependency = "*"
-pytest-mock = "*"
-pytest-subtests = "*"
-shellcheck-py = "*"

@@ -85,7 +85,7 @@ def run_standardising(
     Returns:
         a list of `FileTiff` wrapper
     """
-    # pylint: disable-msg=too-many-arguments
+    # pylint: disable=too-many-arguments
     start_time = time_in_ms()
 
     get_log().info("standardising_start", gdalVersion=gdal_version, fileCount=len(tiles_to_process))

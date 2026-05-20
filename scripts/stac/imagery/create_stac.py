@@ -20,6 +20,7 @@ from scripts.stac.util import checksum
 from scripts.stac.util.media_type import StacMediaType
 
 
+# pylint: disable=too-many-positional-arguments
 def create_collection(
     collection_context: CollectionContext,
     current_datetime: str,
@@ -143,7 +144,9 @@ def merge_item_list_for_resupply(
     return supplied_items + published_items
 
 
-def create_item(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments
+def create_item(
     asset_path: str,
     start_datetime: str,
     end_datetime: str,

@@ -171,6 +171,7 @@ def get_transform_srs_command(source_epsg: int, target_epsg: int) -> list[str]:
     ]
 
 
+# pylint: disable=too-many-positional-arguments
 def get_thumbnail_command(
     format_: str,
     input_: str,

@@ -1,3 +1,5 @@
+FROM ghcr.io/astral-sh/uv:0.11.14@sha256:1025398289b62de8269e70c45b91ffa37c373f38118d7da036fb8bb8efc85d97 AS uv_source
+
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa AS builder
 
 # Avoid blocking `apt-get install` commands
@@ -6,12 +8,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 RUN apt-get update
-# Install pipx and build dependencies
-RUN apt-get install --assume-yes gcc libgeos-dev pipx python3-dev
-
-# Install Poetry with the bundle plugin
-RUN pipx install poetry
-RUN pipx inject poetry poetry-plugin-bundle
+# Install build dependencies
+RUN apt-get install --assume-yes gcc libgeos-dev python3-dev
+COPY --from=uv_source /uv /uvx /bin/
 
 # Add UbuntuGIS PPA and install PDAL
 RUN apt-get install --assume-yes software-properties-common apt-transport-https
@@ -27,12 +26,12 @@ RUN cp -nv $( ldd /usr/bin/pdal | awk '{print $3}' ) /pdal_shared/
 # Define the working directory for the following commands
 WORKDIR /src
 
-# Add Poetry config
-COPY poetry.lock pyproject.toml /src/
+# Add uv config
+COPY uv.lock pyproject.toml /src/
 
 # Bundle production dependencies into /venv
-RUN /root/.local/bin/poetry bundle venv --no-ansi --no-interaction --only=main -vvv /venv
-
+ENV UV_PROJECT_ENVIRONMENT=/venv
+RUN uv sync --verbose --frozen --no-dev --no-install-project
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa
 
