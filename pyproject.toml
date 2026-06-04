@@ -9,9 +9,8 @@ description = "A collection of scripts for processing imagery"
 authors = [
     { name = "Blayne Chard", email = "bchard@linz.govt.nz" },
     { name = "Daniel Silk", email = "dsilk@linz.govt.nz" },
-    { name = "Paul Fouquet", email = "pfouquet@linz.govt.nz" },
     { name = "Alice Fage", email = "afage@linz.govt.nz" },
-    { name = "Megan Davidson", email = "mdavidson@linz.govt.nz" },
+    { name = "Sheetal Poudel", email = "spoudel@linz.govt.nz" },
     { name = "Tobias Schmidt", email = "tschmidt@linz.govt.nz" },
 ]
 requires-python = "~=3.12.3"
