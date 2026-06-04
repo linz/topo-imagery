@@ -5,10 +5,10 @@ from typing import Any
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 
-from scripts.files import fs
-from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import NoSuchFileError, read
-from scripts.files.geotiff import get_extents
+from topo_imagery_common.files import fs
+from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.files.fs import NoSuchFileError, read
+from scripts.tiff.geotiff import get_extents
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.capture_area import get_capture_area_description
@@ -16,7 +16,7 @@ from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollect
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.link import Link, Relation
-from scripts.stac.util import checksum
+from topo_imagery_common.files import checksum
 from scripts.stac.util.media_type import StacMediaType
 
 

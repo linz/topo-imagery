@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.12.3, <3.13"
 
+[manifest]
+members = [
+    "topo-imagery",
+    "topo-imagery-common",
+]
+
 [[package]]
 name = "arrow"
 version = "1.2.3"
@@ -904,6 +910,7 @@ dependencies = [
     { name = "py-multihash" },
     { name = "shapely" },
     { name = "tifffile" },
+    { name = "topo-imagery-common" },
 ]
 
 [package.dev-dependencies]
@@ -930,6 +937,7 @@ requires-dist = [
     { name = "py-multihash" },
     { name = "shapely" },
     { name = "tifffile" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
 ]
 
 [package.metadata.requires-dev]
@@ -947,6 +955,27 @@ dev = [
     { name = "pytest-mock" },
     { name = "pytest-subtests" },
     { name = "shellcheck-py" },
+]
+
+[[package]]
+name = "topo-imagery-common"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-common" }
+dependencies = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely" },
 ]
 
 [[package]]

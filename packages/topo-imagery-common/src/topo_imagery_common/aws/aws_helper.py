@@ -9,7 +9,7 @@ from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshabl
 from botocore.session import Session as BotocoreSession
 from linz_logger import get_log
 
-from scripts.aws.aws_credential_source import CredentialSource
+from topo_imagery_common.aws.aws_credential_source import CredentialSource
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

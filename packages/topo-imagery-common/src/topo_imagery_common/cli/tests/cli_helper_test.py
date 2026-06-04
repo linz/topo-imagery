@@ -5,7 +5,7 @@ from pytest import raises
 from pytest_subtests import SubTests
 from shapely.geometry import MultiPolygon
 
-from scripts.cli.cli_helper import (
+from topo_imagery_common.cli.cli_helper import (
     TileFiles,
     coalesce_multi_single,
     get_geometry_from_geojson_feature,

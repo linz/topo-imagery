@@ -9,7 +9,7 @@ from shapely.geometry import MultiPolygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
 
-from scripts.logging.time_helper import time_in_ms
+from topo_imagery_common.logging.time_helper import time_in_ms
 
 DECIMAL_DEGREES_1M = Decimal("0.00001")
 """

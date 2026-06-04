@@ -13,7 +13,7 @@ from shapely.geometry import shape
 
 from scripts.collection_from_items import NoItemsError, main
 from scripts.conftest import any_epoch_datetime_string
-from scripts.files.fs_s3 import write
+from topo_imagery_common.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext

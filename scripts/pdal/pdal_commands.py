@@ -5,9 +5,9 @@ from tempfile import mkdtemp
 
 from linz_logger import get_log
 
-from scripts.aws.aws_helper import is_s3
-from scripts.files.fs import copy
-from scripts.logging.time_helper import time_in_ms
+from topo_imagery_common.aws.aws_helper import is_s3
+from topo_imagery_common.files.fs import copy
+from topo_imagery_common.logging.time_helper import time_in_ms
 
 
 class PDALExecutionException(Exception):

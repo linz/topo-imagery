@@ -1,6 +1,6 @@
 from enum import Enum
 
-from scripts.stac.util import checksum
+from topo_imagery_common.files import checksum
 from scripts.stac.util.media_type import StacMediaType
 
 

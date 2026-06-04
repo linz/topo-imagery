@@ -7,8 +7,8 @@ from typing import Any, NamedTuple
 import shapely.geometry
 from linz_logger import get_log
 
-from scripts.datetimes import parse_rfc_3339_date
-from scripts.files.fs import read
+from topo_imagery_common.datetimes import parse_rfc_3339_date
+from topo_imagery_common.files.fs import read
 
 
 class InputParameterError(Exception):

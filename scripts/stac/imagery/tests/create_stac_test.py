@@ -6,7 +6,7 @@ from typing import Any, cast
 from pytest_subtests import SubTests
 
 from scripts.conftest import any_epoch_datetime, any_epoch_datetime_string
-from scripts.datetimes import format_rfc_3339_datetime_string
+from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List
 from boto3 import client
 from linz_logger import get_log
 
-from scripts.cli.cli_helper import (
+from topo_imagery_common.cli.cli_helper import (
     coalesce_multi_single,
     empty_str_to_false,
     get_geometry_from_geojson_feature,
@@ -15,12 +15,12 @@ from scripts.cli.cli_helper import (
     str_to_bool,
     str_to_gsd,
 )
-from scripts.cli.common_args import CommonArgumentParser
-from scripts.datetimes import RFC_3339_DATETIME_FORMAT
-from scripts.files.files_helper import SUFFIX_JSON
-from scripts.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
+from topo_imagery_common.cli.common_args import CommonArgumentParser
+from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
+from topo_imagery_common.files.files_helper import SUFFIX_JSON
+from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
-from scripts.logging.time_helper import time_in_ms
+from topo_imagery_common.logging.time_helper import time_in_ms
 from scripts.stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND

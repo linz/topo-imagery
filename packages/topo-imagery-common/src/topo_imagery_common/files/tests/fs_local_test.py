@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from scripts.files.fs_local import exists, read, write
+from topo_imagery_common.files.fs_local import exists, read, write
 
 
 @pytest.mark.dependency(name="write")

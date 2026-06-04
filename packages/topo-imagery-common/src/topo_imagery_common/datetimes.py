@@ -58,7 +58,7 @@ def format_rfc_3339_datetime_string(datetime_object: datetime) -> str:
     >>> format_rfc_3339_datetime_string(datetime(2001, 2, 3, 4, 5, 6))
     Traceback (most recent call last):
     ...
-    scripts.datetimes.NaiveDatetimeError: Can't convert naive datetime, timezone aware datetime object needed
+    topo_imagery_common.datetimes.NaiveDatetimeError: Can't convert naive datetime, timezone aware datetime object needed
     """
     if datetime_object.tzinfo is None:
         raise NaiveDatetimeError()
@@ -107,12 +107,12 @@ def convert_utc_to_nz_datetime(datetime_object: datetime) -> datetime:
     >>> convert_utc_to_nz_datetime(datetime(2001, 2, 3, 4, 5, 6))
     Traceback (most recent call last):
     ...
-    scripts.datetimes.NaiveDatetimeError: Can't convert naive datetime, timezone aware datetime object needed
+    topo_imagery_common.datetimes.NaiveDatetimeError: Can't convert naive datetime, timezone aware datetime object needed
     >>> dt_nz = datetime(2001, 2, 3, 4, 5, 6, tzinfo=tz.gettz("Pacific/Auckland"))
     >>> convert_utc_to_nz_datetime(dt_nz)
     Traceback (most recent call last):
     ...
-    scripts.datetimes.NotUTCError: Input datetime must be in UTC
+    topo_imagery_common.datetimes.NotUTCError: Input datetime must be in UTC
     """
     if datetime_object.tzinfo is None:
         raise NaiveDatetimeError()

@@ -1,6 +1,6 @@
 from pytest_subtests import SubTests
 
-from scripts.aws.aws_helper import parse_path
+from topo_imagery_common.aws.aws_helper import parse_path
 
 
 def test_parse_path_s3(subtests: SubTests) -> None:
