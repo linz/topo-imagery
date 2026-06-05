@@ -3,10 +3,9 @@ from concurrent.futures import Future, ThreadPoolExecutor
 
 from boto3 import client
 from linz_logger import get_log
-
-from topo_imagery_common.aws.aws_helper import is_s3
-from topo_imagery_common.files import fs_local, fs_s3
-from topo_imagery_common.files.checksum import multihash_as_hex
+from aws.aws_helper import is_s3
+from files import fs_local, fs_s3
+from files.checksum import multihash_as_hex
 
 
 def write(destination: str, source: bytes, content_type: str | None = None) -> str:

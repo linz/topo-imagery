@@ -7,14 +7,14 @@ from decimal import Decimal
 from functools import partial
 from multiprocessing import Pool
 
+from aws.aws_helper import is_s3
+from cli.cli_helper import TileFiles
+from files.files_helper import ContentType, is_tiff
+from files.fs import exists, read, write, write_all, write_sidecars
 from linz_logger import get_log
+from log.time_helper import time_in_ms
 from tifffile import TiffFile
 
-from topo_imagery_common.aws.aws_helper import is_s3
-from topo_imagery_common.cli.cli_helper import TileFiles
-from scripts.tiff.file_tiff import FileTiff, FileTiffType
-from topo_imagery_common.files.files_helper import ContentType, is_tiff
-from topo_imagery_common.files.fs import exists, read, write, write_all, write_sidecars
 from scripts.gdal.gdal_bands import get_gdal_band_offset
 from scripts.gdal.gdal_commands import (
     get_alpha_command,
@@ -28,7 +28,7 @@ from scripts.gdal.gdal_commands import (
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
 from scripts.gdal.gdal_helper import gdal_info, run_gdal
 from scripts.gdal.gdal_presets import CompressionPreset
-from topo_imagery_common.logging.time_helper import time_in_ms
+from scripts.tiff.file_tiff import FileTiff, FileTiffType
 from scripts.tile.tile_index import Bounds, get_bounds_from_name
 
 

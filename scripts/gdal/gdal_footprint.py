@@ -1,7 +1,8 @@
 import os
 from decimal import Decimal
 
-from topo_imagery_common.files.files_helper import get_file_name_from_path
+from files.files_helper import get_file_name_from_path
+
 from scripts.gdal.gdal_commands import get_footprint_command
 from scripts.gdal.gdal_helper import run_gdal
 

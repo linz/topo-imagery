@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytest
 from boto3 import client
+from files.fs_s3 import write
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
@@ -13,7 +14,6 @@ from shapely.geometry import shape
 
 from scripts.collection_from_items import NoItemsError, main
 from scripts.conftest import any_epoch_datetime_string
-from topo_imagery_common.files.fs_s3 import write
 from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext

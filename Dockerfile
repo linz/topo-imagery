@@ -28,6 +28,7 @@ WORKDIR /src
 
 # Add uv config
 COPY uv.lock pyproject.toml /src/
+COPY ./packages/ /src/packages/
 
 # Bundle production dependencies into /venv
 ENV UV_PROJECT_ENVIRONMENT=/venv

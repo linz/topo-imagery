@@ -3,13 +3,12 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from linz_logger import get_log
+from log.time_helper import time_in_ms
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
 from shapely.constructive import make_valid
 from shapely.geometry import MultiPolygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
-
-from topo_imagery_common.logging.time_helper import time_in_ms
 
 DECIMAL_DEGREES_1M = Decimal("0.00001")
 """

@@ -6,13 +6,13 @@ from shutil import rmtree
 from tempfile import mkdtemp
 from typing import cast
 
+from aws.aws_helper import is_s3
+from files.files_helper import get_file_name_from_path
+from files.fs import copy
 from linz_logger import get_log
+from log.time_helper import time_in_ms
 
-from topo_imagery_common.aws.aws_helper import is_s3
-from topo_imagery_common.files.files_helper import get_file_name_from_path
-from topo_imagery_common.files.fs import copy
 from scripts.gdal.gdalinfo import GdalInfo
-from topo_imagery_common.logging.time_helper import time_in_ms
 
 
 class GDALExecutionException(Exception):

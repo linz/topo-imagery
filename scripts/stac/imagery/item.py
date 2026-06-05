@@ -1,7 +1,8 @@
 import json
 from typing import Any, TypedDict
 
-from topo_imagery_common.files.fs import read
+from files.fs import read
+
 from scripts.stac.link import Link, Relation
 from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType

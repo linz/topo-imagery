@@ -8,8 +8,7 @@ from boto3 import Session
 from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials, ReadOnlyCredentials
 from botocore.session import Session as BotocoreSession
 from linz_logger import get_log
-
-from topo_imagery_common.aws.aws_credential_source import CredentialSource
+from aws.aws_credential_source import CredentialSource
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

@@ -2,8 +2,9 @@ from datetime import datetime
 from os import urandom
 from typing import Callable
 
+from files.checksum import multihash_as_hex
+
 from scripts.stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
-from topo_imagery_common.files.checksum import multihash_as_hex
 
 
 def fixed_now_function(now: datetime) -> Callable[[], datetime]:

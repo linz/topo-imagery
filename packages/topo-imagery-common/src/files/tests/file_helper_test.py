@@ -1,6 +1,5 @@
 from pytest_subtests import SubTests
-
-from topo_imagery_common.files.files_helper import is_tiff
+from files.files_helper import is_tiff
 
 
 def test_is_tiff(subtests: SubTests) -> None:
