@@ -25,8 +25,6 @@ sessions: dict[str, Session] = {}
 
 bucket_roles: list[CredentialSource] = []
 
-client_sts = session.client("sts")
-
 bucket_config_path = environ.get("AWS_ROLE_CONFIG_PATH", "s3://linz-bucket-config/config.json")
 
 
@@ -111,6 +109,7 @@ def get_session_credentials(prefix: str, retry_count: int = 3) -> ReadOnlyCreden
     Returns:
         an AWS credential (`access_key`, `secret_key`, `token`)
     """
+    client_sts = session.client("sts")
     last_error: Exception = Exception(f"Invalid retry count: {retry_count}")
     for retry in range(1, retry_count + 1):
         try:
