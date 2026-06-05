@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Any
 
 from boto3 import client
 from linz_logger import get_log
-from aws.aws_helper import get_session, parse_path
-from files import checksum
-from log.time_helper import time_in_ms
+from common.aws.aws_helper import get_session, parse_path
+from common.files import checksum
+from common.log.time_helper import time_in_ms
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

@@ -9,9 +9,9 @@ from tempfile import mkdtemp
 import pytest
 import shapely.geometry
 from boto3 import client
-from files.files_helper import ContentType
-from files.fs import read
-from files.fs_s3 import write
+from common.files.files_helper import ContentType
+from common.files.fs import read
+from common.files.fs_s3 import write
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client

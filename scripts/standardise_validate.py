@@ -3,7 +3,7 @@ import sys
 from argparse import ArgumentParser
 from datetime import datetime, timezone
 
-from cli.cli_helper import (
+from common.cli.cli_helper import (
     InputParameterError,
     load_input_files,
     str_to_bool,
@@ -12,9 +12,9 @@ from cli.cli_helper import (
     str_to_positive_int,
     valid_date,
 )
-from datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
-from files.files_helper import SUFFIX_JSON, ContentType
-from files.fs import exists, write
+from common.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
+from common.files.files_helper import SUFFIX_JSON, ContentType
+from common.files.fs import exists, write
 from linz_logger import get_log
 
 from scripts.gdal.gdal_helper import get_srs, get_vfs_path

@@ -4,7 +4,7 @@ from typing import Any
 from pytest import raises
 from pytest_subtests import SubTests
 from shapely.geometry import MultiPolygon
-from cli.cli_helper import (
+from common.cli.cli_helper import (
     TileFiles,
     coalesce_multi_single,
     get_geometry_from_geojson_feature,

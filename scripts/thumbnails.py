@@ -4,11 +4,11 @@ import tempfile
 from functools import partial
 from multiprocessing import Pool
 
-from cli.common_args import CommonArgumentParser
-from files.files_helper import ContentType, get_file_name_from_path, is_tiff
-from files.fs import exists, read, write
+from common.cli.common_args import CommonArgumentParser
+from common.files.files_helper import ContentType, get_file_name_from_path, is_tiff
+from common.files.fs import exists, read, write
+from common.log.time_helper import time_in_ms
 from linz_logger import get_log
-from log.time_helper import time_in_ms
 
 from scripts.gdal import gdal_helper
 from scripts.gdal.gdal_commands import get_thumbnail_command

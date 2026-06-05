@@ -1,6 +1,6 @@
 from enum import Enum
 
-from files import checksum
+from common.files import checksum
 
 from scripts.stac.util.media_type import StacMediaType
 

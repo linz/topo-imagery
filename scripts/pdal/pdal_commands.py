@@ -3,10 +3,10 @@ import subprocess
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from aws.aws_helper import is_s3
-from files.fs import copy
+from common.aws.aws_helper import is_s3
+from common.files.fs import copy
+from common.log.time_helper import time_in_ms
 from linz_logger import get_log
-from log.time_helper import time_in_ms
 
 
 class PDALExecutionException(Exception):

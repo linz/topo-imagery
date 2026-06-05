@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 from boto3 import client
-from files.fs_s3 import write
+from common.files.fs_s3 import write
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises

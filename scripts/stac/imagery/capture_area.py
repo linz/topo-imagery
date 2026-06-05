@@ -2,8 +2,8 @@ import json
 from decimal import Decimal
 from typing import Any, Sequence
 
+from common.log.time_helper import time_in_ms
 from linz_logger import get_log
-from log.time_helper import time_in_ms
 from shapely import BufferCapStyle, BufferJoinStyle, to_geojson, union_all, wkt
 from shapely.constructive import make_valid
 from shapely.geometry import MultiPolygon

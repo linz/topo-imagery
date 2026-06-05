@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from files.fs_local import exists, read, write
+from common.files.fs_local import exists, read, write
 
 
 @pytest.mark.dependency(name="write")

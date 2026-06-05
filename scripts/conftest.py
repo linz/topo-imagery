@@ -5,7 +5,7 @@ from string import ascii_lowercase
 from typing import Iterator
 
 import pytest
-from datetimes import format_rfc_3339_datetime_string
+from common.datetimes import format_rfc_3339_datetime_string
 
 from scripts.stac.imagery.collection_context import CollectionContext
 

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
-from files.files_helper import get_file_name_from_path
+from common.files.files_helper import get_file_name_from_path
 from pytest_subtests import SubTests
 
 from scripts.conftest import any_epoch_datetime_string

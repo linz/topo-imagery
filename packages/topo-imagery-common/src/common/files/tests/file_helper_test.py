@@ -1,5 +1,5 @@
 from pytest_subtests import SubTests
-from files.files_helper import is_tiff
+from common.files.files_helper import is_tiff
 
 
 def test_is_tiff(subtests: SubTests) -> None:
