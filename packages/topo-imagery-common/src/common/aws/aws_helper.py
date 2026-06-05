@@ -7,8 +7,8 @@ from urllib.parse import urlparse
 from boto3 import Session
 from botocore.credentials import AssumeRoleCredentialFetcher, DeferredRefreshableCredentials, ReadOnlyCredentials
 from botocore.session import Session as BotocoreSession
-from linz_logger import get_log
 from common.aws.aws_credential_source import CredentialSource
+from linz_logger import get_log
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

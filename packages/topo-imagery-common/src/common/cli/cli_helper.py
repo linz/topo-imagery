@@ -5,9 +5,9 @@ from decimal import Decimal
 from typing import Any, NamedTuple
 
 import shapely.geometry
-from linz_logger import get_log
 from common.datetimes import parse_rfc_3339_date
 from common.files.fs import read
+from linz_logger import get_log
 
 
 class InputParameterError(Exception):

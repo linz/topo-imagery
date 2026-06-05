@@ -1,5 +1,5 @@
-from pytest_subtests import SubTests
 from common.aws.aws_helper import parse_path
+from pytest_subtests import SubTests
 
 
 def test_parse_path_s3(subtests: SubTests) -> None:

@@ -1,9 +1,6 @@
 from datetime import datetime
 from typing import Any
 
-from pytest import raises
-from pytest_subtests import SubTests
-from shapely.geometry import MultiPolygon
 from common.cli.cli_helper import (
     TileFiles,
     coalesce_multi_single,
@@ -13,6 +10,9 @@ from common.cli.cli_helper import (
     parse_list,
     valid_date,
 )
+from pytest import raises
+from pytest_subtests import SubTests
+from shapely.geometry import MultiPolygon
 
 
 def test_get_tile_files(subtests: SubTests) -> None:
