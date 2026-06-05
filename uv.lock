@@ -228,6 +228,12 @@ wheels = [
 ]
 
 [[package]]
+name = "common"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/b2/c900168d36abd28b1b08a81387835eff8b574bc6c2e9fefb5c4a38135d94/common-0.1.2.tar.gz", hash = "sha256:3dfa982670abefc870043b239eaa0ecd860be7aa952b1931c1356b426ff8c76a", size = 3541, upload-time = "2016-05-19T14:38:59.454Z" }
+
+[[package]]
 name = "cryptography"
 version = "48.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -906,11 +912,11 @@ version = "7.21.1"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "common" },
     { name = "linz-logger" },
     { name = "py-multihash" },
     { name = "shapely" },
     { name = "tifffile" },
-    { name = "topo-imagery-common" },
 ]
 
 [package.dev-dependencies]
@@ -933,11 +939,11 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boto3" },
+    { name = "common" },
     { name = "linz-logger" },
     { name = "py-multihash" },
     { name = "shapely" },
     { name = "tifffile" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
 ]
 
 [package.metadata.requires-dev]

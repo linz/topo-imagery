@@ -20,7 +20,7 @@ dependencies = [
     "py-multihash",
     "shapely",
     "tifffile",
-    "topo-imagery-common",
+    "common",
 ]
 
 [dependency-groups]

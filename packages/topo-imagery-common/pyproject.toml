@@ -17,3 +17,6 @@ dependencies = [
 
 [tool.uv]
 package = true
+
+[tool.uv_build]
+module-name = "common"
