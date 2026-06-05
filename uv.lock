@@ -4,8 +4,8 @@ requires-python = ">=3.12.3, <3.13"
 
 [manifest]
 members = [
+    "common",
     "topo-imagery",
-    "topo-imagery-common",
 ]
 
 [[package]]
@@ -229,9 +229,24 @@ wheels = [
 
 [[package]]
 name = "common"
-version = "0.1.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/eb/b2/c900168d36abd28b1b08a81387835eff8b574bc6c2e9fefb5c4a38135d94/common-0.1.2.tar.gz", hash = "sha256:3dfa982670abefc870043b239eaa0ecd860be7aa952b1931c1356b426ff8c76a", size = 3541, upload-time = "2016-05-19T14:38:59.454Z" }
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-common" }
+dependencies = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely" },
+]
 
 [[package]]
 name = "cryptography"
@@ -939,7 +954,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "boto3" },
-    { name = "common" },
+    { name = "common", editable = "packages/topo-imagery-common" },
     { name = "linz-logger" },
     { name = "py-multihash" },
     { name = "shapely" },
@@ -961,27 +976,6 @@ dev = [
     { name = "pytest-mock" },
     { name = "pytest-subtests" },
     { name = "shellcheck-py" },
-]
-
-[[package]]
-name = "topo-imagery-common"
-version = "0.1.0"
-source = { editable = "packages/topo-imagery-common" }
-dependencies = [
-    { name = "boto3" },
-    { name = "linz-logger" },
-    { name = "py-multihash" },
-    { name = "python-dateutil" },
-    { name = "shapely" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3" },
-    { name = "linz-logger" },
-    { name = "py-multihash" },
-    { name = "python-dateutil" },
-    { name = "shapely" },
 ]
 
 [[package]]

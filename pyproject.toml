@@ -48,7 +48,7 @@ package = false
 default-groups = "all"
 
 [tool.uv.sources]
-topo-imagery-common = { workspace = true }
+common = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
