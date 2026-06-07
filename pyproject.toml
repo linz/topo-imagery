@@ -20,7 +20,7 @@ dependencies = [
     "py-multihash",
     "shapely",
     "tifffile",
-    "common",
+    "topo-imagery-common",
 ]
 
 [dependency-groups]
@@ -48,7 +48,7 @@ package = false
 default-groups = "all"
 
 [tool.uv.sources]
-common = { workspace = true }
+topo-imagery-common = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]

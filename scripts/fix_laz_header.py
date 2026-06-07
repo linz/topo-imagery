@@ -6,11 +6,11 @@ from functools import partial
 from multiprocessing import Pool
 from typing import Any, Iterable
 
-from common.cli.common_args import CommonArgumentParser
-from common.files.files_helper import ContentType
-from common.files.fs import copy, exists, read, write
-from common.log.time_helper import time_in_ms
 from linz_logger import get_log
+from topo_imagery_common.cli.common_args import CommonArgumentParser
+from topo_imagery_common.files.files_helper import ContentType
+from topo_imagery_common.files.fs import copy, exists, read, write
+from topo_imagery_common.log.time_helper import time_in_ms
 
 from scripts.pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
 

@@ -5,7 +5,8 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 
 from boto3 import client
-from common.cli.cli_helper import (
+from linz_logger import get_log
+from topo_imagery_common.cli.cli_helper import (
     coalesce_multi_single,
     empty_str_to_false,
     get_geometry_from_geojson_feature,
@@ -13,12 +14,11 @@ from common.cli.cli_helper import (
     str_to_bool,
     str_to_gsd,
 )
-from common.cli.common_args import CommonArgumentParser
-from common.datetimes import RFC_3339_DATETIME_FORMAT
-from common.files.files_helper import SUFFIX_JSON
-from common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
-from common.log.time_helper import time_in_ms
-from linz_logger import get_log
+from topo_imagery_common.cli.common_args import CommonArgumentParser
+from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
+from topo_imagery_common.files.files_helper import SUFFIX_JSON
+from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
+from topo_imagery_common.log.time_helper import time_in_ms
 
 from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME

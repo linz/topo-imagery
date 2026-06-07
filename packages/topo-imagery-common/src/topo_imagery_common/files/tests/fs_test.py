@@ -4,12 +4,12 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 from boto3 import client
-from common.files.fs import NoSuchFileError, read, write, write_all, write_sidecars
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
+from topo_imagery_common.files.fs import NoSuchFileError, read, write, write_all, write_sidecars
 
 
 def test_read_key_not_found_local() -> None:

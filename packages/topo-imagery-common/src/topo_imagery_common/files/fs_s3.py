@@ -4,10 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from boto3 import client
-from common.aws.aws_helper import get_session, parse_path
-from common.files import checksum
-from common.log.time_helper import time_in_ms
 from linz_logger import get_log
+from topo_imagery_common.aws.aws_helper import get_session, parse_path
+from topo_imagery_common.files import checksum
+from topo_imagery_common.log.time_helper import time_in_ms
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

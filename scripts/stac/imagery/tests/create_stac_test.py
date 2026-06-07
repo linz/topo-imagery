@@ -3,8 +3,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, cast
 
-from common.datetimes import format_rfc_3339_datetime_string
 from pytest_subtests import SubTests
+from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 
 from scripts.conftest import any_epoch_datetime, any_epoch_datetime_string
 from scripts.gdal.gdalinfo import GdalInfo

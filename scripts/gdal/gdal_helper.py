@@ -6,11 +6,11 @@ from shutil import rmtree
 from tempfile import mkdtemp
 from typing import cast
 
-from common.aws.aws_helper import is_s3
-from common.files.files_helper import get_file_name_from_path
-from common.files.fs import copy
-from common.log.time_helper import time_in_ms
 from linz_logger import get_log
+from topo_imagery_common.aws.aws_helper import is_s3
+from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.files.fs import copy
+from topo_imagery_common.log.time_helper import time_in_ms
 
 from scripts.gdal.gdalinfo import GdalInfo
 

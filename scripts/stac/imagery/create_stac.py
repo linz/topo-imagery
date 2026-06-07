@@ -2,11 +2,11 @@ import json
 import os
 from typing import Any
 
-from common.files import checksum, fs
-from common.files.files_helper import get_file_name_from_path
-from common.files.fs import NoSuchFileError, read
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
+from topo_imagery_common.files import checksum, fs
+from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.files.fs import NoSuchFileError, read
 
 from scripts.gdal.gdal_helper import gdal_info
 from scripts.gdal.gdalinfo import GdalInfo

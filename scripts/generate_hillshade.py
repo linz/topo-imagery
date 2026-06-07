@@ -5,13 +5,13 @@ from datetime import datetime, timezone
 from functools import partial
 from multiprocessing import Pool
 
-from common.cli.cli_helper import InputParameterError, TileFiles, load_input_files
-from common.cli.common_args import CommonArgumentParser
-from common.datetimes import RFC_3339_DATETIME_FORMAT
-from common.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
-from common.files.fs import exists, read, write, write_all
-from common.log.time_helper import time_in_ms
 from linz_logger import get_log
+from topo_imagery_common.cli.cli_helper import InputParameterError, TileFiles, load_input_files
+from topo_imagery_common.cli.common_args import CommonArgumentParser
+from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
+from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
+from topo_imagery_common.files.fs import exists, read, write, write_all
+from topo_imagery_common.log.time_helper import time_in_ms
 
 from scripts.gdal.gdal_commands import get_gdal_command, get_hillshade_command
 from scripts.gdal.gdal_helper import run_gdal

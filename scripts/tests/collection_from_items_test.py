@@ -5,12 +5,12 @@ from unittest.mock import patch
 
 import pytest
 from boto3 import client
-from common.files.fs_s3 import write
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 from shapely.geometry import shape
+from topo_imagery_common.files.fs_s3 import write
 
 from scripts.collection_from_items import NoItemsError, main
 from scripts.conftest import any_epoch_datetime_string
