@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.12.3, <3.13"
 
+[manifest]
+members = [
+    "topo-imagery",
+    "topo-imagery-common",
+]
+
 [[package]]
 name = "arrow"
 version = "1.2.3"
@@ -901,9 +907,9 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
-    { name = "py-multihash" },
     { name = "shapely" },
     { name = "tifffile" },
+    { name = "topo-imagery-common" },
 ]
 
 [package.dev-dependencies]
@@ -927,9 +933,9 @@ dev = [
 requires-dist = [
     { name = "boto3" },
     { name = "linz-logger" },
-    { name = "py-multihash" },
-    { name = "shapely" },
+    { name = "shapely", specifier = ">=2.0" },
     { name = "tifffile" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
 ]
 
 [package.metadata.requires-dev]
@@ -937,7 +943,7 @@ dev = [
     { name = "black" },
     { name = "gitlint" },
     { name = "isort" },
-    { name = "moto" },
+    { name = "moto", specifier = ">=4.2" },
     { name = "mypy" },
     { name = "mypy-boto3-s3" },
     { name = "pre-commit" },
@@ -947,6 +953,45 @@ dev = [
     { name = "pytest-mock" },
     { name = "pytest-subtests" },
     { name = "shellcheck-py" },
+]
+
+[[package]]
+name = "topo-imagery-common"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-common" }
+dependencies = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "moto" },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3" },
+    { name = "linz-logger" },
+    { name = "py-multihash" },
+    { name = "python-dateutil" },
+    { name = "shapely", specifier = ">=2.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "moto", specifier = ">=4.2" },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
 ]
 
 [[package]]

@@ -5,13 +5,13 @@ from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
+from topo_imagery_common.cli.common_args import CommonArgumentParser
+from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.files.fs import read, write_all, write_sidecars
+from topo_imagery_common.log.time_helper import time_in_ms
 
-from scripts.cli.common_args import CommonArgumentParser
-from scripts.files.files_helper import get_file_name_from_path
-from scripts.files.fs import read, write_all, write_sidecars
 from scripts.gdal.gdal_commands import get_ascii_translate_command
 from scripts.gdal.gdal_helper import run_gdal
-from scripts.logging.time_helper import time_in_ms
 
 
 def main() -> None:

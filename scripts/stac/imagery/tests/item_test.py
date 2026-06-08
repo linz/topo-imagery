@@ -5,9 +5,9 @@ from typing import Any
 from unittest.mock import patch
 
 from pytest_subtests import SubTests
+from topo_imagery_common.files.files_helper import get_file_name_from_path
 
 from scripts.conftest import any_epoch_datetime_string
-from scripts.files.files_helper import get_file_name_from_path
 from scripts.stac.imagery.collection import ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem

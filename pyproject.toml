@@ -17,9 +17,9 @@ requires-python = "~=3.12.3"
 dependencies = [
     "boto3",
     "linz-logger",
-    "py-multihash",
-    "shapely",
+    "shapely>=2.0",
     "tifffile",
+    "topo-imagery-common",
 ]
 
 [dependency-groups]
@@ -27,7 +27,7 @@ dev = [
     "black",
     "gitlint",
     "isort",
-    "moto",
+    "moto>=4.2",
     "mypy",
     "mypy-boto3-s3",
     "pre-commit",
@@ -45,6 +45,12 @@ line-length = 127
 [tool.uv]
 package = false
 default-groups = "all"
+
+[tool.uv.sources]
+topo-imagery-common = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/*"]
 
 [tool.isort]
 line_length = 127

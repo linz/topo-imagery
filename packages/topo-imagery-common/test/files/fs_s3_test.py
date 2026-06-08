@@ -7,9 +7,8 @@ from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
-
-from scripts.files.files_helper import ContentType
-from scripts.files.fs_s3 import exists, list_files_in_uri, read, write
+from topo_imagery_common.files.files_helper import ContentType
+from topo_imagery_common.files.fs_s3 import exists, list_files_in_uri, read, write
 
 
 @mock_aws

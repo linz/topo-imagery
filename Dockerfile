@@ -28,10 +28,11 @@ WORKDIR /src
 
 # Add uv config
 COPY uv.lock pyproject.toml /src/
+COPY ./packages/ /src/packages/
 
 # Bundle production dependencies into /venv
 ENV UV_PROJECT_ENVIRONMENT=/venv
-RUN uv sync --verbose --frozen --no-dev --no-install-project
+RUN uv sync --verbose --frozen --no-dev --no-install-project --no-editable
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa
 
