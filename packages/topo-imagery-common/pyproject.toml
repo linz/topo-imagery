@@ -12,12 +12,12 @@ dependencies = [
     "linz-logger",
     "py-multihash",
     "python-dateutil",
-    "shapely",
+    "shapely>=2.0",
 ]
 
 [dependency-groups]
 dev = [
-    "moto",
+    "moto>=4.2",
     "mypy-boto3-s3",
     "pytest",
     "pytest-dependency",
