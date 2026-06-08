@@ -969,6 +969,14 @@ dependencies = [
     { name = "shapely" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "moto" },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-subtests" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "boto3" },
@@ -976,6 +984,14 @@ requires-dist = [
     { name = "py-multihash" },
     { name = "python-dateutil" },
     { name = "shapely" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "moto" },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-subtests" },
 ]
 
 [[package]]

@@ -15,5 +15,13 @@ dependencies = [
     "shapely",
 ]
 
+[dependency-groups]
+dev = [
+    "moto",
+    "mypy-boto3-s3",
+    "pytest",
+    "pytest-subtests",
+]
+
 [tool.uv]
 package = true
