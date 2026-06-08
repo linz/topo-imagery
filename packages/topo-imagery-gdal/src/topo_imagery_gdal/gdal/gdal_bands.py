@@ -1,5 +1,4 @@
 from linz_logger import get_log
-
 from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand

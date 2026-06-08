@@ -1,5 +1,4 @@
 from pytest_subtests import SubTests
-
 from topo_imagery_gdal.gdal.gdal_helper import is_geotiff
 from topo_imagery_gdal.testing.gdalinfo import fake_gdal_info
 

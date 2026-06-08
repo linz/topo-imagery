@@ -3,7 +3,6 @@ from __future__ import annotations
 from decimal import Decimal
 
 from linz_logger import get_log
-
 from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
 from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdal_presets import (

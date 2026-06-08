@@ -1,5 +1,4 @@
 from shapely.geometry import Polygon
-
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 
