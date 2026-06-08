@@ -6,6 +6,7 @@ requires-python = ">=3.12.3, <3.13"
 members = [
     "topo-imagery",
     "topo-imagery-common",
+    "topo-imagery-gdal",
 ]
 
 [[package]]
@@ -910,6 +911,7 @@ dependencies = [
     { name = "shapely" },
     { name = "tifffile" },
     { name = "topo-imagery-common" },
+    { name = "topo-imagery-gdal" },
 ]
 
 [package.dev-dependencies]
@@ -936,6 +938,7 @@ requires-dist = [
     { name = "shapely", specifier = ">=2.0" },
     { name = "tifffile" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
 ]
 
 [package.metadata.requires-dev]
@@ -989,6 +992,37 @@ requires-dist = [
 dev = [
     { name = "moto", specifier = ">=4.2" },
     { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[[package]]
+name = "topo-imagery-gdal"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-gdal" }
+dependencies = [
+    { name = "linz-logger" },
+    { name = "shapely" },
+    { name = "topo-imagery-common" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "linz-logger" },
+    { name = "shapely", specifier = ">=2.0" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+]
+
+[package.metadata.requires-dev]
+dev = [
     { name = "pytest" },
     { name = "pytest-dependency" },
     { name = "pytest-subtests" },

@@ -2,9 +2,9 @@ from decimal import Decimal
 
 from pytest_subtests import SubTests
 
-from scripts.gdal.gdal_commands import get_cutline_command, get_footprint_command, get_gdal_command
-from scripts.gdal.gdal_helper import EpsgNumber
-from scripts.gdal.gdal_presets import CompressionPreset, HillshadePreset
+from topo_imagery_gdal.gdal.gdal_commands import get_cutline_command, get_footprint_command, get_gdal_command
+from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
 
 
 def test_preset_webp(subtests: SubTests) -> None:

@@ -1,6 +1,6 @@
-from scripts.gdal.gdal_presets import CompressionPreset
-from scripts.gdal.tests.gdalinfo import add_band, add_palette_band, fake_gdal_info
-from scripts.tiff.file_tiff import FileTiff, FileTiffErrorType
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
+from topo_imagery_gdal.testing.gdalinfo import add_band, add_palette_band, fake_gdal_info
+from topo_imagery_gdal.tiff.file_tiff import FileTiff, FileTiffErrorType
 
 
 def test_check_band_count_valid_3() -> None:

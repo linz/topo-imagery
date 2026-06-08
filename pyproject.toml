@@ -20,6 +20,7 @@ dependencies = [
     "shapely>=2.0",
     "tifffile",
     "topo-imagery-common",
+    "topo-imagery-gdal",
 ]
 
 [dependency-groups]
@@ -48,6 +49,7 @@ default-groups = "all"
 
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
+topo-imagery-gdal = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]

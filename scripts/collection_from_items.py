@@ -19,8 +19,8 @@ from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
 from topo_imagery_common.files.files_helper import SUFFIX_JSON
 from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from topo_imagery_common.log.time_helper import time_in_ms
+from topo_imagery_gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 
-from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT
 from scripts.stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND

@@ -4,9 +4,9 @@ from decimal import Decimal
 
 from linz_logger import get_log
 
-from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_helper import EpsgNumber
-from scripts.gdal.gdal_presets import (
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
+from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
+from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
     COMPRESS_WEBP_LOSSLESS,
@@ -18,8 +18,23 @@ from scripts.gdal.gdal_presets import (
     CompressionPreset,
     HillshadePreset,
 )
-from scripts.gdal.gdalinfo import GdalInfo
-from scripts.stac.imagery.capture_area import get_buffer_distance
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
+
+DECIMAL_DEGREES_1M = Decimal("0.00001")
+
+
+def get_buffer_distance(gsd: Decimal) -> float:
+    """The `gsd` (in meters) is multiplied by 2 and then by the 1m degree of precision.
+    A `buffer factor` of 2 was decided on after experimenting with different outputs,
+    details of this can be found in TDE-1049.
+
+    Args:
+        gsd: Ground Sample Distance in meters
+
+    Returns:
+        buffer distance as a float
+    """
+    return float(gsd * 2 * DECIMAL_DEGREES_1M)
 
 
 def get_gdal_command(preset: str, epsg: int) -> list[str]:

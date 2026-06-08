@@ -12,7 +12,7 @@ from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import copy
 from topo_imagery_common.log.time_helper import time_in_ms
 
-from scripts.gdal.gdalinfo import GdalInfo
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 
 class GDALExecutionException(Exception):
