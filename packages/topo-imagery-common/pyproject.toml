@@ -20,6 +20,7 @@ dev = [
     "moto",
     "mypy-boto3-s3",
     "pytest",
+    "pytest-dependency",
     "pytest-subtests",
 ]
 
