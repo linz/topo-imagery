@@ -12,7 +12,7 @@
 
 ## Description
 
-This is a collection of Python scripts used for processing topographic data in and for the cloud (AWS)
+This is a collection of Python scripts used for processing topographic data in and for the cloud (AWS).
 
 The associated Docker container is provided to run the Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-*` Docker image](https://github.com/OSGeo/gdal/pkgs/container/gdal).
 
