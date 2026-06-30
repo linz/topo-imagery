@@ -19,7 +19,6 @@ dependencies = [
     "linz-logger",
     "python-ulid",
     "shapely>=2.0",
-    "tifffile",
     "topo-imagery-common",
     "topo-imagery-gdal",
 ]

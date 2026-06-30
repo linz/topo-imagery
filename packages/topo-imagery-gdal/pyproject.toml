@@ -10,6 +10,7 @@ requires-python = "~=3.12.3"
 dependencies = [
     "linz-logger",
     "shapely>=2.0",
+    "tifffile",
     "topo-imagery-common",
 ]
 

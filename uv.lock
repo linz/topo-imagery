@@ -898,7 +898,6 @@ dependencies = [
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely" },
-    { name = "tifffile" },
     { name = "topo-imagery-common" },
     { name = "topo-imagery-gdal" },
 ]
@@ -925,7 +924,6 @@ requires-dist = [
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely", specifier = ">=2.0" },
-    { name = "tifffile" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
     { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
 ]
@@ -992,6 +990,7 @@ source = { editable = "packages/topo-imagery-gdal" }
 dependencies = [
     { name = "linz-logger" },
     { name = "shapely" },
+    { name = "tifffile" },
     { name = "topo-imagery-common" },
 ]
 
@@ -1006,6 +1005,7 @@ dev = [
 requires-dist = [
     { name = "linz-logger" },
     { name = "shapely", specifier = ">=2.0" },
+    { name = "tifffile" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
 ]
 
