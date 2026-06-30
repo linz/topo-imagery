@@ -21,6 +21,10 @@ dev = [
     "pytest-subtests",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["test"]
+
 [tool.uv]
 package = true
 

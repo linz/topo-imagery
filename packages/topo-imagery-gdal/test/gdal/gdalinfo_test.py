@@ -1,5 +1,5 @@
+from gdalinfo import fake_gdal_info
 from topo_imagery_gdal.gdal.gdalinfo import get_origin
-from topo_imagery_gdal.testing.gdalinfo import fake_gdal_info
 from topo_imagery_gdal.tile.tile_index import Point
 
 
