@@ -1,5 +1,6 @@
 # CATEGORIES
-AERIAL_PHOTOS = "aerial-photos"
+AERIAL_PHOTOS = "ancillary-aerial-photos"
+ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS = "ancillary-near-infrared-aerial-photos"
 SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
 RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
 NEAR_INFRARED_AERIAL_PHOTOS = "near-infrared-aerial-photos"
@@ -18,7 +19,8 @@ COASTAL = "coastal"
 
 
 DATA_CATEGORIES = {
-    AERIAL_PHOTOS: "Aerial Photos",
+    ANCILLARY_AERIAL_PHOTOS: "Ancillary Aerial Photos",
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Ancillary Near-Infrared Aerial Photos",
     SCANNED_AERIAL_PHOTOS: "Scanned Aerial Photos",
     RURAL_AERIAL_PHOTOS: "Rural Aerial Photos",
     NEAR_INFRARED_AERIAL_PHOTOS: "Near-Infrared Aerial Photos",
