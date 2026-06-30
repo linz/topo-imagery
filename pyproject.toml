@@ -35,7 +35,6 @@ dev = [
     "pylint",
     "pytest",
     "pytest-dependency",
-    "pytest-mock",
     "pytest-subtests",
     "shellcheck-py",
 ]
