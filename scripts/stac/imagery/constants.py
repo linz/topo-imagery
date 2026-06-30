@@ -1,5 +1,5 @@
 # CATEGORIES
-AERIAL_PHOTOS = "ancillary-aerial-photos"
+ANCILLARY_AERIAL_PHOTOS = "ancillary-aerial-photos"
 ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS = "ancillary-near-infrared-aerial-photos"
 SCANNED_AERIAL_PHOTOS = "scanned-aerial-photos"
 RURAL_AERIAL_PHOTOS = "rural-aerial-photos"
