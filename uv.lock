@@ -896,6 +896,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
+    { name = "python-ulid" },
     { name = "shapely" },
     { name = "tifffile" },
     { name = "topo-imagery-common" },
@@ -922,6 +923,7 @@ dev = [
 requires-dist = [
     { name = "boto3" },
     { name = "linz-logger" },
+    { name = "python-ulid" },
     { name = "shapely", specifier = ">=2.0" },
     { name = "tifffile" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
