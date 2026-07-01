@@ -16,9 +16,8 @@ from topo_imagery_gdal.gdal.gdal_commands import get_gdal_command, get_hillshade
 from topo_imagery_gdal.gdal.gdal_helper import run_gdal
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
 from topo_imagery_gdal.standardising import create_vrt
-
-from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.create_stac import create_item
+from topo_imagery_stac.imagery.create_stac import create_item
+from topo_imagery_stac.json_codec import dict_to_json_bytes
 
 
 def get_args_parser() -> CommonArgumentParser:

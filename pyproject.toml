@@ -21,6 +21,7 @@ dependencies = [
     "shapely>=2.0",
     "topo-imagery-common",
     "topo-imagery-gdal",
+    "topo-imagery-stac",
 ]
 
 [dependency-groups]
@@ -49,12 +50,13 @@ default-groups = "all"
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
 topo-imagery-gdal = { workspace = true }
+topo-imagery-stac = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
 
 [tool.pytest.ini_options]
-pythonpath = ["packages/topo-imagery-gdal/test"]
+pythonpath = ["packages/topo-imagery-gdal/test", "packages/topo-imagery-stac/test"]
 
 [tool.isort]
 line_length = 127

@@ -18,14 +18,14 @@ from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import read
 from topo_imagery_common.files.fs_s3 import write
 
-from scripts.conftest import any_epoch_datetime_string, fake_linz_slug
-from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
-from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.item import ImageryItem, STACAsset
-from scripts.stac.imagery.provider import ProviderRole
-from scripts.stac.imagery.tests.generators import any_stac_processing
-from scripts.stac.util.STAC_VERSION import STAC_VERSION
-from scripts.stac.util.stac_extensions import StacExtensions
+from test_helpers import any_epoch_datetime_string, fake_linz_slug
+from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
+from topo_imagery_stac.imagery.collection_context import CollectionContext
+from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
+from topo_imagery_stac.imagery.provider import ProviderRole
+from topo_imagery_stac.testing.generators import any_stac_processing
+from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
+from topo_imagery_stac.util.stac_extensions import StacExtensions
 
 # pylint: disable=too-many-lines
 

@@ -7,13 +7,13 @@ from unittest.mock import patch
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 
-from scripts.conftest import any_epoch_datetime_string
-from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.item import ImageryItem
-from scripts.stac.imagery.tests.generators import any_stac_asset, any_stac_processing
-from scripts.stac.link import Relation
-from scripts.stac.util.media_type import StacMediaType
+from test_helpers import any_epoch_datetime_string
+from topo_imagery_stac.imagery.collection import ImageryCollection
+from topo_imagery_stac.imagery.collection_context import CollectionContext
+from topo_imagery_stac.imagery.item import ImageryItem
+from topo_imagery_stac.testing.generators import any_stac_asset, any_stac_processing
+from topo_imagery_stac.link import Relation
+from topo_imagery_stac.util.media_type import StacMediaType
 
 
 def test_imagery_stac_item(subtests: SubTests) -> None:

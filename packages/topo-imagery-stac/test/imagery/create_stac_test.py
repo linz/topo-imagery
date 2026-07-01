@@ -7,12 +7,12 @@ from pytest_subtests import SubTests
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
-from scripts.conftest import any_epoch_datetime, any_epoch_datetime_string
-from scripts.stac.imagery.collection import ImageryCollection
-from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, merge_item_list_for_resupply
-from scripts.stac.imagery.tests.generators import any_multihash_as_hex
-from scripts.stac.util.STAC_VERSION import STAC_VERSION
+from test_helpers import any_epoch_datetime, any_epoch_datetime_string
+from topo_imagery_stac.imagery.collection import ImageryCollection
+from topo_imagery_stac.imagery.collection_context import CollectionContext
+from topo_imagery_stac.imagery.create_stac import create_collection, create_item, get_items_to_replace, merge_item_list_for_resupply
+from topo_imagery_stac.testing.generators import any_multihash_as_hex
+from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 
 
 def test_create_item(subtests: SubTests) -> None:

@@ -7,6 +7,7 @@ members = [
     "topo-imagery",
     "topo-imagery-common",
     "topo-imagery-gdal",
+    "topo-imagery-stac",
 ]
 
 [[package]]
@@ -484,6 +485,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/15/79/8085b7c1ecd48d0535c3c8444a1d8df2926e457dce8e55fabc332a382c9c/moto-5.2.1-py3-none-any.whl", hash = "sha256:19d2fbd6e613aa5b4e364c52cd5d3cea371643a0f4210689a703227bd2924c5c", size = 6671379, upload-time = "2026-05-10T19:11:53.543Z" },
 ]
 
+[package.optional-dependencies]
+s3 = [
+    { name = "py-partiql-parser" },
+    { name = "pyyaml" },
+]
+
 [[package]]
 name = "mypy"
 version = "2.1.0"
@@ -620,6 +627,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/11/3d/ed68b0eccd0654f7f3c163d9b3d428f903e5e3e884ab1f0d0a16ba6a4f11/py_multihash-3.0.0.tar.gz", hash = "sha256:2e848941de5ef0533ca26b81940e2ffcf7b4322a3f803e8c97f4f0eca8767aa7", size = 41630, upload-time = "2025-12-17T19:30:00.596Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/24/e2/d65606db8369916fb5a9b4fe14df7e6072970d919300f3fb1c989a1d8e7d/py_multihash-3.0.0-py3-none-any.whl", hash = "sha256:3863ec1313b4eac1e5169137c143d40bf77456e57388f839441deba089f87326", size = 21215, upload-time = "2025-12-17T19:29:59.322Z" },
+]
+
+[[package]]
+name = "py-partiql-parser"
+version = "0.6.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/56/7a/a0f6bda783eb4df8e3dfd55973a1ac6d368a89178c300e1b5b91cd181e5e/py_partiql_parser-0.6.3.tar.gz", hash = "sha256:09cecf916ce6e3da2c050f0cb6106166de42c33d34a078ec2eb19377ea70389a", size = 17456, upload-time = "2025-10-18T13:56:13.441Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/33/a7cbfccc39056a5cf8126b7aab4c8bafbedd4f0ca68ae40ecb627a2d2cd3/py_partiql_parser-0.6.3-py2.py3-none-any.whl", hash = "sha256:deb0769c3346179d2f590dcbde556f708cdb929059fb654bad75f4cf6e07f582", size = 23752, upload-time = "2025-10-18T13:56:12.256Z" },
 ]
 
 [[package]]
@@ -900,6 +916,7 @@ dependencies = [
     { name = "shapely" },
     { name = "topo-imagery-common" },
     { name = "topo-imagery-gdal" },
+    { name = "topo-imagery-stac" },
 ]
 
 [package.dev-dependencies]
@@ -926,6 +943,7 @@ requires-dist = [
     { name = "shapely", specifier = ">=2.0" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
     { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
+    { name = "topo-imagery-stac", editable = "packages/topo-imagery-stac" },
 ]
 
 [package.metadata.requires-dev]
@@ -1013,6 +1031,45 @@ requires-dist = [
 dev = [
     { name = "pytest" },
     { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[[package]]
+name = "topo-imagery-stac"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-stac" }
+dependencies = [
+    { name = "linz-logger" },
+    { name = "python-ulid" },
+    { name = "shapely" },
+    { name = "topo-imagery-common" },
+    { name = "topo-imagery-gdal" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "boto3" },
+    { name = "moto", extra = ["s3"] },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "linz-logger" },
+    { name = "python-ulid" },
+    { name = "shapely", specifier = ">=2.0" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "boto3" },
+    { name = "moto", extras = ["s3"] },
+    { name = "mypy-boto3-s3" },
+    { name = "pytest" },
     { name = "pytest-subtests" },
 ]
 
