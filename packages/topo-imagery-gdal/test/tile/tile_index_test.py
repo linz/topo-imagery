@@ -1,7 +1,7 @@
 import pytest
 from pytest_subtests import SubTests
+from tile.tile_index_data import MAP_SHEET_DATA
 from topo_imagery_gdal.tile.tile_index import Bounds, Point, Size, get_bounds_from_name, get_mapsheet_offset, get_tile_offset
-from topo_imagery_gdal.tile.tile_index_data import MAP_SHEET_DATA
 
 
 def test_get_bounds_from_name() -> None:
