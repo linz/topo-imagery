@@ -53,6 +53,9 @@ topo-imagery-gdal = { workspace = true }
 [tool.uv.workspace]
 members = ["packages/*"]
 
+[tool.pytest.ini_options]
+pythonpath = ["packages/topo-imagery-gdal/test"]
+
 [tool.isort]
 line_length = 127
 case_sensitive = true
