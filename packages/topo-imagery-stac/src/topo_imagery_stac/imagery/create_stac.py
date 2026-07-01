@@ -11,12 +11,12 @@ from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_gdal.tiff.geotiff import get_extents
 
-from scripts.stac.imagery.capture_area import get_capture_area_description
-from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
-from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
-from scripts.stac.link import Link, Relation
-from scripts.stac.util.media_type import StacMediaType
+from topo_imagery_stac.imagery.capture_area import get_capture_area_description
+from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
+from topo_imagery_stac.imagery.collection_context import CollectionContext
+from topo_imagery_stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
+from topo_imagery_stac.link import Link, Relation
+from topo_imagery_stac.util.media_type import StacMediaType
 
 
 # pylint: disable=too-many-positional-arguments

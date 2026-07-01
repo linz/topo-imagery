@@ -1,6 +1,6 @@
 from pytest_subtests import SubTests
 
-from scripts.stac.imagery.collection_context import CollectionContext
+from topo_imagery_stac.imagery.collection_context import CollectionContext
 
 
 def test_get_providers_default_is_present(fake_collection_context: CollectionContext, subtests: SubTests) -> None:

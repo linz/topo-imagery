@@ -3,10 +3,10 @@ from typing import Any, TypedDict
 
 from topo_imagery_common.files.fs import read
 
-from scripts.stac.link import Link, Relation
-from scripts.stac.util.STAC_VERSION import STAC_VERSION
-from scripts.stac.util.media_type import StacMediaType
-from scripts.stac.util.stac_extensions import StacExtensions
+from topo_imagery_stac.link import Link, Relation
+from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
+from topo_imagery_stac.util.media_type import StacMediaType
+from topo_imagery_stac.util.stac_extensions import StacExtensions
 
 STACAsset = TypedDict("STACAsset", {"href": str, "file:checksum": str, "created": str, "updated": str})
 

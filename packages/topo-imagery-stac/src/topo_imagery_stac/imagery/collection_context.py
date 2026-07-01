@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from scripts.stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
+from topo_imagery_stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
 
 
 @dataclass
