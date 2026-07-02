@@ -6,7 +6,6 @@ from pytest_subtests import SubTests
 from shapely import get_exterior_ring, is_ccw
 from shapely.geometry import GeometryCollection, LineString, MultiPolygon, Point, Polygon, shape
 from shapely.predicates import is_valid
-
 from topo_imagery_stac.imagery.capture_area import extract_polygons, generate_capture_area, merge_polygons, to_feature
 
 # In the following tests, the expected and result GeoJSON documents are printed if the test fails.

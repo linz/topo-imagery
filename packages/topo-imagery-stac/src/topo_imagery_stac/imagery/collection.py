@@ -12,8 +12,6 @@ from topo_imagery_common.datetimes import convert_utc_to_nz_datetime, format_rfc
 from topo_imagery_common.files import checksum
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import exists, read, write
-
-from topo_imagery_stac.json_codec import dict_to_json_bytes
 from topo_imagery_stac.imagery.capture_area import generate_capture_area
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import (
@@ -36,6 +34,7 @@ from topo_imagery_stac.imagery.constants import (
     URBAN_AERIAL_PHOTOS,
 )
 from topo_imagery_stac.imagery.provider import Provider
+from topo_imagery_stac.json_codec import dict_to_json_bytes
 from topo_imagery_stac.link import Link, Relation
 from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 from topo_imagery_stac.util.media_type import StacMediaType

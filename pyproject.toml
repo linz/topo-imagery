@@ -67,6 +67,7 @@ profile = "black"
 show_error_codes = true
 strict = true
 disable_error_code = ["import"]
+exclude = ["conftest\\.py$"]
 
 [[tool.mypy.overrides]]
 module = ["linz_logger"]

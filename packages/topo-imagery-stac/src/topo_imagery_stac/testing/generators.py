@@ -3,7 +3,6 @@ from os import urandom
 from typing import Callable
 
 from topo_imagery_common.files.checksum import multihash_as_hex
-
 from topo_imagery_stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
 
 

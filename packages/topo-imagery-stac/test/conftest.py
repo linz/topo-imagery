@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Iterator
 
 import pytest
-
 from test_helpers import fake_linz_slug
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 
