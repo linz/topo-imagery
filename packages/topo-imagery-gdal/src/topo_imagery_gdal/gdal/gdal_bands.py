@@ -1,8 +1,7 @@
 from linz_logger import get_log
-
-from scripts.gdal.gdal_helper import gdal_info
-from scripts.gdal.gdal_presets import CompressionPreset
-from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
+from topo_imagery_gdal.gdal.gdal_helper import gdal_info
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
 def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:

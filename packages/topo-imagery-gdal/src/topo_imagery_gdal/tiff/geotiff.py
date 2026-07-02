@@ -1,6 +1,5 @@
 from shapely.geometry import Polygon
-
-from scripts.gdal.gdalinfo import GdalInfo
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 
 def get_extents(gdalinfo_result: GdalInfo) -> tuple[dict[str, list[list[list[float]]]], tuple[float, float, float, float]]:

@@ -9,9 +9,8 @@ from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import read, write_all, write_sidecars
 from topo_imagery_common.log.time_helper import time_in_ms
-
-from scripts.gdal.gdal_commands import get_ascii_translate_command
-from scripts.gdal.gdal_helper import run_gdal
+from topo_imagery_gdal.gdal.gdal_commands import get_ascii_translate_command
+from topo_imagery_gdal.gdal.gdal_helper import run_gdal
 
 
 def main() -> None:

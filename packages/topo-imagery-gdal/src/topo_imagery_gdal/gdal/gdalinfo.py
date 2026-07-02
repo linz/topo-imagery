@@ -1,6 +1,6 @@
 from typing import Any, TypedDict
 
-from scripts.tile.tile_index import Point
+from topo_imagery_gdal.tile.tile_index import Point
 
 
 class GdalInfoBandColorTable(TypedDict):

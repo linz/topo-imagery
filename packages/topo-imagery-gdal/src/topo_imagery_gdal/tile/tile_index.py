@@ -1,7 +1,7 @@
 import re
 from typing import NamedTuple
 
-from scripts.tile.util import charcodeat
+from topo_imagery_gdal.tile.util import charcodeat
 
 SHEET_WIDTH = 24_000
 """ Width of Topo 1:50k mapsheets (meters) """

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "topo-imagery-gdal"
+version = "0.1.0"
+description = "GDAL and raster utilities for topo-imagery processing"
+requires-python = "~=3.12.3"
+dependencies = [
+    "linz-logger",
+    "shapely>=2.0",
+    "tifffile",
+    "topo-imagery-common",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-dependency",
+    "pytest-subtests",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["test"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+topo-imagery-common = { workspace = true }

@@ -14,9 +14,8 @@ from topo_imagery_common.cli.cli_helper import TileFiles
 from topo_imagery_common.files.files_helper import ContentType, is_tiff
 from topo_imagery_common.files.fs import exists, read, write, write_all, write_sidecars
 from topo_imagery_common.log.time_helper import time_in_ms
-
-from scripts.gdal.gdal_bands import get_gdal_band_offset
-from scripts.gdal.gdal_commands import (
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
+from topo_imagery_gdal.gdal.gdal_commands import (
     get_alpha_command,
     get_build_vrt_command,
     get_cutline_command,
@@ -25,11 +24,11 @@ from scripts.gdal.gdal_commands import (
     get_relabel_colorinterp_command,
     get_transform_srs_command,
 )
-from scripts.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
-from scripts.gdal.gdal_helper import gdal_info, run_gdal
-from scripts.gdal.gdal_presets import CompressionPreset
-from scripts.tiff.file_tiff import FileTiff, FileTiffType
-from scripts.tile.tile_index import Bounds, get_bounds_from_name
+from topo_imagery_gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
+from topo_imagery_gdal.gdal.gdal_helper import gdal_info, run_gdal
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
+from topo_imagery_gdal.tiff.file_tiff import FileTiff, FileTiffType
+from topo_imagery_gdal.tile.tile_index import Bounds, get_bounds_from_name
 
 
 @dataclass

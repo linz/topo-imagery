@@ -17,9 +17,10 @@ requires-python = "~=3.12.3"
 dependencies = [
     "boto3",
     "linz-logger",
+    "python-ulid",
     "shapely>=2.0",
-    "tifffile",
     "topo-imagery-common",
+    "topo-imagery-gdal",
 ]
 
 [dependency-groups]
@@ -34,7 +35,6 @@ dev = [
     "pylint",
     "pytest",
     "pytest-dependency",
-    "pytest-mock",
     "pytest-subtests",
     "shellcheck-py",
 ]
@@ -48,9 +48,13 @@ default-groups = "all"
 
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
+topo-imagery-gdal = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["packages/topo-imagery-gdal/test"]
 
 [tool.isort]
 line_length = 127

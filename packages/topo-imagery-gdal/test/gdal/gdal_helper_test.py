@@ -1,7 +1,6 @@
+from gdalinfo import fake_gdal_info
 from pytest_subtests import SubTests
-
-from scripts.gdal.gdal_helper import is_geotiff
-from scripts.gdal.tests.gdalinfo import fake_gdal_info
+from topo_imagery_gdal.gdal.gdal_helper import is_geotiff
 
 
 def test_is_geotiff(subtests: SubTests) -> None:

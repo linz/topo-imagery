@@ -5,9 +5,9 @@ from enum import Enum
 from typing import Any
 from urllib.parse import unquote
 
-from scripts.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
-from scripts.gdal.gdal_presets import DEFAULT_NO_DATA_VALUE, CompressionPreset
-from scripts.gdal.gdalinfo import GdalInfo
+from topo_imagery_gdal.gdal.gdal_helper import GDALExecutionException, gdal_info, run_gdal
+from topo_imagery_gdal.gdal.gdal_presets import DEFAULT_NO_DATA_VALUE, CompressionPreset
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 
 class FileTiffErrorType(str, Enum):

@@ -1,6 +1,6 @@
 from typing import cast
 
-from scripts.gdal.gdalinfo import GdalInfo, GdalInfoBand
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
 def fake_gdal_info() -> GdalInfo:

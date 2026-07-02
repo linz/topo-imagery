@@ -7,16 +7,16 @@ from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
+from topo_imagery_gdal.gdal.gdal_helper import gdal_info
+from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
+from topo_imagery_gdal.tiff.geotiff import get_extents
 
-from scripts.gdal.gdal_helper import gdal_info
-from scripts.gdal.gdalinfo import GdalInfo
 from scripts.stac.imagery.capture_area import get_capture_area_description
 from scripts.stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from scripts.stac.link import Link, Relation
 from scripts.stac.util.media_type import StacMediaType
-from scripts.tiff.geotiff import get_extents
 
 
 # pylint: disable=too-many-positional-arguments
