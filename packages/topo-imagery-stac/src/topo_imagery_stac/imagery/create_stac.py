@@ -10,7 +10,6 @@ from topo_imagery_common.files.fs import NoSuchFileError, read
 from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_gdal.tiff.geotiff import get_extents
-
 from topo_imagery_stac.imagery.capture_area import get_capture_area_description
 from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext

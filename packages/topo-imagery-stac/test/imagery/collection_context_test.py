@@ -1,5 +1,4 @@
 from pytest_subtests import SubTests
-
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 
 
