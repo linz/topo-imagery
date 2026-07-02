@@ -1,0 +1,36 @@
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "topo-imagery-stac"
+version = "0.1.0"
+description = "STAC utilities for topo-imagery processing"
+requires-python = "~=3.12.3"
+dependencies = [
+    "linz-logger",
+    "python-ulid",
+    "shapely>=2.0",
+    "topo-imagery-common",
+    "topo-imagery-gdal",
+]
+
+[dependency-groups]
+dev = [
+    "boto3",
+    "moto[s3]",
+    "mypy-boto3-s3",
+    "pytest",
+    "pytest-subtests",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["test"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+topo-imagery-common = { workspace = true }
+topo-imagery-gdal = { workspace = true }

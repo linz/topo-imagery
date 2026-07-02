@@ -16,12 +16,11 @@ from topo_imagery_common.cli.cli_helper import (
 from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType
 from topo_imagery_common.files.fs import exists, write
-
-from scripts.gdal.gdal_helper import get_srs, get_vfs_path
-from scripts.json_codec import dict_to_json_bytes
-from scripts.stac.imagery.create_stac import create_item
-from scripts.standardising import StandardisingConfig, run_standardising
-from scripts.tiff.file_tiff import FileTiff
+from topo_imagery_gdal.gdal.gdal_helper import get_srs, get_vfs_path
+from topo_imagery_gdal.standardising import StandardisingConfig, run_standardising
+from topo_imagery_gdal.tiff.file_tiff import FileTiff
+from topo_imagery_stac.imagery.create_stac import create_item
+from topo_imagery_stac.json_codec import dict_to_json_bytes
 
 
 def get_args_parser() -> ArgumentParser:
