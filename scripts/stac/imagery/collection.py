@@ -17,7 +17,8 @@ from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
-    AERIAL_PHOTOS,
+    ANCILLARY_AERIAL_PHOTOS,
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
     DATA_CATEGORIES,
     DATA_DOMAINS,
     DEM,
@@ -41,7 +42,13 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
-ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS, NEAR_INFRARED_AERIAL_PHOTOS}
+ANY_ORTHO_AERIAL_PHOTOS = {
+    ANCILLARY_AERIAL_PHOTOS,
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
+    URBAN_AERIAL_PHOTOS,
+    RURAL_AERIAL_PHOTOS,
+    NEAR_INFRARED_AERIAL_PHOTOS,
+}
 ANY_SATELLITE_IMAGERY = {SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY}
 IMAGERY = {SCANNED_AERIAL_PHOTOS, *ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
 ELEVATION = {DEM, DSM}
@@ -51,6 +58,7 @@ CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 GSD_UNIT = "m"
+ANCILLARY_CATEGORIES = {ANCILLARY_AERIAL_PHOTOS, ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS}
 
 
 class SubtypeParameterError(Exception):
@@ -192,6 +200,11 @@ class ImageryCollection:
         Returns:
             Dataset Title
         """
+        category = self.stac["linz:geospatial_category"]
+
+        if category in ANCILLARY_CATEGORIES and self.stac.get("linz:event_name"):
+            return
+
         temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
         if not temporal_extent:
             raise ValueError("temporal extent must be set before setting the title")
@@ -212,8 +225,6 @@ class ImageryCollection:
 
         # determine suffix based on its lifecycle
         lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.stac["linz:lifecycle"], "") if self.add_title_suffix else None
-
-        category = self.stac["linz:geospatial_category"]
 
         if category == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
@@ -263,8 +274,8 @@ class ImageryCollection:
 
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
-        Urban / Rural / Aerial Photos:
-          Orthophotography within the [Region] region captured in the [year(s)] flying season.
+        Urban / Rural / Ancillary Aerial Photos:
+          Ancillary Orthophotography within the [Region] region captured in the [year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
         DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
@@ -278,6 +289,8 @@ class ImageryCollection:
         """
 
         category = self.stac["linz:geospatial_category"]
+        if category in ANCILLARY_CATEGORIES and self.stac.get("linz:event_name"):
+            return
 
         components = [DATA_DOMAINS[self.domain] if category in {*ELEVATION, *HILLSHADES} else None]
         if category in {*IMAGERY, *ELEVATION}:
@@ -309,7 +322,8 @@ class ImageryCollection:
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
             NEAR_INFRARED_SATELLITE_IMAGERY: "Near-infrared satellite imagery",
-            AERIAL_PHOTOS: "Orthophotography",
+            ANCILLARY_AERIAL_PHOTOS: "Ancillary Orthophotography",
+            ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Ancillary Near-infrared orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
             NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",
