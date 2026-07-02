@@ -461,6 +461,34 @@ published as a record of the Cyclone Gabrielle event.",
             "minimize effects on other map features.",
             id="Coastal 1m DEM Hillshade Igor",
         ),
+        param(
+            CollectionContext(
+                category="ancillary-aerial-photos",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+        ),
+        "Hawke's Bay 0.3m Ancillary Aerial Photos (2023)",
+        "Ancillary Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+        id="Ancillary Aerial Photos",
+    ),
+        param(
+            CollectionContext(
+                category="ancillary-near-infrared-aerial-photos",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+        ),
+        "Hawke's Bay 0.3m Ancillary Near-Infrared Aerial Photos (2023)",
+        "Ancillary Near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+        id="Ancillary Near-Infrared Aerial Photos",
+    ),
     ],
 )
 def test_set_title_set_description(
@@ -1059,3 +1087,22 @@ def test_ancillary_near_infrared_aerial_photos_category(
     fake_ancillary_near_infrared_aerial_photos_collection_context: CollectionContext,
 ) -> None:
     assert fake_ancillary_near_infrared_aerial_photos_collection_context.category == ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
+
+def test_title_and_description_not_updated_when_event_name_set_for_ancillary(subtests: SubTests) -> None:
+    context = CollectionContext(
+        category="ancillary-aerial-photos",
+        domain="land",
+        region="hawkes-bay",
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+        gsd=Decimal("0.3"),
+        collection_id="a-random-collection-id",
+        event_name="Forest Assessment",
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    with subtests.test(msg="title"):
+        collection.set_title()
+        assert collection.stac["title"] == ""
+    with subtests.test(msg="description"):
+        collection.set_description()
+        assert collection.stac["description"] == ""
