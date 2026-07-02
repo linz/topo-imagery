@@ -17,7 +17,6 @@ requires-python = "~=3.12.3"
 dependencies = [
     "boto3",
     "linz-logger",
-    "python-ulid",
     "shapely>=2.0",
     "topo-imagery-common",
     "topo-imagery-gdal",
