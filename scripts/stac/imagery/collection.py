@@ -17,7 +17,8 @@ from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
-    AERIAL_PHOTOS,
+    ANCILLARY_AERIAL_PHOTOS,
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
     DATA_CATEGORIES,
     DATA_DOMAINS,
     DEM,
@@ -41,7 +42,7 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
-ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS, NEAR_INFRARED_AERIAL_PHOTOS}
+ANY_ORTHO_AERIAL_PHOTOS = {ANCILLARY_AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS, NEAR_INFRARED_AERIAL_PHOTOS}
 ANY_SATELLITE_IMAGERY = {SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY}
 IMAGERY = {SCANNED_AERIAL_PHOTOS, *ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
 ELEVATION = {DEM, DSM}
@@ -309,7 +310,8 @@ class ImageryCollection:
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
             NEAR_INFRARED_SATELLITE_IMAGERY: "Near-infrared satellite imagery",
-            AERIAL_PHOTOS: "Orthophotography",
+            ANCILLARY_AERIAL_PHOTOS: "Orthophotography",
+            ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
             NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",

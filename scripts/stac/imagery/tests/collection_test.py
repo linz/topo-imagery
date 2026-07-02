@@ -21,6 +21,7 @@ from topo_imagery_common.files.fs_s3 import write
 from scripts.conftest import any_epoch_datetime_string, fake_linz_slug
 from scripts.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from scripts.stac.imagery.collection_context import CollectionContext
+from scripts.stac.imagery.constants import ANCILLARY_AERIAL_PHOTOS, ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
 from scripts.stac.imagery.item import ImageryItem, STACAsset
 from scripts.stac.imagery.provider import ProviderRole
 from scripts.stac.imagery.tests.generators import any_stac_processing
@@ -1048,3 +1049,13 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     with subtests.test(msg="Optional metadata should be removed if not passed"):
         assert collection.stac.get("linz:event_name") is None
         assert collection.stac.get("linz:geographic_description") is None
+
+
+def test_ancillary_aerial_photos_category(fake_ancillary_aerial_photos_collection_context: CollectionContext) -> None:
+    assert fake_ancillary_aerial_photos_collection_context.category == ANCILLARY_AERIAL_PHOTOS
+
+
+def test_ancillary_near_infrared_aerial_photos_category(
+    fake_ancillary_near_infrared_aerial_photos_collection_context: CollectionContext,
+) -> None:
+    assert fake_ancillary_near_infrared_aerial_photos_collection_context.category == ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
