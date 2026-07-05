@@ -32,33 +32,6 @@ def fake_collection_context() -> Iterator[CollectionContext]:
         collection_id="a-random-collection-id",
     )
 
-
-@pytest.fixture
-def fake_ancillary_aerial_photos_collection_context() -> Iterator[CollectionContext]:
-    yield CollectionContext(
-        category=ANCILLARY_AERIAL_PHOTOS,
-        domain="land",
-        region="hawkes-bay",
-        gsd=Decimal("0.3"),
-        lifecycle="completed",
-        linz_slug=fake_linz_slug(),
-        collection_id="a-random-collection-id",
-    )
-
-
-@pytest.fixture
-def fake_ancillary_near_infrared_aerial_photos_collection_context() -> Iterator[CollectionContext]:
-    yield CollectionContext(
-        category=ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
-        domain="land",
-        region="hawkes-bay",
-        gsd=Decimal("0.3"),
-        lifecycle="completed",
-        linz_slug=fake_linz_slug(),
-        collection_id="a-random-collection-id",
-    )
-
-
 def any_epoch_datetime() -> datetime:
     """
     Get arbitrary datetime

@@ -275,7 +275,7 @@ class ImageryCollection:
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
         Urban / Rural / Ancillary Aerial Photos:
-          Ancillary Orthophotography within the [Region] region captured in the [year(s)] flying season.
+          Ancillary orthophotography within the [Region] region captured in the [year(s)] flying season.
         DEM / DSM:
           [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
         DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
@@ -322,8 +322,8 @@ class ImageryCollection:
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
             NEAR_INFRARED_SATELLITE_IMAGERY: "Near-infrared satellite imagery",
-            ANCILLARY_AERIAL_PHOTOS: "Ancillary Orthophotography",
-            ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Ancillary Near-infrared orthophotography",
+            ANCILLARY_AERIAL_PHOTOS: "Ancillary orthophotography",
+            ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Ancillary near-infrared orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
             NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",
