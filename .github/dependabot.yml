@@ -4,12 +4,18 @@ updates:
     directory: /
     schedule:
       interval: daily
+    cooldown:
+      default-days: 15
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: daily
     commit-message:
       prefix: "build(deps)"
+    ignore:
+      - dependency-name: pkg:localrepo/localrepo/local?repository_url=target
+    cooldown:
+      default-days: 15
   - package-ecosystem: uv
     directory: "/"
     schedule:
@@ -18,3 +24,5 @@ updates:
     commit-message:
       prefix: "build(deps)"
       prefix-development: "build(deps-dev)"
+    cooldown:
+      default-days: 15
