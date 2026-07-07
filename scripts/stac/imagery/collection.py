@@ -59,6 +59,15 @@ CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 GSD_UNIT = "m"
 ANCILLARY_CATEGORIES = {ANCILLARY_AERIAL_PHOTOS, ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS}
+# When an ancillary category is published as part of a named event, the title/description
+# read as plain (non-ancillary) orthophotography instead of "Ancillary ...".
+EVENTS = {
+    ANCILLARY_AERIAL_PHOTOS: {"title": "Aerial Photos", "description": "Orthophotography"},
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: {
+        "title": "Near-Infrared Aerial Photos",
+        "description": "Near-infrared orthophotography",
+    },
+}
 
 
 class SubtypeParameterError(Exception):
@@ -201,9 +210,7 @@ class ImageryCollection:
             Dataset Title
         """
         category = self.stac["linz:geospatial_category"]
-
-        if category in ANCILLARY_CATEGORIES and self.stac.get("linz:event_name"):
-            return
+        is_ancillary_event = category in ANCILLARY_CATEGORIES and bool(self.stac.get("linz:event_name"))
 
         temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
         if not temporal_extent:
@@ -238,10 +245,11 @@ class ImageryCollection:
             ]
 
         elif category in {*ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
+            category_title = EVENTS[category]["title"] if is_ancillary_event else DATA_CATEGORIES[category]
             components = [
                 geographic_description or region,
                 gsd_str,
-                DATA_CATEGORIES[category],
+                category_title,
                 date,
                 lifecycle_suffix,
             ]
@@ -289,8 +297,6 @@ class ImageryCollection:
         """
 
         category = self.stac["linz:geospatial_category"]
-        if category in ANCILLARY_CATEGORIES and self.stac.get("linz:event_name"):
-            return
 
         components = [DATA_DOMAINS[self.domain] if category in {*ELEVATION, *HILLSHADES} else None]
         if category in {*IMAGERY, *ELEVATION}:
@@ -317,6 +323,7 @@ class ImageryCollection:
         end_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][1])).year
 
         category = self.stac["linz:geospatial_category"]
+        is_ancillary_event = category in ANCILLARY_CATEGORIES and bool(self.stac.get("linz:event_name"))
 
         base_descriptions = {
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
@@ -331,8 +338,10 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
+        base_description = EVENTS[category]["description"] if is_ancillary_event else base_descriptions[category]
+
         components = [
-            base_descriptions[category],
+            base_description,
             "within the",
             HUMAN_READABLE_REGIONS[self.stac["linz:region"]],
             "region captured in",
