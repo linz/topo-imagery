@@ -8,7 +8,6 @@ import pytest
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 
 from scripts.stac.imagery.collection_context import CollectionContext
-from scripts.stac.imagery.constants import ANCILLARY_AERIAL_PHOTOS, ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
 
 
 def fake_linz_slug() -> str:
@@ -31,6 +30,7 @@ def fake_collection_context() -> Iterator[CollectionContext]:
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",
     )
+
 
 def any_epoch_datetime() -> datetime:
     """
