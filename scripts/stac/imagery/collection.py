@@ -197,9 +197,11 @@ class ImageryCollection:
 
     def set_title(self) -> None:
         """Set the title based on the STAC metadata.
-        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
+        Satellite Imagery / Near-Infrared Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos /
+        Near-Infrared Aerial Photos / Ancillary Aerial Photos / Ancillary Near-Infrared Aerial Photos /
+        Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
-        DEM / DSM:
+        DEM / DSM / DEM Hillshade / DEM Hillshade Igor / DSM Hillshade / DSM Hillshade Igor:
           https://github.com/linz/elevation/blob/master/docs/naming.md
 
         Raises:
@@ -282,15 +284,24 @@ class ImageryCollection:
 
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
-        Urban / Rural / Ancillary Aerial Photos:
-          Ancillary orthophotography within the [Region] region captured in the [year(s)] flying season.
+        Urban / Rural Aerial Photos / Near-Infrared Aerial Photos:
+          [Orthophotography / Near-infrared orthophotography] within the [Region] region captured in the
+          [year(s)] flying season.
+        Ancillary Aerial Photos / Ancillary Near-Infrared Aerial Photos:
+          [Ancillary orthophotography / Ancillary near-infrared orthophotography] within the [Region] region
+          captured in the [year(s)] flying season. If published as part of a named event, the "Ancillary"
+          prefix is dropped and the description reads as plain (near-infrared) orthophotography instead.
         DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
-        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
-          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
-          Gaps filled with lower resolution elevation data (8m contour) as needed.
-        Satellite Imagery / Scanned Aerial Photos:
-          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
+          [Digital Elevation Model / Digital Surface Model] within the [Region] region captured in [year(s)].
+        DEM/DSM Hillshade / Hillshade Igor:
+          [Digital Elevation Model / Digital Surface Model] [mono-directional / whiter multi-directional]
+          hillshade derived from 1m LiDAR. Gaps filled with lower resolution elevation data (8m contour) as needed.
+        Satellite Imagery / Near-Infrared Satellite Imagery / Scanned Aerial Photos:
+          [Satellite imagery / Near-infrared satellite imagery / Scanned aerial imagery] within the [Region]
+          region captured in [year(s)].
+
+        If `linz:event_name` is set, the description is suffixed with
+        ", published as a record of the [event name] event."
 
         Returns:
             Dataset Description
