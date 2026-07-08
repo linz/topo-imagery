@@ -23,7 +23,10 @@ jobs:
           uv run pre-commit run --all-files
       - name: Unit Tests
         run: |
-          uv run pytest --doctest-modules .
+          uv run pytest --doctest-modules scripts
+          for pkg in packages/*/; do
+            uv run pytest --doctest-modules "$pkg"
+          done
 
       - name: Build containers
         run: |
