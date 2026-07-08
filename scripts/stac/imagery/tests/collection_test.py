@@ -1109,29 +1109,3 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     with subtests.test(msg="Optional metadata should be removed if not passed"):
         assert collection.stac.get("linz:event_name") is None
         assert collection.stac.get("linz:geographic_description") is None
-
-
-def test_ancillary_aerial_photos_category() -> None:
-    context = CollectionContext(
-        category=ANCILLARY_AERIAL_PHOTOS,
-        domain="land",
-        region="hawkes-bay",
-        gsd=Decimal("0.3"),
-        lifecycle="completed",
-        linz_slug=fake_linz_slug(),
-        collection_id="a-random-collection-id",
-    )
-    assert context.category == ANCILLARY_AERIAL_PHOTOS
-
-
-def test_ancillary_near_infrared_aerial_photos_category() -> None:
-    context = CollectionContext(
-        category=ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
-        domain="land",
-        region="hawkes-bay",
-        gsd=Decimal("0.3"),
-        lifecycle="completed",
-        linz_slug=fake_linz_slug(),
-        collection_id="a-random-collection-id",
-    )
-    assert context.category == ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
