@@ -472,7 +472,7 @@ published as a record of the Cyclone Gabrielle event.",
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Ancillary Aerial Photos (2023)",
-            "Ancillary Orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            "Ancillary orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
             id="Ancillary Aerial Photos",
         ),
         param(
@@ -486,8 +486,40 @@ published as a record of the Cyclone Gabrielle event.",
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Ancillary Near-Infrared Aerial Photos (2023)",
-            "Ancillary Near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
+            "Ancillary near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season.",
             id="Ancillary Near-Infrared Aerial Photos",
+        ),
+        param(
+            CollectionContext(
+                category="ancillary-aerial-photos",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                event_name="Forest Assessment",
+            ),
+            "Hawke's Bay 0.3m Aerial Photos (2023)",
+            "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
+            "published as a record of the Forest Assessment event.",
+            id="Ancillary Aerial Photos with Event",
+        ),
+        param(
+            CollectionContext(
+                category="ancillary-near-infrared-aerial-photos",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                event_name="Forest Assessment",
+            ),
+            "Hawke's Bay 0.3m Near-Infrared Aerial Photos (2023)",
+            "Near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
+            "published as a record of the Forest Assessment event.",
+            id="Ancillary Near-Infrared Aerial Photos with Event",
         ),
     ],
 )
@@ -1079,31 +1111,27 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
         assert collection.stac.get("linz:geographic_description") is None
 
 
-def test_ancillary_aerial_photos_category(fake_ancillary_aerial_photos_collection_context: CollectionContext) -> None:
-    assert fake_ancillary_aerial_photos_collection_context.category == ANCILLARY_AERIAL_PHOTOS
-
-
-def test_ancillary_near_infrared_aerial_photos_category(
-    fake_ancillary_near_infrared_aerial_photos_collection_context: CollectionContext,
-) -> None:
-    assert fake_ancillary_near_infrared_aerial_photos_collection_context.category == ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
-
-
-def test_title_and_description_not_updated_when_event_name_set_for_ancillary(subtests: SubTests) -> None:
+def test_ancillary_aerial_photos_category() -> None:
     context = CollectionContext(
-        category="ancillary-aerial-photos",
+        category=ANCILLARY_AERIAL_PHOTOS,
         domain="land",
         region="hawkes-bay",
+        gsd=Decimal("0.3"),
         lifecycle="completed",
         linz_slug=fake_linz_slug(),
-        gsd=Decimal("0.3"),
         collection_id="a-random-collection-id",
-        event_name="Forest Assessment",
     )
-    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    with subtests.test(msg="title"):
-        collection.set_title()
-        assert collection.stac["title"] == ""
-    with subtests.test(msg="description"):
-        collection.set_description()
-        assert collection.stac["description"] == ""
+    assert context.category == ANCILLARY_AERIAL_PHOTOS
+
+
+def test_ancillary_near_infrared_aerial_photos_category() -> None:
+    context = CollectionContext(
+        category=ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+        collection_id="a-random-collection-id",
+    )
+    assert context.category == ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS
