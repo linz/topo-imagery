@@ -1,5 +1,13 @@
 # Changelog
 
+## [7.22.0](https://github.com/linz/topo-imagery/compare/v7.21.1...v7.22.0) (2026-07-08)
+
+
+### Features
+
+* Added Chatham Islands to the list of regions TDE-1971 ([#1585](https://github.com/linz/topo-imagery/issues/1585)) ([4e642d4](https://github.com/linz/topo-imagery/commit/4e642d45d9fc2b59db6d210e665f1939f7f5032b))
+* change aerial photos to ancillary aerial photos TDE-1924 ([#1568](https://github.com/linz/topo-imagery/issues/1568)) ([4ac5259](https://github.com/linz/topo-imagery/commit/4ac525992eea5c965478cbe38ea9f3b255c2e3f3))
+
 ## [7.21.1](https://github.com/linz/topo-imagery/compare/v7.21.0...v7.21.1) (2026-04-22)
 
 
