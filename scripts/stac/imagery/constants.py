@@ -61,6 +61,7 @@ HUMAN_READABLE_REGIONS = {
     "waikato": "Waikato",
     "wellington": "Wellington",
     "west-coast": "West Coast",
+    "chatham-islands": "Chatham Islands",
 }
 
 LIFECYCLE_SUFFIXES = {
