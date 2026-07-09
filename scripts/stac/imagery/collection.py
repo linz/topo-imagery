@@ -17,7 +17,8 @@ from scripts.json_codec import dict_to_json_bytes
 from scripts.stac.imagery.capture_area import generate_capture_area
 from scripts.stac.imagery.collection_context import CollectionContext
 from scripts.stac.imagery.constants import (
-    AERIAL_PHOTOS,
+    ANCILLARY_AERIAL_PHOTOS,
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
     DATA_CATEGORIES,
     DATA_DOMAINS,
     DEM,
@@ -41,7 +42,13 @@ from scripts.stac.util.STAC_VERSION import STAC_VERSION
 from scripts.stac.util.media_type import StacMediaType
 from scripts.stac.util.stac_extensions import StacExtensions
 
-ANY_ORTHO_AERIAL_PHOTOS = {AERIAL_PHOTOS, URBAN_AERIAL_PHOTOS, RURAL_AERIAL_PHOTOS, NEAR_INFRARED_AERIAL_PHOTOS}
+ANY_ORTHO_AERIAL_PHOTOS = {
+    ANCILLARY_AERIAL_PHOTOS,
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS,
+    URBAN_AERIAL_PHOTOS,
+    RURAL_AERIAL_PHOTOS,
+    NEAR_INFRARED_AERIAL_PHOTOS,
+}
 ANY_SATELLITE_IMAGERY = {SATELLITE_IMAGERY, NEAR_INFRARED_SATELLITE_IMAGERY}
 IMAGERY = {SCANNED_AERIAL_PHOTOS, *ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}
 ELEVATION = {DEM, DSM}
@@ -51,6 +58,16 @@ CAPTURE_AREA_FILE_NAME = "capture-area.geojson"
 CAPTURE_DATES_FILE_NAME = "capture-dates.geojson"
 WARN_NO_PUBLISHED_CAPTURE_AREA = "no_published_capture_area"
 GSD_UNIT = "m"
+ANCILLARY_CATEGORIES = {ANCILLARY_AERIAL_PHOTOS, ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS}
+# When an ancillary category is published as part of a named event, the title/description
+# read as plain (non-ancillary) orthophotography instead of "Ancillary ...".
+EVENTS = {
+    ANCILLARY_AERIAL_PHOTOS: {"title": "Aerial Photos", "description": "Orthophotography"},
+    ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: {
+        "title": "Near-Infrared Aerial Photos",
+        "description": "Near-infrared orthophotography",
+    },
+}
 
 
 class SubtypeParameterError(Exception):
@@ -180,9 +197,11 @@ class ImageryCollection:
 
     def set_title(self) -> None:
         """Set the title based on the STAC metadata.
-        Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos / Scanned Aerial Photos:
+        Satellite Imagery / Near-Infrared Satellite Imagery / Urban Aerial Photos / Rural Aerial Photos /
+        Near-Infrared Aerial Photos / Ancillary Aerial Photos / Ancillary Near-Infrared Aerial Photos /
+        Scanned Aerial Photos:
           https://github.com/linz/imagery/blob/master/docs/naming.md
-        DEM / DSM:
+        DEM / DSM / DEM Hillshade / DEM Hillshade Igor / DSM Hillshade / DSM Hillshade Igor:
           https://github.com/linz/elevation/blob/master/docs/naming.md
 
         Raises:
@@ -192,6 +211,9 @@ class ImageryCollection:
         Returns:
             Dataset Title
         """
+        category = self.stac["linz:geospatial_category"]
+        is_ancillary_event = category in ANCILLARY_CATEGORIES and bool(self.stac.get("linz:event_name"))
+
         temporal_extent = self.stac.get("extent", {}).get("temporal", {}).get("interval")
         if not temporal_extent:
             raise ValueError("temporal extent must be set before setting the title")
@@ -213,8 +235,6 @@ class ImageryCollection:
         # determine suffix based on its lifecycle
         lifecycle_suffix = LIFECYCLE_SUFFIXES.get(self.stac["linz:lifecycle"], "") if self.add_title_suffix else None
 
-        category = self.stac["linz:geospatial_category"]
-
         if category == SCANNED_AERIAL_PHOTOS:
             if not historic_survey_number:
                 raise MissingMetadataError("historic_survey_number")
@@ -227,10 +247,11 @@ class ImageryCollection:
             ]
 
         elif category in {*ANY_SATELLITE_IMAGERY, *ANY_ORTHO_AERIAL_PHOTOS}:
+            category_title = EVENTS[category]["title"] if is_ancillary_event else DATA_CATEGORIES[category]
             components = [
                 geographic_description or region,
                 gsd_str,
-                DATA_CATEGORIES[category],
+                category_title,
                 date,
                 lifecycle_suffix,
             ]
@@ -263,15 +284,24 @@ class ImageryCollection:
 
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
-        Urban / Rural / Aerial Photos:
-          Orthophotography within the [Region] region captured in the [year(s)] flying season.
+        Urban / Rural Aerial Photos / Near-Infrared Aerial Photos:
+          [Orthophotography / Near-infrared orthophotography] within the [Region] region captured in the
+          [year(s)] flying season.
+        Ancillary Aerial Photos / Ancillary Near-Infrared Aerial Photos:
+          [Ancillary orthophotography / Ancillary near-infrared orthophotography] within the [Region] region
+          captured in the [year(s)] flying season. If published as part of a named event, the "Ancillary"
+          prefix is dropped and the description reads as plain (near-infrared) orthophotography instead.
         DEM / DSM:
-          [Digital Surface Model / Digital Elevation Model] within the [Region] region captured in [year(s)].
-        DEM_HILLSHADE / DEM_HILLSHADE_IGOR:
-          [Digital Elevation Model] [mono-directional / whiter multi-directional] hillshade derived from 1m LiDAR.
-          Gaps filled with lower resolution elevation data (8m contour) as needed.
-        Satellite Imagery / Scanned Aerial Photos:
-          [Satellite imagery | Scanned Aerial Photos] within the [Region] region captured in [year(s)].
+          [Digital Elevation Model / Digital Surface Model] within the [Region] region captured in [year(s)].
+        DEM/DSM Hillshade / Hillshade Igor:
+          [Digital Elevation Model / Digital Surface Model] [mono-directional / whiter multi-directional]
+          hillshade derived from 1m LiDAR. Gaps filled with lower resolution elevation data (8m contour) as needed.
+        Satellite Imagery / Near-Infrared Satellite Imagery / Scanned Aerial Photos:
+          [Satellite imagery / Near-infrared satellite imagery / Scanned aerial imagery] within the [Region]
+          region captured in [year(s)].
+
+        If `linz:event_name` is set, the description is suffixed with
+        ", published as a record of the [event name] event."
 
         Returns:
             Dataset Description
@@ -304,12 +334,14 @@ class ImageryCollection:
         end_year = convert_utc_to_nz_datetime(parse_rfc_3339_datetime(temporal_extent[0][1])).year
 
         category = self.stac["linz:geospatial_category"]
+        is_ancillary_event = category in ANCILLARY_CATEGORIES and bool(self.stac.get("linz:event_name"))
 
         base_descriptions = {
             SCANNED_AERIAL_PHOTOS: "Scanned aerial imagery",
             SATELLITE_IMAGERY: "Satellite imagery",
             NEAR_INFRARED_SATELLITE_IMAGERY: "Near-infrared satellite imagery",
-            AERIAL_PHOTOS: "Orthophotography",
+            ANCILLARY_AERIAL_PHOTOS: "Ancillary orthophotography",
+            ANCILLARY_NEAR_INFRARED_AERIAL_PHOTOS: "Ancillary near-infrared orthophotography",
             URBAN_AERIAL_PHOTOS: "Orthophotography",
             RURAL_AERIAL_PHOTOS: "Orthophotography",
             NEAR_INFRARED_AERIAL_PHOTOS: "Near-infrared orthophotography",
@@ -317,8 +349,10 @@ class ImageryCollection:
             DSM: "Digital Surface Model",
         }
 
+        base_description = EVENTS[category]["description"] if is_ancillary_event else base_descriptions[category]
+
         components = [
-            base_descriptions[category],
+            base_description,
             "within the",
             HUMAN_READABLE_REGIONS[self.stac["linz:region"]],
             "region captured in",
