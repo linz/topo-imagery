@@ -3,7 +3,7 @@ from typing import cast
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
 
-def fake_gdal_info() -> GdalInfo:
+def fake_gdalinfo() -> GdalInfo:
     return cast(GdalInfo, {})
 
 

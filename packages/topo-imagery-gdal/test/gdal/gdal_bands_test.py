@@ -1,11 +1,11 @@
-from gdalinfo import add_band, add_palette_band, fake_gdal_info
+from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
 from pytest import raises
 from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 
 
 def test_gdal_grey_bands() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Gray")
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
@@ -14,7 +14,7 @@ def test_gdal_grey_bands() -> None:
 
 
 def test_gdal_grey_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Alpha")
     add_band(gdalinfo, color_interpretation="Gray")
 
@@ -24,7 +24,7 @@ def test_gdal_grey_bands_detection() -> None:
 
 
 def test_gdal_grey_bands_dem_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Gray")
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo, CompressionPreset.DEM_LERC.value)
@@ -33,7 +33,7 @@ def test_gdal_grey_bands_dem_detection() -> None:
 
 
 def test_gdal_rgba_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Alpha")
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
@@ -45,7 +45,7 @@ def test_gdal_rgba_bands_detection() -> None:
 
 
 def test_gdal_rgb_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
@@ -56,7 +56,7 @@ def test_gdal_rgb_bands_detection() -> None:
 
 
 def test_gdal_rgb_undefined_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
@@ -68,7 +68,7 @@ def test_gdal_rgb_undefined_bands_detection() -> None:
 
 
 def test_gdal_rgb_undefined_alpha_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
@@ -81,7 +81,7 @@ def test_gdal_rgb_undefined_alpha_bands_detection() -> None:
 
 
 def test_gdal_rgbnir_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
@@ -93,7 +93,7 @@ def test_gdal_rgbnir_bands_detection() -> None:
 
 
 def test_gdal_rgbnira_bands_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
     add_band(gdalinfo, color_interpretation="Blue")
@@ -106,7 +106,7 @@ def test_gdal_rgbnira_bands_detection() -> None:
 
 
 def test_gdal_rgba_palette_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_palette_band(gdalinfo, colour_table_entries=[[x, x, x, 255] for x in reversed(range(256))])
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
@@ -115,7 +115,7 @@ def test_gdal_rgba_palette_detection() -> None:
 
 
 def test_gdal_rgb_palette_detection() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_palette_band(gdalinfo, colour_table_entries=[[x, x, x] for x in reversed(range(256))])
 
     bands = get_gdal_band_offset("some_file.tiff", gdalinfo)
@@ -125,7 +125,7 @@ def test_gdal_rgb_palette_detection() -> None:
 
 # Older greyscale historical scanned imagery was standardised as 4 band GGGA from paletted source TIFFs
 def test_gdal_ggga() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Gray")
     add_band(gdalinfo, color_interpretation="Gray")
     add_band(gdalinfo, color_interpretation="Gray")
@@ -137,7 +137,7 @@ def test_gdal_ggga() -> None:
 
 
 def test_gdal_default_rg_missing_b() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, color_interpretation="Red")
     add_band(gdalinfo, color_interpretation="Green")
 
@@ -147,7 +147,7 @@ def test_gdal_default_rg_missing_b() -> None:
 
 
 def test_get_band_type() -> None:
-    gdalinfo = fake_gdal_info()
+    gdalinfo = fake_gdalinfo()
     add_band(gdalinfo, band_type="UInt16")
     add_band(gdalinfo, band_type="UInt16")
     add_band(gdalinfo, band_type="UInt16")
