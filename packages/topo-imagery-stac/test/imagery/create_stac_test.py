@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, cast
 
 from pytest_subtests import SubTests
-from test_helpers import any_epoch_datetime, any_epoch_datetime_string
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_stac.imagery.collection import ImageryCollection
@@ -16,6 +15,7 @@ from topo_imagery_stac.imagery.create_stac import (
     merge_item_list_for_resupply,
 )
 from topo_imagery_stac.testing.generators import any_multihash_as_hex
+from topo_imagery_stac.testing.helpers import any_epoch_datetime, any_epoch_datetime_string
 from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 
 

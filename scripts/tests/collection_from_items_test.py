@@ -16,9 +16,9 @@ from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem
 from topo_imagery_stac.json_codec import dict_to_json_bytes
 from topo_imagery_stac.testing.generators import any_stac_asset, any_stac_processing
+from topo_imagery_stac.testing.helpers import any_epoch_datetime_string
 
 from scripts.collection_from_items import NoItemsError, main
-from scripts.conftest import any_epoch_datetime_string
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
