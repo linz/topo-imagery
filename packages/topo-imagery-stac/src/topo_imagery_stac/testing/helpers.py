@@ -2,7 +2,9 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from random import choice, randint
 from string import ascii_lowercase
+from typing import Iterator
 
+import pytest
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 
@@ -41,3 +43,8 @@ def any_collection_context() -> CollectionContext:
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",
     )
+
+
+@pytest.fixture
+def fake_collection_context() -> Iterator[CollectionContext]:
+    yield any_collection_context()
