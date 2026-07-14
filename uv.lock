@@ -891,7 +891,7 @@ wheels = [
 
 [[package]]
 name = "topo-imagery"
-version = "7.21.1"
+version = "7.22.0"
 source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
