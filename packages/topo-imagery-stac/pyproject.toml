@@ -17,9 +17,6 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "boto3",
-    "moto[s3]",
-    "mypy-boto3-s3",
     "pytest",
     "pytest-subtests",
 ]
