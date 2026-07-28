@@ -7,6 +7,7 @@ members = [
     "topo-imagery",
     "topo-imagery-common",
     "topo-imagery-gdal",
+    "topo-imagery-pdal",
     "topo-imagery-stac",
 ]
 
@@ -900,6 +901,7 @@ dependencies = [
     { name = "shapely" },
     { name = "topo-imagery-common" },
     { name = "topo-imagery-gdal" },
+    { name = "topo-imagery-pdal" },
     { name = "topo-imagery-stac" },
 ]
 
@@ -926,6 +928,7 @@ requires-dist = [
     { name = "shapely", specifier = ">=2.0" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
     { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
+    { name = "topo-imagery-pdal", editable = "packages/topo-imagery-pdal" },
     { name = "topo-imagery-stac", editable = "packages/topo-imagery-stac" },
 ]
 
@@ -1007,6 +1010,35 @@ requires-dist = [
     { name = "linz-logger" },
     { name = "shapely", specifier = ">=2.0" },
     { name = "tifffile" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[[package]]
+name = "topo-imagery-pdal"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-pdal" }
+dependencies = [
+    { name = "linz-logger" },
+    { name = "topo-imagery-common" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "linz-logger" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
 ]
 

@@ -11,8 +11,7 @@ from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import copy, exists, read, write
 from topo_imagery_common.log.time_helper import time_in_ms
-
-from scripts.pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
+from topo_imagery_pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
 
 
 def get_args_parser() -> CommonArgumentParser:

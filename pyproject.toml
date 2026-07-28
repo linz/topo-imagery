@@ -20,6 +20,7 @@ dependencies = [
     "shapely>=2.0",
     "topo-imagery-common",
     "topo-imagery-gdal",
+    "topo-imagery-pdal",
     "topo-imagery-stac",
 ]
 
@@ -49,6 +50,7 @@ default-groups = "all"
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
 topo-imagery-gdal = { workspace = true }
+topo-imagery-pdal = { workspace = true }
 topo-imagery-stac = { workspace = true }
 
 [tool.uv.workspace]
