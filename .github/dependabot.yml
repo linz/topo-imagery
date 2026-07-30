@@ -4,16 +4,22 @@ updates:
     directory: /
     schedule:
       interval: daily
+    cooldown:
+      default-days: 15
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: daily
+    cooldown:
+      default-days: 15
     commit-message:
       prefix: "build(deps)"
   - package-ecosystem: uv
     directory: "/"
     schedule:
       interval: daily
+    cooldown:
+      default-days: 15
     open-pull-requests-limit: 10
     commit-message:
       prefix: "build(deps)"
