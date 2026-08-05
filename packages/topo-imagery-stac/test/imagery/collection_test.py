@@ -203,7 +203,7 @@ published as a record of the Cyclone Gabrielle event.",
                 geographic_description="Hawke's Bay Cyclone Gabrielle",
                 event_name="Cyclone Gabrielle",
             ),
-            "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)",
+            "Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DSM (2023)",
             "Digital Surface Model within the Hawke's Bay region captured in 2023, "
             "published as a record of the Cyclone Gabrielle event.",
             id="Event Elevation",

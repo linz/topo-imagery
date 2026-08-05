@@ -258,9 +258,7 @@ class ImageryCollection:
 
         elif category in ELEVATION:
             components = [
-                region,
-                "-" if geographic_description else None,
-                self._combine_with_event(geographic_description, event_name),
+                self._combine_with_region(region, self._combine_with_event(geographic_description, event_name)),
                 DATA_DOMAINS[self.domain],
                 "LiDAR",
                 gsd_str,
@@ -294,6 +292,15 @@ class ImageryCollection:
         if event_name.lower() in term.lower():
             return term
         return f"{term} {event_name}"
+
+    @staticmethod
+    def _combine_with_region(region: str, term: str | None) -> str:
+        """Combine a region with a location term, avoiding repeated region text."""
+        if not term:
+            return region
+        if region.lower() in term.lower():
+            return term
+        return f"{region} - {term}"
 
     def set_description(self) -> None:
         """Set the descriptions for imagery and elevation datasets.
