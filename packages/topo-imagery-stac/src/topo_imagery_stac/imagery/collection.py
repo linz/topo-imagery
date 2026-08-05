@@ -271,7 +271,7 @@ class ImageryCollection:
 
         elif category in HILLSHADES:
             components = [
-                self._combine_with_event(geographic_description or region, event_name),
+                region,
                 DATA_DOMAINS[self.domain],
                 gsd_str,
                 DATA_CATEGORIES[category],
