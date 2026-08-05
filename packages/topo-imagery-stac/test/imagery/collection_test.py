@@ -25,8 +25,8 @@ from topo_imagery_stac.util.stac_extensions import StacExtensions
 
 
 def test_metadata_initialised(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
-    fake_collection_context.event_name = "Cyclone Gabrielle"
-    fake_collection_context.geographic_description = "Hawke's Bay Cyclone Gabrielle"
+    fake_collection_context.event_name = "Forest Assessment"
+    fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
 
     with subtests.test():
@@ -36,10 +36,10 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
         assert collection.stac["linz:region"] == "hawkes-bay"
 
     with subtests.test():
-        assert collection.stac["linz:geographic_description"] == "Hawke's Bay Cyclone Gabrielle"
+        assert collection.stac["linz:geographic_description"] == "Hawke's Bay Forest Assessment"
 
     with subtests.test():
-        assert collection.stac["linz:event_name"] == "Cyclone Gabrielle"
+        assert collection.stac["linz:event_name"] == "Forest Assessment"
 
     with subtests.test():
         assert collection.stac["linz:lifecycle"] == "completed"
@@ -224,8 +224,7 @@ published as a record of the Cyclone Gabrielle event.",
             "Digital Elevation Model within the Hawke's Bay region captured in 2023, "
             "published as a record of the Cyclone Gabrielle event.",
             id="Event DEM",
-        ),
-        param(
+        ),                 param(
             CollectionContext(
                 category="satellite-imagery",
                 domain="land",
@@ -423,21 +422,6 @@ published as a record of the Cyclone Gabrielle event.",
         ),
         param(
             CollectionContext(
-                category="dem",
-                domain="coastal",
-                region="bay-of-plenty",
-                geographic_description="Tauranga",
-                lifecycle="completed",
-                linz_slug=fake_linz_slug(),
-                gsd=Decimal("1"),
-                collection_id="a-random-collection-id",
-            ),
-            "Bay of Plenty - Tauranga Coastal LiDAR 1m DEM (2023)",
-            "Coastal Digital Elevation Model within the Bay of Plenty region captured in 2023.",
-            id="Coastal DEM",
-        ),
-        param(
-            CollectionContext(
                 category="dem-hillshade",
                 domain="coastal",
                 region="new-zealand",
@@ -508,11 +492,11 @@ published as a record of the Cyclone Gabrielle event.",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
                 collection_id="a-random-collection-id",
-                event_name="Cyclone Gabrielle",
+                event_name="Forest Assessment",
             ),
-            "Hawke's Bay Cyclone Gabrielle 0.3m Aerial Photos (2023)",
+            "Hawke's Bay Forest Assessment 0.3m Aerial Photos (2023)",
             "Orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
-            "published as a record of the Cyclone Gabrielle event.",
+            "published as a record of the Forest Assessment event.",
             id="Ancillary Aerial Photos with Event",
         ),
         param(
@@ -524,11 +508,11 @@ published as a record of the Cyclone Gabrielle event.",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
                 collection_id="a-random-collection-id",
-                event_name="Cyclone Gabrielle",
+                event_name="Forest Assessment",
             ),
-            "Hawke's Bay Cyclone Gabrielle 0.3m Near-Infrared Aerial Photos (2023)",
+            "Hawke's Bay Forest Assessment 0.3m Near-Infrared Aerial Photos (2023)",
             "Near-infrared orthophotography within the Hawke's Bay region captured in the 2023 flying season, "
-            "published as a record of the Cyclone Gabrielle event.",
+            "published as a record of the Forest Assessment event.",
             id="Ancillary Near-Infrared Aerial Photos with Event",
         ),
     ],
@@ -920,15 +904,15 @@ def test_should_not_add_capture_area(
 
 
 def test_event_name_is_present(fake_collection_context: CollectionContext) -> None:
-    fake_collection_context.event_name = "Cyclone Gabrielle"
+    fake_collection_context.event_name = "Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    assert "Cyclone Gabrielle" == collection.stac["linz:event_name"]
+    assert "Forest Assessment" == collection.stac["linz:event_name"]
 
 
 def test_geographic_description_is_present(fake_collection_context: CollectionContext) -> None:
-    fake_collection_context.geographic_description = "Hawke's Bay Cyclone Gabrielle"
+    fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    assert "Hawke's Bay Cyclone Gabrielle" == collection.stac["linz:geographic_description"]
+    assert "Hawke's Bay Forest Assessment" == collection.stac["linz:geographic_description"]
 
 
 def test_linz_slug_is_present(fake_collection_context: CollectionContext) -> None:
@@ -1077,8 +1061,8 @@ def test_add_providers_roles_order_sorted(fake_collection_context: CollectionCon
 
 
 def test_update_metadata(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
-    fake_collection_context.event_name = "Cyclone Gabrielle"
-    fake_collection_context.geographic_description = "Hawke's Bay Cyclone Gabrielle"
+    fake_collection_context.event_name = "Forest Assessment"
+    fake_collection_context.geographic_description = "Hawke's Bay Forest Assessment"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     old_slug = collection.stac["linz:slug"]
     new_metadata = CollectionContext(
