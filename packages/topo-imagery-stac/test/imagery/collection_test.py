@@ -224,7 +224,8 @@ published as a record of the Cyclone Gabrielle event.",
             "Digital Elevation Model within the Hawke's Bay region captured in 2023, "
             "published as a record of the Cyclone Gabrielle event.",
             id="Event DEM",
-        ),                 param(
+        ),
+        param(
             CollectionContext(
                 category="satellite-imagery",
                 domain="land",
