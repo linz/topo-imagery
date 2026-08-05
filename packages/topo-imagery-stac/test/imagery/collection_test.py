@@ -210,6 +210,23 @@ published as a record of the Cyclone Gabrielle event.",
         ),
         param(
             CollectionContext(
+                category="dem",
+                domain="land",
+                region="hawkes-bay",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("0.3"),
+                collection_id="a-random-collection-id",
+                geographic_description="Hawke's Bay Cyclone Gabrielle",
+                event_name="Cyclone Gabrielle",
+            ),
+            "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DEM (2023)",
+            "Digital Elevation Model within the Hawke's Bay region captured in 2023, "
+            "published as a record of the Cyclone Gabrielle event.",
+            id="Event DEM",
+        ),
+        param(
+            CollectionContext(
                 category="satellite-imagery",
                 domain="land",
                 region="hawkes-bay",
