@@ -210,23 +210,6 @@ published as a record of the Cyclone Gabrielle event.",
         ),
         param(
             CollectionContext(
-                category="dem",
-                domain="land",
-                region="hawkes-bay",
-                lifecycle="completed",
-                linz_slug=fake_linz_slug(),
-                gsd=Decimal("0.3"),
-                collection_id="a-random-collection-id",
-                geographic_description="Hawke's Bay Cyclone Gabrielle",
-                event_name="Cyclone Gabrielle",
-            ),
-            "Hawke's Bay - Hawke's Bay Cyclone Gabrielle LiDAR 0.3m DEM (2023)",
-            "Digital Elevation Model within the Hawke's Bay region captured in 2023, "
-            "published as a record of the Cyclone Gabrielle event.",
-            id="Event DEM",
-        ),
-        param(
-            CollectionContext(
                 category="satellite-imagery",
                 domain="land",
                 region="hawkes-bay",
@@ -420,6 +403,21 @@ published as a record of the Cyclone Gabrielle event.",
             "Hillshade generated from the New Zealand LiDAR 0.25m DEM "
             "using GDAL’s default hillshading parameters of 315˚ azimuth and 45˚ elevation angle.",
             id="0.25m DEM Hillshade",
+        ),
+        param(
+            CollectionContext(
+                category="dem",
+                domain="coastal",
+                region="bay-of-plenty",
+                geographic_description="Tauranga",
+                lifecycle="completed",
+                linz_slug=fake_linz_slug(),
+                gsd=Decimal("1"),
+                collection_id="a-random-collection-id",
+            ),
+            "Bay of Plenty - Tauranga Coastal LiDAR 1m DEM (2023)",
+            "Coastal Digital Elevation Model within the Bay of Plenty region captured in 2023.",
+            id="Coastal DEM",
         ),
         param(
             CollectionContext(
