@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "topo-imagery"
-version = "7.22.0"
+version = "7.23.0"
 description = "A collection of scripts for processing imagery"
 authors = [
     { name = "Blayne Chard", email = "bchard@linz.govt.nz" },

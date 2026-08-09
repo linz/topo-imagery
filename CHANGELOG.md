@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.23.0](https://github.com/linz/topo-imagery/compare/v7.22.0...v7.23.0) (2026-08-09)
+
+
+### Features
+
+* title generation needs to consistently account for event names TDE-2010 ([#1603](https://github.com/linz/topo-imagery/issues/1603)) ([590a38b](https://github.com/linz/topo-imagery/commit/590a38bd85833c6fdd2877ff9df6da330f440d3d))
+
 ## [7.22.0](https://github.com/linz/topo-imagery/compare/v7.21.1...v7.22.0) (2026-07-08)
 
 
