@@ -39,6 +39,19 @@ def test_get_bounds_from_name_defaults_to_mainland() -> None:
     assert get_bounds_from_name("CK08") == get_bounds_from_name("CK08", target_epsg=EpsgNumber.NZTM_2000)
 
 
+def test_get_bounds_from_50k_name_chatham() -> None:
+    expected_bounds = Bounds(Point(x=3506000, y=5104000), Size(width=24_000, height=36_000))
+    bounds = get_bounds_from_name("CI06", target_epsg=EpsgNumber.CITM_2000)
+    assert expected_bounds == bounds
+
+
+def test_get_bounds_from_name_chatham_without_target_epsg_fails_loudly() -> None:
+    # Omitting target_epsg for a Chatham tile name must not silently default to mainland
+    # arithmetic (see the regression test above) - it should fail loudly instead.
+    with pytest.raises(ValueError, match="Unknown mainland map sheet"):
+        get_bounds_from_name("CI06_5000_0606")
+
+
 def test_get_bounds_from_name_unsupported_epsg() -> None:
     with pytest.raises(ValueError, match="Unsupported target EPSG"):
         get_bounds_from_name("CI06_5000_0606", target_epsg=2194)
@@ -74,3 +87,12 @@ def test_get_chatham_mapsheet_offset(subtests: SubTests) -> None:
 def test_get_chatham_mapsheet_offset_unknown_sheet() -> None:
     with pytest.raises(ValueError, match="Unknown Chatham Islands map sheet"):
         get_chatham_mapsheet_offset("CI99")
+
+
+def test_get_mapsheet_offset_unknown_sheet(subtests: SubTests) -> None:
+    # "CI" is reserved for the Chatham Islands and out of range for the mainland grid; "AS23" is a
+    # real row with a gap that skips column 23 (see SHEET_RANGES["AS"] = [(21, 22), (24, 24)]).
+    for sheet_code in ["CI05", "CI22", "AS23"]:
+        with subtests.test(msg=sheet_code):
+            with pytest.raises(ValueError, match="Unknown mainland map sheet"):
+                get_mapsheet_offset(sheet_code)
