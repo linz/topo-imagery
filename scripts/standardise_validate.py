@@ -176,7 +176,7 @@ def main() -> None:
         return
 
     # SRS needed for FileCheck (non visual QA)
-    srs = get_srs()
+    srs = get_srs(standardising_config.target_epsg)
 
     for file in tiff_files:
         stac_item_path = file.get_path_standardised().rsplit(".", 1)[0] + SUFFIX_JSON

@@ -99,8 +99,11 @@ def run_gdal(
     return proc
 
 
-def get_srs() -> bytes:
-    """Run `gdalsrsinfo` with the EPSG code `2193`
+def get_srs(epsg: int = EpsgNumber.NZTM_2000) -> bytes:
+    """Run `gdalsrsinfo` with the given EPSG code.
+
+    Args:
+        epsg: the EPSG code to get the srs for. Defaults to 2193 (NZTM).
 
     Raises:
         Exception: if `gdal` has an stderr
@@ -108,7 +111,7 @@ def get_srs() -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{EpsgNumber.NZTM_2000}"]
+    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{epsg}"]
     gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
     if gdalsrsinfo_result.stderr:
         raise Exception(
