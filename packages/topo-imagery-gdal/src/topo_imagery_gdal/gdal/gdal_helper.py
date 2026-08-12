@@ -107,6 +107,12 @@ def get_srs_command(epsg: int = EpsgNumber.NZTM_2000) -> list[str]:
 
     Returns:
         a list of arguments to run `gdalsrsinfo`
+
+    Examples:
+        >>> get_srs_command(EpsgNumber.NZTM_2000)
+        ['gdalsrsinfo', '-o', 'wkt', 'EPSG:2193']
+        >>> get_srs_command(EpsgNumber.CITM_2000)
+        ['gdalsrsinfo', '-o', 'wkt', 'EPSG:3793']
     """
     return ["gdalsrsinfo", "-o", "wkt", f"EPSG:{epsg}"]
 
