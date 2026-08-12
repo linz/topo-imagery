@@ -99,6 +99,18 @@ def run_gdal(
     return proc
 
 
+def get_srs_command(epsg: int = EpsgNumber.NZTM_2000) -> list[str]:
+    """Build a `gdalsrsinfo` command for the given EPSG code.
+
+    Args:
+        epsg: the EPSG code to get the srs for. Defaults to 2193 (NZTM).
+
+    Returns:
+        a list of arguments to run `gdalsrsinfo`
+    """
+    return ["gdalsrsinfo", "-o", "wkt", f"EPSG:{epsg}"]
+
+
 def get_srs(epsg: int = EpsgNumber.NZTM_2000) -> bytes:
     """Run `gdalsrsinfo` with the given EPSG code.
 
@@ -111,8 +123,7 @@ def get_srs(epsg: int = EpsgNumber.NZTM_2000) -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{epsg}"]
-    gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
+    gdalsrsinfo_result = run_gdal(get_srs_command(epsg))
     if gdalsrsinfo_result.stderr:
         raise Exception(
             f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"
