@@ -8,8 +8,9 @@ HIGH_BIT_DEPTH_BAND_TYPES = {
     "Int16",
     "UInt32",
     "Int32",
-    "Float32", 
+    "Float32",
 }
+
 
 def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     """Look for a specific colorInterpretation inside of a `gdalinfo` band output.
@@ -180,6 +181,7 @@ def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
 
     bands = info["bands"]
     return bands[0]["type"]
+
 
 def is_16_32_bit_band_type(band_type: str) -> bool:
     return band_type in HIGH_BIT_DEPTH_BAND_TYPES

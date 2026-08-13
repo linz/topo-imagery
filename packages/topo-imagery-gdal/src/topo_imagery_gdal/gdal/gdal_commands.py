@@ -3,7 +3,8 @@ from __future__ import annotations
 from decimal import Decimal
 
 from linz_logger import get_log
-from topo_imagery_gdal.gdal.gdal_bands import is_16_32_bit_band_type
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, is_16_32_bit_band_type
+from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
@@ -16,8 +17,6 @@ from topo_imagery_gdal.gdal.gdal_presets import (
     CompressionPreset,
     HillshadePreset,
 )
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
-from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 DECIMAL_DEGREES_1M = Decimal("0.00001")
