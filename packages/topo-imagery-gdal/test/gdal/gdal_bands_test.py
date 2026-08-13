@@ -1,6 +1,6 @@
 from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
 from pytest import raises
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type, is_16_32_bit_band_type
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 
 
@@ -155,3 +155,8 @@ def test_get_band_type() -> None:
     band_type = get_gdal_band_type("some_file.tiff", gdalinfo)
 
     assert band_type == "UInt16"
+
+
+def test_is_16_32_bit_band_type() -> None:
+    assert is_16_32_bit_band_type("UInt16") is True
+    assert is_16_32_bit_band_type("Byte") is False

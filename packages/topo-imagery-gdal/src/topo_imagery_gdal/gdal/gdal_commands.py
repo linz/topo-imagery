@@ -3,8 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from linz_logger import get_log
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
-from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
+from topo_imagery_gdal.gdal.gdal_bands import is_16_32_bit_band_type
 from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
@@ -17,9 +16,13 @@ from topo_imagery_gdal.gdal.gdal_presets import (
     CompressionPreset,
     HillshadePreset,
 )
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
+from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 DECIMAL_DEGREES_1M = Decimal("0.00001")
+BIGTIFF_NO = "bigtiff=no"
+BIGTIFF_YES = "bigtiff=yes"
 
 
 def get_buffer_distance(gsd: Decimal) -> float:
@@ -36,24 +39,28 @@ def get_buffer_distance(gsd: Decimal) -> float:
     return float(gsd * 2 * DECIMAL_DEGREES_1M)
 
 
-def get_gdal_command(preset: str, epsg: int) -> list[str]:
+def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> list[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
         preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
         epsg: the EPSG code of the file
+        band_type: optional GDAL band type used to decide whether BIGTIFF is required
 
     Returns:
         a list of arguments to run `gdal_translate`
     """
     get_log().info("gdal_preset", preset=preset)
 
-    base_command: list[str] = [
+    base_command = [
         "gdal_translate",
         *BASE_COG,
         "-a_srs",
         f"EPSG:{epsg}",
     ]
+
+    if preset == CompressionPreset.RGBNIR_ZSTD.value and band_type and is_16_32_bit_band_type(band_type):
+        base_command = [BIGTIFF_YES if arg == BIGTIFF_NO else arg for arg in base_command]
 
     ZSTD_OPTIONS = COMPRESS_ZSTD + ZSTD_OVERVIEWS
 
