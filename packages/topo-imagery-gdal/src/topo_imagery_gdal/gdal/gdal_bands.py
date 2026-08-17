@@ -3,12 +3,11 @@ from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
-HIGH_BIT_DEPTH_BAND_TYPES = {
+# Unsupported RGBNIR band types (eg. Int16, Int32)re rejected by check_band_type_is_supported().
+SUPPORTED_RGBNIR_BAND_TYPES = {
+    "Byte",
     "UInt16",
-    "Int16",
     "UInt32",
-    "Int32",
-    "Float32",
 }
 
 
@@ -183,5 +182,26 @@ def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
     return bands[0]["type"]
 
 
-def is_16_32_bit_band_type(band_type: str) -> bool:
-    return band_type in HIGH_BIT_DEPTH_BAND_TYPES
+def is_high_bit_depth_band_type(band_type: str) -> bool:
+    # For RGBNIR, high-bit-depth means supported and not Byte (uint8).
+    return band_type in SUPPORTED_RGBNIR_BAND_TYPES and band_type != "Byte"
+
+
+def check_band_type_is_supported(band_type: str, file: str) -> None:
+    """Raise an error if the band type is not supported for RGBNIR imagery.
+
+    Args:
+        band_type: GDAL band type string
+        file: path to the file being checked
+
+    Raises:
+        RuntimeError: if the band type is not in SUPPORTED_RGBNIR_BAND_TYPES
+    """
+    if band_type not in SUPPORTED_RGBNIR_BAND_TYPES:
+        get_log().error(
+            "unsupported_band_type",
+            path=file,
+            band_type=band_type,
+            supported=sorted(SUPPORTED_RGBNIR_BAND_TYPES),
+        )
+        raise RuntimeError(f"unsupported_band_type: {band_type}")

@@ -3,7 +3,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from linz_logger import get_log
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, is_16_32_bit_band_type
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, is_high_bit_depth_band_type
 from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
@@ -58,7 +58,7 @@ def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> li
         f"EPSG:{epsg}",
     ]
 
-    if preset == CompressionPreset.RGBNIR_ZSTD.value and band_type and is_16_32_bit_band_type(band_type):
+    if preset == CompressionPreset.RGBNIR_ZSTD.value and band_type and is_high_bit_depth_band_type(band_type):
         base_command = [BIGTIFF_YES if arg == BIGTIFF_NO else arg for arg in base_command]
 
     ZSTD_OPTIONS = COMPRESS_ZSTD + ZSTD_OVERVIEWS

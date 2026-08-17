@@ -102,17 +102,32 @@ def test_preset_zstd(subtests: SubTests) -> None:
 
 
 def test_preset_zstd_high_bit_depth_uses_bigtiff(subtests: SubTests) -> None:
+    for band_type in ("UInt16", "UInt32"):
+        gdal_command = get_gdal_command(
+            CompressionPreset.RGBNIR_ZSTD.value,
+            epsg=EpsgNumber.NZTM_2000.value,
+            band_type=band_type,
+        )
+
+        with subtests.test(msg=f"{band_type} uses bigtiff=yes"):
+            assert "bigtiff=yes" in gdal_command
+
+        with subtests.test(msg=f"{band_type} does not use bigtiff=no"):
+            assert "bigtiff=no" not in gdal_command
+
+
+def test_preset_zstd_byte_keeps_bigtiff_no(subtests: SubTests) -> None:
     gdal_command = get_gdal_command(
         CompressionPreset.RGBNIR_ZSTD.value,
         epsg=EpsgNumber.NZTM_2000.value,
-        band_type="UInt16",
+        band_type="Byte",
     )
 
     with subtests.test():
-        assert "bigtiff=yes" in gdal_command
+        assert "bigtiff=no" in gdal_command
 
     with subtests.test():
-        assert "bigtiff=no" not in gdal_command
+        assert "bigtiff=yes" not in gdal_command
 
 
 def test_preset_lzw(subtests: SubTests) -> None:
