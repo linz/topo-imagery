@@ -3,7 +3,7 @@ from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
-# Unsupported RGBNIR band types (eg. Int16, Int32)re rejected by check_band_type_is_supported().
+# Unsupported RGBNIR band types(eg. Int16, Int32) are rejected by check_band_type_is_supported().
 SUPPORTED_RGBNIR_BAND_TYPES = {
     "Byte",
     "UInt16",
@@ -183,7 +183,20 @@ def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
 
 
 def is_high_bit_depth_band_type(band_type: str) -> bool:
-    # For RGBNIR, high-bit-depth means supported and not Byte (uint8).
+    """Return whether a band type is high bit-depth for RGBNIR processing.
+
+    High bit-depth means the type is supported for RGBNIR and is not `Byte`.
+
+    Examples:
+        >>> is_high_bit_depth_band_type("UInt16")
+        True
+        >>> is_high_bit_depth_band_type("UInt32")
+        True
+        >>> is_high_bit_depth_band_type("Byte")
+        False
+        >>> is_high_bit_depth_band_type("Int16")
+        False
+    """
     return band_type in SUPPORTED_RGBNIR_BAND_TYPES and band_type != "Byte"
 
 

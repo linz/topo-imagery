@@ -51,6 +51,10 @@ def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> li
     """
     get_log().info("gdal_preset", preset=preset)
 
+    needs_bigtiff = (
+        preset == CompressionPreset.RGBNIR_ZSTD.value and band_type is not None and is_high_bit_depth_band_type(band_type)
+    )
+
     base_command = [
         "gdal_translate",
         *BASE_COG,
@@ -58,8 +62,7 @@ def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> li
         f"EPSG:{epsg}",
     ]
 
-    if preset == CompressionPreset.RGBNIR_ZSTD.value and band_type and is_high_bit_depth_band_type(band_type):
-        base_command = [BIGTIFF_YES if arg == BIGTIFF_NO else arg for arg in base_command]
+    base_command += ["-co", BIGTIFF_YES if needs_bigtiff else BIGTIFF_NO]
 
     ZSTD_OPTIONS = COMPRESS_ZSTD + ZSTD_OVERVIEWS
 
