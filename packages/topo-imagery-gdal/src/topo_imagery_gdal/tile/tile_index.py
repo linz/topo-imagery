@@ -88,7 +88,9 @@ SHEET_RANGES: dict[str, list[tuple[int, int]]] = {
     "BN": [(22, 29), (32, 38)],
     "BP": [(22, 37)],
     "BQ": [(21, 36)],
-    "BR": [(19, 30), (32, 34)],
+    # TEMPORARY: 35 extended from 34 to admit BR35, which is not a real Topo50 sheet (all sea).
+    # Added only to process a satellite imagery set; revert to [(19, 30), (32, 34)] afterwards.
+    "BR": [(19, 30), (32, 35)],
     "BS": [(19, 29)],
     "BT": [(18, 28)],
     "BU": [(16, 27)],

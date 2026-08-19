@@ -253,6 +253,8 @@ MAP_SHEET_DATA: list[dict[Any, Any]] = [
     {"origin": {"x": 1684000, "y": 5406000}, "code": "BR29"},
     {"origin": {"x": 1780000, "y": 5406000}, "code": "BR33"},
     {"origin": {"x": 1804000, "y": 5406000}, "code": "BR34"},
+    # TEMPORARY: not a real Topo50 sheet (all sea) - see SHEET_RANGES["BR"] in tile_index.py
+    {"origin": {"x": 1828000, "y": 5406000}, "code": "BR35"},
     {"origin": {"x": 1444000, "y": 5370000}, "code": "BS19"},
     {"origin": {"x": 1468000, "y": 5370000}, "code": "BS20"},
     {"origin": {"x": 1492000, "y": 5370000}, "code": "BS21"},
