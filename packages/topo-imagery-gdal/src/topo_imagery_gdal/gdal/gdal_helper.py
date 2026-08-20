@@ -1,13 +1,13 @@
 import json
 import os
 import subprocess
-from enum import Enum
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import cast
 
 from linz_logger import get_log
 from topo_imagery_common.aws.aws_helper import is_s3
+from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import copy
 from topo_imagery_common.log.time_helper import time_in_ms
@@ -16,13 +16,6 @@ from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 class GDALExecutionException(Exception):
     pass
-
-
-class EpsgNumber(int, Enum):
-    NZTM_2000 = 2193
-    """New Zealand Transverse Mercator 2000"""
-    WGS_1984 = 4326
-    """World Geodetic System 1984"""
 
 
 def get_vfs_path(path: str) -> str:
@@ -106,8 +99,29 @@ def run_gdal(
     return proc
 
 
-def get_srs() -> bytes:
-    """Run `gdalsrsinfo` with the EPSG code `2193`
+def get_srs_command(epsg: int = EpsgNumber.NZTM_2000) -> list[str]:
+    """Build a `gdalsrsinfo` command for the given EPSG code.
+
+    Args:
+        epsg: the EPSG code to get the srs for. Defaults to 2193 (NZTM).
+
+    Returns:
+        a list of arguments to run `gdalsrsinfo`
+
+    Examples:
+        >>> get_srs_command(EpsgNumber.NZTM_2000)
+        ['gdalsrsinfo', '-o', 'wkt', 'EPSG:2193']
+        >>> get_srs_command(EpsgNumber.CITM_2000)
+        ['gdalsrsinfo', '-o', 'wkt', 'EPSG:3793']
+    """
+    return ["gdalsrsinfo", "-o", "wkt", f"EPSG:{epsg}"]
+
+
+def get_srs(epsg: int = EpsgNumber.NZTM_2000) -> bytes:
+    """Run `gdalsrsinfo` with the given EPSG code.
+
+    Args:
+        epsg: the EPSG code to get the srs for. Defaults to 2193 (NZTM).
 
     Raises:
         Exception: if `gdal` has an stderr
@@ -115,8 +129,7 @@ def get_srs() -> bytes:
     Returns:
         the output of `gdalsrsinfo`
     """
-    gdalsrsinfo_command = ["gdalsrsinfo", "-o", "wkt", f"EPSG:{EpsgNumber.NZTM_2000.value}"]
-    gdalsrsinfo_result = run_gdal(gdalsrsinfo_command)
+    gdalsrsinfo_result = run_gdal(get_srs_command(epsg))
     if gdalsrsinfo_result.stderr:
         raise Exception(
             f"Error trying to retrieve srs from epsg code, no files have been checked\n{gdalsrsinfo_result.stderr!r}"

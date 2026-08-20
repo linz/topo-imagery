@@ -11,6 +11,7 @@ from linz_logger import get_log
 from tifffile import TiffFile
 from topo_imagery_common.aws.aws_helper import is_s3
 from topo_imagery_common.cli.cli_helper import TileFiles
+from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_common.files.files_helper import ContentType, is_tiff
 from topo_imagery_common.files.fs import exists, read, write, write_all, write_sidecars
 from topo_imagery_common.log.time_helper import time_in_ms
@@ -211,7 +212,7 @@ def standardising(
 def create_vrt(
     source_tiffs: list[str],
     target_path: str,
-    epsg: int = 2193,
+    epsg: int = EpsgNumber.NZTM_2000,
     add_alpha: bool = False,
     resolution: list[Decimal] | None = None,
 ) -> str:
@@ -328,7 +329,7 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
     command.extend(get_gdal_band_offset(input_file, gdalinfo_data, config.gdal_preset))
 
     # Specify the extent to get the right boundaries in case of the tiff got no data on its edges
-    output_bounds: Bounds = get_bounds_from_name(tile_name)
+    output_bounds: Bounds = get_bounds_from_name(tile_name, target_epsg=config.target_epsg)
     min_x = output_bounds.point.x
     max_y = output_bounds.point.y
     min_y = max_y - output_bounds.size.height

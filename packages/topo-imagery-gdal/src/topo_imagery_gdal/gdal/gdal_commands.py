@@ -3,8 +3,8 @@ from __future__ import annotations
 from decimal import Decimal
 
 from linz_logger import get_log
+from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, is_high_bit_depth_band_type
-from topo_imagery_gdal.gdal.gdal_helper import EpsgNumber
 from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
@@ -110,7 +110,7 @@ def get_cutline_command(cutline: str | None) -> list[str]:
 def get_build_vrt_command(
     files: list[str],
     output: str = "output.vrt",
-    epsg: int = 2193,
+    epsg: int = EpsgNumber.NZTM_2000,
     add_alpha: bool = False,
     resolution: list[Decimal] | None = None,
 ) -> list[str]:
@@ -283,7 +283,7 @@ def get_footprint_command(gsd: Decimal, preset: str) -> list[str]:
     gdal_footprint_command: list[str] = [
         "gdal_footprint",
         "-t_srs",
-        f"EPSG:{EpsgNumber.WGS_1984.value}",
+        f"EPSG:{EpsgNumber.WGS_1984}",
         "-max_points",
         "unlimited",
         "-lco",

@@ -9,6 +9,7 @@ from linz_logger import get_log
 from topo_imagery_common.cli.cli_helper import InputParameterError, TileFiles, load_input_files
 from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
+from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
 from topo_imagery_common.files.fs import exists, read, write, write_all
 from topo_imagery_common.log.time_helper import time_in_ms
@@ -111,7 +112,7 @@ def create_hillshade(
 
         # COGify the hillshade output, using ZSTD compression
         run_gdal(
-            get_gdal_command(CompressionPreset.DEM_ZSTD.value, 2193),
+            get_gdal_command(CompressionPreset.DEM_ZSTD.value, EpsgNumber.NZTM_2000),
             input_file=hillshade_working_path,
             output_file=hillshade_cog_working_path,
         )

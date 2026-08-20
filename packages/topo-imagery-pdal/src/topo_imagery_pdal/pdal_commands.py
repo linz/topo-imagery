@@ -5,6 +5,7 @@ from tempfile import mkdtemp
 
 from linz_logger import get_log
 from topo_imagery_common.aws.aws_helper import is_s3
+from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_common.files.fs import copy
 from topo_imagery_common.log.time_helper import time_in_ms
 
@@ -53,7 +54,7 @@ def get_pdal_command(command: str, options: list[str]) -> list[str]:
 pdal_translate_add_proj_command = get_pdal_command(
     "translate",
     [
-        "--readers.las.spatialreference=EPSG:2193+7839",
+        f"--readers.las.spatialreference=EPSG:{EpsgNumber.NZTM_2000}+{EpsgNumber.NZVD_2016}",
         "--writers.las.filesource_id=0",
         "--writers.las.forward=all",
     ],

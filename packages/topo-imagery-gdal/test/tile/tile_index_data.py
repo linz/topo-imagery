@@ -1,5 +1,15 @@
 from typing import Any
 
+# Values source: https://data.linz.govt.nz/layer/50089-nz-chatham-island-linz-map-sheets-topo-150k/
+CHATHAM_SHEET_DATA: list[dict[Any, Any]] = [
+    {"origin": {"x": 3458000, "y": 5176000}, "code": "CI01"},
+    {"origin": {"x": 3482000, "y": 5176000}, "code": "CI02"},
+    {"origin": {"x": 3506000, "y": 5176000}, "code": "CI03"},
+    {"origin": {"x": 3482000, "y": 5140000}, "code": "CI04"},
+    {"origin": {"x": 3506000, "y": 5140000}, "code": "CI05"},
+    {"origin": {"x": 3506000, "y": 5104000}, "code": "CI06"},
+]
+
 MAP_SHEET_DATA: list[dict[Any, Any]] = [
     {"origin": {"x": 1492000, "y": 6234000}, "code": "AS21"},
     {"origin": {"x": 1516000, "y": 6234000}, "code": "AS22"},

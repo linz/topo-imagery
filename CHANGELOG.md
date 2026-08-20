@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.24.0](https://github.com/linz/topo-imagery/compare/v7.23.0...v7.24.0) (2026-08-18)
+
+
+### Features
+
+* support Chatham Islands EPSG:3793 TDE-1990 ([#1588](https://github.com/linz/topo-imagery/issues/1588)) ([09ce5c4](https://github.com/linz/topo-imagery/commit/09ce5c4d3e886398fad94a6b2905dbab25b1eef2))
+
 ## [7.23.0](https://github.com/linz/topo-imagery/compare/v7.22.0...v7.23.0) (2026-08-09)
 
 
