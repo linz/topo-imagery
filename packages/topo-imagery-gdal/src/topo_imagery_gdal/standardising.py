@@ -15,7 +15,7 @@ from topo_imagery_common.epsg import EpsgNumber
 from topo_imagery_common.files.files_helper import ContentType, is_tiff
 from topo_imagery_common.files.fs import exists, read, write, write_all, write_sidecars
 from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
+from topo_imagery_gdal.gdal.gdal_bands import check_band_type_is_supported, get_gdal_band_offset, get_gdal_band_type
 from topo_imagery_gdal.gdal.gdal_commands import (
     get_alpha_command,
     get_build_vrt_command,
@@ -321,8 +321,12 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
     """Generate output using GDAL command."""
     target_file = os.path.join(tmp_path, f"{tile_name}.tiff")
 
-    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg)
-    command.extend(get_gdal_band_offset(input_file, gdal_info(input_file), config.gdal_preset))
+    gdalinfo_data = gdal_info(input_file)
+    band_type = get_gdal_band_type(input_file, gdalinfo_data)
+    if config.gdal_preset == CompressionPreset.RGBNIR_ZSTD.value:
+        check_band_type_is_supported(band_type, input_file)
+    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg, band_type=band_type)
+    command.extend(get_gdal_band_offset(input_file, gdalinfo_data, config.gdal_preset))
 
     # Specify the extent to get the right boundaries in case of the tiff got no data on its edges
     output_bounds: Bounds = get_bounds_from_name(tile_name, target_epsg=config.target_epsg)

@@ -25,10 +25,6 @@ BASE_COG = [
     # this significantly reduces the size of tiffs which are very sparse
     "-co",
     "sparse_ok=true",
-    # Do not create BIGTIFF
-    # An error will be raise by GDAL if it fails creating a tiff > 4GB in size
-    "-co",
-    "bigtiff=no",
     # Always ignore existing overviews so they are not created from already compressed overviews
     "-co",
     "overviews=ignore_existing",

@@ -1,6 +1,11 @@
 from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
 from pytest import raises
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
+from topo_imagery_gdal.gdal.gdal_bands import (
+    check_band_type_is_supported,
+    get_gdal_band_offset,
+    get_gdal_band_type,
+    is_high_bit_depth_band_type,
+)
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 
 
@@ -155,3 +160,26 @@ def test_get_band_type() -> None:
     band_type = get_gdal_band_type("some_file.tiff", gdalinfo)
 
     assert band_type == "UInt16"
+
+
+def test_is_high_bit_depth_band_type() -> None:
+    assert is_high_bit_depth_band_type("UInt16") is True
+    assert is_high_bit_depth_band_type("UInt32") is True
+    assert is_high_bit_depth_band_type("Byte") is False
+    assert is_high_bit_depth_band_type("Int16") is False
+
+
+def test_check_band_type_is_supported_allows_unsigned() -> None:
+    check_band_type_is_supported("Byte", "some_file.tiff")
+    check_band_type_is_supported("UInt16", "some_file.tiff")
+    check_band_type_is_supported("UInt32", "some_file.tiff")
+
+
+def test_check_band_type_is_supported_rejects_signed() -> None:
+    with raises(RuntimeError, match="unsupported_band_type"):
+        check_band_type_is_supported("Int16", "some_file.tiff")
+
+
+def test_check_band_type_is_supported_rejects_float() -> None:
+    with raises(RuntimeError, match="unsupported_band_type"):
+        check_band_type_is_supported("Float32", "some_file.tiff")
