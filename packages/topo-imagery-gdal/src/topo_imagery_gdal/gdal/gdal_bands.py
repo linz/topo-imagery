@@ -186,15 +186,5 @@ def is_high_bit_depth_band_type(band_type: str) -> bool:
     """Return whether a band type is high bit-depth for RGBNIR processing.
 
     High bit-depth means the type is supported for RGBNIR and is not `Byte`.
-
-    Examples:
-        >>> is_high_bit_depth_band_type("UInt16")
-        True
-        >>> is_high_bit_depth_band_type("UInt32")
-        True
-        >>> is_high_bit_depth_band_type("Byte")
-        False
-        >>> is_high_bit_depth_band_type("Int16")
-        False
     """
     return band_type in SUPPORTED_RGBNIR_BAND_TYPES and band_type != "Byte"
