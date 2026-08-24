@@ -7,6 +7,7 @@ from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_type, is_high_bit_depth_band_type
 from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_gdal.tiff.geotiff import get_extents
@@ -16,6 +17,16 @@ from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
 from topo_imagery_stac.link import Link, Relation
 from topo_imagery_stac.util.media_type import StacMediaType
+
+RASTER_DATA_TYPE_BY_GDAL: dict[str, str] = {
+    "UInt16": "uint16",
+    "UInt32": "uint32",
+}
+
+BITS_PER_SAMPLE_BY_GDAL: dict[str, int] = {
+    "UInt16": 16,
+    "UInt32": 32,
+}
 
 
 # pylint: disable=too-many-positional-arguments
@@ -176,6 +187,15 @@ def create_item(
 
     if not gdalinfo_result:
         gdalinfo_result = gdal_info(asset_path)
+
+    band_type: str | None = None
+    if gdalinfo_result.get("bands"):
+        band_type = get_gdal_band_type(asset_path, gdalinfo_result)
+        if is_high_bit_depth_band_type(band_type):
+            item.update_raster_bands_metadata(
+                RASTER_DATA_TYPE_BY_GDAL[band_type],
+                BITS_PER_SAMPLE_BY_GDAL[band_type],
+            )
 
     if item.stac.get("links") is not None:
         # Remove existing derived_from links in case of resupply

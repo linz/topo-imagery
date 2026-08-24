@@ -47,6 +47,78 @@ def test_create_item(subtests: SubTests) -> None:
         assert item.stac["assets"]["visual"]["updated"] == current_datetime
 
 
+def test_create_item_adds_raster_metadata_for_high_bit_depth(subtests: SubTests) -> None:
+    for band_type, data_type, bits_per_sample in [
+        ("UInt16", "uint16", 16),
+        ("UInt32", "uint32", 32),
+    ]:
+        fake_gdal_info: GdalInfo = cast(
+            GdalInfo,
+            {
+                "wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]},
+                "bands": [
+                    {
+                        "band": 1,
+                        "block": [256, 256],
+                        "type": band_type,
+                        "colorInterpretation": "Red",
+                        "noDataValue": None,
+                        "colorTable": None,
+                    }
+                ],
+            },
+        )
+
+        item = create_item(
+            "./scripts/tests/data/empty.tiff",
+            "",
+            "",
+            "abc123",
+            "any GDAL version",
+            any_epoch_datetime_string(),
+            fake_gdal_info,
+        )
+
+        with subtests.test(msg=f"raster metadata for {band_type}"):
+            assert item.stac["assets"]["visual"]["raster:bands"] == [
+                {"data_type": data_type, "bits_per_sample": bits_per_sample}
+            ]
+            assert "https://stac-extensions.github.io/raster/v1.1.0/schema.json" in item.stac["stac_extensions"]
+
+
+def test_create_item_does_not_add_raster_metadata_for_byte(subtests: SubTests) -> None:
+    fake_gdal_info: GdalInfo = cast(
+        GdalInfo,
+        {
+            "wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]},
+            "bands": [
+                {
+                    "band": 1,
+                    "block": [256, 256],
+                    "type": "Byte",
+                    "colorInterpretation": "Red",
+                    "noDataValue": None,
+                    "colorTable": None,
+                }
+            ],
+        },
+    )
+
+    item = create_item(
+        "./scripts/tests/data/empty.tiff",
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        any_epoch_datetime_string(),
+        fake_gdal_info,
+    )
+
+    with subtests.test(msg="no raster metadata for Byte"):
+        assert "raster:bands" not in item.stac["assets"]["visual"]
+        assert "https://stac-extensions.github.io/raster/v1.1.0/schema.json" not in item.stac["stac_extensions"]
+
+
 def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
