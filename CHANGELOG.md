@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.25.0](https://github.com/linz/topo-imagery/compare/v7.24.0...v7.25.0) (2026-08-25)
+
+
+### Features
+
+* topo imagery write bigtiff for 16 32 bit rgbnir imagery TDE-2005 ([#1607](https://github.com/linz/topo-imagery/issues/1607)) ([ea4a6bc](https://github.com/linz/topo-imagery/commit/ea4a6bc464d8d3ea67f6b53625a2a37ce8869b25))
+
 ## [7.24.0](https://github.com/linz/topo-imagery/compare/v7.23.0...v7.24.0) (2026-08-18)
 
 
