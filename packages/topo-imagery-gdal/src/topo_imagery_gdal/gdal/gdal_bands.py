@@ -186,5 +186,35 @@ def is_high_bit_depth_band_type(band_type: str) -> bool:
     """Return whether a band type is high bit-depth for RGBNIR processing.
 
     High bit-depth means the type is supported for RGBNIR and is not `Byte`.
+
+    Examples:
+        >>> is_high_bit_depth_band_type("UInt16")
+        True
+        >>> is_high_bit_depth_band_type("UInt32")
+        True
+        >>> is_high_bit_depth_band_type("Byte")
+        False
+        >>> is_high_bit_depth_band_type("Int16")
+        False
     """
     return band_type in SUPPORTED_RGBNIR_BAND_TYPES and band_type != "Byte"
+
+
+def check_band_type_is_supported(band_type: str, file: str) -> None:
+    """Raise an error if the band type is not supported for RGBNIR imagery.
+
+    Args:
+        band_type: GDAL band type string
+        file: path to the file being checked
+
+    Raises:
+        RuntimeError: if the band type is not in SUPPORTED_RGBNIR_BAND_TYPES
+    """
+    if band_type not in SUPPORTED_RGBNIR_BAND_TYPES:
+        get_log().error(
+            "unsupported_band_type",
+            path=file,
+            band_type=band_type,
+            supported=sorted(SUPPORTED_RGBNIR_BAND_TYPES),
+        )
+        raise RuntimeError(f"unsupported_band_type: {band_type}")
