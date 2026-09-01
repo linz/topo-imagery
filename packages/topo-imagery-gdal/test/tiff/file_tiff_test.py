@@ -1,6 +1,6 @@
 from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
-from topo_imagery_gdal.tiff.file_tiff import FileTiff, FileTiffErrorType
+from topo_imagery.gdal.gdal.gdal_presets import CompressionPreset
+from topo_imagery.gdal.tiff.file_tiff import FileTiff, FileTiffErrorType
 
 
 def test_check_band_count_valid_3() -> None:

@@ -1,12 +1,12 @@
 from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
 from pytest import raises
-from topo_imagery_gdal.gdal.gdal_bands import (
+from topo_imagery.gdal.gdal.gdal_bands import (
     check_band_type_is_supported,
     get_gdal_band_offset,
     get_gdal_band_type,
     is_high_bit_depth_band_type,
 )
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
+from topo_imagery.gdal.gdal.gdal_presets import CompressionPreset
 
 
 def test_gdal_grey_bands() -> None:

@@ -26,5 +26,8 @@ pythonpath = ["test"]
 [tool.uv]
 package = true
 
+[tool.uv.build-backend]
+module-name = "topo_imagery.pdal"
+
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }

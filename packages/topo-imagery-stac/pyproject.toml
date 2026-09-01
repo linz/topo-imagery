@@ -28,6 +28,9 @@ pythonpath = ["test"]
 [tool.uv]
 package = true
 
+[tool.uv.build-backend]
+module-name = "topo_imagery.stac"
+
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
 topo-imagery-gdal = { workspace = true }

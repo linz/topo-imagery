@@ -66,6 +66,13 @@ show_error_codes = true
 strict = true
 disable_error_code = ["import"]
 exclude = ["conftest\\.py$"]
+explicit_package_bases = true
+mypy_path = [
+    "packages/topo-imagery-common/src",
+    "packages/topo-imagery-gdal/src",
+    "packages/topo-imagery-pdal/src",
+    "packages/topo-imagery-stac/src",
+]
 
 [[tool.mypy.overrides]]
 module = ["linz_logger"]

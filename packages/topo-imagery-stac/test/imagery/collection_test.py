@@ -10,16 +10,16 @@ import pytest
 import shapely.geometry
 from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
-from topo_imagery_common.files.files_helper import ContentType
-from topo_imagery_common.files.fs import read, write
-from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
-from topo_imagery_stac.imagery.collection_context import CollectionContext
-from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
-from topo_imagery_stac.imagery.provider import ProviderRole
-from topo_imagery_stac.testing.generators import any_stac_processing
-from topo_imagery_stac.testing.helpers import any_epoch_datetime_string, fake_linz_slug
-from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
-from topo_imagery_stac.util.stac_extensions import StacExtensions
+from topo_imagery.common.files.files_helper import ContentType
+from topo_imagery.common.files.fs import read, write
+from topo_imagery.stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
+from topo_imagery.stac.imagery.collection_context import CollectionContext
+from topo_imagery.stac.imagery.item import ImageryItem, STACAsset
+from topo_imagery.stac.imagery.provider import ProviderRole
+from topo_imagery.stac.testing.generators import any_stac_processing
+from topo_imagery.stac.testing.helpers import any_epoch_datetime_string, fake_linz_slug
+from topo_imagery.stac.util.STAC_VERSION import STAC_VERSION
+from topo_imagery.stac.util.stac_extensions import StacExtensions
 
 # pylint: disable=too-many-lines
 

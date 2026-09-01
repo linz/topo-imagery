@@ -5,13 +5,13 @@ from functools import partial
 from multiprocessing import Pool
 
 from linz_logger import get_log
-from topo_imagery_common.cli.common_args import CommonArgumentParser
-from topo_imagery_common.files.files_helper import ContentType, get_file_name_from_path, is_tiff
-from topo_imagery_common.files.fs import exists, read, write
-from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_gdal.gdal import gdal_helper
-from topo_imagery_gdal.gdal.gdal_commands import get_thumbnail_command
-from topo_imagery_gdal.gdal.gdal_helper import is_geotiff, run_gdal
+from topo_imagery.common.cli.common_args import CommonArgumentParser
+from topo_imagery.common.files.files_helper import ContentType, get_file_name_from_path, is_tiff
+from topo_imagery.common.files.fs import exists, read, write
+from topo_imagery.common.log.time_helper import time_in_ms
+from topo_imagery.gdal.gdal import gdal_helper
+from topo_imagery.gdal.gdal.gdal_commands import get_thumbnail_command
+from topo_imagery.gdal.gdal.gdal_helper import is_geotiff, run_gdal
 
 
 def thumbnails(path: str, target: str) -> str | None:

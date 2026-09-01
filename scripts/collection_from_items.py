@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, List
 
 from boto3 import client
 from linz_logger import get_log
-from topo_imagery_common.cli.cli_helper import (
+from topo_imagery.common.cli.cli_helper import (
     coalesce_multi_single,
     empty_str_to_false,
     get_geometry_from_geojson_feature,
@@ -14,16 +14,16 @@ from topo_imagery_common.cli.cli_helper import (
     str_to_bool,
     str_to_gsd,
 )
-from topo_imagery_common.cli.common_args import CommonArgumentParser
-from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
-from topo_imagery_common.files.files_helper import SUFFIX_JSON
-from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
-from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT
-from topo_imagery_stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
-from topo_imagery_stac.imagery.collection_context import CollectionContext
-from topo_imagery_stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
-from topo_imagery_stac.imagery.create_stac import create_collection
+from topo_imagery.common.cli.common_args import CommonArgumentParser
+from topo_imagery.common.datetimes import RFC_3339_DATETIME_FORMAT
+from topo_imagery.common.files.files_helper import SUFFIX_JSON
+from topo_imagery.common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
+from topo_imagery.common.log.time_helper import time_in_ms
+from topo_imagery.gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT
+from topo_imagery.stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
+from topo_imagery.stac.imagery.collection_context import CollectionContext
+from topo_imagery.stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
+from topo_imagery.stac.imagery.create_stac import create_collection
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client

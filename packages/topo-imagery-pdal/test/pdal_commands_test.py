@@ -1,4 +1,4 @@
-from topo_imagery_pdal.pdal_commands import get_pdal_command
+from topo_imagery.pdal.pdal_commands import get_pdal_command
 
 
 def test_check_pdal_command() -> None:

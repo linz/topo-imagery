@@ -2,14 +2,14 @@ from decimal import Decimal
 
 import pytest
 from pytest_subtests import SubTests
-from topo_imagery_common.epsg import EpsgNumber
-from topo_imagery_gdal.gdal.gdal_commands import (
+from topo_imagery.common.epsg import EpsgNumber
+from topo_imagery.gdal.gdal.gdal_commands import (
     get_buffer_distance,
     get_cutline_command,
     get_footprint_command,
     get_gdal_command,
 )
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
+from topo_imagery.gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
 
 
 def test_get_buffer_distance(subtests: SubTests) -> None:

@@ -1,8 +1,8 @@
 import pytest
 from pytest_subtests import SubTests
 from tile_index_data import CHATHAM_SHEET_DATA, MAP_SHEET_DATA
-from topo_imagery_common.epsg import EpsgNumber
-from topo_imagery_gdal.tile.tile_index import (
+from topo_imagery.common.epsg import EpsgNumber
+from topo_imagery.gdal.tile.tile_index import (
     Bounds,
     Point,
     Size,

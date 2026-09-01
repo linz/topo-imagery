@@ -1,6 +1,6 @@
 from fake_gdalinfo import fake_gdalinfo
-from topo_imagery_gdal.gdal.gdalinfo import get_origin
-from topo_imagery_gdal.tile.tile_index import Point
+from topo_imagery.gdal.gdal.gdalinfo import get_origin
+from topo_imagery.gdal.tile.tile_index import Point
 
 
 def test_get_origin() -> None:

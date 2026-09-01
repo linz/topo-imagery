@@ -10,13 +10,13 @@ from moto.s3.responses import DEFAULT_REGION_NAME
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 from shapely.geometry import shape
-from topo_imagery_common.files.fs_s3 import write
-from topo_imagery_stac.imagery.collection import ImageryCollection
-from topo_imagery_stac.imagery.collection_context import CollectionContext
-from topo_imagery_stac.imagery.item import ImageryItem
-from topo_imagery_stac.json_codec import dict_to_json_bytes
-from topo_imagery_stac.testing.generators import any_stac_asset, any_stac_processing
-from topo_imagery_stac.testing.helpers import any_epoch_datetime_string
+from topo_imagery.common.files.fs_s3 import write
+from topo_imagery.stac.imagery.collection import ImageryCollection
+from topo_imagery.stac.imagery.collection_context import CollectionContext
+from topo_imagery.stac.imagery.item import ImageryItem
+from topo_imagery.stac.json_codec import dict_to_json_bytes
+from topo_imagery.stac.testing.generators import any_stac_asset, any_stac_processing
+from topo_imagery.stac.testing.helpers import any_epoch_datetime_string
 
 from scripts.collection_from_items import NoItemsError, main
 
