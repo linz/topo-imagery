@@ -14,6 +14,10 @@ dependencies = [
     "topo-imagery-common",
 ]
 
+[project.scripts]
+thumbnails = "topo_imagery_gdal.thumbnails:main"
+translate-ascii = "topo_imagery_gdal.translate_ascii:main"
+
 [dependency-groups]
 dev = [
     "pytest",
