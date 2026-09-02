@@ -3,27 +3,27 @@ requires = ["uv_build>=0.11.14,<0.12.0"]
 build-backend = "uv_build"
 
 [project]
-name = "topo-imagery-stac"
+name = "topo-imagery-raster"
 version = "0.1.0"
-description = "STAC utilities for topo-imagery processing"
+description = "Command line tools for raster (GDAL) topo-imagery processing"
 requires-python = "~=3.12.3"
 dependencies = [
-    "boto3",
     "linz-logger",
-    "python-ulid",
-    "shapely>=2.0",
     "topo-imagery-common",
     "topo-imagery-gdal",
+    "topo-imagery-stac",
 ]
 
 [project.scripts]
-collection-from-items = "topo_imagery_stac.collection_from_items:main"
+generate-hillshade = "topo_imagery_raster.generate_hillshade:main"
+standardise-validate = "topo_imagery_raster.standardise_validate:main"
+thumbnails = "topo_imagery_raster.thumbnails:main"
+translate-ascii = "topo_imagery_raster.translate_ascii:main"
 
 [dependency-groups]
 dev = [
-    "moto>=4.2",
-    "mypy-boto3-s3",
     "pytest",
+    "pytest-dependency",
     "pytest-subtests",
 ]
 
@@ -37,3 +37,4 @@ package = true
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
 topo-imagery-gdal = { workspace = true }
+topo-imagery-stac = { workspace = true }
