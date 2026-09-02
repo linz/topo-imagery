@@ -8,6 +8,8 @@ members = [
     "topo-imagery-common",
     "topo-imagery-gdal",
     "topo-imagery-pdal",
+    "topo-imagery-pointcloud",
+    "topo-imagery-raster",
     "topo-imagery-stac",
 ]
 
@@ -899,10 +901,8 @@ dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
     { name = "shapely" },
-    { name = "topo-imagery-common" },
-    { name = "topo-imagery-gdal" },
-    { name = "topo-imagery-pdal" },
-    { name = "topo-imagery-stac" },
+    { name = "topo-imagery-pointcloud" },
+    { name = "topo-imagery-raster" },
 ]
 
 [package.dev-dependencies]
@@ -926,10 +926,8 @@ requires-dist = [
     { name = "boto3" },
     { name = "linz-logger" },
     { name = "shapely", specifier = ">=2.0" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
-    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
-    { name = "topo-imagery-pdal", editable = "packages/topo-imagery-pdal" },
-    { name = "topo-imagery-stac", editable = "packages/topo-imagery-stac" },
+    { name = "topo-imagery-pointcloud", editable = "packages/topo-imagery-pointcloud" },
+    { name = "topo-imagery-raster", editable = "packages/topo-imagery-raster" },
 ]
 
 [package.metadata.requires-dev]
@@ -1040,6 +1038,70 @@ dev = [
 requires-dist = [
     { name = "linz-logger" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[[package]]
+name = "topo-imagery-pointcloud"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-pointcloud" }
+dependencies = [
+    { name = "linz-logger" },
+    { name = "topo-imagery-common" },
+    { name = "topo-imagery-pdal" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "linz-logger" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "topo-imagery-pdal", editable = "packages/topo-imagery-pdal" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[[package]]
+name = "topo-imagery-raster"
+version = "0.1.0"
+source = { editable = "packages/topo-imagery-raster" }
+dependencies = [
+    { name = "linz-logger" },
+    { name = "topo-imagery-common" },
+    { name = "topo-imagery-gdal" },
+    { name = "topo-imagery-stac" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-dependency" },
+    { name = "pytest-subtests" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "linz-logger" },
+    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
+    { name = "topo-imagery-stac", editable = "packages/topo-imagery-stac" },
 ]
 
 [package.metadata.requires-dev]

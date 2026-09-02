@@ -24,6 +24,9 @@ jobs:
       - name: Unit Tests
         run: |
           for pkg in packages/*/; do
+            # Packages that only declare entry points have no tests of their own;
+            # their commands are covered by the end to end tests below.
+            [ -d "${pkg}test" ] || continue
             uv run pytest --doctest-modules "$pkg"
           done
 
