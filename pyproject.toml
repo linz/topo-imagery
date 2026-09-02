@@ -18,10 +18,8 @@ dependencies = [
     "boto3",
     "linz-logger",
     "shapely>=2.0",
-    "topo-imagery-common",
-    "topo-imagery-gdal",
-    "topo-imagery-pdal",
-    "topo-imagery-stac",
+    "topo-imagery-pointcloud",
+    "topo-imagery-raster",
 ]
 
 [dependency-groups]
@@ -48,10 +46,8 @@ package = false
 default-groups = "all"
 
 [tool.uv.sources]
-topo-imagery-common = { workspace = true }
-topo-imagery-gdal = { workspace = true }
-topo-imagery-pdal = { workspace = true }
-topo-imagery-stac = { workspace = true }
+topo-imagery-pointcloud = { workspace = true }
+topo-imagery-raster = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
