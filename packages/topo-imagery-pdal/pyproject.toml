@@ -12,6 +12,9 @@ dependencies = [
     "topo-imagery-common",
 ]
 
+[project.scripts]
+fix-laz-header = "topo_imagery_pdal.fix_laz_header:main"
+
 [dependency-groups]
 dev = [
     "pytest",

@@ -1054,6 +1054,7 @@ name = "topo-imagery-stac"
 version = "0.1.0"
 source = { editable = "packages/topo-imagery-stac" }
 dependencies = [
+    { name = "boto3" },
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely" },
@@ -1063,12 +1064,15 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "moto" },
+    { name = "mypy-boto3-s3" },
     { name = "pytest" },
     { name = "pytest-subtests" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "boto3" },
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely", specifier = ">=2.0" },
@@ -1078,6 +1082,8 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "moto", specifier = ">=4.2" },
+    { name = "mypy-boto3-s3" },
     { name = "pytest" },
     { name = "pytest-subtests" },
 ]

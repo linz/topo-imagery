@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "STAC utilities for topo-imagery processing"
 requires-python = "~=3.12.3"
 dependencies = [
+    "boto3",
     "linz-logger",
     "python-ulid",
     "shapely>=2.0",
@@ -15,8 +16,15 @@ dependencies = [
     "topo-imagery-gdal",
 ]
 
+[project.scripts]
+collection-from-items = "topo_imagery_stac.collection_from_items:main"
+generate-hillshade = "topo_imagery_stac.generate_hillshade:main"
+standardise-validate = "topo_imagery_stac.standardise_validate:main"
+
 [dependency-groups]
 dev = [
+    "moto>=4.2",
+    "mypy-boto3-s3",
     "pytest",
     "pytest-subtests",
 ]
