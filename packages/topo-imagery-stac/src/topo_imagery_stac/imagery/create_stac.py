@@ -7,9 +7,6 @@ from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
-from topo_imagery_gdal.gdal.gdal_helper import gdal_info
-from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
-from topo_imagery_gdal.tiff.geotiff import get_extents
 from topo_imagery_stac.imagery.capture_area import get_capture_area_description
 from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
@@ -151,7 +148,8 @@ def create_item(
     collection_id: str,
     gdal_version: str,
     current_datetime: str,
-    gdalinfo_result: GdalInfo | None = None,
+    geometry: dict[str, Any],
+    bbox: tuple[float, ...],
     derived_from: list[str] | None = None,
     odr_url: str | None = None,
 ) -> ImageryItem:
@@ -162,9 +160,10 @@ def create_item(
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
-        gdal_version: GDAL version
+        gdal_version: version of the software used to produce the asset
         current_datetime: date and time for setting consistent update and/or creation timestamp
-        gdalinfo_result: result of the gdalinfo command. Defaults to None.
+        geometry: geometry of the asset
+        bbox: bounding box of the asset
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
         odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
@@ -173,9 +172,6 @@ def create_item(
     """
     item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
     base_stac = item.stac.copy()
-
-    if not gdalinfo_result:
-        gdalinfo_result = gdal_info(asset_path)
 
     if item.stac.get("links") is not None:
         # Remove existing derived_from links in case of resupply
@@ -199,7 +195,7 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(*get_extents(gdalinfo_result))
+    item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
     if item.stac != base_stac and item.stac["properties"]["updated"] != current_datetime:

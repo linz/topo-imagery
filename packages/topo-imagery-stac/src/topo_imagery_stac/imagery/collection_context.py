@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from topo_imagery_gdal.gdal.gdal_presets import DataType
+from topo_imagery_common.data_type import DataType
 from topo_imagery_stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
 
 

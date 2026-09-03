@@ -10,9 +10,9 @@ import pytest
 import shapely.geometry
 from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
+from topo_imagery_common.data_type import DataType
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import read, write
-from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
