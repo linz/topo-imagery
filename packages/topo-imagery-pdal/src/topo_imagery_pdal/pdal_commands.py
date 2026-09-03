@@ -161,7 +161,7 @@ def get_pdal_version() -> str:
     # Keep only non-dash lines.
     version = " ".join(line for line in (raw.strip() for raw in output.splitlines()) if line.strip("-"))
 
-    if not version: # falsy value raises to prevent empty STAC metadata `processing:software`
+    if not version:  # falsy value raises to prevent empty STAC metadata `processing:software`
         raise PDALExecutionException(f"`{pdal_exec} --version` reported no version: {output!r}")
 
     return version
