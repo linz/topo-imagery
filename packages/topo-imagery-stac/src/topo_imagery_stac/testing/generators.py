@@ -1,6 +1,6 @@
 from datetime import datetime
 from os import urandom
-from typing import Any, Callable
+from typing import Callable
 
 from shapely.geometry import Polygon
 from topo_imagery_common.files.checksum import multihash_as_hex
