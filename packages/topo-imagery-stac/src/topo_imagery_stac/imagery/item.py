@@ -2,6 +2,7 @@ import json
 from typing import Any, TypedDict
 
 from topo_imagery_common.files.fs import read
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.link import Link, Relation
 from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 from topo_imagery_stac.util.media_type import StacMediaType
@@ -94,7 +95,7 @@ class ImageryItem:
         self.stac["properties"]["datetime"] = None
 
     # FIXME: redefine the 'Any'
-    def update_spatial(self, geometry: dict[str, Any], bbox: tuple[float, ...]) -> None:
+    def update_spatial(self, geometry: GeojsonPolygon, bbox: tuple[float, ...]) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
 
         Args:
