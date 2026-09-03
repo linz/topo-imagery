@@ -19,7 +19,7 @@ from topo_imagery_common.files.fs import exists, write
 from topo_imagery_gdal.gdal.gdal_helper import get_srs, get_vfs_path
 from topo_imagery_gdal.standardising import StandardisingConfig, run_standardising
 from topo_imagery_gdal.tiff.file_tiff import FileTiff
-from topo_imagery_stac.imagery.create_stac import create_item
+from topo_imagery_raster.create_item import create_item_from_tiff
 from topo_imagery_stac.json_codec import dict_to_json_bytes
 
 
@@ -190,7 +190,7 @@ def main() -> None:
                 get_log().info("non_visual_qa_passed", path=file.get_path_standardised())
 
             # Create STAC and save in target
-            item = create_item(
+            item = create_item_from_tiff(
                 file.get_path_standardised(),
                 start_datetime,
                 end_datetime,

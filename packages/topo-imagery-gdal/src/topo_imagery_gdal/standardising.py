@@ -12,7 +12,7 @@ from tifffile import TiffFile
 from topo_imagery_common.aws.aws_helper import is_s3
 from topo_imagery_common.cli.cli_helper import TileFiles
 from topo_imagery_common.epsg import EpsgNumber
-from topo_imagery_common.files.files_helper import ContentType, is_tiff
+from topo_imagery_common.files.files_helper import SUFFIX_FOOTPRINT, ContentType, is_tiff
 from topo_imagery_common.files.fs import exists, read, write, write_all, write_sidecars
 from topo_imagery_common.log.time_helper import time_in_ms
 from topo_imagery_gdal.gdal.gdal_bands import check_band_type_is_supported, get_gdal_band_offset, get_gdal_band_type
@@ -25,7 +25,7 @@ from topo_imagery_gdal.gdal.gdal_commands import (
     get_relabel_colorinterp_command,
     get_transform_srs_command,
 )
-from topo_imagery_gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT, create_footprint
+from topo_imagery_gdal.gdal.gdal_footprint import create_footprint
 from topo_imagery_gdal.gdal.gdal_helper import gdal_info, run_gdal
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.tiff.file_tiff import FileTiff, FileTiffType
