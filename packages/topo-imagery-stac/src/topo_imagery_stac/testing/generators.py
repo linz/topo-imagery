@@ -1,8 +1,10 @@
 from datetime import datetime
 from os import urandom
-from typing import Callable
+from typing import Any, Callable
 
+from shapely.geometry import Polygon
 from topo_imagery_common.files.checksum import multihash_as_hex
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
 
 
@@ -38,3 +40,10 @@ def any_stac_processing() -> STACProcessing:
 
 def any_multihash_as_hex() -> str:
     return multihash_as_hex(urandom(64))
+
+
+def any_geometry_and_bbox() -> tuple[GeojsonPolygon, tuple[float, ...]]:
+    """A geometry and a matching bounding box, for tests that need spatial extents but do not assert on them."""
+    geometry: GeojsonPolygon = {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}
+
+    return geometry, Polygon(geometry["coordinates"][0]).bounds

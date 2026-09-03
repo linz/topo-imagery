@@ -12,6 +12,7 @@ from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import read, write
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
@@ -640,9 +641,9 @@ def test_add_item(fake_collection_context: CollectionContext, subtests: SubTests
         ),
         any_stac_processing(),
     )
-    geometry = {
+    geometry: GeojsonPolygon = {
         "type": "Polygon",
-        "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
+        "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
     bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
     start_datetime = "2021-01-27T00:00:00Z"

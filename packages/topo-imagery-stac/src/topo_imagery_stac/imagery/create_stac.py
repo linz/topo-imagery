@@ -7,6 +7,7 @@ from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.imagery.capture_area import get_capture_area_description
 from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
@@ -148,7 +149,7 @@ def create_item(
     collection_id: str,
     gdal_version: str,
     current_datetime: str,
-    geometry: dict[str, Any],
+    geometry: GeojsonPolygon,
     bbox: tuple[float, ...],
     derived_from: list[str] | None = None,
     odr_url: str | None = None,
