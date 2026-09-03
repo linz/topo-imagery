@@ -111,7 +111,7 @@ def get_gdal_version() -> str:
         the `gdalinfo --version` output, for example "GDAL 3.10.3, released 2025/04/01"
     """
     version = run_gdal(["gdalinfo", "--version"]).stdout.decode().strip()
-    if not version: # falsy value raises to prevent empty STAC metadata `processing:software`
+    if not version:  # falsy value raises to prevent empty STAC metadata `processing:software`
         raise GDALExecutionException("`gdalinfo --version` reported no version")
 
     return version
