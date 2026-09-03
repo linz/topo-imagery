@@ -147,7 +147,7 @@ def create_item(
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
-    gdal_version: str,
+    processing_software_version: str,
     current_datetime: str,
     geometry: GeojsonPolygon,
     bbox: tuple[float, ...],
@@ -161,7 +161,7 @@ def create_item(
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
-        gdal_version: version of the software used to produce the asset
+        processing_software_version: version of the software used to produce the asset
         current_datetime: date and time for setting consistent update and/or creation timestamp
         geometry: geometry of the asset
         bbox: bounding box of the asset
@@ -171,7 +171,7 @@ def create_item(
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
+    item = create_or_load_base_item(asset_path, processing_software_version, current_datetime, odr_url)
     base_stac = item.stac.copy()
 
     if item.stac.get("links") is not None:
@@ -209,12 +209,12 @@ def create_item(
 
 
 def create_or_load_base_item(
-    asset_path: str, gdal_version: str, current_datetime: str, odr_url: str | None = None
+    asset_path: str, processing_software_version: str, current_datetime: str, odr_url: str | None = None
 ) -> ImageryItem:
     """
     Args:
         asset_path: path with filename of the visual asset (TIFF)
-        gdal_version: GDAL version string
+        processing_software_version: version of the software used to produce the asset
         current_datetime: date and time used for setting consistent update and/or creation timestamp
         odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
@@ -233,7 +233,9 @@ def create_or_load_base_item(
     stac_processing = STACProcessing(
         **{
             "processing:datetime": current_datetime,
-            "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
+            "processing:software": STACProcessingSoftware(
+                **{"gdal": processing_software_version, "linz/topo-imagery": commit_url}
+            ),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
     )
