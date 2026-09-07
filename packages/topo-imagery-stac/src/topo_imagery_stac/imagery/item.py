@@ -131,6 +131,3 @@ class ImageryItem:
             self.stac["links"][:] = [l for l in self.stac["links"] if l.get("rel") != link.stac["rel"]]
 
         self.stac.setdefault("links", []).append(link.stac)
-        self.stac.setdefault("stac_extensions", [])
-        if StacExtensions.raster.value not in self.stac["stac_extensions"]:
-            self.stac["stac_extensions"].append(StacExtensions.raster.value)
