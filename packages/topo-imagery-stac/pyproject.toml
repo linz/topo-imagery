@@ -15,9 +15,6 @@ dependencies = [
     "topo-imagery-common",
 ]
 
-[project.scripts]
-collection-from-items = "topo_imagery_stac.collection_from_items:main"
-
 [dependency-groups]
 dev = [
     "moto>=4.2",
