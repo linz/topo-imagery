@@ -572,6 +572,14 @@ def test_set_gsd(
     assert collection.stac["gsd"] == 123.456
 
 
+def test_set_data_type(
+    fake_collection_context: CollectionContext,
+) -> None:
+    fake_collection_context.data_type = "uint16"
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    assert collection.stac["data_type"] == "uint16"
+    
+
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.category = "rural-aerial-photos"
     fake_collection_context.historic_survey_number = None
