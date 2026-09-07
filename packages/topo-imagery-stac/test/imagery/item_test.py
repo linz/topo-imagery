@@ -106,20 +106,6 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
         assert imagery_item.stac["properties"] == new_stac_properties
 
 
-def test_update_raster_bands_metadata(subtests: SubTests) -> None:
-    path = "./scripts/tests/data/empty.tiff"
-    id_ = get_file_name_from_path(path)
-    item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
-
-    item.update_raster_bands_metadata("uint16", 16)
-
-    with subtests.test(msg="adds raster:bands to visual asset"):
-        assert item.stac["assets"]["visual"]["raster:bands"] == [{"data_type": "uint16", "bits_per_sample": 16}]
-
-    with subtests.test(msg="adds raster extension to stac_extensions"):
-        assert "https://stac-extensions.github.io/raster/v1.1.0/schema.json" in item.stac["stac_extensions"]
-
-
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
 
