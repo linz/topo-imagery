@@ -117,6 +117,7 @@ class ImageryCollection:
             "linz:security_classification": "unclassified",
             "linz:slug": context.linz_slug,
             "gsd": float(context.gsd),
+            "data_type": context.data_type,
             "created": created_datetime,
             "updated": updated_datetime,
         }
@@ -164,6 +165,7 @@ class ImageryCollection:
             updated_datetime: The updated datetime of the Collection.
         """
         self.stac["gsd"] = float(context.gsd)
+        self.stac["data_type"] = context.data_type
         self.stac["linz:security_classification"] = "unclassified"
         if context.lifecycle:
             self.stac["linz:lifecycle"] = context.lifecycle
@@ -191,6 +193,7 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.data_type = context.data_type
         self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
