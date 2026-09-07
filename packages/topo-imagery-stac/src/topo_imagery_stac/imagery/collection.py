@@ -80,10 +80,11 @@ class MissingMetadataError(Exception):
         self.message = f"Missing metadata: {metadata}"
 
 
-class ImageryCollection:
+class ImageryCollection:  # pylint:disable=too-many-instance-attributes
     stac: dict[str, Any]
     gsd: Decimal
     domain: str
+    data_type: str
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
@@ -100,6 +101,7 @@ class ImageryCollection:
 
         self.gsd = context.gsd
         self.domain = context.domain
+        self.data_type = context.data_type
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
