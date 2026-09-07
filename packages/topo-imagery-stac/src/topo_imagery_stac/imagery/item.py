@@ -7,15 +7,7 @@ from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 from topo_imagery_stac.util.media_type import StacMediaType
 from topo_imagery_stac.util.stac_extensions import StacExtensions
 
-STACAsset = TypedDict(
-    "STACAsset",
-    {
-        "href": str,
-        "file:checksum": str,
-        "created": str,
-        "updated": str,
-    },
-)
+STACAsset = TypedDict("STACAsset", {"href": str, "file:checksum": str, "created": str, "updated": str})
 
 STACProcessingSoftware = TypedDict("STACProcessingSoftware", {"gdal": str, "linz/topo-imagery": str})
 """STAC Processing extension LINZ specific fields"""

@@ -578,7 +578,7 @@ def test_set_data_type(
     fake_collection_context.data_type = "uint16"
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     assert collection.stac["data_type"] == "uint16"
-    
+
 
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.category = "rural-aerial-photos"
