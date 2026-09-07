@@ -44,7 +44,7 @@ def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> li
     Args:
         preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
         epsg: the EPSG code of the file
-        data_type: explicit GDAL data type used to decide whether BIGTIFF is required.
+        band_type: optional GDAL band type used to decide whether BIGTIFF is required
 
     Returns:
         a list of arguments to run `gdal_translate`

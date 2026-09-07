@@ -50,13 +50,6 @@ def get_args_parser() -> ArgumentParser:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
     parser.add_argument(
-        "--data-type",
-        dest="data_type",
-        help="Explicit GDAL data type for the output imagery, for example UInt16.",
-        required=False,
-        default=None,
-    )
-    parser.add_argument(
         "--create-footprints",
         dest="create_footprints",
         help="Create footprints for each tile ('true' / 'false')",
@@ -155,7 +148,6 @@ def main() -> None:
         cutline=arguments.cutline,
         scale_to_resolution=arguments.scale_to_resolution,
         force=force,
-        data_type=arguments.data_type,
     )
 
     try:
