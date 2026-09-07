@@ -39,6 +39,7 @@ def any_collection_context() -> CollectionContext:
         domain="land",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
+        data_type="uint8",
         lifecycle="completed",
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",

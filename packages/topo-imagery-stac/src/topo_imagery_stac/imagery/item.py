@@ -7,19 +7,6 @@ from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 from topo_imagery_stac.util.media_type import StacMediaType
 from topo_imagery_stac.util.stac_extensions import StacExtensions
 
-STACRasterBand = TypedDict("STACRasterBand", {"data_type": str, "bits_per_sample": int})
-
-STACAsset = TypedDict(
-    "STACAsset",
-    {
-        "href": str,
-        "file:checksum": str,
-        "created": str,
-        "updated": str,
-        "raster:bands": NotRequired[list[STACRasterBand]],
-    },
-)
-
 STACProcessingSoftware = TypedDict("STACProcessingSoftware", {"gdal": str, "linz/topo-imagery": str})
 """STAC Processing extension LINZ specific fields"""
 
@@ -134,15 +121,6 @@ class ImageryItem:
             self.stac["links"][:] = [l for l in self.stac["links"] if l.get("rel") != link.stac["rel"]]
 
         self.stac.setdefault("links", []).append(link.stac)
-
-    def update_raster_bands_metadata(self, data_type: str, bits_per_sample: int) -> None:
-        """Add raster extension metadata to the visual asset.
-
-        Args:
-            data_type: STAC raster data type (for example `uint16`)
-            bits_per_sample: Number of bits for each sample
-        """
-        self.stac["assets"]["visual"]["raster:bands"] = [{"data_type": data_type, "bits_per_sample": bits_per_sample}]
         self.stac.setdefault("stac_extensions", [])
         if StacExtensions.raster.value not in self.stac["stac_extensions"]:
             self.stac["stac_extensions"].append(StacExtensions.raster.value)

@@ -72,6 +72,7 @@ def get_args_parser() -> CommonArgumentParser:
         choices=HUMAN_READABLE_REGIONS.keys(),
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
+    parser.add_argument("--data-type", dest="data_type", help="Data type of imagery Dataset, for example uint8", type=str, required=True)
     parser.add_argument(
         "--geographic-description",
         dest="geographic_description",
@@ -262,6 +263,7 @@ def main(args: List[str] | None = None) -> None:
         domain=arguments.domain,
         region=arguments.region,
         gsd=arguments.gsd,
+        data_type=arguments.data_type,
         lifecycle=arguments.lifecycle,
         linz_slug=arguments.linz_slug,
         collection_id=collection_id,

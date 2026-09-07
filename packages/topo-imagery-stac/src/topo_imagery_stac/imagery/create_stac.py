@@ -189,13 +189,6 @@ def create_item(
         gdalinfo_result = gdal_info(asset_path)
 
     band_type: str | None = None
-    if gdalinfo_result.get("bands"):
-        band_type = get_gdal_band_type(asset_path, gdalinfo_result)
-        if is_high_bit_depth_band_type(band_type):
-            item.update_raster_bands_metadata(
-                RASTER_DATA_TYPE_BY_GDAL[band_type],
-                BITS_PER_SAMPLE_BY_GDAL[band_type],
-            )
 
     if item.stac.get("links") is not None:
         # Remove existing derived_from links in case of resupply
