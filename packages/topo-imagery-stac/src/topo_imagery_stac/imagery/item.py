@@ -94,7 +94,6 @@ class ImageryItem:
         self.stac["properties"]["end_datetime"] = end_datetime
         self.stac["properties"]["datetime"] = None
 
-    # FIXME: redefine the 'Any'
     def update_spatial(self, geometry: GeojsonPolygon, bbox: tuple[float, ...]) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
 
