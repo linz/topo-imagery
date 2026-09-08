@@ -21,6 +21,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         domain (str): The domain of the dataset (e.g., "land").
         region (str): The region of the dataset (e.g., "auckland").
         gsd (Decimal): Ground Sample Distance in meters.
+        data_type (str): The data type of the dataset (e.g., "uint16").
         lifecycle (str): Lifecycle status of the dataset (e.g., "completed").
         linz_slug (str): LINZ slug for the dataset.
         producers (list[str]): List of producers for the dataset.
@@ -42,6 +43,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     gsd: Decimal
     lifecycle: str
     linz_slug: str
+    data_type: str = ""
     producers: list[str] = field(default_factory=list)
     licensors: list[str] = field(default_factory=list)
     collection_id: str | None = None
