@@ -234,7 +234,7 @@ def create_or_load_base_item(
         **{
             "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(
-                **{"gdal": processing_software_version, "linz/topo-imagery": commit_url}
+                **{"processing_software_version": processing_software_version, "linz/topo-imagery": commit_url}
             ),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
