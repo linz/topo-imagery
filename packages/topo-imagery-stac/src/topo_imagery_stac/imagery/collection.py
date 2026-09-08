@@ -121,6 +121,9 @@ class ImageryCollection:
             "updated": updated_datetime,
         }
 
+        if context.data_type:
+            self.stac["data_type"] = context.data_type
+
         # Optional metadata - if not provided, the field will not be added to the Collection
         if event_name := context.event_name:
             self.stac["linz:event_name"] = event_name
@@ -164,6 +167,10 @@ class ImageryCollection:
             updated_datetime: The updated datetime of the Collection.
         """
         self.stac["gsd"] = float(context.gsd)
+        if context.data_type:
+            self.stac["data_type"] = context.data_type
+        else:
+            self.stac.pop("data_type", None)
         self.stac["linz:security_classification"] = "unclassified"
         if context.lifecycle:
             self.stac["linz:lifecycle"] = context.lifecycle

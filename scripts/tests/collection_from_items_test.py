@@ -62,6 +62,8 @@ def test_should_create_collection_file(item: ImageryItem, fake_collection_contex
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -102,6 +104,8 @@ def test_should_create_coastal_collection_file(item: ImageryItem, fake_collectio
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -119,6 +123,46 @@ def test_should_create_coastal_collection_file(item: ImageryItem, fake_collectio
     # Verify collection.json has been created with "Coastal" information
     resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
     assert "Coastal" in resp["Body"].read().decode("utf-8")
+
+
+@mock_aws
+def test_should_store_data_type_on_collection_only(item: ImageryItem, fake_collection_context: CollectionContext) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="stacfiles")
+    item.add_collection("abc")
+    write("s3://stacfiles/item.json", dict_to_json_bytes(item.stac))
+
+    args = [
+        "--uri",
+        "s3://stacfiles/",
+        "--collection-id",
+        "abc",
+        "--category",
+        "urban-aerial-photos",
+        "--region",
+        "hawkes-bay",
+        "--gsd",
+        "1",
+        "--data-type",
+        "uint16",
+        "--lifecycle",
+        "ongoing",
+        "--producer",
+        "Placeholder",
+        "--licensor",
+        "Placeholder",
+        "--concurrency",
+        "25",
+        "--linz-slug",
+        fake_collection_context.linz_slug,
+    ]
+
+    main(args)
+
+    resp = s3_client.get_object(Bucket="stacfiles", Key="collection.json")
+    collection = json.loads(resp["Body"].read().decode("utf-8"))
+    assert collection["data_type"] == "uint16"
+    assert "data_type" not in item.stac
 
 
 @mock_aws
@@ -145,6 +189,8 @@ def test_should_fail_if_collection_has_no_matching_items(
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -182,6 +228,8 @@ def test_should_fail_to_create_collection_file_without_linz_slug(capsys: Capture
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -218,6 +266,8 @@ def test_should_not_add_if_not_item(fake_collection_context: CollectionContext, 
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -261,6 +311,8 @@ def test_should_determine_dates_from_items(item: ImageryItem, fake_collection_co
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -322,6 +374,8 @@ def test_should_accept_simplified_capture_area_flag(item: ImageryItem, fake_coll
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -373,6 +427,8 @@ def test_should_fail_with_both_supplied_and_simplified_capture_area(
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -419,6 +475,8 @@ def test_should_fail_with_both_supplied_capture_area_and_capture_dates(
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -483,6 +541,8 @@ def test_should_pass_with_empty_supplied_capture_area_and_capture_dates(
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -566,6 +626,8 @@ def test_should_use_capture_dates_for_capture_area(item: ImageryItem, fake_colle
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
@@ -608,6 +670,8 @@ def test_should_fail_when_capture_dates_file_missing(
         "hawkes-bay",
         "--gsd",
         "1",
+        "--data-type",
+        "uint16",
         "--lifecycle",
         "ongoing",
         "--producer",
