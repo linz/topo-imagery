@@ -1,5 +1,5 @@
 # A PDAL runtime, built from source and published as `ghcr.io/linz/pdal:<version>` so that
-# routine releases of this repository does not have to recompile it.
+# a new release of this repository does not have to recompile it.
 # Rebuilt only when this file changes.
 #
 ARG PDAL_VERSION=2.10.2
@@ -15,31 +15,31 @@ ENV TZ=Etc/UTC
 ARG PDAL_VERSION
 ARG PDAL_COMMIT
 
-# Install build dependencies. No plugin is enabled, so only the libraries core PDAL links
-# against are needed: the LAS, LAZ and COPC drivers are built in.
+# Install build dependencies.
 RUN apt-get update \
     && apt-get install --assume-yes --no-install-recommends \
     build-essential \
     ca-certificates \
     cmake \
     git \
+    libcurl4-openssl-dev \
     libgdal-dev \
-    libgeos-dev \
     libgeotiff-dev \
-    liblaszip-dev \
+    libgtest-dev \
     libproj-dev \
-    libtiff-dev \
-    libzstd-dev \
+    ninja-build \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 --branch "$PDAL_VERSION" https://github.com/PDAL/PDAL.git /usr/src/pdal
 RUN test "$(git -C /usr/src/pdal rev-parse HEAD)" = "$PDAL_COMMIT"
 
-# /usr/local/lib is already on the loader path, so no RPATH handling is needed
+# Ninja as used by PDAL CI.
 RUN cmake -S /usr/src/pdal -B /usr/src/pdal/build \
+    -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DUSE_EXTERNAL_GTEST=ON \
     -DWITH_TESTS=OFF
 RUN cmake --build /usr/src/pdal/build --parallel "$(nproc)"
 RUN cmake --install /usr/src/pdal/build
@@ -51,18 +51,15 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 ENV TZ=Etc/UTC
 
-# PDAL links against the distribution's GDAL, PROJ, GEOS and laszip, so the runtime needs their
-# shared libraries. PROJ and GDAL find their own data under /usr/share, so no PROJ_DATA or
-# GDAL_DATA is required. python3 runs the environments layered on top of this image, and
-# ca-certificates is needed to reach S3.
 RUN apt-get update \
     && apt-get install --assume-yes --no-install-recommends \
         ca-certificates \
         libgdal34t64 \
-        liblaszip8 \
         python3 \
     && rm -rf /var/lib/apt/lists/*
 
+# BSD clause 2: binary redistribution must reproduce the licence.
+COPY --from=builder /usr/src/pdal/LICENSE.txt /usr/share/doc/pdal/copyright
 COPY --from=builder /usr/local/bin/pdal /usr/local/bin/pdal
 COPY --from=builder /usr/local/lib/ /usr/local/lib/
 RUN ldconfig \
