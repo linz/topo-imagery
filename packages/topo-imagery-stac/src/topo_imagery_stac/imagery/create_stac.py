@@ -7,7 +7,7 @@ from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
-from topo_imagery_common.geometry import GeojsonPolygon
+from topo_imagery_common.geometry import BoundingBox, GeojsonPolygon
 from topo_imagery_stac.imagery.capture_area import get_capture_area_description
 from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
@@ -150,7 +150,7 @@ def create_item(
     processing_software_version: str,
     current_datetime: str,
     geometry: GeojsonPolygon,
-    bbox: tuple[float, ...],
+    bbox: BoundingBox,
     derived_from: list[str] | None = None,
     odr_url: str | None = None,
 ) -> ImageryItem:
@@ -234,7 +234,7 @@ def create_or_load_base_item(
         **{
             "processing:datetime": current_datetime,
             "processing:software": STACProcessingSoftware(
-                **{"processing_software_version": processing_software_version, "linz/topo-imagery": commit_url}
+                **{"gdal": processing_software_version, "linz/topo-imagery": commit_url}
             ),
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }

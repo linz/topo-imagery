@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 DECIMAL_DEGREES_1M = Decimal("0.00001")
 
@@ -7,17 +7,22 @@ DECIMAL_DEGREES_1M = Decimal("0.00001")
 class GeojsonPolygon(TypedDict):
     """A GeoJSON Polygon geometry. Other geometry types nest `coordinates` differently and are not covered by this type."""
 
-    type: str
-    """GeoJSON geometry type
-
-    Always: "Polygon"
-    """
+    type: Literal["Polygon"]
+    """GeoJSON geometry type"""
     coordinates: list[list[list[float]]]
     """Linear rings of positions, the first being the exterior ring
 
     Example:
         [[[0, 1], [1, 1], [1, 0], [0, 0]]]
     """
+
+
+type BoundingBox = tuple[float, float, float, float]
+"""A 2D bounding box as (min_x, min_y, max_x, max_y) - `shapely`'s `.bounds` ordering.
+
+Example:
+    (0.0, 0.0, 1.0, 1.0)
+"""
 
 
 def get_buffer_distance(gsd: Decimal) -> float:

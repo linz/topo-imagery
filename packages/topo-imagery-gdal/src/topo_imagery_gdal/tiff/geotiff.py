@@ -1,9 +1,9 @@
 from shapely.geometry import Polygon
-from topo_imagery_common.geometry import GeojsonPolygon
+from topo_imagery_common.geometry import BoundingBox, GeojsonPolygon
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 
 
-def get_extents(gdalinfo_result: GdalInfo) -> tuple[GeojsonPolygon, tuple[float, float, float, float]]:
+def get_extents(gdalinfo_result: GdalInfo) -> tuple[GeojsonPolygon, BoundingBox]:
     """Get the geometry and bounding box from the `gdalinfo`.
 
     Args:
