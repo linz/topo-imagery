@@ -43,7 +43,6 @@ dev = [
 [tool.black]
 line-length = 127
 
-
 [tool.uv]
 package = false
 default-groups = "all"
