@@ -583,7 +583,7 @@ def test_id_parsed_on_init(fake_collection_context: CollectionContext) -> None:
 
 def test_bbox_updated_from_none(fake_collection_context: CollectionContext) -> None:
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    bbox = [1799667.5, 5815977.0, 1800422.5, 5814986.0]
+    bbox = [1799667.5, 5814986.0, 1800422.5, 5815977.0]
     collection.update_spatial_extent(bbox)
     assert collection.stac["extent"]["spatial"]["bbox"] == [bbox]
 
@@ -645,7 +645,7 @@ def test_add_item(fake_collection_context: CollectionContext, subtests: SubTests
         "type": "Polygon",
         "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
+    bbox = (1799667.5, 5814986.0, 1800422.5, 5815977.0)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-27T00:00:00Z"
     item.update_spatial(geometry, bbox)
@@ -941,7 +941,7 @@ def test_capture_dates_added(fake_collection_context: CollectionContext) -> None
 def test_reset_extent(fake_collection_context: CollectionContext) -> None:
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     collection.update_temporal_extent("2021-01-27T00:00:00Z", "2021-01-27T00:00:00Z")
-    collection.update_spatial_extent([1799667.5, 5815977.0, 1800422.5, 5814986.0])
+    collection.update_spatial_extent([1799667.5, 5814986.0, 1800422.5, 5815977.0])
     collection.reset_extent()
     assert collection.stac["extent"]["spatial"]["bbox"] is None
     assert collection.stac["extent"]["temporal"]["interval"] is None
