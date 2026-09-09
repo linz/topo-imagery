@@ -47,6 +47,6 @@ def create_item_from_tiff(
         current_datetime,
         geometry,
         bbox,
-        derived_from,
-        odr_url,
+        derived_from=derived_from,
+        odr_url=odr_url,
     )
