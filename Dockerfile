@@ -50,12 +50,15 @@ COPY --from=builder /venv /venv
 COPY --from=builder /usr/bin/pdal /usr/bin/pdal
 COPY --from=builder /pdal_shared/ /usr/lib/
 
-# Copy Python scripts
-COPY ./scripts/ /app/scripts/
+# Copy the entrypoint, and the end to end test fixtures the CI suite runs against.
+# `e2e/data` lands at `/app/tests/data` so that the paths embedded in the fixtures, and the
+# `--from-file ./tests/data/...` arguments, resolve against the working directory unchanged.
+COPY ./scripts/docker-entrypoint.sh /app/
+COPY ./e2e/ /app/tests/
 
 ENV PYTHONPATH="/app"
 ENV GTIFF_SRS_SOURCE="EPSG"
 
-WORKDIR /app/scripts
+WORKDIR /app
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

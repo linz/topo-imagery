@@ -24,7 +24,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     }
     bbox = (1799667.5, 5814986.0, 1800422.5, 5815977.0)
 
-    path = "./scripts/tests/data/empty.tiff"
+    path = "./e2e/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-29T00:00:00Z"
@@ -116,7 +116,7 @@ def test_imagery_add_collection(fake_collection_context: CollectionContext, subt
         updated_datetime=any_epoch_datetime_string(),
     )
 
-    path = "./scripts/tests/data/empty.tiff"
+    path = "./e2e/data/empty.tiff"
     id_ = get_file_name_from_path(path)
     item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
 
