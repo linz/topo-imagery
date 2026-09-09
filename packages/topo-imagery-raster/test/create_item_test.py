@@ -12,7 +12,7 @@ def test_should_derive_spatial_extents_from_gdalinfo() -> None:
     )
 
     item = create_item_from_tiff(
-        "./scripts/tests/data/empty.tiff",
+        "./e2e/data/empty.tiff",
         any_epoch_datetime_string(),
         any_epoch_datetime_string(),
         "any collection id",
