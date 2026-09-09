@@ -1,19 +1,24 @@
 import json
 import os
-from typing import Any
+from typing import Any, Literal
 
 from linz_logger import get_log
 from shapely.geometry.base import BaseGeometry
 from topo_imagery_common.files import checksum, fs
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.files.fs import NoSuchFileError, read
-from topo_imagery_gdal.gdal.gdal_helper import gdal_info
-from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
-from topo_imagery_gdal.tiff.geotiff import get_extents
+from topo_imagery_common.geometry import BoundingBox, GeojsonPolygon
 from topo_imagery_stac.imagery.capture_area import get_capture_area_description
 from topo_imagery_stac.imagery.collection import COLLECTION_FILE_NAME, ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
-from topo_imagery_stac.imagery.item import ImageryItem, STACAsset, STACProcessing, STACProcessingSoftware
+from topo_imagery_stac.imagery.item import (
+    ImageryItem,
+    STACAsset,
+    STACProcessing,
+    STACProcessingSoftware,
+    STACProcessingSoftwareGdal,
+    STACProcessingSoftwarePdal,
+)
 from topo_imagery_stac.link import Link, Relation
 from topo_imagery_stac.util.media_type import StacMediaType
 
@@ -143,15 +148,18 @@ def merge_item_list_for_resupply(
 
 
 # pylint: disable=too-many-arguments
-# pylint: disable=too-many-positional-arguments
+# pylint: disable=too-many-locals
 def create_item(
     asset_path: str,
     start_datetime: str,
     end_datetime: str,
     collection_id: str,
-    gdal_version: str,
+    processing_software_version: str,
     current_datetime: str,
-    gdalinfo_result: GdalInfo | None = None,
+    geometry: GeojsonPolygon,
+    bbox: BoundingBox,
+    *,
+    processing_software: Literal["gdal", "pdal"] = "gdal",
     derived_from: list[str] | None = None,
     odr_url: str | None = None,
 ) -> ImageryItem:
@@ -162,20 +170,19 @@ def create_item(
         start_datetime: start date of the survey
         end_datetime: end date of the survey
         collection_id: collection id to link to the Item
-        gdal_version: GDAL version
+        processing_software_version: version of the software used to produce the asset
         current_datetime: date and time for setting consistent update and/or creation timestamp
-        gdalinfo_result: result of the gdalinfo command. Defaults to None.
+        geometry: geometry of the asset
+        bbox: bounding box of the asset
+        processing_software: name of the processing software. Defaults to "gdal".
         derived_from: list of STAC Items from where this Item is derived. Defaults to None.
         odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
     Returns:
         a STAC Item wrapped in ImageryItem
     """
-    item = create_or_load_base_item(asset_path, gdal_version, current_datetime, odr_url)
+    item = create_or_load_base_item(asset_path, processing_software, processing_software_version, current_datetime, odr_url)
     base_stac = item.stac.copy()
-
-    if not gdalinfo_result:
-        gdalinfo_result = gdal_info(asset_path)
 
     if item.stac.get("links") is not None:
         # Remove existing derived_from links in case of resupply
@@ -199,7 +206,7 @@ def create_item(
             )
 
     item.update_datetime(start_datetime, end_datetime)
-    item.update_spatial(*get_extents(gdalinfo_result))
+    item.update_spatial(geometry, bbox)
     item.add_collection(collection_id)
 
     if item.stac != base_stac and item.stac["properties"]["updated"] != current_datetime:
@@ -212,12 +219,18 @@ def create_item(
 
 
 def create_or_load_base_item(
-    asset_path: str, gdal_version: str, current_datetime: str, odr_url: str | None = None
+    asset_path: str,
+    processing_software: Literal["gdal", "pdal"],
+    processing_software_version: str,
+    current_datetime: str,
+    odr_url: str | None = None,
 ) -> ImageryItem:
     """
     Args:
         asset_path: path with filename of the visual asset (TIFF)
-        gdal_version: GDAL version string
+        processing_software: name of the processing software, which is also the
+            `processing:software` field the version is recorded under
+        processing_software_version: version of the software used to produce the asset
         current_datetime: date and time used for setting consistent update and/or creation timestamp
         odr_url: S3 URL of the already published files in ODR (if this is a resupply). Defaults to None.
 
@@ -233,10 +246,21 @@ def create_or_load_base_item(
     else:
         commit_url = "GIT_HASH not specified"
 
+    # The software name is a STAC field name, so it is set explicitly
+    stac_processing_software: STACProcessingSoftware
+    if processing_software == "pdal":
+        stac_processing_software = STACProcessingSoftwarePdal(
+            **{"pdal": processing_software_version, "linz/topo-imagery": commit_url}
+        )
+    else:
+        stac_processing_software = STACProcessingSoftwareGdal(
+            **{"gdal": processing_software_version, "linz/topo-imagery": commit_url}
+        )
+
     stac_processing = STACProcessing(
         **{
             "processing:datetime": current_datetime,
-            "processing:software": STACProcessingSoftware(**{"gdal": gdal_version, "linz/topo-imagery": commit_url}),
+            "processing:software": stac_processing_software,
             "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
         }
     )

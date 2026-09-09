@@ -8,8 +8,8 @@ from shapely.constructive import make_valid
 from shapely.geometry import MultiPolygon
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import orient
+from topo_imagery_common.geometry import get_buffer_distance
 from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_gdal.gdal.gdal_commands import get_buffer_distance
 
 
 def to_feature(geometry: BaseGeometry) -> dict[str, Any]:

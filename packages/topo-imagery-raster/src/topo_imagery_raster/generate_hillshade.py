@@ -17,7 +17,7 @@ from topo_imagery_gdal.gdal.gdal_commands import get_gdal_command, get_hillshade
 from topo_imagery_gdal.gdal.gdal_helper import run_gdal
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
 from topo_imagery_gdal.standardising import create_vrt
-from topo_imagery_stac.imagery.create_stac import create_item
+from topo_imagery_raster.create_item import create_item_from_tiff
 from topo_imagery_stac.json_codec import dict_to_json_bytes
 
 
@@ -179,7 +179,7 @@ def main() -> None:
             stac_item_path = path.rsplit(".", 1)[0] + SUFFIX_JSON
             if not exists(stac_item_path):
                 # Create STAC and save in target
-                item = create_item(
+                item = create_item_from_tiff(
                     asset_path=path,
                     start_datetime="",
                     end_datetime="",

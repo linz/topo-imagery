@@ -13,7 +13,6 @@ dependencies = [
     "python-ulid",
     "shapely>=2.0",
     "topo-imagery-common",
-    "topo-imagery-gdal",
 ]
 
 [project.scripts]
@@ -36,4 +35,3 @@ package = true
 
 [tool.uv.sources]
 topo-imagery-common = { workspace = true }
-topo-imagery-gdal = { workspace = true }

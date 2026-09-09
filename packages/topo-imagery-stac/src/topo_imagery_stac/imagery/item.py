@@ -2,6 +2,7 @@ import json
 from typing import Any, TypedDict
 
 from topo_imagery_common.files.fs import read
+from topo_imagery_common.geometry import BoundingBox, GeojsonPolygon
 from topo_imagery_stac.link import Link, Relation
 from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 from topo_imagery_stac.util.media_type import StacMediaType
@@ -9,8 +10,17 @@ from topo_imagery_stac.util.stac_extensions import StacExtensions
 
 STACAsset = TypedDict("STACAsset", {"href": str, "file:checksum": str, "created": str, "updated": str})
 
-STACProcessingSoftware = TypedDict("STACProcessingSoftware", {"gdal": str, "linz/topo-imagery": str})
-"""STAC Processing extension LINZ specific fields"""
+STACProcessingSoftwareGdal = TypedDict("STACProcessingSoftwareGdal", {"gdal": str, "linz/topo-imagery": str})
+"""STAC Processing extension LINZ specific fields for a raster asset produced by GDAL"""
+
+STACProcessingSoftwarePdal = TypedDict("STACProcessingSoftwarePdal", {"pdal": str, "linz/topo-imagery": str})
+"""STAC Processing extension LINZ specific fields for a point cloud asset produced by PDAL"""
+
+type STACProcessingSoftware = STACProcessingSoftwareGdal | STACProcessingSoftwarePdal
+"""An Item names the one software that produced its asset, so these are alternatives rather than
+optional fields: a raster Item carries `gdal` and a point cloud Item carries `pdal`, never both
+and never neither.
+"""
 
 STACProcessing = TypedDict(
     "STACProcessing",
@@ -93,8 +103,7 @@ class ImageryItem:
         self.stac["properties"]["end_datetime"] = end_datetime
         self.stac["properties"]["datetime"] = None
 
-    # FIXME: redefine the 'Any'
-    def update_spatial(self, geometry: dict[str, Any], bbox: tuple[float, ...]) -> None:
+    def update_spatial(self, geometry: GeojsonPolygon, bbox: BoundingBox) -> None:
         """Update the `geometry` and `bbox` (bounding box) of the Item.
 
         Args:
