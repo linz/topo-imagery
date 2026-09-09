@@ -56,7 +56,6 @@ COPY --from=builder /pdal_shared/ /usr/lib/
 COPY ./docker-entrypoint.sh /app/
 COPY ./e2e/ /app/tests/
 
-ENV PYTHONPATH="/app"
 ENV GTIFF_SRS_SOURCE="EPSG"
 
 WORKDIR /app
