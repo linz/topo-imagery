@@ -10,8 +10,17 @@ from topo_imagery_stac.util.stac_extensions import StacExtensions
 
 STACAsset = TypedDict("STACAsset", {"href": str, "file:checksum": str, "created": str, "updated": str})
 
-STACProcessingSoftware = TypedDict("STACProcessingSoftware", {"gdal": str, "linz/topo-imagery": str})
-"""STAC Processing extension LINZ specific fields"""
+STACProcessingSoftwareGdal = TypedDict("STACProcessingSoftwareGdal", {"gdal": str, "linz/topo-imagery": str})
+"""STAC Processing extension LINZ specific fields for a raster asset produced by GDAL"""
+
+STACProcessingSoftwarePdal = TypedDict("STACProcessingSoftwarePdal", {"pdal": str, "linz/topo-imagery": str})
+"""STAC Processing extension LINZ specific fields for a point cloud asset produced by PDAL"""
+
+type STACProcessingSoftware = STACProcessingSoftwareGdal | STACProcessingSoftwarePdal
+"""An Item names the one software that produced its asset, so these are alternatives rather than
+optional fields: a raster Item carries `gdal` and a point cloud Item carries `pdal`, never both
+and never neither.
+"""
 
 STACProcessing = TypedDict(
     "STACProcessing",

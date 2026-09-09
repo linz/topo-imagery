@@ -178,7 +178,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         "any current datetime",
         fake_geometry,
         fake_bbox,
-        [derived_from_path.as_posix()],
+        derived_from=[derived_from_path.as_posix()],
     )
 
     assert {
@@ -215,7 +215,7 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         "any current datetime",
         fake_geometry,
         fake_bbox,
-        [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
+        derived_from=[derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
     )
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"

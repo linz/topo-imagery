@@ -5,7 +5,7 @@ from typing import Callable
 from shapely.geometry import Polygon
 from topo_imagery_common.files.checksum import multihash_as_hex
 from topo_imagery_common.geometry import BoundingBox, GeojsonPolygon
-from topo_imagery_stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftware
+from topo_imagery_stac.imagery.item import STACAsset, STACProcessing, STACProcessingSoftwareGdal
 
 
 def fixed_now_function(now: datetime) -> Callable[[], datetime]:
@@ -30,7 +30,7 @@ def any_stac_processing() -> STACProcessing:
     return STACProcessing(
         **{
             "processing:datetime": "any processing datetime",
-            "processing:software": STACProcessingSoftware(
+            "processing:software": STACProcessingSoftwareGdal(
                 **{"gdal": "any GDAL version", "linz/topo-imagery": "any topo imagery version"}
             ),
             "processing:version": "any processing version",
