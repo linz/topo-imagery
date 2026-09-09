@@ -1,0 +1,8 @@
+{
+  "type": "Feature",
+  "id": "Fake Item",
+  "properties": {
+    "start_datetime": "2018-11-30T11:00:00Z",
+    "end_datetime": "2020-01-31T11:00:00Z"
+  }
+}
