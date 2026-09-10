@@ -8,8 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      IMAGE: topo-imagery
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
 
@@ -30,23 +28,15 @@ jobs:
             uv run pytest --doctest-modules "$pkg"
           done
 
-      - name: Build container
-        run: |
-          docker build --label "github_run_id=${GITHUB_RUN_ID}" --tag "$IMAGE" .
-
-      - name: End to end tests - raster
-        run: ./e2e/raster.sh "$IMAGE" "${{ runner.temp }}"
-
-      - name: End to end tests - point cloud
-        run: ./e2e/pointcloud.sh "$IMAGE" "${{ runner.temp }}"
-
-      - uses: actions/upload-artifact@v4.6.0
-        with:
-          name: e2e-output
-          path: |
-            ${{ runner.temp }}/**/*.tiff
-            ${{ runner.temp }}/**/*.geojson
-            ${{ runner.temp }}/*.log
-          retention-days: 7
-          if-no-files-found: ignore
-        if: failure()
+  containers:
+    # Build, end to end test and (on master) publish the container.
+    # Runs after the unit tests so that a failure there stops an image being pushed.
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    uses: ./.github/workflows/containers.yml
+    secrets: inherit
+    with:
+      publish: ${{ (github.ref == 'refs/heads/master' && !startsWith(github.event.head_commit.message, 'release:')) && 'commit' || '' }}
