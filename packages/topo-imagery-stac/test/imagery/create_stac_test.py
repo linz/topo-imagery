@@ -3,6 +3,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
+from data_dir import DATA_DIR
 from pytest_subtests import SubTests
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
 from topo_imagery_stac.imagery.collection import ImageryCollection
@@ -22,7 +23,7 @@ def test_create_item(subtests: SubTests) -> None:
     fake_geometry, fake_bbox = any_geometry_and_bbox()
     current_datetime = any_epoch_datetime_string()
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
@@ -48,8 +49,8 @@ def test_create_item(subtests: SubTests) -> None:
 def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
-    tiff_path = f"./scripts/tests/data/{item_name}.tiff"
-    derived_from_path = "./scripts/tests/data/fake_item.json"
+    tiff_path = str(DATA_DIR / f"{item_name}.tiff")
+    derived_from_path = str(DATA_DIR / "fake_item.json")
     created_datetime = "created datetime"
     updated_datetime = "updated datetime"
     links = [
@@ -118,7 +119,7 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
 def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     original_item = tmp_path / f"{item_name}.json"
-    asset_file = f"./scripts/tests/data/{item_name}.tiff"
+    asset_file = str(DATA_DIR / f"{item_name}.tiff")
     created_datetime = "created datetime"
     updated_datetime = "updated datetime"
     original_item_content = {
@@ -141,7 +142,7 @@ def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_
     current_datetime = "current datetime"
     fake_geometry, fake_bbox = any_geometry_and_bbox()
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
@@ -170,7 +171,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
     fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
@@ -207,7 +208,7 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
     fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
@@ -558,7 +559,7 @@ def test_create_collection_new_keep_desc_title(fake_collection_context: Collecti
 def test_create_item_with_odr_url(tmp_path: Path) -> None:
     item_name = "empty"
     existing_item_file = tmp_path / f"{item_name}.json"
-    tiff_path = f"./scripts/tests/data/{item_name}.tiff"
+    tiff_path = str(DATA_DIR / f"{item_name}.tiff")
 
     fake_geometry, fake_bbox = any_geometry_and_bbox()
 
@@ -609,7 +610,7 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
 
     current_datetime = "current datetime"
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
@@ -630,7 +631,7 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
 def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     original_item = tmp_path / f"{item_name}.json"
-    asset_file = f"./scripts/tests/data/{item_name}.tiff"
+    asset_file = str(DATA_DIR / f"{item_name}.tiff")
     created_datetime = "created datetime"
     updated_datetime = "updated datetime"
     original_item_content = {
@@ -653,7 +654,7 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
     current_datetime = "current datetime"
     fake_geometry, fake_bbox = any_geometry_and_bbox()
     item = create_item(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         "",
         "",
         "abc123",
