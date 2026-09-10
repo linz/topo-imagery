@@ -43,21 +43,20 @@ ENV GIT_VERSION=$GIT_VERSION
 
 ENV TZ=Etc/UTC
 
-# Copy just the bundle from the first stage
+# Copy just the bundle from the first stage, and put its bin/ on PATH so that the
+# console entry points can be run directly as the container's command.
 COPY --from=builder /venv /venv
+ENV PATH="/venv/bin:$PATH"
 
 # Copy PDAL and shared libs from the builder stage
 COPY --from=builder /usr/bin/pdal /usr/bin/pdal
 COPY --from=builder /pdal_shared/ /usr/lib/
 
-# Copy the entrypoint, and the end to end test fixtures the CI suite runs against.
+# Copy the end to end test fixtures the CI suite runs against.
 # `e2e/data` is mounted at `/app/tests/data` so that the paths embedded in the fixtures, the
 # `--from-file ./tests/data/...` arguments resolve against the working directory unchanged.
-COPY ./docker-entrypoint.sh /app/
 COPY ./e2e/ /app/tests/
 
 ENV GTIFF_SRS_SOURCE="EPSG"
 
 WORKDIR /app
-
-ENTRYPOINT ["./docker-entrypoint.sh"]
