@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from linz_logger import get_log
 from topo_imagery_common.epsg import EpsgNumber
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, is_high_bit_depth_band_type
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
 from topo_imagery_gdal.gdal.gdal_presets import (
     BASE_COG,
     COMPRESS_LZW,
@@ -15,6 +15,7 @@ from topo_imagery_gdal.gdal.gdal_presets import (
     WEBP_OVERVIEWS,
     ZSTD_OVERVIEWS,
     CompressionPreset,
+    DataType,
     HillshadePreset,
 )
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
@@ -38,22 +39,24 @@ def get_buffer_distance(gsd: Decimal) -> float:
     return float(gsd * 2 * DECIMAL_DEGREES_1M)
 
 
-def get_gdal_command(preset: str, epsg: int, band_type: str | None = None) -> list[str]:
+def get_gdal_command(preset: str, epsg: int, data_type: str = DataType.UINT8.value) -> list[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
-        preset: gdal preset to use. Defined in `gdal.gdal_preset.py`
+        preset: gdal preset to use. Defined in `gdal.gdal_presets.py`
         epsg: the EPSG code of the file
-        band_type: optional GDAL band type used to decide whether BIGTIFF is required
+        data_type: the data type of the dataset. Defined in `gdal.gdal_presets.py`. Defaults to `uint8`.
+                   Anything other than `uint8` is written as a BIGTIFF as the tiffs may exceed 4GB.
 
     Returns:
         a list of arguments to run `gdal_translate`
     """
-    get_log().info("gdal_preset", preset=preset)
+    get_log().info("gdal_preset_and_data_type", preset=preset, data_type=data_type)
 
-    needs_bigtiff = (
-        preset == CompressionPreset.RGBNIR_ZSTD.value and band_type is not None and is_high_bit_depth_band_type(band_type)
-    )
+    # Deliberately uses `data_type` only, not the preset: as `CompressionPreset.RGBNIR_ZSTD` is expected to
+    # reach here with a non-`uint8` type, since `StandardisingConfig.__post_init__` rejects every other combination.
+    # A new preset allowed to carry a non-`uint8` type would silently get a BIGTIFF, so keep that validation.
+    needs_bigtiff = data_type != DataType.UINT8.value
 
     base_command = [
         "gdal_translate",
