@@ -9,7 +9,7 @@ from topo_imagery_gdal.gdal.gdal_commands import (
     get_footprint_command,
     get_gdal_command,
 )
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, DataType, HillshadePreset
 
 
 def test_get_buffer_distance(subtests: SubTests) -> None:
@@ -102,25 +102,25 @@ def test_preset_zstd(subtests: SubTests) -> None:
 
 
 def test_preset_zstd_high_bit_depth_uses_bigtiff(subtests: SubTests) -> None:
-    for band_type in ("UInt16", "UInt32"):
+    for data_type in (DataType.UINT16, DataType.UINT32):
         gdal_command = get_gdal_command(
             CompressionPreset.RGBNIR_ZSTD.value,
             epsg=EpsgNumber.NZTM_2000.value,
-            band_type=band_type,
+            data_type=data_type.value,
         )
 
-        with subtests.test(msg=f"{band_type} uses bigtiff=yes"):
+        with subtests.test(msg=f"{data_type.value} uses bigtiff=yes"):
             assert "bigtiff=yes" in gdal_command
 
-        with subtests.test(msg=f"{band_type} does not use bigtiff=no"):
+        with subtests.test(msg=f"{data_type.value} does not use bigtiff=no"):
             assert "bigtiff=no" not in gdal_command
 
 
-def test_preset_zstd_byte_keeps_bigtiff_no(subtests: SubTests) -> None:
+def test_preset_zstd_uint8_keeps_bigtiff_no(subtests: SubTests) -> None:
     gdal_command = get_gdal_command(
         CompressionPreset.RGBNIR_ZSTD.value,
         epsg=EpsgNumber.NZTM_2000.value,
-        band_type="Byte",
+        data_type=DataType.UINT8.value,
     )
 
     with subtests.test():

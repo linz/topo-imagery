@@ -17,6 +17,7 @@ from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3
 from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType
 from topo_imagery_common.files.fs import exists, write
 from topo_imagery_gdal.gdal.gdal_helper import get_srs, get_vfs_path
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_gdal.standardising import StandardisingConfig, run_standardising
 from topo_imagery_gdal.tiff.file_tiff import FileTiff
 from topo_imagery_stac.imagery.create_stac import create_item
@@ -49,6 +50,15 @@ def get_args_parser() -> ArgumentParser:
         help="The target EPSG code. If different to source the imagery will be reprojected",
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
+    parser.add_argument(
+        "--data-type",
+        dest="data_type",
+        help="Dataset data type, e.g. uint8. Anything other than uint8 is only valid with the rgbnir_zstd preset",
+        type=str,
+        choices=[data_type.value for data_type in DataType],
+        default=DataType.UINT8.value,
+        required=False,
+    )
     parser.add_argument(
         "--create-footprints",
         dest="create_footprints",
@@ -146,6 +156,7 @@ def main() -> None:
         create_footprints=arguments.create_footprints,
         simplify_footprints=arguments.simplify_footprints,
         cutline=arguments.cutline,
+        data_type=arguments.data_type,
         scale_to_resolution=arguments.scale_to_resolution,
         force=force,
     )
