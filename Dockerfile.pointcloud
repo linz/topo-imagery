@@ -1,0 +1,29 @@
+FROM ghcr.io/astral-sh/uv:0.11.14@sha256:1025398289b62de8269e70c45b91ffa37c373f38118d7da036fb8bb8efc85d97 AS uv_source
+
+FROM ghcr.io/linz/pdal-docker:2.10.2@sha256:6c581725d6f62d20ab7db1f3120abec0c889652de27085370fff4c9a8cb5ed9f AS builder
+
+COPY --from=uv_source /uv /uvx /bin/
+
+WORKDIR /build
+
+COPY uv.lock pyproject.toml /build/
+COPY ./packages/ /build/packages/
+
+ENV UV_PROJECT_ENVIRONMENT=/venv
+ENV UV_PYTHON=/usr/bin/python3
+ENV UV_PYTHON_PREFERENCE=only-system
+
+RUN uv sync --frozen --no-dev --no-editable --package topo-imagery-pointcloud
+
+FROM ghcr.io/linz/pdal-docker:2.10.2@sha256:6c581725d6f62d20ab7db1f3120abec0c889652de27085370fff4c9a8cb5ed9f
+
+ARG GIT_HASH
+ENV GIT_HASH=$GIT_HASH
+ARG GIT_VERSION
+ENV GIT_VERSION=$GIT_VERSION
+
+COPY --from=builder /venv /venv
+
+ENV PATH="/venv/bin:$PATH"
+
+WORKDIR /app
