@@ -37,14 +37,14 @@ class StandardisingConfig:
     # pylint: disable=too-many-instance-attributes
     # FIXME: https://github.com/pylint-dev/pylint/issues/9058
     """Standardising configuration.
-    gdal_preset: gdal preset to use. See `gdal.gdal_preset.py`
+    gdal_preset: gdal preset to use. See `gdal.gdal_presets.py`
     source_epsg: current EPSG code of the source file
     target_epsg: desired EPSG code of the output file
     gsd: expected Ground Sample Distance in meters
     create_footprints: whether to create footprints for each tile
     simplify_footprints: whether to simplify footprints for each tile using gdal_fillnodata
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
-    data_type: data type of the dataset. See `gdal.gdal_preset.py`. Defaults to `uint8`.
+    data_type: data type of the dataset. See `gdal.gdal_presets.py`. Defaults to `uint8`.
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
     force: overwrite existing output file. Defaults to False.
     """
@@ -135,12 +135,12 @@ def standardising(
             input: list of input files for the creation of the output tile
             includeDerived: whether STAC should include derived_from links
         config: a StandardisingConfig data class, containing
-            gdal_preset: gdal preset to use. See `gdal.gdal_preset.py`
+            gdal_preset: gdal preset to use. See `gdal.gdal_presets.py`
             source_epsg: current EPSG code of the source file
             target_epsg: desired EPSG code of the output file
             gsd: expected Ground Sample Distance in meters
             cutline: path to the cutline file. Must be `.fgb` or `.geojson`
-            data_type: data type of the dataset. See `gdal.gdal_preset.py`. Defaults to `uint8`.
+            data_type: data type of the dataset. See `gdal.gdal_presets.py`. Defaults to `uint8`.
             scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
         target_output: output directory path. Defaults to "/tmp/". Not to be confused with `tmp_path`.
 
