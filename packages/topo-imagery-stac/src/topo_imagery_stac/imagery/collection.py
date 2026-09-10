@@ -12,7 +12,7 @@ from topo_imagery_common.data_type import DataType
 from topo_imagery_common.datetimes import convert_utc_to_nz_datetime, format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from topo_imagery_common.files import checksum
 from topo_imagery_common.files.files_helper import ContentType
-from topo_imagery_common.files.fs import exists, read, write
+from topo_imagery_common.files.fs import NoSuchFileError, exists, read, write
 from topo_imagery_stac.imagery.capture_area import generate_capture_area
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import (
@@ -619,7 +619,7 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
             item_path = os.path.join(self.published_location, os.path.basename(link["href"]))
             if not exists(item_path):
                 get_log().error(f"STAC Item not found: {item_path}")
-                raise FileNotFoundError(item_path)
+                raise NoSuchFileError(item_path)
             existing_item_stac = json.loads(read(item_path))
             items_stac.append(existing_item_stac)
         return items_stac
