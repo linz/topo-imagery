@@ -14,7 +14,7 @@ from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType, is_
 from topo_imagery_common.files.fs import exists, read, write, write_all
 from topo_imagery_common.log.time_helper import time_in_ms
 from topo_imagery_gdal.gdal.gdal_commands import get_gdal_command, get_hillshade_command
-from topo_imagery_gdal.gdal.gdal_helper import run_gdal
+from topo_imagery_gdal.gdal.gdal_helper import get_gdal_version, run_gdal
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
 from topo_imagery_gdal.standardising import create_vrt
 from topo_imagery_raster.create_item import create_item_from_tiff
@@ -161,10 +161,7 @@ def main() -> None:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         sys.exit(1)
 
-    gdal_version = os.environ["GDAL_VERSION"]
-
-    get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
-    gdal_version = os.environ["GDAL_VERSION"]
+    gdal_version = get_gdal_version()
 
     get_log().info("generate_hillshade_start", gdalVersion=gdal_version, fileCount=len(tile_files), preset=arguments.preset)
 

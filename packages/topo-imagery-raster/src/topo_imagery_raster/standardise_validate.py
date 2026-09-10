@@ -16,7 +16,7 @@ from topo_imagery_common.cli.cli_helper import (
 from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT, format_rfc_3339_nz_midnight_datetime_string
 from topo_imagery_common.files.files_helper import SUFFIX_JSON, ContentType
 from topo_imagery_common.files.fs import exists, write
-from topo_imagery_gdal.gdal.gdal_helper import get_srs, get_vfs_path
+from topo_imagery_gdal.gdal.gdal_helper import get_gdal_version, get_srs, get_vfs_path
 from topo_imagery_gdal.standardising import StandardisingConfig, run_standardising
 from topo_imagery_gdal.tiff.file_tiff import FileTiff
 from topo_imagery_raster.create_item import create_item_from_tiff
@@ -167,7 +167,7 @@ def main() -> None:
         start_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.start_datetime)
         end_datetime = format_rfc_3339_nz_midnight_datetime_string(arguments.end_datetime)
 
-    gdal_version = os.environ["GDAL_VERSION"]
+    gdal_version = get_gdal_version()
 
     tiff_files = run_standardising(tile_files, standardising_config, arguments.concurrency, gdal_version, arguments.target)
 

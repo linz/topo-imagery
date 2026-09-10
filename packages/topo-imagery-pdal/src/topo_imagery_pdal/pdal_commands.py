@@ -1,5 +1,6 @@
 import os
 import subprocess
+from functools import cache
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -12,6 +13,15 @@ from topo_imagery_common.log.time_helper import time_in_ms
 
 class PDALExecutionException(Exception):
     pass
+
+
+def _pdal_executable() -> str:
+    """The `pdal` executable to run.
+
+    Returns:
+        the value of `PDAL_EXECUTABLE`, or `pdal` to find it on the path
+    """
+    return os.environ.get("PDAL_EXECUTABLE", "pdal")
 
 
 def get_pdal_command(command: str, options: list[str]) -> list[str]:
@@ -86,7 +96,7 @@ def run_pdal(
     """
     start_time = time_in_ms()
     pdal_env = os.environ.copy()
-    pdal_exec = os.environ.get("PDAL_EXECUTABLE", "pdal")
+    pdal_exec = _pdal_executable()
     pdal_command = [pdal_exec, *command_options_args]
 
     if not input_file:
@@ -125,3 +135,33 @@ def run_pdal(
     get_log().trace("run_pdal_succeeded", command=" ".join(pdal_command), stdout=proc.stdout.decode())
 
     return proc
+
+
+@cache
+def get_pdal_version() -> str:
+    """Get the version of PDAL available to this process (cached).
+
+    Raises:
+        PDALExecutionException: if the `pdal` executable cannot be run, or reports no version
+
+    Returns:
+        the `pdal --version` core output, for example "pdal 2.10.2 (git-version: 27008f)"
+    """
+    pdal_exec = _pdal_executable()
+    try:
+        proc = subprocess.run([pdal_exec, "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    except (subprocess.CalledProcessError, OSError) as error:
+        raise PDALExecutionException(f"Could not determine the PDAL version: {error}") from error
+
+    # `pdal --version` frames the version in dashes:
+    #     --------------------------------------------------------------------------------
+    #     pdal 2.10.2 (git-version: 27008f)
+    #     --------------------------------------------------------------------------------
+    output = proc.stdout.decode().strip()
+    # Keep only non-dash lines.
+    version = " ".join(line for line in (raw.strip() for raw in output.splitlines()) if line.strip("-"))
+
+    if not version:  # falsy value raises to prevent empty STAC metadata `processing:software`
+        raise PDALExecutionException(f"`{pdal_exec} --version` reported no version: {output!r}")
+
+    return version
