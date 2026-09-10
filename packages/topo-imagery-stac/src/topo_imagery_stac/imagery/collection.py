@@ -124,6 +124,11 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
             "updated": updated_datetime,
         }
 
+        if context.data_type != "uint8":
+            self.stac["data_type"] = context.data_type
+        else:
+            self.stac.pop("data_type", None)
+           
         # Optional metadata - if not provided, the field will not be added to the Collection
         if event_name := context.event_name:
             self.stac["linz:event_name"] = event_name
