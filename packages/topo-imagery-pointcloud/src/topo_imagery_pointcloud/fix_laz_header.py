@@ -9,7 +9,7 @@ from typing import Any, Iterable
 from linz_logger import get_log
 from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.files.files_helper import ContentType
-from topo_imagery_common.files.fs import copy, exists, read, write
+from topo_imagery_common.files.fs import NoSuchFileError, copy, exists, read, write
 from topo_imagery_common.log.time_helper import time_in_ms
 from topo_imagery_pdal.pdal_commands import get_pdal_version, pdal_translate_add_proj_command, run_pdal
 
@@ -99,7 +99,7 @@ def json_file_loader(path: str) -> list[str]:
         return []
     try:
         return list(flatten(json.loads(read(path))))
-    except FileNotFoundError as e:
+    except NoSuchFileError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         return []
 
@@ -116,7 +116,7 @@ def manifest_loader(path: str) -> list[str]:
     try:
         manifest = json.loads(read(path))
         return list(flatten([entry["source"] for entry in manifest.get("parameters", {}).get("manifest", [])]))
-    except FileNotFoundError as e:
+    except NoSuchFileError as e:
         get_log().error("An error occurred when loading the input file.", error=str(e))
         return []
 
