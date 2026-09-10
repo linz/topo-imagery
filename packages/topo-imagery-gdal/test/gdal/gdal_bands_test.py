@@ -1,6 +1,6 @@
 from fake_gdalinfo import add_band, add_palette_band, fake_gdalinfo
 from pytest import raises
-from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset, get_gdal_band_type
+from topo_imagery_gdal.gdal.gdal_bands import get_gdal_band_offset
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 
 
@@ -144,14 +144,3 @@ def test_gdal_default_rg_missing_b() -> None:
     with raises(RuntimeError) as excinfo:
         get_gdal_band_offset("some_file.tiff", gdalinfo)
     assert "missing_expected_rgb_bands: Blue" in str(excinfo.value)
-
-
-def test_get_band_type() -> None:
-    gdalinfo = fake_gdalinfo()
-    add_band(gdalinfo, band_type="UInt16")
-    add_band(gdalinfo, band_type="UInt16")
-    add_band(gdalinfo, band_type="UInt16")
-
-    band_type = get_gdal_band_type("some_file.tiff", gdalinfo)
-
-    assert band_type == "UInt16"

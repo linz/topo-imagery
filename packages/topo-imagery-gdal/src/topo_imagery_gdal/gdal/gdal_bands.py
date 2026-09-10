@@ -156,20 +156,3 @@ def get_gdal_band_offset(file: str, info: GdalInfo | None = None, preset: str | 
                     band_nir_arg.extend([f"-colorinterp_{str(band["band"])}", "nir"])
 
     return rgb_bands + band_nir_arg + band_alpha_arg
-
-
-def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
-    """Get the band type of the first band.
-
-    Args:
-        file: file to check
-        info: optional precomputed gdalinfo
-
-    Returns:
-        band type
-    """
-    if info is None:
-        info = gdal_info(file)
-
-    bands = info["bands"]
-    return bands[0]["type"]
