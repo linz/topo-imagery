@@ -71,7 +71,7 @@ class StandardisingConfig:
         if self.data_type != DataType.UINT8.value and self.gdal_preset != CompressionPreset.RGBNIR_ZSTD.value:
             raise ValueError(
                 f"Data type {self.data_type} is only supported with the "
-                f"{CompressionPreset.RGBNIR_ZSTD.value} preset: {self.gdal_preset}"
+                f"{CompressionPreset.RGBNIR_ZSTD.value} preset, preset supplied was {self.gdal_preset}"
             )
 
 
