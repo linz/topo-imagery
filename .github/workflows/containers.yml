@@ -16,6 +16,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # TODO: remove `image` tag and switch to <repo>/<container> once repo is renamed to geoprocessor
+          - container: raster
+            image: topo-imagery
+          - container: pointcloud
+            image: geoprocessor/pointcloud
     environment: ${{ inputs.publish != '' && 'prod' || '' }}
     permissions:
       id-token: write
@@ -23,7 +32,7 @@ jobs:
       packages: write
     env:
       AWS_CI_ROLE: ${{ secrets.AWS_CI_ROLE }}
-      IMAGE: local-topo-imagery
+      IMAGE: local-${{ matrix.container }}
     steps:
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
@@ -45,7 +54,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175 # v4
         with:
-          images: ${{ github.repository }}
+          # TODO: switch to ${{ github.repository }}/${{ matrix.container }} once repo is renamed to geoprocessor
+          images: ${{ github.repository_owner }}/${{ matrix.image }}
           labels: |
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
 
@@ -53,6 +63,7 @@ jobs:
         uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4
         with:
           context: .
+          file: Dockerfile.${{ matrix.container }}
           # Loaded into the local daemon instead of pushed: the tests below run against this
           # exact image, and the push step tags the same image rather than building again.
           load: true
@@ -63,17 +74,14 @@ jobs:
             GIT_VERSION=${{ steps.version.outputs.version }}
             GITHUB_RUN_ID=${{ github.run_id }}
 
-      - name: End to end tests - raster
-        run: ./e2e/raster.sh "$IMAGE" "${{ runner.temp }}"
-
-      - name: End to end tests - point cloud
-        run: ./e2e/pointcloud.sh "$IMAGE" "${{ runner.temp }}"
+      - name: End to end tests
+        run: ./e2e/${{ matrix.container }}.sh "$IMAGE" "${{ runner.temp }}"
 
       - name: Keep the output of a failed test run
         uses: actions/upload-artifact@v4.6.0
         if: failure()
         with:
-          name: e2e-output
+          name: ${{ matrix.container }}-e2e-output
           path: |
             ${{ runner.temp }}/**/*.tiff
             ${{ runner.temp }}/**/*.geojson
@@ -120,9 +128,10 @@ jobs:
           esac
 
           # ghcr namespaces by owner, ECR does not.
-          repositories=("ghcr.io/${{ github.repository }}")
+          # TODO: switch to ${{ github.repository }}/${{ matrix.container }} once repo is renamed to geoprocessor
+          repositories=("ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}")
           if [[ -n "$ECR_REGISTRY" ]]; then
-            repositories+=("${ECR_REGISTRY}/${{ github.event.repository.name }}")
+            repositories+=("${ECR_REGISTRY}/${{ matrix.image }}")
           fi
 
           for repository in "${repositories[@]}"; do
