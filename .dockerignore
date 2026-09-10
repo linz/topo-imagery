@@ -1,1 +1,8 @@
-**/__pycache__
+# Only uv's workspace metadata and the packages are needed; test fixtures are mounted at run time.
+*
+!packages
+!pyproject.toml
+!uv.lock
+
+packages/**/__pycache__
+packages/**/.pytest_cache
