@@ -15,6 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
+collection-from-items = "topo_imagery_raster.collection_from_items:main"
 generate-hillshade = "topo_imagery_raster.generate_hillshade:main"
 standardise-validate = "topo_imagery_raster.standardise_validate:main"
 thumbnails = "topo_imagery_raster.thumbnails:main"
@@ -22,6 +23,8 @@ translate-ascii = "topo_imagery_raster.translate_ascii:main"
 
 [dependency-groups]
 dev = [
+    "moto>=4.2",
+    "mypy-boto3-s3",
     "pytest",
     "pytest-dependency",
     "pytest-subtests",

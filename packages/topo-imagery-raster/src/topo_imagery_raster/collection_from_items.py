@@ -1,37 +1,12 @@
 import argparse
-import json
-import os
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, List
 
-from boto3 import client
-from linz_logger import get_log
-from topo_imagery_common.cli.cli_helper import (
-    coalesce_multi_single,
-    empty_str_to_false,
-    get_geometry_from_geojson_feature,
-    get_non_empty_features,
-    str_to_bool,
-    str_to_gsd,
-)
+from topo_imagery_common.cli.cli_helper import coalesce_multi_single, empty_str_to_false, str_to_bool, str_to_gsd
 from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.datetimes import RFC_3339_DATETIME_FORMAT
-from topo_imagery_common.files.files_helper import SUFFIX_FOOTPRINT, SUFFIX_JSON
-from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
-from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
-from topo_imagery_stac.imagery.create_stac import create_collection
-
-if TYPE_CHECKING:
-    from mypy_boto3_s3 import S3Client
-else:
-    S3Client = GetObjectOutputTypeDef = dict
-
-
-class NoItemsError(Exception):
-    pass
+from topo_imagery_stac.imagery.create_collection_from_items import create_collection_from_items
 
 
 def get_args_parser() -> CommonArgumentParser:
@@ -185,76 +160,13 @@ def get_args_parser() -> CommonArgumentParser:
     return parser
 
 
-# pylint: disable=too-many-locals
-def main(args: List[str] | None = None) -> None:
-    start_time = time_in_ms()
-    parser = get_args_parser()
-    arguments = parser.parse_args(args)
+def main(args: list[str] | None = None) -> None:
+    arguments = get_args_parser().parse_args(args)
     uri = arguments.uri
-    collection_id = arguments.collection_id
-    supplied_capture_area = arguments.supplied_capture_area
-    simplified_capture_area = arguments.simplified_capture_area
-    capture_dates = arguments.capture_dates
 
     if not uri.startswith("s3://"):
         msg = f"uri is not a s3 path: {uri}"
         raise argparse.ArgumentTypeError(msg)
-
-    if capture_dates:
-        capture_dates_path = os.path.join(uri, CAPTURE_DATES_FILE_NAME)
-        supplied_capture_area = capture_dates_path
-        get_log().info("Using capture dates file to generate capture area", capture_dates_path=capture_dates_path)
-
-    s3_client: S3Client = client("s3")
-
-    files_to_read = list_files_in_uri(uri, [SUFFIX_JSON, SUFFIX_FOOTPRINT], s3_client)
-
-    items_to_add = []
-    polygons = []
-
-    if supplied_capture_area:
-        content = json.loads(read(supplied_capture_area))
-        features = get_non_empty_features(content, supplied_capture_area)
-        for feature in features:
-            polygons.append(get_geometry_from_geojson_feature(feature, supplied_capture_area))
-
-    for key, result in get_object_parallel_multithreading(
-        bucket_name_from_path(uri), files_to_read, s3_client, arguments.concurrency
-    ):
-        content = json.load(result["Body"])
-        # The following if/else looks like it could be avoided by refactoring `list_files_in_uri()`
-        # to return a result list per suffix, but we would have to call `get_object_parallel_multithreading()`
-        # for each of them to avoid this if/else.
-        if key.endswith(SUFFIX_JSON):
-            if content["type"] != "Feature":
-                get_log().warn(
-                    "skipping: not a STAC item",
-                    file=key,
-                    action="collection_from_items",
-                    reason="skip",
-                )
-                continue
-            item_collection_id = content.get("collection")
-            if collection_id != item_collection_id:
-                get_log().warn(
-                    f"skipping: {item_collection_id} and {collection_id} do not match",
-                    file=key,
-                    action="collection_from_items",
-                    reason="skip",
-                )
-                continue
-            items_to_add.append(content)
-            get_log().info("Item will be added to Collection", item=content["id"], file=key)
-        elif key.endswith(SUFFIX_FOOTPRINT) and not supplied_capture_area:
-            features = get_non_empty_features(content, key)
-            for feature in features:
-                polygons.append(get_geometry_from_geojson_feature(feature, key))
-
-    if len(items_to_add) == 0:
-        get_log().error(
-            f"Collection {collection_id} has no items. Collection will not be created.",
-        )
-        raise NoItemsError(f"Collection {collection_id} has no items")
 
     collection_context = CollectionContext(
         category=arguments.category,
@@ -263,39 +175,27 @@ def main(args: List[str] | None = None) -> None:
         gsd=arguments.gsd,
         lifecycle=arguments.lifecycle,
         linz_slug=arguments.linz_slug,
-        collection_id=collection_id,
+        collection_id=arguments.collection_id,
         geographic_description=arguments.geographic_description,
         event_name=arguments.event,
         historic_survey_number=arguments.historic_survey_number,
         producers=coalesce_multi_single(arguments.producer_list, arguments.producer),
         licensors=coalesce_multi_single(arguments.licensor_list, arguments.licensor),
         add_title_suffix=arguments.add_title_suffix,
-        add_capture_dates=capture_dates,
+        add_capture_dates=arguments.capture_dates,
         delete_existing_items=arguments.delete_all_existing_items,
         keep_description=arguments.keep_description,
         keep_title=arguments.keep_title,
     )
 
-    collection = create_collection(
+    create_collection_from_items(
         collection_context=collection_context,
-        current_datetime=arguments.current_datetime,
-        stac_items=items_to_add,
-        item_polygons=polygons,
         uri=uri,
+        concurrency=arguments.concurrency,
+        current_datetime=arguments.current_datetime,
         odr_url=arguments.odr_url,
-        supplied_capture_area=supplied_capture_area,
-        simplified_capture_area=simplified_capture_area,
-    )
-
-    destination = os.path.join(uri, COLLECTION_FILE_NAME)
-    collection.write_to(destination)
-
-    get_log().info(
-        "Collection created",
-        item_count=len(files_to_read),
-        item_match_count=items_to_add,
-        duration=time_in_ms() - start_time,
-        destination=destination,
+        supplied_capture_area=arguments.supplied_capture_area or None,
+        simplified_capture_area=arguments.simplified_capture_area,
     )
 
 
