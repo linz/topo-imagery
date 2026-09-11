@@ -12,6 +12,7 @@ from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import read, write
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
@@ -1138,3 +1139,51 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     with subtests.test(msg="Optional metadata should be removed if not passed"):
         assert collection.stac.get("linz:event_name") is None
         assert collection.stac.get("linz:geographic_description") is None
+
+
+def test_data_type_uint8_omitted_from_stac() -> None:
+    """Verify that uint8 (default data type) is omitted from STAC JSON output."""
+    context = CollectionContext(
+        category="rural-aerial-photos",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        data_type=DataType.UINT8,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    
+    assert "data_type" not in collection.stac, "uint8 should be omitted from STAC as it is the default"
+
+
+def test_data_type_uint16_included_in_stac() -> None:
+    """Verify that uint16 is included in STAC JSON output."""
+    context = CollectionContext(
+        category="dem",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("1.0"),
+        data_type=DataType.UINT16,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    
+    assert collection.stac["data_type"] == "uint16", "uint16 should be included in STAC JSON"
+
+
+def test_data_type_uint32_included_in_stac() -> None:
+    """Verify that uint32 is included in STAC JSON output."""
+    context = CollectionContext(
+        category="dem",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("1.0"),
+        data_type=DataType.UINT32,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    
+    assert collection.stac["data_type"] == "uint32", "uint32 should be included in STAC JSON"
