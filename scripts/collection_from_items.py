@@ -20,6 +20,7 @@ from topo_imagery_common.files.files_helper import SUFFIX_JSON
 from topo_imagery_common.files.fs_s3 import bucket_name_from_path, get_object_parallel_multithreading, list_files_in_uri, read
 from topo_imagery_common.log.time_helper import time_in_ms
 from topo_imagery_gdal.gdal.gdal_footprint import SUFFIX_FOOTPRINT
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection import CAPTURE_DATES_FILE_NAME, COLLECTION_FILE_NAME
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import DATA_CATEGORIES, DATA_DOMAINS, HUMAN_READABLE_REGIONS, LAND
@@ -76,9 +77,10 @@ def get_args_parser() -> CommonArgumentParser:
         "--data-type", 
         dest="data_type", 
         help="Dataset data type",
-        choices=["uint8", "uint16", "float32"],
+        choices=[dt.value for dt in DataType],
         type=str,
-        required=True,
+        default=DataType.UINT8.value,
+        required=False,
     )
     parser.add_argument(
         "--geographic-description",
@@ -270,7 +272,7 @@ def main(args: List[str] | None = None) -> None:
         domain=arguments.domain,
         region=arguments.region,
         gsd=arguments.gsd,
-        data_type=arguments.data_type,
+        data_type=DataType(arguments.data_type),
         lifecycle=arguments.lifecycle,
         linz_slug=arguments.linz_slug,
         collection_id=collection_id,
