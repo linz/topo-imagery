@@ -79,3 +79,6 @@ exclude = ["conftest\\.py$"]
 [[tool.mypy.overrides]]
 module = ["linz_logger"]
 ignore_missing_imports = true
+
+[tool.pylint.messages_control]
+fail-under = 9.5
