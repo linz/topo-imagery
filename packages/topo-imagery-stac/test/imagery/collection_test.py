@@ -12,6 +12,7 @@ from pytest import CaptureFixture, mark, param
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import read, write
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection import WARN_NO_PUBLISHED_CAPTURE_AREA, ImageryCollection, MissingMetadataError
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem, STACAsset
@@ -68,6 +69,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Rural Aerial Photos (2023)",
@@ -82,6 +84,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay LiDAR 0.3m DEM (2023)",
@@ -96,6 +99,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay LiDAR 0.3m DSM (2023)",
@@ -110,6 +114,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Satellite Imagery (2023)",
@@ -124,6 +129,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Near-Infrared Satellite Imagery (2023)",
@@ -138,6 +144,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Near-Infrared Aerial Photos (2023)",
@@ -152,6 +159,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 historic_survey_number="SNC8844",
             ),
@@ -167,6 +175,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="Ponsonby",
             ),
@@ -182,6 +191,7 @@ def test_metadata_initialised(fake_collection_context: CollectionContext, subtes
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="Hawke's Bay Cyclone Gabrielle",
                 event_name="Cyclone Gabrielle",
@@ -199,6 +209,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="Hawke's Bay Cyclone Gabrielle",
                 event_name="Cyclone Gabrielle",
@@ -216,6 +227,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="Hawke's Bay Cyclone Gabrielle",
                 event_name="Cyclone Gabrielle",
@@ -233,6 +245,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="preview",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay LiDAR 0.3m DSM (2023) - Preview",
@@ -247,6 +260,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="ongoing",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Rural Aerial Photos (2023) - Draft",
@@ -261,6 +275,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="ongoing",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 add_title_suffix=False,
             ),
@@ -276,6 +291,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -292,6 +308,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("8"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -309,6 +326,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("8"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -326,6 +344,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -343,6 +362,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -360,6 +380,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -377,6 +398,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -395,6 +417,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.25"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -413,6 +436,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Bay of Plenty - Tauranga Coastal LiDAR 1m DEM (2023)",
@@ -427,6 +451,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -444,6 +469,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("1"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 geographic_description="",
                 event_name="",
@@ -462,6 +488,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Ancillary Aerial Photos (2023)",
@@ -476,6 +503,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
             ),
             "Hawke's Bay 0.3m Ancillary Near-Infrared Aerial Photos (2023)",
@@ -490,6 +518,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 event_name="Cyclone Gabrielle",
             ),
@@ -506,6 +535,7 @@ published as a record of the Cyclone Gabrielle event.",
                 lifecycle="completed",
                 linz_slug=fake_linz_slug(),
                 gsd=Decimal("0.3"),
+                data_type=DataType.UINT8,
                 collection_id="a-random-collection-id",
                 event_name="Cyclone Gabrielle",
             ),
@@ -541,6 +571,14 @@ def test_set_gsd(
     fake_collection_context.gsd = Decimal("123.456")
     collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
     assert collection.stac["gsd"] == 123.456
+
+
+def test_set_data_type(
+    fake_collection_context: CollectionContext,
+) -> None:
+    fake_collection_context.data_type = DataType.UINT16
+    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
+    assert collection.stac["data_type"] == "uint16"
 
 
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
@@ -1069,6 +1107,7 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
         domain="land",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
+        data_type=DataType.UINT8,
         lifecycle="ongoing",
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",
@@ -1100,3 +1139,51 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
     with subtests.test(msg="Optional metadata should be removed if not passed"):
         assert collection.stac.get("linz:event_name") is None
         assert collection.stac.get("linz:geographic_description") is None
+
+
+def test_data_type_uint8_omitted_from_stac() -> None:
+    """Verify that uint8 (default data type) is omitted from STAC JSON output."""
+    context = CollectionContext(
+        category="rural-aerial-photos",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("0.3"),
+        data_type=DataType.UINT8,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    assert "data_type" not in collection.stac, "uint8 should be omitted from STAC as it is the default"
+
+
+def test_data_type_uint16_included_in_stac() -> None:
+    """Verify that uint16 is included in STAC JSON output."""
+    context = CollectionContext(
+        category="dem",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("1.0"),
+        data_type=DataType.UINT16,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    assert collection.stac["data_type"] == "uint16", "uint16 should be included in STAC JSON"
+
+
+def test_data_type_uint32_included_in_stac() -> None:
+    """Verify that uint32 is included in STAC JSON output."""
+    context = CollectionContext(
+        category="dem",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("1.0"),
+        data_type=DataType.UINT32,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    assert collection.stac["data_type"] == "uint32", "uint32 should be included in STAC JSON"

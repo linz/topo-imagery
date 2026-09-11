@@ -3,13 +3,6 @@ from topo_imagery_gdal.gdal.gdal_helper import gdal_info
 from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo, GdalInfoBand
 
-# Unsupported RGBNIR band types(eg. Int16, Int32) are rejected by check_band_type_is_supported().
-SUPPORTED_RGBNIR_BAND_TYPES = {
-    "Byte",
-    "UInt16",
-    "UInt32",
-}
-
 
 def find_band(bands: list[GdalInfoBand], color: str) -> GdalInfoBand | None:
     """Look for a specific colorInterpretation inside of a `gdalinfo` band output.
@@ -183,38 +176,28 @@ def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
 
 
 def is_high_bit_depth_band_type(band_type: str) -> bool:
-    """Return whether a band type is high bit-depth for RGBNIR processing.
-
-    High bit-depth means the type is supported for RGBNIR and is not `Byte`.
-
-    Examples:
-        >>> is_high_bit_depth_band_type("UInt16")
-        True
-        >>> is_high_bit_depth_band_type("UInt32")
-        True
-        >>> is_high_bit_depth_band_type("Byte")
-        False
-        >>> is_high_bit_depth_band_type("Int16")
-        False
-    """
-    return band_type in SUPPORTED_RGBNIR_BAND_TYPES and band_type != "Byte"
-
-
-def check_band_type_is_supported(band_type: str, file: str) -> None:
-    """Raise an error if the band type is not supported for RGBNIR imagery.
+    """Check if band type is high bit depth (16-bit or higher).
 
     Args:
         band_type: GDAL band type string
-        file: path to the file being checked
+
+    Returns:
+        True if band type is high bit depth, False for 8-bit (Byte)
+    """
+    return band_type != "Byte"
+
+
+def check_band_type_is_supported(band_type: str, file: str) -> None:
+    """Validate that band type is supported.
+
+    Args:
+        band_type: GDAL band type string to validate
+        file: file path for error message
 
     Raises:
-        RuntimeError: if the band type is not in SUPPORTED_RGBNIR_BAND_TYPES
+        RuntimeError: if band type is not supported
     """
-    if band_type not in SUPPORTED_RGBNIR_BAND_TYPES:
-        get_log().error(
-            "unsupported_band_type",
-            path=file,
-            band_type=band_type,
-            supported=sorted(SUPPORTED_RGBNIR_BAND_TYPES),
-        )
-        raise RuntimeError(f"unsupported_band_type: {band_type}")
+    supported_types = {"Byte", "UInt16", "UInt32", "Float32", "Float64"}
+    if band_type not in supported_types:
+        get_log().error("unsupported_band_type", band_type=band_type, file=file)
+        raise RuntimeError(f"Unsupported band type: {band_type} in {file}")

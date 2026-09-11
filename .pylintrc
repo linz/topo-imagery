@@ -6,6 +6,7 @@ disable =
         missing-module-docstring,
         missing-function-docstring,
         broad-exception-raised,
+fail-under = 9.5
 
 [FORMAT]
 max-line-length=127

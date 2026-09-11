@@ -57,6 +57,7 @@ class StandardisingConfig:
     cutline: str | None
     scale_to_resolution: list[Decimal] | None = None
     force: bool = False
+    data_type: str | None = None
 
     def __post_init__(self) -> None:
         if self.cutline and not self.cutline.endswith((".fgb", ".geojson")):

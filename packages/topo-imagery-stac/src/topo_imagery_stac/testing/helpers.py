@@ -6,6 +6,7 @@ from typing import Iterator
 
 import pytest
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 
 
@@ -39,6 +40,7 @@ def any_collection_context() -> CollectionContext:
         domain="land",
         region="hawkes-bay",
         gsd=Decimal("0.3"),
+        data_type=DataType.UINT8,
         lifecycle="completed",
         linz_slug=fake_linz_slug(),
         collection_id="a-random-collection-id",
