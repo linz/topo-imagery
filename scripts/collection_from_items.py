@@ -74,8 +74,8 @@ def get_args_parser() -> CommonArgumentParser:
     )
     parser.add_argument("--gsd", dest="gsd", help="GSD of imagery Dataset, for example 0.3", type=str_to_gsd, required=True)
     parser.add_argument(
-        "--data-type", 
-        dest="data_type", 
+        "--data-type",
+        dest="data_type",
         help="Dataset data type",
         choices=[dt.value for dt in DataType],
         type=str,
