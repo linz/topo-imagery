@@ -323,9 +323,10 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
     target_file = os.path.join(tmp_path, f"{tile_name}.tiff")
 
     gdalinfo_data = gdal_info(input_file)
-    if config.gdal_preset == CompressionPreset.RGBNIR_ZSTD.value and config.data_type is not None:
-        check_band_type_is_supported(config.data_type, input_file)
-    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg, data_type=config.data_type)
+    band_type = get_gdal_band_type(input_file, gdalinfo_data)
+    if config.gdal_preset == CompressionPreset.RGBNIR_ZSTD.value:
+        check_band_type_is_supported(band_type, input_file)
+    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg, band_type=band_type)
     command.extend(get_gdal_band_offset(input_file, gdalinfo_data, config.gdal_preset))
 
     # Specify the extent to get the right boundaries in case of the tiff got no data on its edges

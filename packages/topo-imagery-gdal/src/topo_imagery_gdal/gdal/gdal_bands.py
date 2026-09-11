@@ -173,3 +173,31 @@ def get_gdal_band_type(file: str, info: GdalInfo | None = None) -> str:
 
     bands = info["bands"]
     return bands[0]["type"]
+
+
+def is_high_bit_depth_band_type(band_type: str) -> bool:
+    """Check if band type is high bit depth (16-bit or higher).
+
+    Args:
+        band_type: GDAL band type string
+
+    Returns:
+        True if band type is high bit depth, False for 8-bit (Byte)
+    """
+    return band_type != "Byte"
+
+
+def check_band_type_is_supported(band_type: str, file: str) -> None:
+    """Validate that band type is supported.
+
+    Args:
+        band_type: GDAL band type string to validate
+        file: file path for error message
+
+    Raises:
+        RuntimeError: if band type is not supported
+    """
+    supported_types = {"Byte", "UInt16", "UInt32", "Float32", "Float64"}
+    if band_type not in supported_types:
+        get_log().error("unsupported_band_type", band_type=band_type, file=file)
+        raise RuntimeError(f"Unsupported band type: {band_type} in {file}")
