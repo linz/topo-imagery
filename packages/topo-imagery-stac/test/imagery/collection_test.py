@@ -1153,7 +1153,7 @@ def test_data_type_uint8_omitted_from_stac() -> None:
         linz_slug=fake_linz_slug(),
     )
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    
+
     assert "data_type" not in collection.stac, "uint8 should be omitted from STAC as it is the default"
 
 
@@ -1169,7 +1169,7 @@ def test_data_type_uint16_included_in_stac() -> None:
         linz_slug=fake_linz_slug(),
     )
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    
+
     assert collection.stac["data_type"] == "uint16", "uint16 should be included in STAC JSON"
 
 
@@ -1185,5 +1185,5 @@ def test_data_type_uint32_included_in_stac() -> None:
         linz_slug=fake_linz_slug(),
     )
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    
+
     assert collection.stac["data_type"] == "uint32", "uint32 should be included in STAC JSON"

@@ -102,7 +102,11 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
 
         self.gsd = context.gsd
         self.domain = context.domain
-        self.data_type = context.data_type
+        # Ensure data_type is a DataType enum, not a string
+        if isinstance(context.data_type, str):
+            self.data_type = DataType(context.data_type)
+        else:
+            self.data_type = context.data_type
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -125,9 +129,9 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
         }
 
         # Only include data_type if it's not the default (uint8)
-        if context.data_type != DataType.UINT8:
-            self.stac["data_type"] = context.data_type.value
-           
+        if self.data_type != DataType.UINT8:
+            self.stac["data_type"] = self.data_type.value
+
         # Optional metadata - if not provided, the field will not be added to the Collection
         if event_name := context.event_name:
             self.stac["linz:event_name"] = event_name
@@ -172,8 +176,12 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
         """
         self.stac["gsd"] = float(context.gsd)
         # Only include data_type if it's not the default (uint8)
-        if context.data_type != DataType.UINT8:
-            self.stac["data_type"] = context.data_type.value
+        # Ensure data_type is a DataType enum, not a string
+        data_type = context.data_type
+        if isinstance(data_type, str):
+            data_type = DataType(data_type)
+        if data_type != DataType.UINT8:
+            self.stac["data_type"] = data_type.value
         else:
             self.stac.pop("data_type", None)
         self.stac["linz:security_classification"] = "unclassified"
@@ -203,7 +211,11 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
-        self.data_type = context.data_type
+        # Ensure data_type is a DataType enum, not a string
+        if isinstance(context.data_type, str):
+            self.data_type = DataType(context.data_type)
+        else:
+            self.data_type = context.data_type
         self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
