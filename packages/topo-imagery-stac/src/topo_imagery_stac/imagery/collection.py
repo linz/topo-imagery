@@ -102,11 +102,7 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
 
         self.gsd = context.gsd
         self.domain = context.domain
-        # Ensure data_type is a DataType enum, not a string
-        if isinstance(context.data_type, str):
-            self.data_type = DataType(context.data_type)
-        else:
-            self.data_type = context.data_type
+        self.data_type = context.data_type
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -167,7 +163,7 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
                 collection.publish_capture_area = False
         return collection
 
-    def update(self, context: CollectionContext, updated_datetime: str) -> None:  # pylint: disable=too-many-branches
+    def update(self, context: CollectionContext, updated_datetime: str) -> None:
         """Update the Collection with new metadata.
 
         Args:
@@ -176,12 +172,8 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
         """
         self.stac["gsd"] = float(context.gsd)
         # Only include data_type if it's not the default (uint8)
-        # Ensure data_type is a DataType enum, not a string
-        data_type = context.data_type
-        if isinstance(data_type, str):
-            data_type = DataType(data_type)
-        if data_type != DataType.UINT8:
-            self.stac["data_type"] = data_type.value
+        if context.data_type != DataType.UINT8:
+            self.stac["data_type"] = context.data_type.value
         else:
             self.stac.pop("data_type", None)
         self.stac["linz:security_classification"] = "unclassified"
@@ -211,11 +203,7 @@ class ImageryCollection:  # pylint: disable=too-many-instance-attributes
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
-        # Ensure data_type is a DataType enum, not a string
-        if isinstance(context.data_type, str):
-            self.data_type = DataType(context.data_type)
-        else:
-            self.data_type = context.data_type
+        self.data_type = context.data_type
         self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 
