@@ -43,6 +43,15 @@ dev = [
 [tool.black]
 line-length = 127
 
+[tool.pytest.ini_options]
+pythonpath = [
+    "packages/topo-imagery-common/test",
+    "packages/topo-imagery-gdal/test",
+    "packages/topo-imagery-pdal/test",
+    "packages/topo-imagery-stac/test",
+    "scripts/tests",
+]
+
 [tool.uv]
 package = false
 default-groups = "all"
