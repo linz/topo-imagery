@@ -41,7 +41,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     domain: str
     region: str
     gsd: Decimal
-    data_type: str
+    data_type: DataType
     lifecycle: str
     linz_slug: str
     producers: list[str] = field(default_factory=list)
