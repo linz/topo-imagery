@@ -79,8 +79,7 @@ def get_args_parser() -> CommonArgumentParser:
         help="Dataset data type",
         choices=[dt.value for dt in DataType],
         type=str,
-        default=DataType.UINT8.value,
-        required=False,
+        required=True,
     )
     parser.add_argument(
         "--geographic-description",

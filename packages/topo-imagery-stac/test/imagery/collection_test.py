@@ -573,14 +573,6 @@ def test_set_gsd(
     assert collection.stac["gsd"] == 123.456
 
 
-def test_set_data_type(
-    fake_collection_context: CollectionContext,
-) -> None:
-    fake_collection_context.data_type = DataType.UINT16
-    collection = ImageryCollection(fake_collection_context, any_epoch_datetime_string(), any_epoch_datetime_string())
-    assert collection.stac["data_type"] == "uint16"
-
-
 def test_set_title_set_description_long_date(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
     fake_collection_context.category = "rural-aerial-photos"
     fake_collection_context.historic_survey_number = None
@@ -1142,7 +1134,7 @@ def test_update_metadata(fake_collection_context: CollectionContext, subtests: S
 
 
 def test_data_type_uint8_omitted_from_stac() -> None:
-    """Verify that uint8 (default data type) is omitted from STAC JSON output."""
+    """Verify that uint8 is omitted from STAC JSON output, as only the higher bit depths are recorded."""
     context = CollectionContext(
         category="rural-aerial-photos",
         domain="land",
@@ -1154,7 +1146,7 @@ def test_data_type_uint8_omitted_from_stac() -> None:
     )
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
 
-    assert "data_type" not in collection.stac, "uint8 should be omitted from STAC as it is the default"
+    assert "data_type" not in collection.stac, "uint8 should be omitted from STAC"
 
 
 def test_data_type_uint16_included_in_stac() -> None:
@@ -1187,3 +1179,19 @@ def test_data_type_uint32_included_in_stac() -> None:
     collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
 
     assert collection.stac["data_type"] == "uint32", "uint32 should be included in STAC JSON"
+
+
+def test_data_type_float32_omitted_from_stac() -> None:
+    """Verify that float32 is omitted from STAC JSON output, DEM collections do not record it"""
+    context = CollectionContext(
+        category="dem",
+        domain="land",
+        region="hawkes-bay",
+        gsd=Decimal("1.0"),
+        data_type=DataType.FLOAT32,
+        lifecycle="completed",
+        linz_slug=fake_linz_slug(),
+    )
+    collection = ImageryCollection(context, any_epoch_datetime_string(), any_epoch_datetime_string())
+
+    assert "data_type" not in collection.stac, "float32 should be omitted from STAC"
