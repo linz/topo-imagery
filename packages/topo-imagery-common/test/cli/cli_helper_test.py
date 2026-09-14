@@ -1,3 +1,4 @@
+from argparse import ArgumentTypeError
 from datetime import datetime
 from typing import Any
 
@@ -11,6 +12,7 @@ from topo_imagery_common.cli.cli_helper import (
     get_non_empty_features,
     get_tile_files,
     parse_list,
+    str_to_positive_int,
     valid_date,
 )
 
@@ -196,3 +198,25 @@ def test_get_non_empty_features_single_feature() -> None:
     features = get_non_empty_features(geojson, "/tmp/test/test.geojson")
     assert len(features) == 1
     assert features[0]["type"] == "Feature"
+
+
+def test_str_to_positive_int_returns_int_when_value_is_positive() -> None:
+    assert str_to_positive_int("5") == 5
+
+
+def test_str_to_positive_int_raises_when_value_is_not_an_integer() -> None:
+    with raises(ArgumentTypeError) as e:
+        str_to_positive_int("foo")
+    assert str(e.value) == "'foo' is not a valid integer"
+
+
+def test_str_to_positive_int_raises_when_value_is_zero() -> None:
+    with raises(ArgumentTypeError) as e:
+        str_to_positive_int("0")
+    assert str(e.value) == "must be >= 1"
+
+
+def test_str_to_positive_int_raises_when_value_is_negative() -> None:
+    with raises(ArgumentTypeError) as e:
+        str_to_positive_int("-1")
+    assert str(e.value) == "must be >= 1"
