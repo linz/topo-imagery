@@ -25,7 +25,7 @@ def test_get_buffer_distance(subtests: SubTests) -> None:
 
 
 def test_preset_webp(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(CompressionPreset.WEBP.value, epsg=EpsgNumber.NZTM_2000)
+    gdal_command = get_gdal_command(CompressionPreset.WEBP.value, epsg=EpsgNumber.NZTM_2000, data_type=DataType.UINT8.value)
 
     # Basic cog creation
     with subtests.test():
@@ -65,7 +65,9 @@ def test_preset_webp(subtests: SubTests) -> None:
 
 
 def test_preset_zstd(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(CompressionPreset.RGBNIR_ZSTD.value, epsg=EpsgNumber.NZTM_2000)
+    gdal_command = get_gdal_command(
+        CompressionPreset.RGBNIR_ZSTD.value, epsg=EpsgNumber.NZTM_2000, data_type=DataType.FLOAT32.value
+    )
 
     # Basic cog creation
     with subtests.test():
@@ -131,7 +133,7 @@ def test_preset_zstd_uint8_keeps_bigtiff_no(subtests: SubTests) -> None:
 
 
 def test_preset_lzw(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(CompressionPreset.LZW.value, epsg=EpsgNumber.NZTM_2000)
+    gdal_command = get_gdal_command(CompressionPreset.LZW.value, epsg=EpsgNumber.NZTM_2000, data_type=DataType.UINT8.value)
 
     # Basic cog creation
     with subtests.test():
@@ -171,7 +173,9 @@ def test_preset_lzw(subtests: SubTests) -> None:
 
 
 def test_preset_dem_lerc(subtests: SubTests) -> None:
-    gdal_command = get_gdal_command(CompressionPreset.DEM_LERC.value, epsg=EpsgNumber.NZTM_2000)
+    gdal_command = get_gdal_command(
+        CompressionPreset.DEM_LERC.value, epsg=EpsgNumber.NZTM_2000, data_type=DataType.FLOAT32.value
+    )
     # Basic cog creation
     with subtests.test():
         assert "COG" in gdal_command
