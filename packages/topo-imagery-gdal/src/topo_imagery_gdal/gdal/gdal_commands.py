@@ -39,7 +39,7 @@ def get_buffer_distance(gsd: Decimal) -> float:
     return float(gsd * 2 * DECIMAL_DEGREES_1M)
 
 
-def get_gdal_command(preset: str, epsg: int, data_type: str = DataType.UINT8.value) -> list[str]:
+def get_gdal_command(preset: str, epsg: int, data_type: str) -> list[str]:
     """Build a `gdal_translate` command based on the `preset`, `epsg` code, with conversion to 8bits if required.
 
     Args:
