@@ -12,6 +12,7 @@ from topo_imagery_common.datetimes import convert_utc_to_nz_datetime, format_rfc
 from topo_imagery_common.files import checksum
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import exists, read, write
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.capture_area import generate_capture_area
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import (
@@ -80,10 +81,11 @@ class MissingMetadataError(Exception):
         self.message = f"Missing metadata: {metadata}"
 
 
-class ImageryCollection:
+class ImageryCollection:  # pylint: disable=too-many-instance-attributes
     stac: dict[str, Any]
     gsd: Decimal
     domain: str
+    data_type: DataType
     capture_area: dict[str, Any] | None = None
     publish_capture_area = True
     published_location: str | None = None
@@ -100,6 +102,7 @@ class ImageryCollection:
 
         self.gsd = context.gsd
         self.domain = context.domain
+        self.data_type = context.data_type
         self.add_title_suffix = context.add_title_suffix
 
         self.stac = {
@@ -120,6 +123,10 @@ class ImageryCollection:
             "created": created_datetime,
             "updated": updated_datetime,
         }
+
+        # Only include data_type for `UINT16` and `UINT32`
+        if self.data_type in (DataType.UINT16, DataType.UINT32):
+            self.stac["data_type"] = self.data_type.value
 
         # Optional metadata - if not provided, the field will not be added to the Collection
         if event_name := context.event_name:
@@ -164,6 +171,11 @@ class ImageryCollection:
             updated_datetime: The updated datetime of the Collection.
         """
         self.stac["gsd"] = float(context.gsd)
+        # Only include data_type for `UINT16` and `UINT32`
+        if context.data_type in (DataType.UINT16, DataType.UINT32):
+            self.stac["data_type"] = context.data_type.value
+        else:
+            self.stac.pop("data_type", None)
         self.stac["linz:security_classification"] = "unclassified"
         if context.lifecycle:
             self.stac["linz:lifecycle"] = context.lifecycle
@@ -191,6 +203,7 @@ class ImageryCollection:
 
         self.stac["updated"] = updated_datetime
         self.gsd = context.gsd
+        self.data_type = context.data_type
         self.domain = context.domain
         self.add_title_suffix = context.add_title_suffix
 

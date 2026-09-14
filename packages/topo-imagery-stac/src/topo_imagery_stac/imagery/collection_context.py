@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
+from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.provider import Provider, ProviderRole, merge_provider_roles
 
 
@@ -21,6 +22,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
         domain (str): The domain of the dataset (e.g., "land").
         region (str): The region of the dataset (e.g., "auckland").
         gsd (Decimal): Ground Sample Distance in meters.
+        data_type (DataType): The data type of the dataset (e.g., `DataType.UINT8`, `DataType.UINT16`).
         lifecycle (str): Lifecycle status of the dataset (e.g., "completed").
         linz_slug (str): LINZ slug for the dataset.
         producers (list[str]): List of producers for the dataset.
@@ -40,6 +42,7 @@ class CollectionContext:  # pylint:disable=too-many-instance-attributes
     domain: str
     region: str
     gsd: Decimal
+    data_type: DataType
     lifecycle: str
     linz_slug: str
     producers: list[str] = field(default_factory=list)
