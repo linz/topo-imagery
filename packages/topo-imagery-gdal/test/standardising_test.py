@@ -35,7 +35,7 @@ def test_config_defaults_to_uint8() -> None:
 
 
 def test_config_allows_high_bit_depth_rgbnir(subtests: SubTests) -> None:
-    for data_type in DataType:
+    for data_type in [DataType.UINT8, DataType.UINT16, DataType.UINT32]:
         with subtests.test(msg=f"{data_type.value} is valid with {CompressionPreset.RGBNIR_ZSTD.value}"):
             config = standardising_config(CompressionPreset.RGBNIR_ZSTD.value, data_type.value)
 
@@ -48,6 +48,14 @@ def test_config_allows_uint8_for_any_preset(subtests: SubTests) -> None:
             config = standardising_config(preset.value, DataType.UINT8.value)
 
             assert config.data_type == DataType.UINT8.value
+
+
+def test_config_allows_float32_for_dem_presets(subtests: SubTests) -> None:
+    for preset in [CompressionPreset.DEM_LERC, CompressionPreset.DEM_ZSTD]:
+        with subtests.test(msg=f"{DataType.FLOAT32.value} is valid with {preset.value}"):
+            config = standardising_config(preset.value, DataType.FLOAT32.value)
+
+            assert config.data_type == DataType.FLOAT32.value
 
 
 def test_config_rejects_high_bit_depth_for_other_presets(subtests: SubTests) -> None:
