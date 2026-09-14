@@ -20,20 +20,6 @@ def standardising_config(preset: str, data_type: str) -> StandardisingConfig:
     )
 
 
-def test_config_defaults_to_uint8() -> None:
-    config = StandardisingConfig(
-        gdal_preset=CompressionPreset.WEBP.value,
-        source_epsg=EpsgNumber.NZTM_2000.value,
-        target_epsg=EpsgNumber.NZTM_2000.value,
-        gsd=Decimal("0.1"),
-        create_footprints=False,
-        simplify_footprints=False,
-        cutline=None,
-    )
-
-    assert config.data_type == DataType.UINT8.value
-
-
 def test_config_allows_high_bit_depth_rgbnir(subtests: SubTests) -> None:
     for data_type in [DataType.UINT8, DataType.UINT16, DataType.UINT32]:
         with subtests.test(msg=f"{data_type.value} is valid with {CompressionPreset.RGBNIR_ZSTD.value}"):

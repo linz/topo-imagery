@@ -44,7 +44,7 @@ class StandardisingConfig:
     create_footprints: whether to create footprints for each tile
     simplify_footprints: whether to simplify footprints for each tile using gdal_fillnodata
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
-    data_type: data type of the dataset. See `gdal.gdal_presets.py`. Defaults to `uint8`.
+    data_type: data type of the dataset. See `gdal.gdal_presets.py`.
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
     force: overwrite existing output file. Defaults to False.
     """
@@ -56,7 +56,7 @@ class StandardisingConfig:
     create_footprints: bool
     simplify_footprints: bool
     cutline: str | None
-    data_type: str = DataType.UINT8.value
+    data_type: str
     scale_to_resolution: list[Decimal] | None = None
     force: bool = False
 
@@ -143,7 +143,7 @@ def standardising(
             target_epsg: desired EPSG code of the output file
             gsd: expected Ground Sample Distance in meters
             cutline: path to the cutline file. Must be `.fgb` or `.geojson`
-            data_type: data type of the dataset. See `gdal.gdal_presets.py`. Defaults to `uint8`.
+            data_type: data type of the dataset. See `gdal.gdal_presets.py`.
             scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
         target_output: output directory path. Defaults to "/tmp/". Not to be confused with `tmp_path`.
 
