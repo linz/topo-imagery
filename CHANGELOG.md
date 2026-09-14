@@ -1,5 +1,19 @@
 # Changelog
 
+## [8.0.0](https://github.com/linz/topo-imagery/compare/v7.24.0...v8.0.0) (2026-09-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* add data type to STAC collection metadata TDE-2004 ([#1643](https://github.com/linz/topo-imagery/issues/1643))
+* use data-type parameter to determine BIGTIFF option TDE-2034 ([#1641](https://github.com/linz/topo-imagery/issues/1641))
+
+### Features
+
+* add data type to STAC collection metadata TDE-2004 ([#1643](https://github.com/linz/topo-imagery/issues/1643)) ([5b3c7cb](https://github.com/linz/topo-imagery/commit/5b3c7cbd8197dcb1006b4d9889b43d30a27d7148))
+* topo imagery write bigtiff for 16 32 bit rgbnir imagery TDE-2005 ([#1607](https://github.com/linz/topo-imagery/issues/1607)) ([ea4a6bc](https://github.com/linz/topo-imagery/commit/ea4a6bc464d8d3ea67f6b53625a2a37ce8869b25))
+* use data-type parameter to determine BIGTIFF option TDE-2034 ([#1641](https://github.com/linz/topo-imagery/issues/1641)) ([2f72bf4](https://github.com/linz/topo-imagery/commit/2f72bf4ca95eab2064cd13af24d178c0dc572c50))
+
 ## [7.24.0](https://github.com/linz/topo-imagery/compare/v7.23.0...v7.24.0) (2026-08-18)
 
 
