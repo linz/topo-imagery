@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.imagery.collection import ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.item import ImageryItem
@@ -17,11 +18,11 @@ from topo_imagery_stac.util.media_type import StacMediaType
 
 def test_imagery_stac_item(subtests: SubTests) -> None:
     # mock functions that interact with files
-    geometry = {
+    geometry: GeojsonPolygon = {
         "type": "Polygon",
         "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
+    bbox = (1799667.5, 5814986.0, 1800422.5, 5815977.0)
 
     path = "./scripts/tests/data/empty.tiff"
     id_ = get_file_name_from_path(path)

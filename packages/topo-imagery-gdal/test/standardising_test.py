@@ -2,8 +2,9 @@ from decimal import Decimal
 
 from pytest import raises
 from pytest_subtests import SubTests
+from topo_imagery_common.data_type import DataType
 from topo_imagery_common.epsg import EpsgNumber
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, DataType
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset
 from topo_imagery_gdal.standardising import StandardisingConfig
 
 

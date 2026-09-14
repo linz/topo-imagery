@@ -1,6 +1,7 @@
 import os
 from enum import Enum
 
+SUFFIX_FOOTPRINT = "_footprint.geojson"
 SUFFIX_JSON = ".json"
 
 

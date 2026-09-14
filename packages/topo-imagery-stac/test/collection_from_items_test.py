@@ -11,6 +11,7 @@ from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
 from shapely.geometry import shape
 from topo_imagery_common.files.fs_s3 import write
+from topo_imagery_common.geometry import GeojsonPolygon
 from topo_imagery_stac.collection_from_items import NoItemsError, main
 from topo_imagery_stac.imagery.collection import ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
@@ -30,11 +31,11 @@ def setup() -> Iterator[ImageryItem]:
     # Create mocked STAC Item
     with patch.dict(environ, {"GIT_HASH": "any Git hash", "GIT_VERSION": "any Git version"}):
         item = ImageryItem("123", any_stac_asset(), any_stac_processing())
-    geometry = {
+    geometry: GeojsonPolygon = {
         "type": "Polygon",
-        "coordinates": [[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]],
+        "coordinates": [[[1799667.5, 5815977.0], [1800422.5, 5815977.0], [1800422.5, 5814986.0], [1799667.5, 5814986.0]]],
     }
-    bbox = (1799667.5, 5815977.0, 1800422.5, 5814986.0)
+    bbox = (1799667.5, 5814986.0, 1800422.5, 5815977.0)
     start_datetime = "2021-01-27T11:00:00Z"
     end_datetime = "2021-01-27T11:00:00Z"
     item.update_spatial(geometry, bbox)
