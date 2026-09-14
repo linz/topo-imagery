@@ -15,7 +15,7 @@ from topo_imagery_common.files.fs import exists, read, write, write_all
 from topo_imagery_common.log.time_helper import time_in_ms
 from topo_imagery_gdal.gdal.gdal_commands import get_gdal_command, get_hillshade_command
 from topo_imagery_gdal.gdal.gdal_helper import run_gdal
-from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, HillshadePreset
+from topo_imagery_gdal.gdal.gdal_presets import CompressionPreset, DataType, HillshadePreset
 from topo_imagery_gdal.standardising import create_vrt
 from topo_imagery_stac.imagery.create_stac import create_item
 from topo_imagery_stac.json_codec import dict_to_json_bytes
@@ -112,7 +112,7 @@ def create_hillshade(
 
         # COGify the hillshade output, using ZSTD compression
         run_gdal(
-            get_gdal_command(CompressionPreset.DEM_ZSTD.value, EpsgNumber.NZTM_2000),
+            get_gdal_command(CompressionPreset.DEM_ZSTD.value, EpsgNumber.NZTM_2000, DataType.FLOAT32.value),
             input_file=hillshade_working_path,
             output_file=hillshade_cog_working_path,
         )
