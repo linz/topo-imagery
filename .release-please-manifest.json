@@ -1,3 +1,9 @@
 {
-  ".": "8.0.0"
+  ".": "8.0.0",
+  "packages/topo-imagery-common": "0.1.0",
+  "packages/topo-imagery-gdal": "0.1.0",
+  "packages/topo-imagery-pdal": "0.1.0",
+  "packages/topo-imagery-pointcloud": "0.1.0",
+  "packages/topo-imagery-raster": "0.1.0",
+  "packages/topo-imagery-stac": "0.1.0"
 }
