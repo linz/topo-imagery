@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+from functools import cache
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import cast
@@ -97,6 +98,23 @@ def run_gdal(
     get_log().trace("run_gdal_succeeded", command=command_to_string(temp_command), stdout=proc.stdout.decode())
 
     return proc
+
+
+@cache
+def get_gdal_version() -> str:
+    """Get the version of GDAL available to this process (cached).
+
+    Raises:
+        GDALExecutionException: if `gdalinfo` cannot be run, or reports no version
+
+    Returns:
+        the `gdalinfo --version` output, for example "GDAL 3.10.3, released 2025/04/01"
+    """
+    version = run_gdal(["gdalinfo", "--version"]).stdout.decode().strip()
+    if not version:  # falsy value raises to prevent empty STAC metadata `processing:software`
+        raise GDALExecutionException("`gdalinfo --version` reported no version")
+
+    return version
 
 
 def get_srs_command(epsg: int = EpsgNumber.NZTM_2000) -> list[str]:

@@ -11,7 +11,7 @@ from topo_imagery_common.cli.common_args import CommonArgumentParser
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import copy, exists, read, write
 from topo_imagery_common.log.time_helper import time_in_ms
-from topo_imagery_pdal.pdal_commands import pdal_translate_add_proj_command, run_pdal
+from topo_imagery_pdal.pdal_commands import get_pdal_version, pdal_translate_add_proj_command, run_pdal
 
 
 def get_args_parser() -> CommonArgumentParser:
@@ -205,7 +205,7 @@ def main() -> None:
         get_log().info("no_files_to_process", action="pdal_fix_laz_header", reason="skipped")
         return
 
-    pdal_version = os.environ.get("PDAL_VERSION", "unknown_pdal_version")
+    pdal_version = get_pdal_version()
 
     get_log().info("pdal_fix_laz_header_start", pdalVersion=pdal_version, inputFileCount=len(input_files))
 
