@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "geoprocessor-common"
 version = "0.1.0"
-description = "Shared utilities for topo-imagery processing"
+description = "Shared utilities for LINZ geoprocessor"
 requires-python = "~=3.12.3"
 dependencies = [
     "boto3",

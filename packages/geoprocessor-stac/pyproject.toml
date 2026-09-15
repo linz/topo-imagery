@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "geoprocessor-stac"
 version = "0.1.0"
-description = "STAC utilities for topo-imagery processing"
+description = "STAC utilities for LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
     "boto3",

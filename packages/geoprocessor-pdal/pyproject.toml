@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "geoprocessor-pdal"
 version = "0.1.0"
-description = "PDAL utilities for topo-imagery processing"
+description = "PDAL utilities for LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
     "linz-logger",
