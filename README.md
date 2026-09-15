@@ -46,7 +46,7 @@ The input TIFF file paths have to be passed through a `json` file in the followi
 
 where `output` is the desired output [tile name](https://github.com/linz/topo-imagery/blob/6aa0fb565696cb99fb66ca92b8c678ef3523d11a/scripts/tile/tests/tile_index_data.py#L3-L514) and input is the path to one or several TIFFs. If more than one TIFF, the system will try to retile them into one single output file.
 
-Some test data are available in `/scripts/tests/data/` along with the expected output.
+Some test data are available in `/e2e/data/` along with the expected output.
 
 Run `docker run topo-imagery standardise-validate --help` to get the list of the expected arguments.
 

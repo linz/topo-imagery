@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from data_dir import DATA_DIR
 from pytest_subtests import SubTests
 from topo_imagery_common.files.files_helper import get_file_name_from_path
 from topo_imagery_common.geometry import GeojsonPolygon
@@ -24,7 +25,7 @@ def test_imagery_stac_item(subtests: SubTests) -> None:
     }
     bbox = (1799667.5, 5814986.0, 1800422.5, 5815977.0)
 
-    path = "./scripts/tests/data/empty.tiff"
+    path = str(DATA_DIR / "empty.tiff")
     id_ = get_file_name_from_path(path)
     start_datetime = "2021-01-27T00:00:00Z"
     end_datetime = "2021-01-29T00:00:00Z"
@@ -116,7 +117,7 @@ def test_imagery_add_collection(fake_collection_context: CollectionContext, subt
         updated_datetime=any_epoch_datetime_string(),
     )
 
-    path = "./scripts/tests/data/empty.tiff"
+    path = str(DATA_DIR / "empty.tiff")
     id_ = get_file_name_from_path(path)
     item = ImageryItem(id_, any_stac_asset(), any_stac_processing())
 
