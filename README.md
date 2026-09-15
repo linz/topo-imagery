@@ -14,9 +14,14 @@
 
 This is a collection of Python scripts used for processing topographic data in and for the cloud (AWS).
 
-The associated Docker container is provided to run the Python scripts which use the [GDAL library](https://gdal.org/). It is based on [`osgeo/gdal:ubuntu-small-*` Docker image](https://github.com/OSGeo/gdal/pkgs/container/gdal).
+Two Docker containers are provided to run the Python scripts:
 
-The Docker container is available [in GitHub Packages](https://github.com/linz/topo-imagery/pkgs/container/topo-imagery).
+| Container                 | Built from              | Package                   | Contains                  |
+| ------------------------- | ----------------------- | ------------------------- | ------------------------- |
+| `topo-imagery`            | `Dockerfile.raster`     | `topo-imagery-raster`     | [GDAL](https://gdal.org/) |
+| `geoprocessor/pointcloud` | `Dockerfile.pointcloud` | `topo-imagery-pointcloud` | [PDAL](https://pdal.io/)  |
+
+The containers are available [in GitHub Packages](https://github.com/orgs/linz/packages?repo_name=topo-imagery).
 
 ### Usage
 
@@ -27,7 +32,11 @@ The scripts have been implemented to be run inside the Docker container only. Th
 - Build the `Docker` image:
 
 ```bash
-docker build --tag=topo-imagery .
+docker build --file Dockerfile.raster --tag=topo-imagery .
+```
+
+```bash
+docker build --file Dockerfile.pointcloud --tag=geoprocessor/pointcloud .
 ```
 
 - Example: running the `standardise-validate` command
