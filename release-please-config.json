@@ -1,15 +1,78 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "python",
-  "include-component-in-tag": false,
+  "bootstrap-sha": "0ea29a1d0e5fabdd05b7d415aef98dd6c358af66",
+  "include-component-in-tag": true,
   "pull-request-title-pattern": "release: ${version}",
+  "group-pull-request-title-pattern": "release: ${version}",
   "packages": {
     ".": {
+      "include-component-in-tag": false,
       "extra-files": [
         {
           "path": "uv.lock",
           "type": "toml",
           "jsonpath": "$.package[?(@.name.value=='topo-imagery')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-common": {
+      "component": "topo-imagery-common",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-common')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-gdal": {
+      "component": "topo-imagery-gdal",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-gdal')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-pdal": {
+      "component": "topo-imagery-pdal",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-pdal')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-pointcloud": {
+      "component": "topo-imagery-pointcloud",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-pointcloud')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-raster": {
+      "component": "topo-imagery-raster",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-raster')].version"
+        }
+      ]
+    },
+    "packages/topo-imagery-stac": {
+      "component": "topo-imagery-stac",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='topo-imagery-stac')].version"
         }
       ]
     }

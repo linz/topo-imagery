@@ -100,6 +100,17 @@ You can see the tags in the [GitHub Packages page](https://github.com/linz/topo-
 [googleapis/release-please](https://github.com/googleapis/release-please) is used to support the release process.
 Based on what has been merged to `master` (`fix`, `feat`, `feat!`, `fix!` or `refactor!`), the library generates a `changelog` based on the commit messages and creates a Pull Request. This is triggered by this [GitHub Action](https://github.com/linz/topo-imagery/blob/master/.github/workflows/release-please.yml).
 
+The repository is a [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) and each of its packages is versioned on its own:
+
+| Component                    | Version in                                       | Git tag                         | Changelog                                      |
+| ---------------------------- | ------------------------------------------------ | ------------------------------- | ---------------------------------------------- |
+| Repository (both containers) | `pyproject.toml`                                 | `vX.Y.Z`                        | `CHANGELOG.md`                                 |
+| `topo-imagery-<package>`     | `packages/topo-imagery-<package>/pyproject.toml` | `topo-imagery-<package>-vX.Y.Z` | `packages/topo-imagery-<package>/CHANGELOG.md` |
+
+The repository version takes every commit into account, so it bumps whenever any package does, and both containers keep sharing that single `vX.Y.Z` tag ([see above](#versioning)). A package version only bumps when a user facing commit touches that package's directory, which lets the packages move at their own pace.
+
+All of these bumps are batched into one `release: X.Y.Z` Pull Request, `X.Y.Z` being the new repository version. Merging it tags every component that was released.
+
 ### Publishing
 
 To publish a release, the Pull Request opened by `release-please` bot needs to be merged:
