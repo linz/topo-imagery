@@ -1,0 +1,28 @@
+from pathlib import Path
+from typing import cast
+
+from geoprocessor_gdal.gdal.gdalinfo import GdalInfo
+from geoprocessor_raster.create_item import create_item_from_tiff
+from geoprocessor_stac.testing.helpers import any_epoch_datetime_string
+
+DATA_DIR = Path(__file__).parent / "data"
+
+
+def test_should_derive_spatial_extents_from_gdalinfo() -> None:
+    """`create_item_from_tiff` converts a `gdalinfo` result into the geometry and bbox of the Item."""
+    gdalinfo_result: GdalInfo = cast(
+        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
+    )
+
+    item = create_item_from_tiff(
+        str(DATA_DIR / "empty.tiff"),
+        any_epoch_datetime_string(),
+        any_epoch_datetime_string(),
+        "any collection id",
+        "any GDAL version",
+        any_epoch_datetime_string(),
+        gdalinfo_result,
+    )
+
+    assert item.stac["geometry"] == {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}
+    assert item.stac["bbox"] == (0.0, 0.0, 1.0, 1.0)

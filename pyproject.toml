@@ -18,8 +18,8 @@ dependencies = [
     "boto3",
     "linz-logger",
     "shapely>=2.0",
-    "topo-imagery-pointcloud",
-    "topo-imagery-raster",
+    "geoprocessor-pointcloud",
+    "geoprocessor-raster",
 ]
 
 [dependency-groups]
@@ -43,11 +43,10 @@ line-length = 127
 
 [tool.pytest.ini_options]
 pythonpath = [
-    "packages/topo-imagery-common/test",
-    "packages/topo-imagery-gdal/test",
-    "packages/topo-imagery-pdal/test",
-    "packages/topo-imagery-stac/test",
-    "scripts/tests",
+    "packages/geoprocessor-common/test",
+    "packages/geoprocessor-gdal/test",
+    "packages/geoprocessor-pdal/test",
+    "packages/geoprocessor-stac/test",
 ]
 
 [tool.uv]
@@ -55,8 +54,8 @@ package = false
 default-groups = "all"
 
 [tool.uv.sources]
-topo-imagery-pointcloud = { workspace = true }
-topo-imagery-raster = { workspace = true }
+geoprocessor-pointcloud = { workspace = true }
+geoprocessor-raster = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
