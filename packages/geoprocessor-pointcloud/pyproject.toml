@@ -8,9 +8,9 @@ version = "0.1.0"
 description = "Command line tools for point cloud (PDAL) LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
-    "linz-logger",
     "geoprocessor-common",
     "geoprocessor-pdal",
+    "linz-logger",
 ]
 
 [project.scripts]

@@ -9,10 +9,10 @@ description = "STAC utilities for LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
     "boto3",
+    "geoprocessor-common",
     "linz-logger",
     "python-ulid",
     "shapely>=2.0",
-    "geoprocessor-common",
 ]
 
 [dependency-groups]

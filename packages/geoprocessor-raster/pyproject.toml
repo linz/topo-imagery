@@ -8,10 +8,10 @@ version = "0.1.0"
 description = "Command line tools for raster (GDAL) LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
-    "linz-logger",
     "geoprocessor-common",
     "geoprocessor-gdal",
     "geoprocessor-stac",
+    "linz-logger",
 ]
 
 [project.scripts]

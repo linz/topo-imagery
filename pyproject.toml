@@ -47,7 +47,6 @@ pythonpath = [
     "packages/geoprocessor-gdal/test",
     "packages/geoprocessor-pdal/test",
     "packages/geoprocessor-stac/test",
-    "scripts/tests",
 ]
 
 [tool.uv]

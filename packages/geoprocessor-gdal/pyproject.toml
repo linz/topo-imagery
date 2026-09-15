@@ -8,10 +8,10 @@ version = "0.1.0"
 description = "GDAL and raster utilities for LINZ geoprocessor workflows"
 requires-python = "~=3.12.3"
 dependencies = [
+    "geoprocessor-common",
     "linz-logger",
     "shapely>=2.0",
     "tifffile",
-    "geoprocessor-common",
 ]
 
 [dependency-groups]
