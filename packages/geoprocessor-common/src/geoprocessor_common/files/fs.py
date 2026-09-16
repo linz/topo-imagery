@@ -148,7 +148,9 @@ def write_file(input_: str, target: str, generate_name: bool | None = True) -> s
     else:
         target_file_name = os.path.basename(input_)
 
-    return copy(input_, os.path.join(target, target_file_name))
+    target_path = os.path.join(target, target_file_name)
+    copy(input_, target_path)
+    return target_path
 
 
 class NoSuchFileError(Exception):
