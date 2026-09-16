@@ -13,7 +13,10 @@ ENV UV_PROJECT_ENVIRONMENT=/venv
 ENV UV_PYTHON=/usr/bin/python3
 ENV UV_PYTHON_PREFERENCE=only-system
 
-RUN uv sync --frozen --no-dev --no-editable --package geoprocessor-raster
+RUN apt-get update \
+    && apt-get install --assume-yes --no-install-recommends tini
+
+RUN uv sync --frozen --no-dev --no-editable --package topo-imagery-raster
 
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.10.3@sha256:dab45abca3ca83695d442018692f4f8a0f41955871c57e6101d7f89a92375caa
 
@@ -22,6 +25,7 @@ ENV GIT_HASH=$GIT_HASH
 ARG GIT_VERSION
 ENV GIT_VERSION=$GIT_VERSION
 
+COPY --from=builder /usr/bin/tini /usr/bin/tini
 COPY --from=builder /venv /venv
 
 ENV PATH="/venv/bin:$PATH"
@@ -29,3 +33,5 @@ ENV PATH="/venv/bin:$PATH"
 ENV GTIFF_SRS_SOURCE="EPSG"
 
 WORKDIR /app
+
+ENTRYPOINT ["/usr/bin/tini", "--"]

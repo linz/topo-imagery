@@ -13,7 +13,10 @@ ENV UV_PROJECT_ENVIRONMENT=/venv
 ENV UV_PYTHON=/usr/bin/python3
 ENV UV_PYTHON_PREFERENCE=only-system
 
-RUN uv sync --frozen --no-dev --no-editable --package geoprocessor-pointcloud
+RUN apt-get update \
+    && apt-get install --assume-yes --no-install-recommends tini
+
+RUN uv sync --frozen --no-dev --no-editable --package topo-imagery-pointcloud
 
 FROM ghcr.io/linz/pdal-docker:2.10.2@sha256:6c581725d6f62d20ab7db1f3120abec0c889652de27085370fff4c9a8cb5ed9f
 
@@ -22,8 +25,11 @@ ENV GIT_HASH=$GIT_HASH
 ARG GIT_VERSION
 ENV GIT_VERSION=$GIT_VERSION
 
+COPY --from=builder /usr/bin/tini /usr/bin/tini
 COPY --from=builder /venv /venv
 
 ENV PATH="/venv/bin:$PATH"
 
 WORKDIR /app
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
