@@ -72,10 +72,16 @@ def upload(source_path: str, destination: str, content_type: str | None = None) 
     try:
         s3_client.upload_file(Filename=source_path, Bucket=bucket, Key=key, ExtraArgs=extra_args)
     except s3_client.exceptions.ClientError as ce:
-        get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
+        get_log().error("upload_s3_error", path=destination, error=f"Unable to upload the file: {ce}")
         raise ce
 
-    get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
+    get_log().debug(
+        "upload_s3_success",
+        path=destination,
+        size=os.path.getsize(source_path),
+        multihash=file_multihash,
+        duration=time_in_ms() - start_time,
+    )
     return file_multihash
 
 
@@ -149,7 +155,7 @@ def download(path: str, destination: str, needs_credentials: bool = False) -> No
     os.makedirs(os.path.dirname(destination), mode=0o777, exist_ok=True)
     with open(destination, "wb") as file:
         shutil.copyfileobj(_get_object_body(path, needs_credentials), file, checksum.CHUNK_SIZE)
-    get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
+    get_log().debug("download_s3_success", path=path, duration=time_in_ms() - start_time)
 
 
 def multihash(path: str, needs_credentials: bool = False) -> str:
@@ -167,7 +173,7 @@ def multihash(path: str, needs_credentials: bool = False) -> str:
     """
     start_time = time_in_ms()
     multihash_as_hex = checksum.multihash_from_stream(_get_object_body(path, needs_credentials))
-    get_log().debug("multihash_s3_success", path=path, duration=time_in_ms() - start_time)
+    get_log().debug("multihash_s3_success", path=path, multihash=multihash_as_hex, duration=time_in_ms() - start_time)
     return multihash_as_hex
 
 

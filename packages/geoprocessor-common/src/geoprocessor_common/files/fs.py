@@ -6,6 +6,7 @@ from boto3 import client
 from geoprocessor_common.aws.aws_helper import is_s3
 from geoprocessor_common.files import fs_local, fs_s3
 from geoprocessor_common.files.checksum import multihash_as_hex
+from geoprocessor_common.log.time_helper import time_in_ms
 from linz_logger import get_log
 
 
@@ -34,13 +35,17 @@ def multihash(path: str) -> str:
     Returns:
         the multihash of the file content
     """
+    start_time = time_in_ms()
     if is_s3(path):
         return fs_s3.multihash(path)
 
     try:
-        return fs_local.multihash(path)
+        file_multihash = fs_local.multihash(path)
     except FileNotFoundError as error:
         raise NoSuchFileError(path) from error
+
+    get_log().debug("multihash_success", path=path, multihash=file_multihash, duration=time_in_ms() - start_time)
+    return file_multihash
 
 
 def read(path: str) -> bytes:
@@ -86,23 +91,27 @@ def copy(source: str, target: str, content_type: str | None = None) -> str:
         the multihash of the file content
     """
     get_log().debug("copy", source=source, target=target)
+    start_time = time_in_ms()
 
     try:
         if is_s3(source) and is_s3(target):
             with TemporaryDirectory() as tmp_path:
                 local_copy = os.path.join(tmp_path, os.path.basename(target))
                 fs_s3.download(source, local_copy)
-                return fs_s3.upload(local_copy, target, content_type)
-
-        if is_s3(source):
+                file_multihash = fs_s3.upload(local_copy, target, content_type)
+        elif is_s3(source):
             fs_s3.download(source, target)
-            return fs_local.multihash(target)
+            file_multihash = fs_local.multihash(target)
+        elif is_s3(target):
+            file_multihash = fs_s3.upload(source, target, content_type)
+        else:
+            fs_local.copy_file(source, target)
+            file_multihash = fs_local.multihash(target)
 
-        if is_s3(target):
-            return fs_s3.upload(source, target, content_type)
-
-        fs_local.copy_file(source, target)
-        return fs_local.multihash(target)
+        get_log().debug(
+            "copy_success", source=source, target=target, multihash=file_multihash, duration=time_in_ms() - start_time
+        )
+        return file_multihash
     except FileNotFoundError as error:
         raise NoSuchFileError(source) from error
     except client("s3").exceptions.ClientError as ce:
