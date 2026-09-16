@@ -7,7 +7,7 @@ import multihash
 CHUNK_SIZE = 1024 * 1024  # 1MB
 
 
-class Readable(Protocol):
+class Readable(Protocol):  # pylint: disable=too-few-public-methods
     """A file object or a `boto3` `StreamingBody`."""
 
     def read(self, size: int = ..., /) -> bytes: ...
