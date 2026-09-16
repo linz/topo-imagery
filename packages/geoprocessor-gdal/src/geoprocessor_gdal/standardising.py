@@ -219,7 +219,7 @@ def standardising(
             copy(temp_footprint, footprint_file_path, content_type=ContentType.GEOJSON.value)
 
         # Copy the final version of the working / temp file to the desired destination
-        copy(current_working_file, standardised_file_path, content_type=ContentType.GEOTIFF.value)
+        tiff.set_checksum(copy(current_working_file, standardised_file_path, content_type=ContentType.GEOTIFF.value))
 
     return tiff
 

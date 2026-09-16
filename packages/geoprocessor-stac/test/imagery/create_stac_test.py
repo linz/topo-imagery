@@ -65,6 +65,26 @@ def test_create_item_computes_checksum_from_the_asset() -> None:
     assert item.stac["assets"]["visual"]["file:checksum"] == EMPTY_TIFF_MULTIHASH
 
 
+def test_create_item_uses_the_supplied_checksum() -> None:
+    """A checksum computed while writing the asset is reused, to avoid reading a multi GB asset back."""
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
+    asset_checksum = any_multihash_as_hex()
+
+    item = create_item(
+        str(DATA_DIR / "empty.tiff"),
+        "",
+        "",
+        "abc123",
+        "any GDAL version",
+        any_epoch_datetime_string(),
+        fake_geometry,
+        fake_bbox,
+        asset_checksum=asset_checksum,
+    )
+
+    assert item.stac["assets"]["visual"]["file:checksum"] == asset_checksum
+
+
 def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> None:
     item_name = "empty"
     existing_item = tmp_path / f"{item_name}.json"
