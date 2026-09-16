@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "topo-imagery"
 version = "8.0.0"
-description = "A collection of scripts for processing geospatial dataset"
+description = "A collection of scripts for processing geospatial datasets"
 authors = [
     { name = "Blayne Chard", email = "bchard@linz.govt.nz" },
     { name = "Daniel Silk", email = "dsilk@linz.govt.nz" },
