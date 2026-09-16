@@ -1,8 +1,11 @@
+from pathlib import Path
 from typing import cast
 
 from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_raster.create_item import create_item_from_tiff
 from topo_imagery_stac.testing.helpers import any_epoch_datetime_string
+
+DATA_DIR = Path(__file__).parent / "data"
 
 
 def test_should_derive_spatial_extents_from_gdalinfo() -> None:
@@ -12,7 +15,7 @@ def test_should_derive_spatial_extents_from_gdalinfo() -> None:
     )
 
     item = create_item_from_tiff(
-        "./scripts/tests/data/empty.tiff",
+        str(DATA_DIR / "empty.tiff"),
         any_epoch_datetime_string(),
         any_epoch_datetime_string(),
         "any collection id",
