@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any, Literal
 
-from geoprocessor_common.files import checksum, fs
+from geoprocessor_common.files import fs
 from geoprocessor_common.files.files_helper import get_file_name_from_path
 from geoprocessor_common.files.fs import NoSuchFileError, read
 from geoprocessor_common.geometry import BoundingBox, GeojsonPolygon
@@ -238,8 +238,8 @@ def create_or_load_base_item(
         An ImageryItem with basic information.
     """
     id_ = get_file_name_from_path(asset_path)
-    file_content = fs.read(asset_path)
-    file_content_checksum = checksum.multihash_as_hex(file_content)
+    # The asset can be several GB, so it is hashed as a stream rather than read into memory
+    file_content_checksum = fs.multihash(asset_path)
 
     if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
         commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"

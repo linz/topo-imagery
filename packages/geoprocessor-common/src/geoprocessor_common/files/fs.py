@@ -1,5 +1,6 @@
 import os
 from concurrent.futures import Future, ThreadPoolExecutor
+from tempfile import TemporaryDirectory
 
 from boto3 import client
 from geoprocessor_common.aws.aws_helper import is_s3
@@ -68,18 +69,47 @@ def read(path: str) -> bytes:
         raise NoSuchFileError(path) from error
 
 
-def copy(source: str, target: str) -> str:
-    """Copy a `source` file to a `target`.
+def copy(source: str, target: str, content_type: str | None = None) -> str:
+    """Copy a `source` file to a `target`, streaming it rather than holding it in memory.
+
+    Unlike `write()` this is not limited to 5GB when the target is on `s3`.
 
     Args:
         source: A path to a file to copy
         target: A path of the copy to create
+        content_type: A standard Media Type describing the format of the contents.
+
+    Raises:
+        NoSuchFileError: if the source does not exist
 
     Returns:
-        The path of the file created
+        the multihash of the file content
     """
-    source_content = read(source)
-    return write(target, source_content)
+    get_log().debug("copy", source=source, target=target)
+
+    try:
+        if is_s3(source) and is_s3(target):
+            with TemporaryDirectory() as tmp_path:
+                local_copy = os.path.join(tmp_path, os.path.basename(target))
+                fs_s3.download(source, local_copy)
+                return fs_s3.upload(local_copy, target, content_type)
+
+        if is_s3(source):
+            fs_s3.download(source, target)
+            return fs_local.multihash(target)
+
+        if is_s3(target):
+            return fs_s3.upload(source, target, content_type)
+
+        fs_local.copy_file(source, target)
+        return fs_local.multihash(target)
+    except FileNotFoundError as error:
+        raise NoSuchFileError(source) from error
+    except client("s3").exceptions.ClientError as ce:
+        # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
+        if ce.response["Error"]["Code"] == "NoSuchKey":
+            raise NoSuchFileError(source) from ce
+        raise
 
 
 def exists(path: str) -> bool:

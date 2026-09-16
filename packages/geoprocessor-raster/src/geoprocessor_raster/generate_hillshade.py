@@ -11,7 +11,7 @@ from geoprocessor_common.data_type import DataType
 from geoprocessor_common.datetimes import RFC_3339_DATETIME_FORMAT
 from geoprocessor_common.epsg import EpsgNumber
 from geoprocessor_common.files.files_helper import SUFFIX_JSON, ContentType, is_tiff
-from geoprocessor_common.files.fs import exists, read, write, write_all
+from geoprocessor_common.files.fs import copy, exists, write, write_all
 from geoprocessor_common.log.time_helper import time_in_ms
 from geoprocessor_gdal.gdal.gdal_commands import get_gdal_command, get_hillshade_command
 from geoprocessor_gdal.gdal.gdal_helper import get_gdal_version, run_gdal
@@ -119,7 +119,7 @@ def create_hillshade(
         )
 
         # Note: This file is used as an implicit indicator that processing has completed, so should be written last.
-        write(hillshade_file_path, read(hillshade_cog_working_path), content_type=ContentType.GEOTIFF.value)
+        copy(hillshade_cog_working_path, hillshade_file_path, content_type=ContentType.GEOTIFF.value)
 
         return hillshade_file_path, tile.inputs
 
