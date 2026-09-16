@@ -5,8 +5,8 @@ from string import ascii_lowercase
 from typing import Iterator
 
 import pytest
+from topo_imagery_common.data_type import DataType
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
-from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 
 

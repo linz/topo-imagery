@@ -1,11 +1,10 @@
 import json
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from pytest_subtests import SubTests
 from topo_imagery_common.datetimes import format_rfc_3339_datetime_string
-from topo_imagery_gdal.gdal.gdalinfo import GdalInfo
 from topo_imagery_stac.imagery.collection import ImageryCollection
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.create_stac import (
@@ -14,15 +13,13 @@ from topo_imagery_stac.imagery.create_stac import (
     get_items_to_replace,
     merge_item_list_for_resupply,
 )
-from topo_imagery_stac.testing.generators import any_multihash_as_hex
+from topo_imagery_stac.testing.generators import any_geometry_and_bbox, any_multihash_as_hex
 from topo_imagery_stac.testing.helpers import any_epoch_datetime, any_epoch_datetime_string
 from topo_imagery_stac.util.STAC_VERSION import STAC_VERSION
 
 
 def test_create_item(subtests: SubTests) -> None:
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
     current_datetime = any_epoch_datetime_string()
     item = create_item(
         "./scripts/tests/data/empty.tiff",
@@ -31,7 +28,8 @@ def test_create_item(subtests: SubTests) -> None:
         "abc123",
         "any GDAL version",
         current_datetime,
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
     )
 
     with subtests.test(msg="properties.created"):
@@ -85,9 +83,7 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
     }
 
     existing_item.write_text(json.dumps(existing_item_content))
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     current_datetime = "current datetime"
     item = create_item(
@@ -97,7 +93,8 @@ def test_create_item_when_resupplying(subtests: SubTests, tmp_path: Path) -> Non
         "abc123",
         "any GDAL version",
         current_datetime,
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
         derived_from=[derived_from_path],
         odr_url=tmp_path.as_posix(),
     )
@@ -142,6 +139,7 @@ def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_
     original_item.write_text(json.dumps(original_item_content))
 
     current_datetime = "current datetime"
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
     item = create_item(
         "./scripts/tests/data/empty.tiff",
         "",
@@ -149,7 +147,8 @@ def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_
         "abc123",
         "any GDAL version",
         current_datetime,
-        cast(GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}),
+        fake_geometry,
+        fake_bbox,
         odr_url=tmp_path.as_posix(),
     )
 
@@ -168,9 +167,7 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         "properties": {"start_datetime": "2024-09-02T12:00:00Z", "end_datetime": "2024-09-02T12:00:00Z"},
     }
     derived_from_path.write_text(json.dumps(fake_item))
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     item = create_item(
         "./scripts/tests/data/empty.tiff",
@@ -179,8 +176,9 @@ def test_create_item_with_derived_from(tmp_path: Path) -> None:
         "abc123",
         "any GDAL version",
         "any current datetime",
-        fake_gdal_info,
-        [derived_from_path.as_posix()],
+        fake_geometry,
+        fake_bbox,
+        derived_from=[derived_from_path.as_posix()],
     )
 
     assert {
@@ -206,9 +204,7 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
     }
     derived_from_path_a.write_text(json.dumps(fake_item_a))
     derived_from_path_b.write_text(json.dumps(fake_item_b))
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     item = create_item(
         "./scripts/tests/data/empty.tiff",
@@ -217,8 +213,9 @@ def test_create_item_with_derived_from_datetimes(tmp_path: Path) -> None:
         "abc123",
         "any GDAL version",
         "any current datetime",
-        fake_gdal_info,
-        [derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
+        fake_geometry,
+        fake_bbox,
+        derived_from=[derived_from_path_a.as_posix(), derived_from_path_b.as_posix()],
     )
 
     assert item.stac["properties"]["start_datetime"] == "1998-02-12T11:00:00Z"
@@ -563,9 +560,7 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
     existing_item_file = tmp_path / f"{item_name}.json"
     tiff_path = f"./scripts/tests/data/{item_name}.tiff"
 
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     item_from_scratch = create_item(
         tiff_path,
@@ -574,7 +569,8 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
         item_name,
         "any GDAL version",
         "this current datetime",
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
     )
     existing_item_file.write_text(json.dumps(item_from_scratch.stac))
     item_from_odr_unchanged = create_item(
@@ -584,7 +580,8 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
         item_name,
         "any GDAL version",
         "this current datetime",
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
         odr_url=tmp_path.as_posix(),
     )
     assert item_from_odr_unchanged.stac == item_from_scratch.stac
@@ -596,7 +593,8 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
         item_name,
         "another GDAL version",
         "another current datetime",
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
         odr_url=tmp_path.as_posix(),
     )
     del item_from_odr_changed.stac["properties"]["start_datetime"]
@@ -607,9 +605,7 @@ def test_create_item_with_odr_url(tmp_path: Path) -> None:
 
 
 def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path: Path) -> None:
-    fake_gdal_info: GdalInfo = cast(
-        GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}
-    )
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
 
     current_datetime = "current datetime"
     item = create_item(
@@ -619,7 +615,8 @@ def test_create_item_when_resupplying_with_new_file(subtests: SubTests, tmp_path
         "abc123",
         "any GDAL version",
         current_datetime,
-        fake_gdal_info,
+        fake_geometry,
+        fake_bbox,
         odr_url=tmp_path.as_posix(),
     )
 
@@ -654,6 +651,7 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
     original_item.write_text(json.dumps(original_item_content))
 
     current_datetime = "current datetime"
+    fake_geometry, fake_bbox = any_geometry_and_bbox()
     item = create_item(
         "./scripts/tests/data/empty.tiff",
         "",
@@ -661,7 +659,8 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
         "abc123",
         "any GDAL version",
         current_datetime,
-        cast(GdalInfo, {"wgs84Extent": {"type": "Polygon", "coordinates": [[[0, 1], [1, 1], [1, 0], [0, 0]]]}}),
+        fake_geometry,
+        fake_bbox,
         odr_url=tmp_path.as_posix(),
     )
 

@@ -1121,7 +1121,6 @@ dependencies = [
     { name = "python-ulid" },
     { name = "shapely" },
     { name = "topo-imagery-common" },
-    { name = "topo-imagery-gdal" },
 ]
 
 [package.dev-dependencies]
@@ -1139,7 +1138,6 @@ requires-dist = [
     { name = "python-ulid" },
     { name = "shapely", specifier = ">=2.0" },
     { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
-    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
 ]
 
 [package.metadata.requires-dev]

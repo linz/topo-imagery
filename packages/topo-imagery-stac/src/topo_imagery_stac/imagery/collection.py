@@ -8,11 +8,11 @@ from linz_logger import get_log
 from shapely import to_geojson
 from shapely.geometry import shape
 from shapely.geometry.base import BaseGeometry
+from topo_imagery_common.data_type import DataType
 from topo_imagery_common.datetimes import convert_utc_to_nz_datetime, format_rfc_3339_datetime_string, parse_rfc_3339_datetime
 from topo_imagery_common.files import checksum
 from topo_imagery_common.files.files_helper import ContentType
 from topo_imagery_common.files.fs import exists, read, write
-from topo_imagery_gdal.gdal.gdal_presets import DataType
 from topo_imagery_stac.imagery.capture_area import generate_capture_area
 from topo_imagery_stac.imagery.collection_context import CollectionContext
 from topo_imagery_stac.imagery.constants import (

@@ -1,11 +1,9 @@
 import os
 from decimal import Decimal
 
-from topo_imagery_common.files.files_helper import get_file_name_from_path
+from topo_imagery_common.files.files_helper import SUFFIX_FOOTPRINT, get_file_name_from_path
 from topo_imagery_gdal.gdal.gdal_commands import get_footprint_command
 from topo_imagery_gdal.gdal.gdal_helper import run_gdal
-
-SUFFIX_FOOTPRINT = "_footprint.geojson"
 
 
 def create_footprint(
