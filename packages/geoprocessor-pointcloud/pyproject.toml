@@ -1,0 +1,35 @@
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "geoprocessor-pointcloud"
+version = "0.1.0"
+description = "Command line tools for point cloud (PDAL) LINZ geoprocessor workflows"
+requires-python = "~=3.12.3"
+dependencies = [
+    "geoprocessor-common",
+    "geoprocessor-pdal",
+    "linz-logger",
+]
+
+[project.scripts]
+fix-laz-header = "geoprocessor_pointcloud.fix_laz_header:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-dependency",
+    "pytest-subtests",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["test"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+geoprocessor-common = { workspace = true }
+geoprocessor-pdal = { workspace = true }

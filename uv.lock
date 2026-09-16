@@ -5,12 +5,12 @@ requires-python = ">=3.12.3, <3.13"
 [manifest]
 members = [
     "topo-imagery",
-    "topo-imagery-common",
-    "topo-imagery-gdal",
-    "topo-imagery-pdal",
-    "topo-imagery-pointcloud",
-    "topo-imagery-raster",
-    "topo-imagery-stac",
+    "geoprocessor-common",
+    "geoprocessor-gdal",
+    "geoprocessor-pdal",
+    "geoprocessor-pointcloud",
+    "geoprocessor-raster",
+    "geoprocessor-stac",
 ]
 
 [[package]]
@@ -901,8 +901,8 @@ dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
     { name = "shapely" },
-    { name = "topo-imagery-pointcloud" },
-    { name = "topo-imagery-raster" },
+    { name = "geoprocessor-pointcloud" },
+    { name = "geoprocessor-raster" },
 ]
 
 [package.dev-dependencies]
@@ -926,8 +926,8 @@ requires-dist = [
     { name = "boto3" },
     { name = "linz-logger" },
     { name = "shapely", specifier = ">=2.0" },
-    { name = "topo-imagery-pointcloud", editable = "packages/topo-imagery-pointcloud" },
-    { name = "topo-imagery-raster", editable = "packages/topo-imagery-raster" },
+    { name = "geoprocessor-pointcloud", editable = "packages/geoprocessor-pointcloud" },
+    { name = "geoprocessor-raster", editable = "packages/geoprocessor-raster" },
 ]
 
 [package.metadata.requires-dev]
@@ -947,9 +947,9 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-common"
+name = "geoprocessor-common"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-common" }
+source = { editable = "packages/geoprocessor-common" }
 dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
@@ -986,14 +986,14 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-gdal"
+name = "geoprocessor-gdal"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-gdal" }
+source = { editable = "packages/geoprocessor-gdal" }
 dependencies = [
     { name = "linz-logger" },
     { name = "shapely" },
     { name = "tifffile" },
-    { name = "topo-imagery-common" },
+    { name = "geoprocessor-common" },
 ]
 
 [package.dev-dependencies]
@@ -1008,7 +1008,7 @@ requires-dist = [
     { name = "linz-logger" },
     { name = "shapely", specifier = ">=2.0" },
     { name = "tifffile" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "geoprocessor-common", editable = "packages/geoprocessor-common" },
 ]
 
 [package.metadata.requires-dev]
@@ -1019,12 +1019,12 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-pdal"
+name = "geoprocessor-pdal"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-pdal" }
+source = { editable = "packages/geoprocessor-pdal" }
 dependencies = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common" },
+    { name = "geoprocessor-common" },
 ]
 
 [package.dev-dependencies]
@@ -1037,7 +1037,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "geoprocessor-common", editable = "packages/geoprocessor-common" },
 ]
 
 [package.metadata.requires-dev]
@@ -1048,13 +1048,13 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-pointcloud"
+name = "geoprocessor-pointcloud"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-pointcloud" }
+source = { editable = "packages/geoprocessor-pointcloud" }
 dependencies = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common" },
-    { name = "topo-imagery-pdal" },
+    { name = "geoprocessor-common" },
+    { name = "geoprocessor-pdal" },
 ]
 
 [package.dev-dependencies]
@@ -1067,8 +1067,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
-    { name = "topo-imagery-pdal", editable = "packages/topo-imagery-pdal" },
+    { name = "geoprocessor-common", editable = "packages/geoprocessor-common" },
+    { name = "geoprocessor-pdal", editable = "packages/geoprocessor-pdal" },
 ]
 
 [package.metadata.requires-dev]
@@ -1079,14 +1079,14 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-raster"
+name = "geoprocessor-raster"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-raster" }
+source = { editable = "packages/geoprocessor-raster" }
 dependencies = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common" },
-    { name = "topo-imagery-gdal" },
-    { name = "topo-imagery-stac" },
+    { name = "geoprocessor-common" },
+    { name = "geoprocessor-gdal" },
+    { name = "geoprocessor-stac" },
 ]
 
 [package.dev-dependencies]
@@ -1101,9 +1101,9 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "linz-logger" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
-    { name = "topo-imagery-gdal", editable = "packages/topo-imagery-gdal" },
-    { name = "topo-imagery-stac", editable = "packages/topo-imagery-stac" },
+    { name = "geoprocessor-common", editable = "packages/geoprocessor-common" },
+    { name = "geoprocessor-gdal", editable = "packages/geoprocessor-gdal" },
+    { name = "geoprocessor-stac", editable = "packages/geoprocessor-stac" },
 ]
 
 [package.metadata.requires-dev]
@@ -1116,15 +1116,15 @@ dev = [
 ]
 
 [[package]]
-name = "topo-imagery-stac"
+name = "geoprocessor-stac"
 version = "0.1.0"
-source = { editable = "packages/topo-imagery-stac" }
+source = { editable = "packages/geoprocessor-stac" }
 dependencies = [
     { name = "boto3" },
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely" },
-    { name = "topo-imagery-common" },
+    { name = "geoprocessor-common" },
 ]
 
 [package.dev-dependencies]
@@ -1141,7 +1141,7 @@ requires-dist = [
     { name = "linz-logger" },
     { name = "python-ulid" },
     { name = "shapely", specifier = ">=2.0" },
-    { name = "topo-imagery-common", editable = "packages/topo-imagery-common" },
+    { name = "geoprocessor-common", editable = "packages/geoprocessor-common" },
 ]
 
 [package.metadata.requires-dev]

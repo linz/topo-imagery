@@ -13,7 +13,7 @@ ENV UV_PROJECT_ENVIRONMENT=/venv
 ENV UV_PYTHON=/usr/bin/python3
 ENV UV_PYTHON_PREFERENCE=only-system
 
-RUN uv sync --frozen --no-dev --no-editable --package topo-imagery-pointcloud
+RUN uv sync --frozen --no-dev --no-editable --package geoprocessor-pointcloud
 
 FROM ghcr.io/linz/pdal-docker:2.10.2@sha256:6c581725d6f62d20ab7db1f3120abec0c889652de27085370fff4c9a8cb5ed9f
 

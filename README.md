@@ -18,8 +18,8 @@ Two Docker containers are provided to run the Python scripts:
 
 | Container                 | Built from              | Package                   | Contains                  |
 | ------------------------- | ----------------------- | ------------------------- | ------------------------- |
-| `topo-imagery`            | `Dockerfile.raster`     | `topo-imagery-raster`     | [GDAL](https://gdal.org/) |
-| `geoprocessor/pointcloud` | `Dockerfile.pointcloud` | `topo-imagery-pointcloud` | [PDAL](https://pdal.io/)  |
+| `topo-imagery`            | `Dockerfile.raster`     | `geoprocessor-raster`     | [GDAL](https://gdal.org/) |
+| `geoprocessor/pointcloud` | `Dockerfile.pointcloud` | `geoprocessor-pointcloud` | [PDAL](https://pdal.io/)  |
 
 The containers are available [in GitHub Packages](https://github.com/orgs/linz/packages?repo_name=topo-imagery).
 
