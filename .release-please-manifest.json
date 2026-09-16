@@ -1,5 +1,5 @@
 {
-  ".": "8.0.0",
+  ".": "9.0.0",
   "packages/geoprocessor-common": "0.1.0",
   "packages/geoprocessor-gdal": "0.1.0",
   "packages/geoprocessor-pdal": "0.1.0",
