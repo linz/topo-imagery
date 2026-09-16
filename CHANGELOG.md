@@ -1,5 +1,27 @@
 # Changelog
 
+## [9.0.0](https://github.com/linz/topo-imagery/compare/v8.0.0...v9.0.0) (2026-09-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* move top level scripts and add to project.scripts TDE-1981 ([#1622](https://github.com/linz/topo-imagery/issues/1622))
+
+### Features
+
+* publish pointcloud and raster container TDE-1921 ([#1637](https://github.com/linz/topo-imagery/issues/1637)) ([b745a5c](https://github.com/linz/topo-imagery/commit/b745a5c794ba078673476c367504d8056d69e805))
+* tini init container entrypoint ([#1651](https://github.com/linz/topo-imagery/issues/1651)) ([2c976e4](https://github.com/linz/topo-imagery/commit/2c976e41bb6a3719a9f5ecaa062a2d3d53e2d56c))
+
+
+### Bug Fixes
+
+* use NoSuchFileError consistently TDE-2057 ([#1638](https://github.com/linz/topo-imagery/issues/1638)) ([11cdf06](https://github.com/linz/topo-imagery/commit/11cdf0601aef1ae378758d9cd8b6ceb63d8a78aa))
+
+
+### Code Refactoring
+
+* move top level scripts and add to project.scripts TDE-1981 ([#1622](https://github.com/linz/topo-imagery/issues/1622)) ([06a0f6c](https://github.com/linz/topo-imagery/commit/06a0f6c418213abb97eded0d5faae7f4a5707243))
+
 ## [8.0.0](https://github.com/linz/topo-imagery/compare/v7.24.0...v8.0.0) (2026-09-14)
 
 
