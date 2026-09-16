@@ -24,6 +24,24 @@ def write(destination: str, source: bytes, content_type: str | None = None) -> s
     return destination
 
 
+def multihash(path: str) -> str:
+    """Get the multihash of a file without loading it into memory.
+
+    Args:
+        path: A path to a file.
+
+    Returns:
+        the multihash of the file content
+    """
+    if is_s3(path):
+        return fs_s3.multihash(path)
+
+    try:
+        return fs_local.multihash(path)
+    except FileNotFoundError as error:
+        raise NoSuchFileError(path) from error
+
+
 def read(path: str) -> bytes:
     """Read a file from its path.
 

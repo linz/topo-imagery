@@ -1,14 +1,26 @@
 import json
+import os
 
 from boto3 import client
 from botocore.exceptions import ClientError
+from geoprocessor_common.files.checksum import multihash_as_hex
 from geoprocessor_common.files.files_helper import ContentType
-from geoprocessor_common.files.fs_s3 import exists, list_files_in_uri, read, write
+from geoprocessor_common.files.fs_s3 import (
+    download,
+    exists,
+    list_files_in_uri,
+    multihash,
+    read,
+    upload,
+    write,
+)
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
 from pytest import CaptureFixture, raises
 from pytest_subtests import SubTests
+
+TEST_CONTENT_MULTIHASH = "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
 
 
 @mock_aws
@@ -49,7 +61,109 @@ def test_write_multihash_as_metadata(subtests: SubTests) -> None:
     resp = s3_client.get_object(Bucket="testbucket", Key="test.tiff")
 
     with subtests.test():
-        assert resp["Metadata"]["multihash"] == "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
+        assert resp["Metadata"]["multihash"] == TEST_CONTENT_MULTIHASH
+
+
+@mock_aws
+def test_upload(subtests: SubTests, setup: str) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    source_path = os.path.join(setup, "test.tiff")
+    with open(source_path, "wb") as source_file:
+        source_file.write(b"test content")
+
+    file_multihash = upload(source_path, "s3://testbucket/test.tiff", ContentType.GEOTIFF.value)
+
+    resp = s3_client.get_object(Bucket="testbucket", Key="test.tiff")
+    with subtests.test(msg="content"):
+        assert resp["Body"].read() == b"test content"
+
+    with subtests.test(msg="content type"):
+        assert resp["ContentType"] == ContentType.GEOTIFF.value
+
+    with subtests.test(msg="multihash metadata"):
+        assert resp["Metadata"]["multihash"] == TEST_CONTENT_MULTIHASH
+
+    with subtests.test(msg="returned multihash"):
+        assert file_multihash == TEST_CONTENT_MULTIHASH
+
+
+@mock_aws
+def test_upload_no_content_type(setup: str) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    source_path = os.path.join(setup, "test.file")
+    with open(source_path, "wb") as source_file:
+        source_file.write(b"test content")
+
+    upload(source_path, "s3://testbucket/test.file")
+
+    resp = s3_client.get_object(Bucket="testbucket", Key="test.file")
+    assert resp["Metadata"]["multihash"] == TEST_CONTENT_MULTIHASH
+
+
+@mock_aws
+def test_upload_multipart(subtests: SubTests, setup: str) -> None:
+    """Files bigger than the `boto3` 8MB multipart threshold are uploaded in parts."""
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    content = os.urandom(9 * 1024 * 1024)
+    source_path = os.path.join(setup, "big.tiff")
+    with open(source_path, "wb") as source_file:
+        source_file.write(content)
+
+    file_multihash = upload(source_path, "s3://testbucket/big.tiff", ContentType.GEOTIFF.value)
+
+    resp = s3_client.get_object(Bucket="testbucket", Key="big.tiff")
+    with subtests.test(msg="content"):
+        assert resp["Body"].read() == content
+
+    with subtests.test(msg="multihash is of the whole file, not of its parts"):
+        assert file_multihash == multihash_as_hex(content)
+
+
+@mock_aws
+def test_download(setup: str) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
+    destination = os.path.join(setup, "new_dir/test.file")
+
+    download("s3://testbucket/test.file", destination)
+
+    with open(destination, "rb") as file:
+        assert file.read() == b"test content"
+
+
+@mock_aws
+def test_download_key_not_found(setup: str, capsys: CaptureFixture[str]) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+
+    with raises(ClientError):
+        download("s3://testbucket/test.file", os.path.join(setup, "test.file"))
+
+    assert "s3_key_not_found" in capsys.readouterr().out
+
+
+@mock_aws
+def test_multihash() -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
+
+    assert multihash("s3://testbucket/test.file") == TEST_CONTENT_MULTIHASH
+
+
+@mock_aws
+def test_multihash_key_not_found(capsys: CaptureFixture[str]) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+
+    with raises(ClientError):
+        multihash("s3://testbucket/test.file")
+
+    assert "s3_key_not_found" in capsys.readouterr().out
 
 
 @mock_aws
