@@ -21,8 +21,8 @@ def main() -> None:
     --target - local or s3 path to write converted tiffs
 
     examples:
-        python translate_ascii.py --from-file s3://linz-elevation-staging/test/sample-tests/file-list.json --target /tmp/
-        python translate_ascii.py --from-file ./tests/data/file-list.json --target /tmp/
+        translate-ascii --from-file s3://linz-elevation-staging/test/sample-tests/file-list.json --target /tmp/
+        translate-ascii --from-file ./tests/data/file-list.json --target /tmp/
     """
 
     parser = CommonArgumentParser(description="Translate ASCII files to TIFF files.")
