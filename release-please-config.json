@@ -1,15 +1,78 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "python",
-  "include-component-in-tag": false,
+  "bootstrap-sha": "0ea29a1d0e5fabdd05b7d415aef98dd6c358af66",
+  "include-component-in-tag": true,
   "pull-request-title-pattern": "release: ${version}",
+  "group-pull-request-title-pattern": "release: ${version}",
   "packages": {
     ".": {
+      "include-component-in-tag": false,
       "extra-files": [
         {
           "path": "uv.lock",
           "type": "toml",
           "jsonpath": "$.package[?(@.name.value=='topo-imagery')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-common": {
+      "component": "geoprocessor-common",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-common')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-gdal": {
+      "component": "geoprocessor-gdal",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-gdal')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-pdal": {
+      "component": "geoprocessor-pdal",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-pdal')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-pointcloud": {
+      "component": "geoprocessor-pointcloud",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-pointcloud')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-raster": {
+      "component": "geoprocessor-raster",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-raster')].version"
+        }
+      ]
+    },
+    "packages/geoprocessor-stac": {
+      "component": "geoprocessor-stac",
+      "extra-files": [
+        {
+          "path": "/uv.lock",
+          "type": "toml",
+          "jsonpath": "$.package[?(@.name.value=='geoprocessor-stac')].version"
         }
       ]
     }
