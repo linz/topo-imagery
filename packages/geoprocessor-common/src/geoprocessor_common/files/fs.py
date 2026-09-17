@@ -1,5 +1,7 @@
 import os
+from collections.abc import Generator
 from concurrent.futures import Future, ThreadPoolExecutor
+from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 
 from botocore.exceptions import ClientError
@@ -8,6 +10,32 @@ from geoprocessor_common.files import fs_local, fs_s3
 from geoprocessor_common.files.checksum import multihash_as_hex
 from geoprocessor_common.log.time_helper import time_in_ms
 from linz_logger import get_log
+
+
+@contextmanager
+def _missing_file_as_no_such_file_error(path: str) -> Generator[None, None, None]:
+    """Translate "the file is not there" into `NoSuchFileError`, whether the path is local or on `s3`.
+
+    Any other `ClientError` is re-raised unchanged.
+
+    Args:
+        path: the path to name in the error
+
+    Raises:
+        NoSuchFileError: if the file does not exist
+        ClientError: if `s3` fails for any other reason
+    """
+    try:
+        yield
+    except FileNotFoundError as error:
+        raise NoSuchFileError(path) from error
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
+    except ClientError as ce:
+        # Error codes are listed at
+        # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
+        if ce.response["Error"]["Code"] == "NoSuchKey":
+            raise NoSuchFileError(path) from ce
+        raise
 
 
 def write(destination: str, source: bytes, content_type: str | None = None) -> str:
@@ -36,13 +64,9 @@ def multihash(path: str) -> str:
         the multihash of the file content
     """
     start_time = time_in_ms()
-    if is_s3(path):
-        return fs_s3.multihash(path)
 
-    try:
-        file_multihash = fs_local.multihash(path)
-    except FileNotFoundError as error:
-        raise NoSuchFileError(path) from error
+    with _missing_file_as_no_such_file_error(path):
+        file_multihash = fs_s3.multihash(path) if is_s3(path) else fs_local.multihash(path)
 
     get_log().debug("multihash_success", path=path, multihash=file_multihash, duration=time_in_ms() - start_time)
     return file_multihash
@@ -58,20 +82,9 @@ def read(path: str) -> bytes:
         bytes: The bytes content of the file.
     """
     get_log().debug("read", path=path)
-    if is_s3(path):
-        try:
-            return fs_s3.read(path)
-        # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
-        except ClientError as ce:
-            # Error Code can be found here:
-            # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
-            if ce.response["Error"]["Code"] == "NoSuchKey":
-                raise NoSuchFileError(path) from ce
 
-    try:
-        return fs_local.read(path)
-    except FileNotFoundError as error:
-        raise NoSuchFileError(path) from error
+    with _missing_file_as_no_such_file_error(path):
+        return fs_s3.read(path) if is_s3(path) else fs_local.read(path)
 
 
 def copy(source: str, target: str, content_type: str | None = None) -> str:
@@ -84,16 +97,13 @@ def copy(source: str, target: str, content_type: str | None = None) -> str:
         target: A path of the copy to create
         content_type: A standard Media Type describing the format of the contents.
 
-    Raises:
-        NoSuchFileError: if the source does not exist
-
     Returns:
         the multihash of the file content
     """
     get_log().debug("copy", source=source, target=target)
     start_time = time_in_ms()
 
-    try:
+    with _missing_file_as_no_such_file_error(source):
         if is_s3(source) and is_s3(target):
             with TemporaryDirectory() as tmp_path:
                 local_copy = os.path.join(tmp_path, os.path.basename(target))
@@ -108,17 +118,8 @@ def copy(source: str, target: str, content_type: str | None = None) -> str:
             fs_local.copy_file(source, target)
             file_multihash = fs_local.multihash(target)
 
-        get_log().debug(
-            "copy_success", source=source, target=target, multihash=file_multihash, duration=time_in_ms() - start_time
-        )
-        return file_multihash
-    except FileNotFoundError as error:
-        raise NoSuchFileError(source) from error
-    except ClientError as ce:
-        # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
-        if ce.response["Error"]["Code"] == "NoSuchKey":
-            raise NoSuchFileError(source) from ce
-        raise
+    get_log().debug("copy_success", source=source, target=target, multihash=file_multihash, duration=time_in_ms() - start_time)
+    return file_multihash
 
 
 def exists(path: str) -> bool:
