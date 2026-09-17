@@ -241,27 +241,32 @@ def create_or_load_base_item(
     file_content = fs.read(asset_path)
     file_content_checksum = checksum.multihash_as_hex(file_content)
 
-    if (topo_imagery_hash := os.environ.get("GIT_HASH")) is not None:
-        commit_url = f"https://github.com/linz/topo-imagery/commit/{topo_imagery_hash}"
+    if (geoprocessor_hash := os.environ.get("GIT_HASH")) is not None:
+        commit_url = f"https://github.com/linz/geoprocessor/commit/{geoprocessor_hash}"
     else:
         commit_url = "GIT_HASH not specified"
 
     # The software name is a STAC field name, so it is set explicitly
     stac_processing_software: STACProcessingSoftware
+    processing_version = os.environ.get("GIT_VERSION", "GIT_VERSION not specified")
     if processing_software == "pdal":
         stac_processing_software = STACProcessingSoftwarePdal(
-            **{"pdal": processing_software_version, "linz/topo-imagery": commit_url}
+            **{
+                "pdal": processing_software_version,
+                "geoprocessor/pointcloud": processing_version,
+                "linz/geoprocessor": commit_url,
+            }
         )
     else:
         stac_processing_software = STACProcessingSoftwareGdal(
-            **{"gdal": processing_software_version, "linz/topo-imagery": commit_url}
+            **{"gdal": processing_software_version, "geoprocessor/raster": processing_version, "linz/geoprocessor": commit_url}
         )
 
     stac_processing = STACProcessing(
         **{
             "processing:datetime": current_datetime,
             "processing:software": stac_processing_software,
-            "processing:version": os.environ.get("GIT_VERSION", "GIT_VERSION not specified"),
+            "processing:version": processing_version,
         }
     )
 
