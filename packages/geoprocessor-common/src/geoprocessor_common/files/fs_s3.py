@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any
 
 from boto3 import client
+from botocore.exceptions import ClientError
 from geoprocessor_common.aws.aws_helper import get_session, parse_path
 from geoprocessor_common.files import checksum
 from geoprocessor_common.log.time_helper import time_in_ms
@@ -43,7 +44,7 @@ def write(destination: str, source: bytes, content_type: str | None = None) -> N
         else:
             s3_client.put_object(Bucket=bucket, Key=key, Body=source, Metadata={"multihash": file_multihash})
         get_log().debug("write_s3_success", path=destination, duration=time_in_ms() - start_time)
-    except s3_client.exceptions.ClientError as ce:
+    except ClientError as ce:
         get_log().error("write_s3_error", path=destination, error=f"Unable to write the file: {ce}")
         raise ce
 
@@ -71,7 +72,7 @@ def upload(source_path: str, destination: str, content_type: str | None = None) 
 
     try:
         s3_client.upload_file(Filename=source_path, Bucket=bucket, Key=key, ExtraArgs=extra_args)
-    except s3_client.exceptions.ClientError as ce:
+    except ClientError as ce:
         get_log().error("upload_s3_error", path=destination, error=f"Unable to upload the file: {ce}")
         raise ce
 
@@ -113,7 +114,7 @@ def _get_object_body(path: str, needs_credentials: bool = False) -> StreamingBod
     except s3_client.exceptions.NoSuchKey as nsk:
         get_log().error("s3_key_not_found", path=path, error=f"The specified file does not seem to exist: {nsk}")
         raise
-    except s3_client.exceptions.ClientError as ce:
+    except ClientError as ce:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("read_s3_needs_credentials", path=path)
@@ -185,7 +186,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
         needs_credentials: if acces to object needs credentials. Defaults to False.
 
     Raises:
-        s3_client.exceptions.ClientError
+        ClientError
         NoSuchBucket
 
     Returns:
@@ -211,7 +212,7 @@ def exists(path: str, needs_credentials: bool = False) -> bool:
     except s3_client.exceptions.NoSuchBucket as nsb:
         get_log().debug("s3_bucket_not_found", path=path, info=f"The specified bucket does not seem to exist: {nsb}")
         return False
-    except s3_client.exceptions.ClientError as ce:
+    except ClientError as ce:
         if not needs_credentials and ce.response["Error"]["Code"] == "AccessDenied":
             get_log().debug("read_s3_needs_credentials", path=path)
             return exists(path, True)
