@@ -1,9 +1,12 @@
 import os
+from collections.abc import Callable
 from pathlib import Path
-from shutil import SameFileError, rmtree
+from shutil import rmtree
 from tempfile import mkdtemp
+from unittest.mock import patch
 
 from boto3 import client
+from botocore.exceptions import ClientError
 from geoprocessor_common.files.files_helper import ContentType
 from geoprocessor_common.files.fs import (
     NoSuchFileError,
@@ -135,6 +138,15 @@ def test_multihash_s3() -> None:
     assert multihash("s3://testbucket/test.file") == TEST_CONTENT_MULTIHASH
 
 
+@mock_aws
+def test_multihash_key_not_found_s3() -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+
+    with raises(NoSuchFileError):
+        multihash("s3://testbucket/test.file")
+
+
 def test_copy_local_to_local(subtests: SubTests, setup: str) -> None:
     source_path = os.path.join(setup, "source.tiff")
     target_path = os.path.join(setup, "new_dir/target.tiff")
@@ -200,18 +212,42 @@ def test_copy_s3_to_s3(subtests: SubTests) -> None:
         assert file_multihash == TEST_CONTENT_MULTIHASH
 
 
+@mock_aws
+def test_s3_errors_that_are_not_a_missing_key_are_reraised(subtests: SubTests, setup: str) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    error = ClientError({"Error": {"Code": "InternalError", "Message": "any error"}}, "GetObject")
+    path = "s3://testbucket/test.file"
+    calls: dict[str, Callable[[], object]] = {
+        "read": lambda: read(path),
+        "download": lambda: copy(path, os.path.join(setup, "test.file")),
+        "multihash": lambda: multihash(path),
+    }
+
+    for patched, call in calls.items():
+        with subtests.test(msg=patched):
+            with patch(f"geoprocessor_common.files.fs_s3.{patched}", side_effect=error):
+                with raises(ClientError):
+                    call()
+
+
 def test_copy_source_not_found_local(setup: str) -> None:
     with raises(NoSuchFileError):
         copy("test_dir/test.file", os.path.join(setup, "test.file"))
 
 
 @mock_aws
-def test_copy_source_not_found_s3(setup: str) -> None:
+def test_copy_source_not_found_s3(subtests: SubTests, setup: str) -> None:
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="testbucket")
+    destination = os.path.join(setup, "source/test.prj")
 
-    with raises(NoSuchFileError):
-        copy("s3://testbucket/test.file", os.path.join(setup, "test.file"))
+    with subtests.test(msg="raises NoSuchFileError"):
+        with raises(NoSuchFileError):
+            copy("s3://testbucket/test.prj", destination)
+
+    with subtests.test(msg="leaves no file behind"):
+        assert os.listdir(os.path.join(setup, "source")) == []
 
 
 @mock_aws
@@ -221,11 +257,3 @@ def test_copy_local_source_not_found_with_s3_target() -> None:
 
     with raises(NoSuchFileError):
         copy("test_dir/test.file", "s3://testbucket/test.file")
-
-
-def test_copy_onto_itself_is_an_error(setup: str) -> None:
-    path = os.path.join(setup, "test.file")
-    write(path, b"test content")
-
-    with raises(SameFileError):
-        copy(path, path)

@@ -17,7 +17,7 @@ from geoprocessor_common.files.fs_s3 import (
 from moto import mock_aws
 from moto.s3.responses import DEFAULT_REGION_NAME
 from mypy_boto3_s3 import S3Client
-from pytest import CaptureFixture, raises
+from pytest import CaptureFixture, MonkeyPatch, raises
 from pytest_subtests import SubTests
 
 TEST_CONTENT_MULTIHASH = "12206ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72"
@@ -136,14 +136,22 @@ def test_download(setup: str) -> None:
 
 
 @mock_aws
-def test_download_key_not_found(setup: str, capsys: CaptureFixture[str]) -> None:
+def test_download_key_not_found(subtests: SubTests, setup: str, capsys: CaptureFixture[str]) -> None:
     s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
     s3_client.create_bucket(Bucket="testbucket")
+    destination = os.path.join(setup, "test.file")
 
     with raises(ClientError):
-        download("s3://testbucket/test.file", os.path.join(setup, "test.file"))
+        download("s3://testbucket/test.file", destination)
 
-    assert "s3_key_not_found" in capsys.readouterr().out
+    with subtests.test(msg="logs the error"):
+        assert "s3_key_not_found" in capsys.readouterr().out
+
+    with subtests.test(msg="leaves no empty file behind"):
+        assert not os.path.exists(destination)
+
+    with subtests.test(msg="leaves no partial file behind"):
+        assert os.listdir(setup) == []
 
 
 @mock_aws
@@ -274,3 +282,16 @@ def test_list_files_in_uri(subtests: SubTests) -> None:
 
     with subtests.test():
         assert "data/image.tiff" not in files
+
+
+@mock_aws
+def test_download_to_a_path_without_a_parent_directory(setup: str, monkeypatch: MonkeyPatch) -> None:
+    s3_client: S3Client = client("s3", region_name=DEFAULT_REGION_NAME)
+    s3_client.create_bucket(Bucket="testbucket")
+    s3_client.put_object(Bucket="testbucket", Key="test.file", Body=b"test content")
+    monkeypatch.chdir(setup)
+
+    download("s3://testbucket/test.file", "test.file")
+
+    with open("test.file", "rb") as file:
+        assert file.read() == b"test content"
