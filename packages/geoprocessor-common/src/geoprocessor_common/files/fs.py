@@ -2,7 +2,7 @@ import os
 from concurrent.futures import Future, ThreadPoolExecutor
 from tempfile import TemporaryDirectory
 
-from boto3 import client
+from botocore.exceptions import ClientError
 from geoprocessor_common.aws.aws_helper import is_s3
 from geoprocessor_common.files import fs_local, fs_s3
 from geoprocessor_common.files.checksum import multihash_as_hex
@@ -62,7 +62,7 @@ def read(path: str) -> bytes:
         try:
             return fs_s3.read(path)
         # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/error-handling.html#parsing-error-responses-and-catching-exceptions-from-aws-services
-        except client("s3").exceptions.ClientError as ce:
+        except ClientError as ce:
             # Error Code can be found here:
             # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
             if ce.response["Error"]["Code"] == "NoSuchKey":
@@ -114,7 +114,7 @@ def copy(source: str, target: str, content_type: str | None = None) -> str:
         return file_multihash
     except FileNotFoundError as error:
         raise NoSuchFileError(source) from error
-    except client("s3").exceptions.ClientError as ce:
+    except ClientError as ce:
         # https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html#ErrorCodeList
         if ce.response["Error"]["Code"] == "NoSuchKey":
             raise NoSuchFileError(source) from ce
