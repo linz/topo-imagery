@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 from boto3 import client
 from botocore.exceptions import ClientError
 from geoprocessor_common.aws.aws_helper import get_session, parse_path
-from geoprocessor_common.files import checksum
+from geoprocessor_common.files import checksum, fs_local
 from geoprocessor_common.log.time_helper import time_in_ms
 from linz_logger import get_log
 
@@ -136,7 +136,8 @@ def read(path: str, needs_credentials: bool = False) -> bytes:
         The file in bytes.
     """
     start_time = time_in_ms()
-    file: bytes = _get_object_body(path, needs_credentials).read()
+    with _get_object_body(path, needs_credentials) as body:
+        file: bytes = body.read()
     get_log().debug("read_s3_success", path=path, duration=time_in_ms() - start_time)
     return file
 
@@ -153,9 +154,9 @@ def download(path: str, destination: str, needs_credentials: bool = False) -> No
         ClientError
     """
     start_time = time_in_ms()
-    os.makedirs(os.path.dirname(destination), mode=0o777, exist_ok=True)
-    with open(destination, "wb") as file:
-        shutil.copyfileobj(_get_object_body(path, needs_credentials), file, checksum.CHUNK_SIZE)
+    with fs_local.atomic_write_path(destination) as partial_destination:
+        with _get_object_body(path, needs_credentials) as body, open(partial_destination, "wb") as file:
+            shutil.copyfileobj(body, file, checksum.CHUNK_SIZE)
     get_log().debug("download_s3_success", path=path, duration=time_in_ms() - start_time)
 
 
@@ -173,9 +174,10 @@ def multihash(path: str, needs_credentials: bool = False) -> str:
         the multihash of the file content
     """
     start_time = time_in_ms()
-    multihash_as_hex = checksum.multihash_from_stream(_get_object_body(path, needs_credentials))
-    get_log().debug("multihash_s3_success", path=path, multihash=multihash_as_hex, duration=time_in_ms() - start_time)
-    return multihash_as_hex
+    with _get_object_body(path, needs_credentials) as body:
+        file_multihash = checksum.multihash_from_stream(body)
+    get_log().debug("multihash_s3_success", path=path, multihash=file_multihash, duration=time_in_ms() - start_time)
+    return file_multihash
 
 
 def exists(path: str, needs_credentials: bool = False) -> bool:
