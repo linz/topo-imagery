@@ -172,8 +172,8 @@ def main(args: list[str] | None = None) -> None:
     arguments = parser.parse_args(args)
 
     enabled_arguments = [
-    name
-    for name, value in [
+        name
+        for name, value in [
             ("--supplied-capture-area", arguments.supplied_capture_area),
             ("--simplified-capture-area", arguments.simplified_capture_area),
             ("--capture-dates", arguments.capture_dates),
