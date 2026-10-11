@@ -111,6 +111,10 @@ class ImageryItem:
             self.stac["assets"]["visual"]["updated"] = stac_processing_data["processing:datetime"]
             self.stac["properties"].update(stac_processing_data)
             self.stac["properties"]["updated"] = stac_processing_data["processing:datetime"]
+            if "stac_extensions" not in self.stac:
+                self.stac["stac_extensions"] = [StacExtensions.processing.value]
+            elif StacExtensions.processing.value not in self.stac["stac_extensions"]:
+                self.stac["stac_extensions"].append(StacExtensions.processing.value)
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
         """Update the Item `start_datetime` and `end_datetime` property.

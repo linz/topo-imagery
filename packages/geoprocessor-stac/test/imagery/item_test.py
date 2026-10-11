@@ -95,6 +95,7 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
     imagery_item = ImageryItem.from_file(str(temp_file))
 
     imagery_item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
     with subtests.test(msg="item.stac should not change when checksum did not change"):
         assert imagery_item.stac == fake_imagery_item_stac
 
@@ -106,6 +107,33 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
         assert imagery_item.stac["properties"]["updated"] == new_updated_date
 
         assert imagery_item.stac["properties"] == new_stac_properties
+
+
+def test_update_item_processing_extension(subtests: SubTests, tmp_path: Path, fake_imagery_item_stac: dict[str, Any]) -> None:
+    processing_extension = "https://stac-extensions.github.io/processing/v1.2.0/schema.json"
+
+    temp_file = tmp_path / "existing_item.json"
+    temp_file.write_text(json.dumps(fake_imagery_item_stac))
+
+    new_stac_processing = any_stac_processing()
+    new_checksum = "my_new_checksum"
+
+    with subtests.test(msg="item.stac extension is not appended when it already exists"):
+        new_item = ImageryItem.from_file(str(temp_file))
+        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+        assert new_item.stac["stac_extensions"].count(processing_extension) == 1
+
+    with subtests.test(msg="item.stac extension is added when the extension attribute is missing"):
+        new_item = ImageryItem.from_file(str(temp_file))
+        del new_item.stac["stac_extensions"]
+        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+        assert sum(processing_extension in item for item in new_item.stac["stac_extensions"]) == 1
+
+    with subtests.test(msg="item.stac extension processing is added when the processing URL is missing"):
+        new_item = ImageryItem.from_file(str(temp_file))
+        new_item.stac["stac_extensions"] = ["https://stac-extensions.github.io/file/v2.0.0/schema.json"]
+        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+        assert sum(processing_extension in item for item in new_item.stac["stac_extensions"]) == 1
 
 
 # pylint: disable=duplicate-code
