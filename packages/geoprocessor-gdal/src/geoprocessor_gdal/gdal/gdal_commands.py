@@ -61,7 +61,7 @@ def get_gdal_command(preset: str, epsg: int, data_type: str) -> list[str]:
     get_log().info("gdal_preset_and_data_type", preset=preset, data_type=data_type)
 
     rescale_to_8bit = preset == CompressionPreset.WEBP.value and data_type != DataType.UINT8.value
-    needs_bigtiff = data_type == DataType.UINT16.value and preset == CompressionPreset.RGBNIR_ZSTD.value
+    needs_bigtiff = data_type == DataType.UINT16.value and not rescale_to_8bit
 
     base_command = [
         "gdal_translate",
