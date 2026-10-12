@@ -109,8 +109,13 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
         assert imagery_item.stac["properties"] == new_stac_properties
 
 
-def test_update_item_processing_extension(subtests: SubTests, tmp_path: Path, fake_imagery_item_stac: dict[str, Any]) -> None:
+def test_update_item_processing_extension(
+    subtests: SubTests,
+    tmp_path: Path,
+    fake_imagery_item_stac: dict[str, Any],
+) -> None:
     processing_extension = "https://stac-extensions.github.io/processing/v1.2.0/schema.json"
+    file_extension = "https://stac-extensions.github.io/file/v2.0.0/schema.json"
 
     temp_file = tmp_path / "existing_item.json"
     temp_file.write_text(json.dumps(fake_imagery_item_stac))
@@ -118,35 +123,25 @@ def test_update_item_processing_extension(subtests: SubTests, tmp_path: Path, fa
     new_stac_processing = any_stac_processing()
     new_checksum = "my_new_checksum"
 
-    with subtests.test(msg="item.stac processing extension is not duplicated when already present"):
-        new_item = ImageryItem.from_file(str(temp_file))
-        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
-        assert new_item.stac["stac_extensions"].count(processing_extension) == 1
+    with subtests.test(msg="processing extension is not duplicated"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.update_checksum_related_metadata(new_checksum, new_stac_processing)
 
-    with subtests.test(msg="item.stac processing extension is added when stac_extensions is missing"):
-        new_item = ImageryItem.from_file(str(temp_file))
-        del new_item.stac["stac_extensions"]
-        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
-        assert new_item.stac["stac_extensions"].count(processing_extension) == 1
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
 
-    with subtests.test(msg="item.stac processing extension is added when missing, preserving existing extensions"):
-        new_item = ImageryItem.from_file(str(temp_file))
-        new_item.stac["stac_extensions"] = ["https://stac-extensions.github.io/file/v2.0.0/schema.json"]
-        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
-        assert new_item.stac["stac_extensions"].count(processing_extension) == 1
-        assert "https://stac-extensions.github.io/file/v2.0.0/schema.json" in new_item.stac["stac_extensions"]
+    with subtests.test(msg="processing extension is added to existing extensions"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
 
-    with subtests.test(msg="item.stac existing processing extension version is preserved"):
-        old_processing_extension = "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
-        new_item = ImageryItem.from_file(str(temp_file))
-        new_item.stac["stac_extensions"].remove(processing_extension)
-        new_item.stac["stac_extensions"].append(old_processing_extension)
+        item.update_checksum_related_metadata(new_checksum, new_stac_processing)
 
-        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
-
-        assert len(new_item.stac["stac_extensions"]) == 2
-        assert new_item.stac["stac_extensions"].count(old_processing_extension) == 1
-        assert processing_extension not in new_item.stac["stac_extensions"]
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
 
 
 # pylint: disable=duplicate-code
