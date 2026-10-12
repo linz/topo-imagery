@@ -166,6 +166,9 @@ def test_create_item_when_resupplying_with_changed_file(subtests: SubTests, tmp_
     original_item_content = {
         "type": "Feature",
         "id": item_name,
+        "stac_extensions": [
+            "https://stac-extensions.github.io/file/v2.0.0/schema.json",
+        ],
         "assets": {
             "visual": {
                 "href": asset_file,
@@ -678,6 +681,9 @@ def test_create_item_when_resupplying_with_changed_asset_file(subtests: SubTests
     original_item_content = {
         "type": "Feature",
         "id": item_name,
+        "stac_extensions": [
+            "https://stac-extensions.github.io/file/v2.0.0/schema.json",
+        ],
         "assets": {
             "visual": {
                 "href": asset_file,
