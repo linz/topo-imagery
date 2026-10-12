@@ -102,8 +102,7 @@ class ImageryItem:
             properties.processing:software
             properties.processing:version
 
-        Also adds the Processing Extension reference to stac_extensions if no
-        version is already present, preserving any existing version.
+        Also adds the Processing Extension reference to stac_extensions if missing.
 
         Args:
             file_content_checksum (str): the new checksum
@@ -114,8 +113,6 @@ class ImageryItem:
             self.stac["assets"]["visual"]["updated"] = stac_processing_data["processing:datetime"]
             self.stac["properties"].update(stac_processing_data)
             self.stac["properties"]["updated"] = stac_processing_data["processing:datetime"]
-            if "stac_extensions" not in self.stac:
-                self.stac["stac_extensions"] = []
 
             if StacExtensions.processing.value not in self.stac["stac_extensions"]:
                 self.stac["stac_extensions"].append(StacExtensions.processing.value)
