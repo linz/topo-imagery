@@ -60,6 +60,7 @@ def get_gdal_command(preset: str, epsg: int, data_type: str) -> list[str]:
     """
     get_log().info("gdal_preset_and_data_type", preset=preset, data_type=data_type)
 
+    rescale_to_8bit = preset == CompressionPreset.WEBP.value and data_type != DataType.UINT8.value
     needs_bigtiff = data_type == DataType.UINT16.value and preset == CompressionPreset.RGBNIR_ZSTD.value
 
     base_command = [
@@ -86,7 +87,7 @@ def get_gdal_command(preset: str, epsg: int, data_type: str) -> list[str]:
     if preset_options is None:
         raise ValueError(f"Unsupported compression preset: {preset}")
 
-    if preset == CompressionPreset.WEBP.value and data_type != DataType.UINT8.value:
+    if rescale_to_8bit:
         preset_options = get_webp_rescaled(data_type) + preset_options
 
     return base_command + preset_options
