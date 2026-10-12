@@ -136,6 +136,18 @@ def test_update_item_processing_extension(subtests: SubTests, tmp_path: Path, fa
         assert new_item.stac["stac_extensions"].count(processing_extension) == 1
         assert "https://stac-extensions.github.io/file/v2.0.0/schema.json" in new_item.stac["stac_extensions"]
 
+    with subtests.test(msg="item.stac existing processing extension version is preserved"):
+        old_processing_extension = "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+        new_item = ImageryItem.from_file(str(temp_file))
+        new_item.stac["stac_extensions"].remove(processing_extension)
+        new_item.stac["stac_extensions"].append(old_processing_extension)
+
+        new_item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+
+        assert len(new_item.stac["stac_extensions"]) == 2
+        assert new_item.stac["stac_extensions"].count(old_processing_extension) == 1
+        assert processing_extension not in new_item.stac["stac_extensions"]
+
 
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(fake_collection_context: CollectionContext, subtests: SubTests) -> None:

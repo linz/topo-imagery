@@ -102,6 +102,9 @@ class ImageryItem:
             properties.processing:software
             properties.processing:version
 
+        Also adds the Processing Extension reference to stac_extensions if no
+        version is already present, preserving any existing version.
+
         Args:
             file_content_checksum (str): the new checksum
             stac_processing_data (STACProcessing): new data for the STAC processing extension attributes for this asset/item
@@ -113,7 +116,9 @@ class ImageryItem:
             self.stac["properties"]["updated"] = stac_processing_data["processing:datetime"]
             if "stac_extensions" not in self.stac:
                 self.stac["stac_extensions"] = [StacExtensions.processing.value]
-            elif StacExtensions.processing.value not in self.stac["stac_extensions"]:
+            elif not any(
+                "https://stac-extensions.github.io/processing/" in extension for extension in self.stac["stac_extensions"]
+            ):
                 self.stac["stac_extensions"].append(StacExtensions.processing.value)
 
     def update_datetime(self, start_datetime: str, end_datetime: str) -> None:
