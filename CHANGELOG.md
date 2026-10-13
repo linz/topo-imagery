@@ -1,5 +1,17 @@
 # Changelog
 
+## [10.1.0](https://github.com/linz/geoprocessor/compare/v10.0.0...v10.1.0) (2026-10-13)
+
+
+### Features
+
+* rescale 16-bit sources to 8-bit with the webp preset TDE-2106 ([#1683](https://github.com/linz/geoprocessor/issues/1683)) ([27293c7](https://github.com/linz/geoprocessor/commit/27293c71ec5009b2b0e8713166c9486ace0e8171))
+
+
+### Bug Fixes
+
+* replace mutually exclusive arguments with validation TDE-2117 ([#1684](https://github.com/linz/geoprocessor/issues/1684)) ([5e76e31](https://github.com/linz/geoprocessor/commit/5e76e31b523c9b8492bee8f4f387c04a77fcf7af))
+
 ## [10.0.0](https://github.com/linz/geoprocessor/compare/v9.0.3...v10.0.0) (2026-10-07)
 
 
