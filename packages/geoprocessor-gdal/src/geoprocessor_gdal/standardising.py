@@ -32,6 +32,8 @@ from geoprocessor_gdal.tile.tile_index import Bounds, get_bounds_from_name
 from linz_logger import get_log
 from tifffile import TiffFile
 
+UINT16_SUPPORTED_PRESETS = (CompressionPreset.RGBNIR_ZSTD.value, CompressionPreset.WEBP.value)
+
 
 @dataclass
 class StandardisingConfig:
@@ -68,14 +70,12 @@ class StandardisingConfig:
             raise ValueError(f"scale_to_resolution must be exactly two items [xres, yres]: {self.scale_to_resolution}")
         if self.data_type not in [data_type.value for data_type in DataType]:
             raise ValueError(f"Unsupported data type: {self.data_type}")
-        # Only RGBNIR imagery is standardised with `UINT16` or `UINT32`
-        if (
-            self.data_type in (DataType.UINT16.value, DataType.UINT32.value)
-            and self.gdal_preset != CompressionPreset.RGBNIR_ZSTD.value
-        ):
+
+        if self.data_type == DataType.UINT16.value and self.gdal_preset not in UINT16_SUPPORTED_PRESETS:
             raise ValueError(
                 f"Data type {self.data_type} is only supported with the "
-                f"{CompressionPreset.RGBNIR_ZSTD.value} preset, preset supplied was {self.gdal_preset}"
+                f"{' or '.join(UINT16_SUPPORTED_PRESETS)} presets, "
+                f"preset supplied was {self.gdal_preset}"
             )
 
 
