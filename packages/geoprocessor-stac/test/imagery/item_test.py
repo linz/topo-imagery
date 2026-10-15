@@ -142,6 +142,32 @@ def test_update_item_processing_extension(
             processing_extension,
         ]
 
+    with subtests.test(msg="processing extension is added when checksum is unchanged"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
+
+    with subtests.test(msg="processing extension is not added when processing fields are missing"):
+        item = ImageryItem.from_file(str(temp_file))
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+
+        item.stac["properties"].pop("processing:datetime", None)
+        item.stac["properties"].pop("processing:software", None)
+        item.stac["properties"].pop("processing:version", None)
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [file_extension]
+
 
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
