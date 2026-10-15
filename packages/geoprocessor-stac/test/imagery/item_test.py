@@ -121,6 +121,7 @@ def test_update_item_processing_extension(
 
     new_stac_processing = any_stac_processing()
     new_checksum = "my_new_checksum"
+    new_updated_date = new_stac_processing["processing:datetime"]
 
     with subtests.test(msg="processing extension is not duplicated"):
         item = ImageryItem.from_file(str(temp_file))
@@ -167,6 +168,18 @@ def test_update_item_processing_extension(
         item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
 
         assert item.stac["stac_extensions"] == [file_extension]
+
+    with subtests.test(msg="item updated datetime changes when processing extension is added"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+        existing_asset_updated = item.stac["assets"]["visual"]["updated"]
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["properties"]["updated"] == new_updated_date
+        assert item.stac["assets"]["visual"]["updated"] == existing_asset_updated
 
 
 # pylint: disable=duplicate-code
