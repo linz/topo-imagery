@@ -118,7 +118,7 @@ class ImageryItem:
             any(key.startswith("processing:") for key in self.stac["properties"])
             and StacExtensions.processing.value not in self.stac["stac_extensions"]
         ):
-            # update the processing datetime
+            # update the item updated date
             self.stac["stac_extensions"].append(StacExtensions.processing.value)
             self.stac["properties"]["updated"] = stac_processing_data["processing:datetime"]
 
