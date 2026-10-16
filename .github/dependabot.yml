@@ -13,8 +13,10 @@ updates:
       default-days: 15
     commit-message:
       prefix: build(deps)
-  - package-ecosystem: "github-actions"
-    directory: "/"
+
+  - package-ecosystem: github-actions
+    directories: 
+      - /
     open-pull-requests-limit: 5
     schedule:
       interval: weekly
@@ -30,8 +32,10 @@ updates:
         applies-to: version-updates
         patterns: ["*"]
         update-types: [minor, patch]
+
   - package-ecosystem: uv
-    directory: "/"
+    directories: 
+      - /
     open-pull-requests-limit: 5
     schedule:
       interval: weekly
