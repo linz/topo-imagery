@@ -108,6 +108,80 @@ def test_update_item_checksum(subtests: SubTests, tmp_path: Path, fake_imagery_i
         assert imagery_item.stac["properties"] == new_stac_properties
 
 
+def test_update_item_processing_extension(
+    subtests: SubTests,
+    tmp_path: Path,
+    fake_imagery_item_stac: dict[str, Any],
+) -> None:
+    processing_extension = "https://stac-extensions.github.io/processing/v1.2.0/schema.json"
+    file_extension = "https://stac-extensions.github.io/file/v2.0.0/schema.json"
+
+    temp_file = tmp_path / "existing_item.json"
+    temp_file.write_text(json.dumps(fake_imagery_item_stac))
+
+    new_stac_processing = any_stac_processing()
+    new_checksum = "my_new_checksum"
+    new_updated_date = new_stac_processing["processing:datetime"]
+
+    with subtests.test(msg="processing extension is not duplicated"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
+
+    with subtests.test(msg="processing extension is added to existing extensions"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        item.update_checksum_related_metadata(new_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
+
+    with subtests.test(msg="processing extension is added when checksum is unchanged"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [
+            file_extension,
+            processing_extension,
+        ]
+
+    with subtests.test(msg="processing extension is not added when processing fields are missing"):
+        item = ImageryItem.from_file(str(temp_file))
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+
+        item.stac["properties"].pop("processing:datetime", None)
+        item.stac["properties"].pop("processing:software", None)
+        item.stac["properties"].pop("processing:version", None)
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["stac_extensions"] == [file_extension]
+
+    with subtests.test(msg="item updated datetime changes when processing extension is added"):
+        item = ImageryItem.from_file(str(temp_file))
+        item.stac["stac_extensions"].remove(processing_extension)
+
+        existing_checksum = item.stac["assets"]["visual"]["file:checksum"]
+        existing_asset_updated = item.stac["assets"]["visual"]["updated"]
+
+        item.update_checksum_related_metadata(existing_checksum, new_stac_processing)
+
+        assert item.stac["properties"]["updated"] == new_updated_date
+        assert item.stac["assets"]["visual"]["updated"] == existing_asset_updated
+
+
 # pylint: disable=duplicate-code
 def test_imagery_add_collection(fake_collection_context: CollectionContext, subtests: SubTests) -> None:
 
