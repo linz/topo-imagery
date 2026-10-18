@@ -10,7 +10,12 @@ from geoprocessor_common.cli.common_args import CommonArgumentParser
 from geoprocessor_common.files.files_helper import ContentType
 from geoprocessor_common.files.fs import NoSuchFileError, copy, exists, read, write
 from geoprocessor_common.log.time_helper import time_in_ms
-from geoprocessor_pdal.pdal_commands import get_pdal_version, pdal_translate_copc_command, run_pdal
+from geoprocessor_pdal.pdal_commands import (
+    get_pdal_version,
+    pdal_copc_project_id_option,
+    pdal_translate_copc_command,
+    run_pdal,
+)
 from linz_logger import get_log
 
 
@@ -56,6 +61,14 @@ def get_args_parser() -> CommonArgumentParser:
         required=False,
         default="/tmp/",
         help="Path where the output files will be saved to. Defaults to '/tmp/'.",
+    )
+    parser.add_argument(
+        "--collection-id",
+        dest="collection_id",
+        required=False,
+        default=None,
+        help="ULID of the STAC collection the files belong to, written to the LAS header as the Project ID. "
+        "If not set, the Project ID is left unassigned (all zeros).",
     )
 
     return parser
@@ -158,6 +171,7 @@ def is_same_file(path_a: str, path_b: str) -> bool:
 
 def pdal_standardise_copc(
     source_file: str,
+    collection_id: str | None = None,
     target: str = "/tmp/",
     force: bool = False,
 ) -> str:
@@ -165,6 +179,7 @@ def pdal_standardise_copc(
 
     Args:
         source_file: /path/to/a/file to process (S3 or local).
+        collection_id: ULID of the STAC collection the files belong to, written to the LAS header as the Project ID.
         target: path where the output files need to be saved to. Defaults to "/tmp/".
         force: overwrite existing output file. Defaults to False.
 
@@ -196,7 +211,11 @@ def pdal_standardise_copc(
 
         copy(source=source_file, target=tmp_file_in)
 
-        run_pdal(pdal_translate_copc_command, input_file=tmp_file_in, output_file=tmp_file_out)
+        pdal_command = pdal_translate_copc_command
+        # FIXME: remove conditional when collection_id is supplied by workflow
+        if collection_id:
+            pdal_command = [*pdal_translate_copc_command, pdal_copc_project_id_option(collection_id)]
+        run_pdal(pdal_command, input_file=tmp_file_in, output_file=tmp_file_out)
 
         copy(source=tmp_file_out, target=target_file)  # copy back to target location (S3 or local)
 
@@ -206,6 +225,7 @@ def pdal_standardise_copc(
 def run_pdal_standardise_copc(
     files_to_process: list[str],
     concurrency: int,
+    collection_id: str | None = None,
     target: str = "/tmp/",
     force: bool = False,
 ) -> list[str]:
@@ -214,6 +234,7 @@ def run_pdal_standardise_copc(
     Args:
         files_to_process: list of files to process
         concurrency: number of concurrent files to process
+        collection_id: ULID of the STAC collection the files belong to. Defaults to None.
         target: output directory path. Defaults to "/tmp/"
         force: overwrite existing files. Defaults to False.
 
@@ -221,7 +242,12 @@ def run_pdal_standardise_copc(
         the list of COPC file paths, in the same order as `files_to_process`.
     """
     with Pool(concurrency) as p:
-        results = list(p.map(partial(pdal_standardise_copc, target=target, force=force), files_to_process))
+        results = list(
+            p.map(
+                partial(pdal_standardise_copc, collection_id=collection_id, target=target, force=force),
+                files_to_process,
+            )
+        )
         p.close()
         p.join()
 
@@ -252,7 +278,13 @@ def main() -> None:
     if arguments.is_argo:
         concurrency = 4
 
-    output_files = run_pdal_standardise_copc(input_files, concurrency, target=arguments.target, force=arguments.force)
+    output_files = run_pdal_standardise_copc(
+        input_files,
+        concurrency,
+        collection_id=arguments.collection_id,
+        target=arguments.target,
+        force=arguments.force,
+    )
     write("/tmp/processed.json", bytes(json.dumps(output_files, indent=0), "UTF-8"), content_type=ContentType.JSON)
 
     get_log().info("pdal_standardise_copc_end", duration=time_in_ms() - start_time, outputFileCount=len(output_files))
