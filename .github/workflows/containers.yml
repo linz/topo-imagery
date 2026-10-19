@@ -79,10 +79,7 @@ jobs:
         if: failure()
         with:
           name: ${{ matrix.container }}-e2e-output
-          path: |
-            ${{ runner.temp }}/e2e/**/*.tiff
-            ${{ runner.temp }}/e2e/**/*.geojson
-            ${{ runner.temp }}/e2e/**/*.log
+          path: ${{ runner.temp }}/e2e
           retention-days: 7
           if-no-files-found: ignore
 
