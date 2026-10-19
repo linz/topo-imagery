@@ -95,7 +95,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: ${{ inputs.publish != '' && env.AWS_CI_ROLE != '' }}
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-region: ap-southeast-2
           mask-aws-account-id: true
