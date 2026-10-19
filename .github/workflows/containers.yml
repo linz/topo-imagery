@@ -32,9 +32,10 @@ jobs:
       IMAGE: local-${{ matrix.container }}
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup GIT version
         id: version
@@ -71,7 +72,7 @@ jobs:
             GITHUB_RUN_ID=${{ github.run_id }}
 
       - name: End to end tests
-        run: ./e2e/${{ matrix.container }}.sh "$IMAGE" "${{ runner.temp }}"
+        run: ./e2e/${{ matrix.container }}.sh "$IMAGE" "${{ runner.temp }}/e2e"
 
       - name: Keep the output of a failed test run
         uses: actions/upload-artifact@v4.6.0
@@ -79,9 +80,9 @@ jobs:
         with:
           name: ${{ matrix.container }}-e2e-output
           path: |
-            ${{ runner.temp }}/**/*.tiff
-            ${{ runner.temp }}/**/*.geojson
-            ${{ runner.temp }}/*.log
+            ${{ runner.temp }}/e2e/**/*.tiff
+            ${{ runner.temp }}/e2e/**/*.geojson
+            ${{ runner.temp }}/e2e/**/*.log
           retention-days: 7
           if-no-files-found: ignore
 
