@@ -52,7 +52,7 @@ repos:
         exclude_types: [python]
 
   - repo: https://github.com/rhysd/actionlint
-    rev: ea8102762106cdca9c88829f1295b39a544706f3 # frozen: v1.6.26
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:
       - id: actionlint
         stages: [pre-commit]
