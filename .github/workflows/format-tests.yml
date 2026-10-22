@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12.3"
       - name: Sync uv
         run: |
-          uv sync --frozen --no-install-project
+          uv sync --locked --no-install-project
       - name: Format
         run: |
           uv run pre-commit run --all-files
