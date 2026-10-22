@@ -27,6 +27,7 @@ from geoprocessor_gdal.gdal.gdal_commands import (
 from geoprocessor_gdal.gdal.gdal_footprint import create_footprint
 from geoprocessor_gdal.gdal.gdal_helper import gdal_info, run_gdal
 from geoprocessor_gdal.gdal.gdal_presets import CompressionPreset
+from geoprocessor_gdal.gdal.gdal_scale import ScaleRange
 from geoprocessor_gdal.tiff.file_tiff import FileTiff, FileTiffType
 from geoprocessor_gdal.tile.tile_index import Bounds, get_bounds_from_name
 from linz_logger import get_log
@@ -49,6 +50,8 @@ class StandardisingConfig:
     cutline: path to the cutline file. Must be `.fgb` or `.geojson`
     data_type: data type of the dataset. See `gdal.gdal_presets.py`.
     scale_to_resolution: scale TIFFs to the specified x,y resolution. Defaults to None = no scaling.
+    scale_range: source ranges of the colour bands to scale 16-bit to 8-bit. Defaults to None = full range.
+    scale_gamma: gamma applied with `scale_range`. Defaults to 1 = linear.
     force: overwrite existing output file. Defaults to False.
     """
 
@@ -61,6 +64,8 @@ class StandardisingConfig:
     cutline: str | None
     data_type: str
     scale_to_resolution: list[Decimal] | None = None
+    scale_range: ScaleRange | None = None
+    scale_gamma: float = 1.0
     force: bool = False
 
     def __post_init__(self) -> None:
@@ -77,6 +82,19 @@ class StandardisingConfig:
                 f"{' or '.join(UINT16_SUPPORTED_PRESETS)} presets, "
                 f"preset supplied was {self.gdal_preset}"
             )
+
+        if self.scale_range is not None and (
+            self.data_type != DataType.UINT16.value or self.gdal_preset != CompressionPreset.WEBP.value
+        ):
+            raise ValueError(
+                f"A scale range is only supported with data type {DataType.UINT16.value} and the "
+                f"{CompressionPreset.WEBP.value} preset, got {self.data_type} and {self.gdal_preset}"
+            )
+
+        if self.scale_gamma <= 0:
+            raise ValueError(f"Expected a positive scale gamma, got {self.scale_gamma}")
+        if self.scale_gamma != 1 and self.scale_range is None:
+            raise ValueError(f"A scale gamma requires a scale range, got gamma {self.scale_gamma}")
 
 
 def run_standardising(
@@ -336,8 +354,16 @@ def apply_gdal_transformation(input_file: str, config: StandardisingConfig, tmp_
     """Generate output using GDAL command."""
     target_file = os.path.join(tmp_path, f"{tile_name}.tiff")
 
-    command = get_gdal_command(config.gdal_preset, epsg=config.target_epsg, data_type=config.data_type)
-    command.extend(get_gdal_band_offset(input_file, gdal_info(input_file), config.gdal_preset))
+    band_args = get_gdal_band_offset(input_file, gdal_info(input_file), config.gdal_preset)
+    command = get_gdal_command(
+        config.gdal_preset,
+        epsg=config.target_epsg,
+        data_type=config.data_type,
+        scale_range=config.scale_range,
+        gamma=config.scale_gamma,
+        band_count=band_args.count("-b"),
+    )
+    command.extend(band_args)
 
     # Specify the extent to get the right boundaries in case of the tiff got no data on its edges
     output_bounds: Bounds = get_bounds_from_name(tile_name, target_epsg=config.target_epsg)
